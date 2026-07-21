@@ -32,6 +32,8 @@
   .summary div span { display: block; font-size: 22px; font-weight: bold; color: #22c55e; margin-top: 5px; }
   .delete-btn { background: #ef4444; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
   .edit-btn { background: #38bdf8; border: none; color: #0f172a; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  .save-btn { background: #22c55e; border: none; color: #0f172a; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  .action-group { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
   footer { text-align: center; padding: 20px; color: #64748b; border-top: 1px solid #1f2937; }
 
   .global-inputs { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:25px; }
@@ -53,6 +55,7 @@
   .checkbox-cell { text-align:center; }
   .checkbox-cell input { width:18px; height:18px; cursor:pointer; }
   tr.selected-row { background: rgba(34,197,94,0.15) !important; }
+  .inline-edit-input { padding:6px 8px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#fff; width:100px; }
 
   .hedge-card { background: rgba(15,23,42,0.6); border: 1px solid rgba(148,163,184,0.2); border-radius: 14px; padding: 20px; margin-bottom: 18px; }
   .hedge-card.nearest { border-color: #facc15; box-shadow: 0 0 18px rgba(250,204,21,0.35); }
@@ -277,9 +280,10 @@
   }
   calcHedge();
 
-  // ===== Accounts (no Buy/Sell type anymore) =====
+  // ===== Accounts =====
   let accounts = JSON.parse(localStorage.getItem('waqarAccounts')) || [];
   let selectedForHedge = [];
+  let editingAccountIds = [];
   let accountIdCounter = parseInt(localStorage.getItem('waqarAccountIdCounter')) || 1000;
 
   function saveAccounts() {
@@ -305,6 +309,7 @@
   function deleteAccount(index) {
     const acc = accounts[index];
     selectedForHedge = selectedForHedge.filter(id => id !== acc.id);
+    editingAccountIds = editingAccountIds.filter(id => id !== acc.id);
     accounts.splice(index, 1);
     saveAccounts();
   }
@@ -330,6 +335,32 @@
     renderAccounts();
   }
 
+  function toggleEditAccount(id) {
+    if (editingAccountIds.includes(id)) editingAccountIds = editingAccountIds.filter(x => x !== id);
+    else editingAccountIds.push(id);
+    renderAccounts();
+  }
+
+  function saveAccountUpdate(id) {
+    const acc = accounts.find(a => a.id === id);
+    if (!acc) return;
+    const balanceEl = document.getElementById('editBalance_' + id);
+    const priceEl = document.getElementById('editPrice_' + id);
+    const statusEl = document.getElementById('editStatus_' + id);
+
+    const newBalance = parseFloat(balanceEl.value);
+    const newPrice = parseFloat(priceEl.value);
+
+    if (isNaN(newBalance) || isNaN(newPrice)) { alert('Balance aur Current Price sahi darj karein.'); return; }
+
+    acc.balance = newBalance;
+    acc.price = newPrice;
+    acc.status = statusEl.value;
+
+    editingAccountIds = editingAccountIds.filter(x => x !== id);
+    saveAccounts();
+  }
+
   function renderAccounts() {
     const tbody = document.getElementById('accountTable');
     tbody.innerHTML = '';
@@ -337,19 +368,48 @@
       const row = document.createElement('tr');
       const isChecked = selectedForHedge.includes(acc.id) ? 'checked' : '';
       if (isChecked) row.classList.add('selected-row');
-      row.innerHTML = `
-        <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
-        <td>${acc.name}</td>
-        <td>${acc.status}</td>
-        <td>$${acc.balance.toFixed(2)}</td>
-        <td>${acc.price.toFixed(2)}</td>
-        <td><button class="delete-btn" onclick="deleteAccount(${i})">Delete</button></td>
-      `;
+      const isEditing = editingAccountIds.includes(acc.id);
+
+      if (isEditing) {
+        row.innerHTML = `
+          <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
+          <td>${acc.name}</td>
+          <td>
+            <select id="editStatus_${acc.id}" class="inline-edit-input">
+              <option value="Phase 1" ${acc.status === 'Phase 1' ? 'selected' : ''}>Phase 1</option>
+              <option value="Phase 2" ${acc.status === 'Phase 2' ? 'selected' : ''}>Phase 2</option>
+              <option value="Master Account" ${acc.status === 'Master Account' ? 'selected' : ''}>Master Account</option>
+            </select>
+          </td>
+          <td><input type="number" id="editBalance_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.balance}"></td>
+          <td><input type="number" id="editPrice_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.price}"></td>
+          <td>
+            <div class="action-group">
+              <button class="save-btn" onclick="saveAccountUpdate(${acc.id})">Save</button>
+              <button class="delete-btn" onclick="deleteAccount(${i})">Delete</button>
+            </div>
+          </td>
+        `;
+      } else {
+        row.innerHTML = `
+          <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
+          <td>${acc.name}</td>
+          <td>${acc.status}</td>
+          <td>$${acc.balance.toFixed(2)}</td>
+          <td>${acc.price.toFixed(2)}</td>
+          <td>
+            <div class="action-group">
+              <button class="edit-btn" onclick="toggleEditAccount(${acc.id})">Update</button>
+              <button class="delete-btn" onclick="deleteAccount(${i})">Delete</button>
+            </div>
+          </td>
+        `;
+      }
       tbody.appendChild(row);
     });
   }
 
-  // ===== Hedges (Buy/Sell decided later via Edit) =====
+  // ===== Hedges =====
   let hedges = JSON.parse(localStorage.getItem('waqarHedges')) || [];
   let hedgeIdCounter = parseInt(localStorage.getItem('waqarHedgeIdCounter')) || 2000;
   let openEditIds = [];
@@ -371,7 +431,7 @@
       name: `Hedge #${hedges.length + 1}`,
       account1: { id: acc1.id, name: acc1.name, price: acc1.price },
       account2: { id: acc2.id, name: acc2.name, price: acc2.price },
-      buyAccId: null,   // decided in Edit
+      buyAccId: null,
       sellAccId: null,
       lot: 1.00,
       target: 1.00,
@@ -384,7 +444,7 @@
 
     selectedForHedge = [];
     renderAccounts();
-    openEditIds.push(hedge.id); // auto-open edit panel for new hedge
+    openEditIds.push(hedge.id);
     renderHedges();
 
     alert(`${hedge.name} ban gaya! Ab "Edit" mein Buy/Sell tayy karein.`);
