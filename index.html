@@ -321,8 +321,12 @@
   let accounts = JSON.parse(localStorage.getItem('waqarAccounts')) || [];
   let selectedForHedge = [];
 
+  // Simple incrementing counter for unique IDs — fixes checkbox mismatch bug
+  let accountIdCounter = parseInt(localStorage.getItem('waqarAccountIdCounter')) || 1000;
+
   function saveAccounts() {
     localStorage.setItem('waqarAccounts', JSON.stringify(accounts));
+    localStorage.setItem('waqarAccountIdCounter', accountIdCounter.toString());
     renderAccounts();
   }
 
@@ -338,7 +342,8 @@
       return;
     }
 
-    const id = Date.now() + Math.random();
+    accountIdCounter += 1;
+    const id = accountIdCounter;
     accounts.push({ id, name, type, status, balance, price });
 
     document.getElementById('accName').value = '';
@@ -404,6 +409,7 @@
 
   // ===== Hedge Creation =====
   let hedges = JSON.parse(localStorage.getItem('waqarHedges')) || [];
+  let hedgeIdCounter = parseInt(localStorage.getItem('waqarHedgeIdCounter')) || 2000;
 
   function createHedge() {
     if (selectedForHedge.length !== 2) {
@@ -430,8 +436,10 @@
     const buySL = buyAcc.price - target;
     const sellTP = buySL + HS_BUFFER;
 
+    hedgeIdCounter += 1;
+
     const hedge = {
-      id: Date.now() + Math.random(),
+      id: hedgeIdCounter,
       name: `Hedge #${hedges.length + 1}`,
       target,
       buyAccountName: buyAcc.name,
@@ -443,6 +451,7 @@
 
     hedges.push(hedge);
     localStorage.setItem('waqarHedges', JSON.stringify(hedges));
+    localStorage.setItem('waqarHedgeIdCounter', hedgeIdCounter.toString());
 
     selectedForHedge = [];
     renderAccounts();
