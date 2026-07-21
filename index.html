@@ -6,30 +6,15 @@
 <title>Forex With Waqar</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
-    line-height: 1.6;
-  }
-  header {
-    background: #111827;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #22c55e;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+  header { background: #111827; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #22c55e; position: sticky; top: 0; z-index: 10; }
   header h1 { color: #22c55e; font-size: 24px; }
   nav a { color: #e2e8f0; text-decoration: none; margin-left: 25px; font-weight: 500; }
   nav a:hover { color: #22c55e; }
   .hero { text-align: center; padding: 60px 20px; background: linear-gradient(180deg, #111827, #0f172a); }
   .hero h2 { font-size: 36px; color: #fff; margin-bottom: 15px; }
   .hero p { color: #94a3b8; max-width: 600px; margin: 0 auto; }
-  section { padding: 50px 40px; max-width: 1000px; margin: 0 auto; }
+  section { padding: 50px 40px; max-width: 1100px; margin: 0 auto; }
   section h3 { color: #22c55e; font-size: 26px; margin-bottom: 20px; border-left: 4px solid #22c55e; padding-left: 12px; }
   .card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 25px; margin-bottom: 20px; }
   .card h4 { color: #38bdf8; margin-bottom: 10px; }
@@ -68,6 +53,22 @@
   .outcome-box .value { font-size:20px; font-weight:bold; }
   .positive { color:#22c55e; }
   .negative { color:#ef4444; }
+
+  .checkbox-cell { text-align:center; }
+  .checkbox-cell input { width:18px; height:18px; cursor:pointer; }
+  tr.selected-row { background: rgba(34,197,94,0.15) !important; }
+
+  .hedge-card { background: rgba(15,23,42,0.6); border: 1px solid rgba(148,163,184,0.2); border-radius: 14px; padding: 20px; margin-bottom: 18px; }
+  .hedge-card.nearest { border-color: #facc15; box-shadow: 0 0 18px rgba(250,204,21,0.35); }
+  .hedge-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+  .hedge-header h4 { color:#38bdf8; font-size:18px; }
+  .hedge-distance { font-size:12px; color:#facc15; font-weight:bold; }
+  .hedge-grid { display:flex; flex-wrap:wrap; gap:15px; }
+  .hedge-side { flex:1; min-width:220px; background: rgba(30,41,59,0.6); border-radius:10px; padding:14px; }
+  .hedge-side .side-title { font-size:13px; margin-bottom:8px; font-weight:bold; }
+  .hedge-side p { font-size:13px; color:#cbd5e1; margin:4px 0; }
+  .hedge-side .glow-tp { color:#67e8f9; font-weight:bold; }
+  .hedge-side .glow-sl { color:#fda4af; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -79,6 +80,7 @@
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
     <a href="#accountmanager">Accounts</a>
+    <a href="#hedgeslist">Hedges</a>
   </nav>
 </header>
 
@@ -121,9 +123,7 @@
     <button onclick="addTrade()">Add Trade</button>
   </div>
   <table>
-    <thead>
-      <tr><th>Date</th><th>Pair</th><th>Type</th><th>Lot</th><th>Entry</th><th>P/L ($)</th><th>Action</th></tr>
-    </thead>
+    <thead><tr><th>Date</th><th>Pair</th><th>Type</th><th>Lot</th><th>Entry</th><th>P/L ($)</th><th>Action</th></tr></thead>
     <tbody id="tradeTable"></tbody>
   </table>
   <div class="summary">
@@ -148,57 +148,28 @@
   <div class="traders-wrapper">
     <div class="trader-panel">
       <h4>Trader 1 <span class="badge-buy">BUY</span></h4>
-      <div class="field-row">
-        <label>Buy Entry Price</label>
-        <input type="number" id="hsBuyEntry" step="0.01" value="0.00" oninput="calcHedge()">
-      </div>
-      <div class="field-row">
-        <label>Buy Take Profit (TP)</label>
-        <input type="text" id="hsBuyTP" class="tp-glow" readonly>
-      </div>
-      <div class="field-row">
-        <label>Buy Stop Loss (SL)</label>
-        <input type="text" id="hsBuySL" class="sl-glow" readonly>
-      </div>
+      <div class="field-row"><label>Buy Entry Price</label><input type="number" id="hsBuyEntry" step="0.01" value="0.00" oninput="calcHedge()"></div>
+      <div class="field-row"><label>Buy Take Profit (TP)</label><input type="text" id="hsBuyTP" class="tp-glow" readonly></div>
+      <div class="field-row"><label>Buy Stop Loss (SL)</label><input type="text" id="hsBuySL" class="sl-glow" readonly></div>
     </div>
     <div class="trader-panel">
       <h4>Trader 2 <span class="badge-sell">SELL</span></h4>
-      <div class="field-row">
-        <label>Sell Entry Price</label>
-        <input type="number" id="hsSellEntry" step="0.01" value="0.00" oninput="calcHedge()">
-      </div>
-      <div class="field-row">
-        <label>Sell Take Profit (TP)</label>
-        <input type="text" id="hsSellTP" class="tp-glow" readonly>
-      </div>
-      <div class="field-row">
-        <label>Sell Stop Loss (SL)</label>
-        <input type="text" id="hsSellSL" class="sl-glow" readonly>
-      </div>
+      <div class="field-row"><label>Sell Entry Price</label><input type="number" id="hsSellEntry" step="0.01" value="0.00" oninput="calcHedge()"></div>
+      <div class="field-row"><label>Sell Take Profit (TP)</label><input type="text" id="hsSellTP" class="tp-glow" readonly></div>
+      <div class="field-row"><label>Sell Stop Loss (SL)</label><input type="text" id="hsSellSL" class="sl-glow" readonly></div>
     </div>
   </div>
   <div class="outcome-summary">
-    <div class="outcome-box">
-      <div class="label">Buy TP Outcome (USD)</div>
-      <div class="value positive" id="hsBuyTPUsd">$0.00</div>
-    </div>
-    <div class="outcome-box">
-      <div class="label">Buy SL Outcome (USD)</div>
-      <div class="value negative" id="hsBuySLUsd">$0.00</div>
-    </div>
-    <div class="outcome-box">
-      <div class="label">Sell TP Outcome (USD)</div>
-      <div class="value positive" id="hsSellTPUsd">$0.00</div>
-    </div>
-    <div class="outcome-box">
-      <div class="label">Sell SL Outcome (USD)</div>
-      <div class="value negative" id="hsSellSLUsd">$0.00</div>
-    </div>
+    <div class="outcome-box"><div class="label">Buy TP Outcome (USD)</div><div class="value positive" id="hsBuyTPUsd">$0.00</div></div>
+    <div class="outcome-box"><div class="label">Buy SL Outcome (USD)</div><div class="value negative" id="hsBuySLUsd">$0.00</div></div>
+    <div class="outcome-box"><div class="label">Sell TP Outcome (USD)</div><div class="value positive" id="hsSellTPUsd">$0.00</div></div>
+    <div class="outcome-box"><div class="label">Sell SL Outcome (USD)</div><div class="value negative" id="hsSellSLUsd">$0.00</div></div>
   </div>
 </section>
 
 <section id="accountmanager">
   <h3>Hedging Accounts Manager</h3>
+
   <div class="form-row">
     <input type="text" id="accName" placeholder="Account Name/Number">
     <select id="accType">
@@ -214,17 +185,49 @@
     <input type="number" id="accPrice" placeholder="Current Price" step="0.01">
     <button onclick="addAccount()">Add Account</button>
   </div>
+
   <div class="form-row">
     <button onclick="sortAccounts('status')">Sort by Status (Z→A)</button>
     <button onclick="sortAccounts('price')">Sort by Price (High→Low)</button>
     <button onclick="sortAccounts('balance')">Sort by Balance (High→Low)</button>
   </div>
+
+  <div class="global-inputs">
+    <div class="input-group">
+      <label>Target ($ Movement) for New Hedge</label>
+      <input type="number" id="hedgeTarget" step="0.01" value="1.00">
+    </div>
+    <div class="input-group">
+      <label>Current XAUUSD Price (Live)</label>
+      <input type="number" id="currentXauPrice" step="0.01" value="0.00" readonly style="color:#facc15; font-weight:bold; font-size:18px;">
+      <small id="priceStatus" style="color:#64748b; font-size:11px;">Fetching live price...</small>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <button onclick="createHedge()">Create Hedge from Selected (2 Accounts)</button>
+  </div>
+
   <table>
     <thead>
-      <tr><th>Account</th><th>Type</th><th>Status</th><th>Balance ($)</th><th>Current Price</th><th>Action</th></tr>
+      <tr>
+        <th>Select</th>
+        <th>Account</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Balance ($)</th>
+        <th>Current Price</th>
+        <th>Action</th>
+      </tr>
     </thead>
     <tbody id="accountTable"></tbody>
   </table>
+</section>
+
+<section id="hedgeslist">
+  <h3>Live Hedges (Auto-Sorted by Nearest SL/TP)</h3>
+  <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Sabse qareeb wala hedge (jiska SL/TP live price ke sabse nazdeek hai) upar highlight hoga.</p>
+  <div id="hedgesContainer"></div>
 </section>
 
 <footer>© 2026 Forex With Waqar — All records saved locally in your browser.</footer>
@@ -245,10 +248,7 @@
     const entry = document.getElementById('entry').value;
     const profit = parseFloat(document.getElementById('profit').value);
 
-    if (!pair || isNaN(profit)) {
-      alert('Pair aur Profit/Loss zaroor darj karein.');
-      return;
-    }
+    if (!pair || isNaN(profit)) { alert('Pair aur Profit/Loss zaroor darj karein.'); return; }
 
     trades.push({ date: new Date().toLocaleDateString(), pair, type, lot, entry, profit });
 
@@ -260,31 +260,21 @@
     saveTrades();
   }
 
-  function deleteTrade(index) {
-    trades.splice(index, 1);
-    saveTrades();
-  }
+  function deleteTrade(index) { trades.splice(index, 1); saveTrades(); }
 
   function renderTrades() {
     const tbody = document.getElementById('tradeTable');
     tbody.innerHTML = '';
-    let totalPL = 0;
-    let wins = 0;
+    let totalPL = 0, wins = 0;
 
     trades.forEach((t, i) => {
       totalPL += parseFloat(t.profit);
       if (parseFloat(t.profit) > 0) wins++;
-
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${t.date}</td>
-        <td>${t.pair}</td>
-        <td>${t.type}</td>
-        <td>${t.lot}</td>
-        <td>${t.entry}</td>
+        <td>${t.date}</td><td>${t.pair}</td><td>${t.type}</td><td>${t.lot}</td><td>${t.entry}</td>
         <td style="color:${t.profit >= 0 ? '#22c55e' : '#ef4444'}">${t.profit}</td>
-        <td><button class="delete-btn" onclick="deleteTrade(${i})">Delete</button></td>
-      `;
+        <td><button class="delete-btn" onclick="deleteTrade(${i})">Delete</button></td>`;
       tbody.appendChild(row);
     });
 
@@ -329,6 +319,7 @@
 
   // ===== Hedging Accounts Manager =====
   let accounts = JSON.parse(localStorage.getItem('waqarAccounts')) || [];
+  let selectedForHedge = [];
 
   function saveAccounts() {
     localStorage.setItem('waqarAccounts', JSON.stringify(accounts));
@@ -347,7 +338,8 @@
       return;
     }
 
-    accounts.push({ name, type, status, balance, price });
+    const id = Date.now() + Math.random();
+    accounts.push({ id, name, type, status, balance, price });
 
     document.getElementById('accName').value = '';
     document.getElementById('accBalance').value = '';
@@ -357,19 +349,34 @@
   }
 
   function deleteAccount(index) {
+    const acc = accounts[index];
+    selectedForHedge = selectedForHedge.filter(id => id !== acc.id);
     accounts.splice(index, 1);
     saveAccounts();
   }
 
   function sortAccounts(criteria) {
-    if (criteria === 'status') {
-      accounts.sort((a, b) => b.status.localeCompare(a.status));
-    } else if (criteria === 'price') {
-      accounts.sort((a, b) => b.price - a.price);
-    } else if (criteria === 'balance') {
-      accounts.sort((a, b) => b.balance - a.balance);
-    }
+    if (criteria === 'status') accounts.sort((a, b) => b.status.localeCompare(a.status));
+    else if (criteria === 'price') accounts.sort((a, b) => b.price - a.price);
+    else if (criteria === 'balance') accounts.sort((a, b) => b.balance - a.balance);
     saveAccounts();
+  }
+
+  function toggleSelect(id) {
+    const acc = accounts.find(a => a.id === id);
+    if (!acc) return;
+
+    if (selectedForHedge.includes(id)) {
+      selectedForHedge = selectedForHedge.filter(x => x !== id);
+    } else {
+      if (selectedForHedge.length >= 2) {
+        alert('Sirf 2 accounts select kiye ja sakte hain. Pehle ek unselect karein.');
+        renderAccounts();
+        return;
+      }
+      selectedForHedge.push(id);
+    }
+    renderAccounts();
   }
 
   function renderAccounts() {
@@ -379,7 +386,11 @@
     accounts.forEach((acc, i) => {
       const row = document.createElement('tr');
       const typeColor = acc.type === 'BUY' ? '#22c55e' : '#ef4444';
+      const isChecked = selectedForHedge.includes(acc.id) ? 'checked' : '';
+      if (isChecked) row.classList.add('selected-row');
+
       row.innerHTML = `
+        <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
         <td>${acc.name}</td>
         <td style="color:${typeColor}; font-weight:bold;">${acc.type}</td>
         <td>${acc.status}</td>
@@ -391,7 +402,138 @@
     });
   }
 
+  // ===== Hedge Creation =====
+  let hedges = JSON.parse(localStorage.getItem('waqarHedges')) || [];
+
+  function createHedge() {
+    if (selectedForHedge.length !== 2) {
+      alert('Hedge banane ke liye bilkul 2 accounts select karein.');
+      return;
+    }
+
+    const acc1 = accounts.find(a => a.id === selectedForHedge[0]);
+    const acc2 = accounts.find(a => a.id === selectedForHedge[1]);
+
+    if (!acc1 || !acc2) { alert('Selected accounts nahi milay.'); return; }
+    if (acc1.type === acc2.type) {
+      alert('Hedge banane ke liye ek BUY aur ek SELL account select karein.');
+      return;
+    }
+
+    const buyAcc = acc1.type === 'BUY' ? acc1 : acc2;
+    const sellAcc = acc1.type === 'SELL' ? acc1 : acc2;
+
+    const target = parseFloat(document.getElementById('hedgeTarget').value) || 0;
+
+    const sellSL = sellAcc.price + target;
+    const buyTP = sellSL - HS_BUFFER;
+    const buySL = buyAcc.price - target;
+    const sellTP = buySL + HS_BUFFER;
+
+    const hedge = {
+      id: Date.now() + Math.random(),
+      name: `Hedge #${hedges.length + 1}`,
+      target,
+      buyAccountName: buyAcc.name,
+      sellAccountName: sellAcc.name,
+      buyEntry: buyAcc.price,
+      sellEntry: sellAcc.price,
+      buyTP, buySL, sellTP, sellSL
+    };
+
+    hedges.push(hedge);
+    localStorage.setItem('waqarHedges', JSON.stringify(hedges));
+
+    selectedForHedge = [];
+    renderAccounts();
+    renderHedges();
+
+    alert(`${hedge.name} successfully ban gaya!`);
+  }
+
+  function deleteHedge(id) {
+    hedges = hedges.filter(h => h.id !== id);
+    localStorage.setItem('waqarHedges', JSON.stringify(hedges));
+    renderHedges();
+  }
+
+  function renderHedges() {
+    const container = document.getElementById('hedgesContainer');
+    const currentPrice = parseFloat(document.getElementById('currentXauPrice').value) || 0;
+
+    const hedgesWithDistance = hedges.map(h => {
+      const distances = [
+        Math.abs(h.buyTP - currentPrice),
+        Math.abs(h.buySL - currentPrice),
+        Math.abs(h.sellTP - currentPrice),
+        Math.abs(h.sellSL - currentPrice)
+      ];
+      return { ...h, minDistance: Math.min(...distances) };
+    });
+
+    hedgesWithDistance.sort((a, b) => a.minDistance - b.minDistance);
+
+    container.innerHTML = '';
+
+    if (hedgesWithDistance.length === 0) {
+      container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge nahi banaya gaya.</p>';
+      return;
+    }
+
+    hedgesWithDistance.forEach((h, i) => {
+      const card = document.createElement('div');
+      card.className = 'hedge-card' + (i === 0 && currentPrice > 0 ? ' nearest' : '');
+
+      card.innerHTML = `
+        <div class="hedge-header">
+          <h4>${h.name}</h4>
+          <div>
+            ${currentPrice > 0 ? `<span class="hedge-distance">Nearest Distance: ${h.minDistance.toFixed(2)}</span>` : ''}
+            <button class="delete-btn" onclick="deleteHedge(${h.id})" style="margin-left:10px;">Delete</button>
+          </div>
+        </div>
+        <div class="hedge-grid">
+          <div class="hedge-side">
+            <div class="side-title" style="color:#22c55e;">BUY — ${h.buyAccountName}</div>
+            <p>Entry: ${h.buyEntry.toFixed(2)}</p>
+            <p>TP: <span class="glow-tp">${h.buyTP.toFixed(2)}</span></p>
+            <p>SL: <span class="glow-sl">${h.buySL.toFixed(2)}</span></p>
+          </div>
+          <div class="hedge-side">
+            <div class="side-title" style="color:#ef4444;">SELL — ${h.sellAccountName}</div>
+            <p>Entry: ${h.sellEntry.toFixed(2)}</p>
+            <p>TP: <span class="glow-tp">${h.sellTP.toFixed(2)}</span></p>
+            <p>SL: <span class="glow-sl">${h.sellSL.toFixed(2)}</span></p>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
   renderAccounts();
+  renderHedges();
+
+  // ===== Live XAUUSD Price Fetching =====
+  async function fetchLivePrice() {
+    const statusEl = document.getElementById('priceStatus');
+    try {
+      const res = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
+      const data = await res.json();
+      const price = data.items[0].xauPrice;
+
+      document.getElementById('currentXauPrice').value = price.toFixed(2);
+      statusEl.textContent = 'Live — last updated ' + new Date().toLocaleTimeString();
+      statusEl.style.color = '#22c55e';
+      renderHedges();
+    } catch (err) {
+      statusEl.textContent = 'Live price fetch nahi ho saki — dobara koshish ki jayegi.';
+      statusEl.style.color = '#ef4444';
+    }
+  }
+
+  fetchLivePrice();
+  setInterval(fetchLivePrice, 30000);
 </script>
 
 </body>
