@@ -67,9 +67,9 @@
   .hedge-grid { display:flex; flex-wrap:wrap; gap:15px; }
   .hedge-side { flex:1; min-width:220px; background: rgba(30,41,59,0.6); border-radius:10px; padding:14px; }
   .hedge-side .side-title { font-size:13px; margin-bottom:8px; font-weight:bold; }
-  .hedge-side p { font-size:13px; color:#cbd5e1; margin:4px 0; }
-  .hedge-side .glow-tp { color:#67e8f9; font-weight:bold; }
-  .hedge-side .glow-sl { color:#fda4af; font-weight:bold; }
+  .hedge-side .mini-field { margin-bottom:8px; }
+  .hedge-side .mini-field label { display:block; font-size:11px; color:#94a3b8; margin-bottom:3px; }
+  .hedge-side .mini-field input { width:100%; padding:6px 8px; border-radius:6px; border:1px solid #334155; background:rgba(15,23,42,0.8); color:#fff; font-size:13px; }
 
   .edit-panel { background: rgba(30,41,59,0.5); border-radius: 12px; padding: 18px; margin-top: 14px; border: 1px dashed rgba(148,163,184,0.3); }
   .edit-panel h5 { color:#a5b4fc; font-size:14px; margin-bottom:12px; }
@@ -210,7 +210,7 @@
       <small id="priceStatus" style="color:#64748b; font-size:11px;">Fetching live price...</small>
     </div>
   </div>
-  <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Sabse qareeb wala hedge (jiska SL/TP live price ke sabse nazdeek hai) upar highlight hoga. "Edit" par click karke Buy/Sell tayy karein aur apna Lot/Target set karein.</p>
+  <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Entry, TP, SL — sab directly edit kar sakte hain. Target change karne par TP/SL formula se khud update ho jayega.</p>
   <div id="hedgesContainer"></div>
 </section>
 
@@ -436,6 +436,7 @@
       lot: 1.00,
       target: 1.00,
       configured: false,
+      buyEntry: null, sellEntry: null,
       buyTP: null, buySL: null, sellTP: null, sellSL: null
     };
 
@@ -467,9 +468,14 @@
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
     const otherAcc = (hedge.account1.id === buyAccId) ? hedge.account2 : hedge.account1;
+    const buyAccObj = (hedge.account1.id === buyAccId) ? hedge.account1 : hedge.account2;
     hedge.buyAccId = buyAccId;
     hedge.sellAccId = otherAcc.id;
-    recalcHedge(hedgeId);
+    hedge.buyAccountName = buyAccObj.name;
+    hedge.sellAccountName = otherAcc.name;
+    hedge.buyEntry = buyAccObj.price;
+    hedge.sellEntry = otherAcc.price;
+    recalcFromEntries(hedgeId);
   }
 
   function updateHedgeSettings(hedgeId) {
@@ -479,33 +485,42 @@
     const targetEl = document.getElementById('hedgeTarget_' + hedgeId);
     hedge.lot = parseFloat(lotEl.value) || 0;
     hedge.target = parseFloat(targetEl.value) || 0;
-    recalcHedge(hedgeId);
+    recalcFromEntries(hedgeId);
   }
 
-  function recalcHedge(hedgeId) {
+  function updateEntry(hedgeId, side) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
+    const val = parseFloat(document.getElementById(`entry_${side}_${hedgeId}`).value) || 0;
+    if (side === 'buy') hedge.buyEntry = val; else hedge.sellEntry = val;
+    recalcFromEntries(hedgeId);
+  }
 
-    if (hedge.buyAccId && hedge.sellAccId) {
-      const buyAcc = (hedge.account1.id === hedge.buyAccId) ? hedge.account1 : hedge.account2;
-      const sellAcc = (hedge.account1.id === hedge.sellAccId) ? hedge.account1 : hedge.account2;
+  function recalcFromEntries(hedgeId) {
+    const hedge = hedges.find(h => h.id === hedgeId);
+    if (!hedge) return;
+    if (hedge.buyEntry == null || hedge.sellEntry == null) return;
 
-      const sellSL = sellAcc.price + hedge.target;
-      const buyTP = sellSL - HS_BUFFER;
-      const buySL = buyAcc.price - hedge.target;
-      const sellTP = buySL + HS_BUFFER;
+    const sellSL = hedge.sellEntry + hedge.target;
+    const buyTP = sellSL - HS_BUFFER;
+    const buySL = hedge.buyEntry - hedge.target;
+    const sellTP = buySL + HS_BUFFER;
 
-      hedge.buyEntry = buyAcc.price;
-      hedge.sellEntry = sellAcc.price;
-      hedge.buyAccountName = buyAcc.name;
-      hedge.sellAccountName = sellAcc.name;
-      hedge.buyTP = buyTP;
-      hedge.buySL = buySL;
-      hedge.sellTP = sellTP;
-      hedge.sellSL = sellSL;
-      hedge.configured = true;
-    }
+    hedge.buyTP = buyTP;
+    hedge.buySL = buySL;
+    hedge.sellTP = sellTP;
+    hedge.sellSL = sellSL;
+    hedge.configured = true;
 
+    saveHedges();
+    renderHedges();
+  }
+
+  function updateManualField(hedgeId, field) {
+    const hedge = hedges.find(h => h.id === hedgeId);
+    if (!hedge) return;
+    const val = parseFloat(document.getElementById(`${field}_${hedgeId}`).value) || 0;
+    hedge[field] = val;
     saveHedges();
     renderHedges();
   }
@@ -550,15 +565,15 @@
           <div class="hedge-grid">
             <div class="hedge-side">
               <div class="side-title" style="color:#22c55e;">BUY — ${h.buyAccountName}</div>
-              <p>Entry: ${h.buyEntry.toFixed(2)}</p>
-              <p>TP: <span class="glow-tp">${h.buyTP.toFixed(2)}</span></p>
-              <p>SL: <span class="glow-sl">${h.buySL.toFixed(2)}</span></p>
+              <div class="mini-field"><label>Entry Price</label><input type="number" step="0.01" id="entry_buy_${h.id}" value="${h.buyEntry.toFixed(2)}" onchange="updateEntry(${h.id}, 'buy')"></div>
+              <div class="mini-field"><label>Take Profit (TP)</label><input type="number" step="0.01" class="tp-glow" id="buyTP_${h.id}" value="${h.buyTP.toFixed(2)}" onchange="updateManualField(${h.id}, 'buyTP')"></div>
+              <div class="mini-field"><label>Stop Loss (SL)</label><input type="number" step="0.01" class="sl-glow" id="buySL_${h.id}" value="${h.buySL.toFixed(2)}" onchange="updateManualField(${h.id}, 'buySL')"></div>
             </div>
             <div class="hedge-side">
               <div class="side-title" style="color:#ef4444;">SELL — ${h.sellAccountName}</div>
-              <p>Entry: ${h.sellEntry.toFixed(2)}</p>
-              <p>TP: <span class="glow-tp">${h.sellTP.toFixed(2)}</span></p>
-              <p>SL: <span class="glow-sl">${h.sellSL.toFixed(2)}</span></p>
+              <div class="mini-field"><label>Entry Price</label><input type="number" step="0.01" id="entry_sell_${h.id}" value="${h.sellEntry.toFixed(2)}" onchange="updateEntry(${h.id}, 'sell')"></div>
+              <div class="mini-field"><label>Take Profit (TP)</label><input type="number" step="0.01" class="tp-glow" id="sellTP_${h.id}" value="${h.sellTP.toFixed(2)}" onchange="updateManualField(${h.id}, 'sellTP')"></div>
+              <div class="mini-field"><label>Stop Loss (SL)</label><input type="number" step="0.01" class="sl-glow" id="sellSL_${h.id}" value="${h.sellSL.toFixed(2)}" onchange="updateManualField(${h.id}, 'sellSL')"></div>
             </div>
           </div>`;
       } else {
@@ -582,15 +597,15 @@
                 <label><input type="radio" name="role_${h.id}" ${buy2Checked} onchange="assignRole(${h.id}, ${h.account2.id})"> Isay BUY banayein</label>
               </div>
             </div>
-            <h5>Calculator</h5>
+            <h5>Lot Size &amp; Target</h5>
             <div class="global-inputs">
               <div class="input-group">
                 <label>Lot Size</label>
-                <input type="number" id="hedgeLot_${h.id}" step="0.01" value="${h.lot}" oninput="updateHedgeSettings(${h.id})">
+                <input type="number" id="hedgeLot_${h.id}" step="0.01" value="${h.lot}" onchange="updateHedgeSettings(${h.id})">
               </div>
               <div class="input-group">
                 <label>Target ($ Movement)</label>
-                <input type="number" id="hedgeTarget_${h.id}" step="0.01" value="${h.target}" oninput="updateHedgeSettings(${h.id})">
+                <input type="number" id="hedgeTarget_${h.id}" step="0.01" value="${h.target}" onchange="updateHedgeSettings(${h.id})">
               </div>
             </div>
           </div>`;
@@ -618,9 +633,9 @@
   async function fetchLivePrice() {
     const statusEl = document.getElementById('priceStatus');
     try {
-      const res = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
+      const res = await fetch('https://api.gold-api.com/price/XAU');
       const data = await res.json();
-      const price = data.items[0].xauPrice;
+      const price = data.price;
       document.getElementById('currentXauPrice').value = price.toFixed(2);
       statusEl.textContent = 'Live — last updated ' + new Date().toLocaleTimeString();
       statusEl.style.color = '#22c55e';
