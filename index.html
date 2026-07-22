@@ -27,6 +27,7 @@
   .form-row input, .form-row select { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; flex: 1; min-width: 120px; }
   .form-row button { padding: 10px 20px; background: #22c55e; color: #0f172a; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
   .form-row button:hover { background: #16a34a; }
+  .form-row button.active-sort { background: #facc15; color: #111827; }
   .summary { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
   .summary div { background: #111827; padding: 15px 20px; border-radius: 8px; border: 1px solid #1f2937; flex: 1; text-align: center; }
   .summary div span { display: block; font-size: 22px; font-weight: bold; color: #22c55e; margin-top: 5px; }
@@ -202,7 +203,7 @@
 </section>
 
 <section id="hedgeslist">
-  <h3>Live Hedges (Auto-Sorted by Nearest SL/TP)</h3>
+  <h3>Live Hedges</h3>
   <div class="global-inputs">
     <div class="input-group">
       <label>Current XAUUSD Price (Live)</label>
@@ -210,7 +211,14 @@
       <small id="priceStatus" style="color:#64748b; font-size:11px;">Fetching live price...</small>
     </div>
   </div>
-  <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Entry, TP, SL — sab directly edit kar sakte hain. Target change karne par TP/SL formula se khud update ho jayega.</p>
+
+  <div class="form-row">
+    <button id="sortBtn_nearest" onclick="setHedgeSort('nearest')">Auto (Nearest SL/TP)</button>
+    <button id="sortBtn_tp" onclick="setHedgeSort('tp')">Sort by TP (High→Low)</button>
+    <button id="sortBtn_sl" onclick="setHedgeSort('sl')">Sort by SL (High→Low)</button>
+  </div>
+
+  <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Entry, TP, SL — sab directly edit kar sakte hain. "Auto" mode mein sabse qareeb hedge upar aata hai; manual sort buttons se TP/SL ke hisaab se order badla ja sakta hai.</p>
   <div id="hedgesContainer"></div>
 </section>
 
@@ -413,10 +421,16 @@
   let hedges = JSON.parse(localStorage.getItem('waqarHedges')) || [];
   let hedgeIdCounter = parseInt(localStorage.getItem('waqarHedgeIdCounter')) || 2000;
   let openEditIds = [];
+  let hedgeSortMode = 'nearest'; // 'nearest' | 'tp' | 'sl'
 
   function saveHedges() {
     localStorage.setItem('waqarHedges', JSON.stringify(hedges));
     localStorage.setItem('waqarHedgeIdCounter', hedgeIdCounter.toString());
+  }
+
+  function setHedgeSort(mode) {
+    hedgeSortMode = mode;
+    renderHedges();
   }
 
   function createHedge() {
@@ -529,7 +543,13 @@
     const container = document.getElementById('hedgesContainer');
     const currentPrice = parseFloat(document.getElementById('currentXauPrice').value) || 0;
 
-    const withDistance = hedges.map(h => {
+    // Highlight active sort button
+    ['nearest', 'tp', 'sl'].forEach(mode => {
+      const btn = document.getElementById('sortBtn_' + mode);
+      if (btn) btn.classList.toggle('active-sort', hedgeSortMode === mode);
+    });
+
+    let list = hedges.map(h => {
       let minDistance = Infinity;
       if (h.configured) {
         minDistance = Math.min(
@@ -539,21 +559,29 @@
           Math.abs(h.sellSL - currentPrice)
         );
       }
-      return { ...h, minDistance };
+      const maxTP = h.configured ? Math.max(h.buyTP, h.sellTP) : -Infinity;
+      const maxSL = h.configured ? Math.max(h.buySL, h.sellSL) : -Infinity;
+      return { ...h, minDistance, maxTP, maxSL };
     });
 
-    withDistance.sort((a, b) => a.minDistance - b.minDistance);
+    if (hedgeSortMode === 'tp') {
+      list.sort((a, b) => b.maxTP - a.maxTP);
+    } else if (hedgeSortMode === 'sl') {
+      list.sort((a, b) => b.maxSL - a.maxSL);
+    } else {
+      list.sort((a, b) => a.minDistance - b.minDistance);
+    }
 
     container.innerHTML = '';
 
-    if (withDistance.length === 0) {
+    if (list.length === 0) {
       container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge nahi banaya gaya.</p>';
       return;
     }
 
-    withDistance.forEach((h, i) => {
+    list.forEach((h, i) => {
       const card = document.createElement('div');
-      const isNearest = i === 0 && currentPrice > 0 && h.configured;
+      const isNearest = i === 0 && hedgeSortMode === 'nearest' && currentPrice > 0 && h.configured;
       card.className = 'hedge-card' + (isNearest ? ' nearest' : '');
 
       const isEditing = openEditIds.includes(h.id);
@@ -611,11 +639,16 @@
           </div>`;
       }
 
+      let badge = '';
+      if (isNearest) badge = `<span class="hedge-distance">Nearest Distance: ${h.minDistance.toFixed(2)}</span>`;
+      else if (hedgeSortMode === 'tp' && h.configured) badge = `<span class="hedge-distance">Max TP: ${h.maxTP.toFixed(2)}</span>`;
+      else if (hedgeSortMode === 'sl' && h.configured) badge = `<span class="hedge-distance">Max SL: ${h.maxSL.toFixed(2)}</span>`;
+
       card.innerHTML = `
         <div class="hedge-header">
           <h4>${h.name}</h4>
           <div class="hedge-actions">
-            ${isNearest ? `<span class="hedge-distance">Nearest Distance: ${h.minDistance.toFixed(2)}</span>` : ''}
+            ${badge}
             <button class="edit-btn" onclick="toggleEdit(${h.id})">${isEditing ? 'Close' : 'Edit'}</button>
             <button class="delete-btn" onclick="deleteHedge(${h.id})">Delete</button>
           </div>
