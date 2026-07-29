@@ -226,7 +226,7 @@
 </section>
 
 <section id="tradingview">
-  <h3>XAUUSD Live Chart</h3>
+  <h3>XAUUSD Live Chart &amp; Analysis Tools</h3>
   <div class="tradingview-widget-container">
     <div id="tradingview_xauusd"></div>
   </div>
@@ -695,7 +695,7 @@
 <script type="text/javascript">
   new TradingView.widget({
     "width": "100%",
-    "height": 500,
+    "height": 650,
     "symbol": "OANDA:XAUUSD",
     "interval": "15",
     "timezone": "Etc/UTC",
@@ -705,6 +705,20 @@
     "toolbar_bg": "#0f172a",
     "enable_publishing": false,
     "allow_symbol_change": true,
+    "hide_top_toolbar": false,
+    "hide_side_toolbar": false,
+    "hide_legend": false,
+    "withdateranges": true,
+    "details": true,
+    "hotlist": true,
+    "calendar": true,
+    "studies": [
+      "MASimple@tv-basicstudies",
+      "RSI@tv-basicstudies"
+    ],
+    "show_popup_button": true,
+    "popup_width": "1000",
+    "popup_height": "650",
     "container_id": "tradingview_xauusd"
   });
 </script>
