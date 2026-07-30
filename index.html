@@ -17,153 +17,38 @@
     min-height: 100vh;
   }
 
-  /* ===== Unique Animated Background ===== */
-  .bg-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.35;
-    z-index: 0;
-    pointer-events: none;
-  }
-  .bg-orb.orb1 {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, #22c55e, transparent 70%);
-    top: -100px; left: -100px;
-    animation: floatOrb1 18s ease-in-out infinite;
-  }
-  .bg-orb.orb2 {
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, #38bdf8, transparent 70%);
-    bottom: -150px; right: -150px;
-    animation: floatOrb2 22s ease-in-out infinite;
-  }
-  .bg-orb.orb3 {
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, #facc15, transparent 70%);
-    top: 40%; left: 50%;
-    animation: floatOrb3 26s ease-in-out infinite;
-  }
-  @keyframes floatOrb1 {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(120px, 80px) scale(1.2); }
-  }
-  @keyframes floatOrb2 {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(-100px, -60px) scale(1.15); }
-  }
-  @keyframes floatOrb3 {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-30%, -60%) scale(1.3); }
-  }
+  .bg-orb { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.35; z-index: 0; pointer-events: none; }
+  .bg-orb.orb1 { width: 500px; height: 500px; background: radial-gradient(circle, #22c55e, transparent 70%); top: -100px; left: -100px; animation: floatOrb1 18s ease-in-out infinite; }
+  .bg-orb.orb2 { width: 600px; height: 600px; background: radial-gradient(circle, #38bdf8, transparent 70%); bottom: -150px; right: -150px; animation: floatOrb2 22s ease-in-out infinite; }
+  .bg-orb.orb3 { width: 400px; height: 400px; background: radial-gradient(circle, #facc15, transparent 70%); top: 40%; left: 50%; animation: floatOrb3 26s ease-in-out infinite; }
+  @keyframes floatOrb1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(120px, 80px) scale(1.2); } }
+  @keyframes floatOrb2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-100px, -60px) scale(1.15); } }
+  @keyframes floatOrb3 { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-30%, -60%) scale(1.3); } }
 
-  .bg-grid {
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(148,163,184,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148,163,184,0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index: 0;
-    pointer-events: none;
-  }
+  .bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(148,163,184,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.05) 1px, transparent 1px); background-size: 40px 40px; z-index: 0; pointer-events: none; }
 
   header, .hero, section, footer { position: relative; z-index: 1; }
 
-  header {
-    background: rgba(17,24,39,0.6);
-    backdrop-filter: blur(16px);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(34,197,94,0.3);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-  }
-  header h1 {
-    font-size: 26px;
-    font-weight: 800;
-    background: linear-gradient(90deg, #22c55e, #38bdf8, #facc15, #22c55e);
-    background-size: 300% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 6s linear infinite;
-  }
-  @keyframes shimmer {
-    to { background-position: 300% center; }
-  }
-  nav a { color: #e2e8f0; text-decoration: none; margin-left: 22px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
+  header { background: rgba(17,24,39,0.6); backdrop-filter: blur(16px); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(34,197,94,0.3); position: sticky; top: 0; z-index: 10; box-shadow: 0 4px 30px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 10px; }
+  header h1 { font-size: 26px; font-weight: 800; background: linear-gradient(90deg, #22c55e, #38bdf8, #facc15, #22c55e); background-size: 300% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 6s linear infinite; }
+  @keyframes shimmer { to { background-position: 300% center; } }
+  nav a { color: #e2e8f0; text-decoration: none; margin-left: 18px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
   nav a:hover { color: #22c55e; }
 
-  .hero {
-    text-align: center;
-    padding: 80px 20px 60px;
-  }
-  .hero .brand-badge {
-    display: inline-block;
-    padding: 6px 18px;
-    border-radius: 999px;
-    background: rgba(34,197,94,0.1);
-    border: 1px solid rgba(34,197,94,0.4);
-    color: #4ade80;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-  }
-  .hero h2 {
-    font-size: 42px;
-    color: #fff;
-    margin-bottom: 15px;
-    font-weight: 800;
-  }
+  .hero { text-align: center; padding: 80px 20px 60px; }
+  .hero .brand-badge { display: inline-block; padding: 6px 18px; border-radius: 999px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.4); color: #4ade80; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; text-transform: uppercase; }
+  .hero h2 { font-size: 42px; color: #fff; margin-bottom: 15px; font-weight: 800; }
   .hero p { color: #94a3b8; max-width: 600px; margin: 0 auto; font-size: 15px; }
 
   section { padding: 40px; max-width: 1100px; margin: 0 auto 30px; }
 
-  .glass-panel {
-    background: rgba(15,23,42,0.55);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(148,163,184,0.15);
-    border-radius: 22px;
-    padding: 35px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.35);
-  }
+  .glass-panel { background: rgba(15,23,42,0.55); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(148,163,184,0.15); border-radius: 22px; padding: 35px; box-shadow: 0 8px 40px rgba(0,0,0,0.35); }
 
-  .brand-watermark {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #facc15;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    opacity: 0.85;
-  }
+  .brand-watermark { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #facc15; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 14px; opacity: 0.85; }
   .brand-watermark::before { content: "⚡"; }
 
-  section h3 {
-    color: #fff;
-    font-size: 26px;
-    margin-bottom: 20px;
-    position: relative;
-    display: inline-block;
-  }
-  section h3::after {
-    content: "";
-    position: absolute;
-    left: 0; bottom: -8px;
-    width: 60px; height: 3px;
-    background: linear-gradient(90deg, #22c55e, #38bdf8);
-    border-radius: 3px;
-  }
+  section h3 { color: #fff; font-size: 26px; margin-bottom: 20px; position: relative; display: inline-block; }
+  section h3::after { content: ""; position: absolute; left: 0; bottom: -8px; width: 60px; height: 3px; background: linear-gradient(90deg, #22c55e, #38bdf8); border-radius: 3px; }
 
   .card { background: rgba(17,24,39,0.7); border: 1px solid rgba(148,163,184,0.12); border-radius: 14px; padding: 25px; margin-bottom: 20px; transition: transform 0.2s, border-color 0.2s; }
   .card:hover { transform: translateY(-3px); border-color: rgba(34,197,94,0.4); }
@@ -190,21 +75,8 @@
   .save-btn { background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: #0f172a; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
   .action-group { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
 
-  footer {
-    text-align: center;
-    padding: 40px 20px;
-    color: #64748b;
-    border-top: 1px solid rgba(148,163,184,0.1);
-    font-size: 13px;
-  }
-  footer .foot-brand {
-    display: block;
-    margin-top: 6px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #22c55e, #38bdf8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+  footer { text-align: center; padding: 40px 20px; color: #64748b; border-top: 1px solid rgba(148,163,184,0.1); font-size: 13px; }
+  footer .foot-brand { display: block; margin-top: 6px; font-weight: 700; background: linear-gradient(90deg, #22c55e, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
   .global-inputs { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:25px; }
   .input-group { display:flex; flex-direction:column; gap:6px; flex:1; min-width:150px; }
@@ -250,8 +122,26 @@
 
   .tradingview-widget-container { border-radius:16px; overflow:hidden; border:1px solid rgba(148,163,184,0.2); }
 
+  /* ===== FAQ Accordion ===== */
+  .faq-folder { background: rgba(17,24,39,0.7); border: 1px solid rgba(148,163,184,0.15); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+  .faq-folder-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px; cursor: pointer; user-select: none;
+  }
+  .faq-folder-header h4 { color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .faq-folder-header .faq-icon { color: #facc15; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.3); }
+  .faq-folder-arrow { color: #94a3b8; transition: transform 0.25s; font-size: 18px; }
+  .faq-folder.open .faq-folder-arrow { transform: rotate(180deg); color: #22c55e; }
+  .faq-folder-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 22px; }
+  .faq-folder.open .faq-folder-body { max-height: 3000px; padding: 0 22px 22px; }
+  .faq-item { border-top: 1px solid rgba(148,163,184,0.1); padding: 14px 0; }
+  .faq-item:first-child { border-top: none; }
+  .faq-item .faq-q { color: #4ade80; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .faq-item .faq-a { color: #cbd5e1; font-size: 13.5px; }
+  .faq-note { color: #facc15; font-size: 12px; margin-top: 6px; display: block; }
+
   @media (max-width: 700px) {
-    header { padding: 15px 20px; flex-wrap: wrap; gap: 10px; }
+    header { padding: 15px 20px; }
     nav a { margin-left: 0; margin-right: 15px; }
     .hero h2 { font-size: 28px; }
     section { padding: 25px 15px; }
@@ -275,6 +165,7 @@
     <a href="#accountmanager">Accounts</a>
     <a href="#hedgeslist">Hedges</a>
     <a href="#tradingview">Live Chart</a>
+    <a href="#faq">FAQs</a>
   </nav>
 </header>
 
@@ -434,6 +325,15 @@
   </div>
 </section>
 
+<section id="faq">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>FAQ Center — Sawal &amp; Jawab</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Har folder par click karein khulne ke liye.</p>
+    <div id="faqContainer"></div>
+  </div>
+</section>
+
 <footer>
   © 2026 All records saved locally in your browser.
   <span class="foot-brand">Forex With Waqar</span>
@@ -442,9 +342,7 @@
 <script>
   // ===== Trade Record =====
   let trades = JSON.parse(localStorage.getItem('waqarTrades')) || [];
-
   function saveTrades() { localStorage.setItem('waqarTrades', JSON.stringify(trades)); renderTrades(); }
-
   function addTrade() {
     const pair = document.getElementById('pair').value.trim();
     const type = document.getElementById('type').value;
@@ -459,9 +357,7 @@
     document.getElementById('profit').value = '';
     saveTrades();
   }
-
   function deleteTrade(index) { trades.splice(index, 1); saveTrades(); }
-
   function renderTrades() {
     const tbody = document.getElementById('tradeTable');
     tbody.innerHTML = '';
@@ -514,7 +410,6 @@
     localStorage.setItem('waqarAccountIdCounter', accountIdCounter.toString());
     renderAccounts();
   }
-
   function addAccount() {
     const name = document.getElementById('accName').value.trim();
     const status = document.getElementById('accStatus').value;
@@ -528,7 +423,6 @@
     document.getElementById('accPrice').value = '';
     saveAccounts();
   }
-
   function deleteAccount(index) {
     const acc = accounts[index];
     selectedForHedge = selectedForHedge.filter(id => id !== acc.id);
@@ -536,14 +430,12 @@
     accounts.splice(index, 1);
     saveAccounts();
   }
-
   function sortAccounts(criteria) {
     if (criteria === 'status') accounts.sort((a, b) => b.status.localeCompare(a.status));
     else if (criteria === 'price') accounts.sort((a, b) => b.price - a.price);
     else if (criteria === 'balance') accounts.sort((a, b) => b.balance - a.balance);
     saveAccounts();
   }
-
   function toggleSelect(id) {
     if (selectedForHedge.includes(id)) {
       selectedForHedge = selectedForHedge.filter(x => x !== id);
@@ -557,33 +449,26 @@
     }
     renderAccounts();
   }
-
   function toggleEditAccount(id) {
     if (editingAccountIds.includes(id)) editingAccountIds = editingAccountIds.filter(x => x !== id);
     else editingAccountIds.push(id);
     renderAccounts();
   }
-
   function saveAccountUpdate(id) {
     const acc = accounts.find(a => a.id === id);
     if (!acc) return;
     const balanceEl = document.getElementById('editBalance_' + id);
     const priceEl = document.getElementById('editPrice_' + id);
     const statusEl = document.getElementById('editStatus_' + id);
-
     const newBalance = parseFloat(balanceEl.value);
     const newPrice = parseFloat(priceEl.value);
-
     if (isNaN(newBalance) || isNaN(newPrice)) { alert('Balance aur Current Price sahi darj karein.'); return; }
-
     acc.balance = newBalance;
     acc.price = newPrice;
     acc.status = statusEl.value;
-
     editingAccountIds = editingAccountIds.filter(x => x !== id);
     saveAccounts();
   }
-
   function renderAccounts() {
     const tbody = document.getElementById('accountTable');
     tbody.innerHTML = '';
@@ -592,7 +477,6 @@
       const isChecked = selectedForHedge.includes(acc.id) ? 'checked' : '';
       if (isChecked) row.classList.add('selected-row');
       const isEditing = editingAccountIds.includes(acc.id);
-
       if (isEditing) {
         row.innerHTML = `
           <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
@@ -642,58 +526,44 @@
     localStorage.setItem('waqarHedges', JSON.stringify(hedges));
     localStorage.setItem('waqarHedgeIdCounter', hedgeIdCounter.toString());
   }
-
-  function setHedgeSort(mode) {
-    hedgeSortMode = mode;
-    renderHedges();
-  }
+  function setHedgeSort(mode) { hedgeSortMode = mode; renderHedges(); }
 
   function createHedge() {
     if (selectedForHedge.length !== 2) { alert('Hedge banane ke liye bilkul 2 accounts select karein.'); return; }
     const acc1 = accounts.find(a => a.id === selectedForHedge[0]);
     const acc2 = accounts.find(a => a.id === selectedForHedge[1]);
     if (!acc1 || !acc2) { alert('Selected accounts nahi milay.'); return; }
-
     hedgeIdCounter += 1;
     const hedge = {
       id: hedgeIdCounter,
       name: `Hedge #${hedges.length + 1}`,
       account1: { id: acc1.id, name: acc1.name, price: acc1.price },
       account2: { id: acc2.id, name: acc2.name, price: acc2.price },
-      buyAccId: null,
-      sellAccId: null,
-      lot: 1.00,
-      target: 1.00,
-      buffer: 0.50,
+      buyAccId: null, sellAccId: null,
+      lot: 1.00, target: 1.00, buffer: 0.50,
       configured: false,
       buyEntry: null, sellEntry: null,
       buyTP: null, buySL: null, sellTP: null, sellSL: null
     };
-
     hedges.push(hedge);
     saveHedges();
-
     selectedForHedge = [];
     renderAccounts();
     openEditIds.push(hedge.id);
     renderHedges();
-
     alert(`${hedge.name} ban gaya! Ab "Edit" mein Buy/Sell tayy karein.`);
   }
-
   function deleteHedge(id) {
     hedges = hedges.filter(h => h.id !== id);
     openEditIds = openEditIds.filter(x => x !== id);
     saveHedges();
     renderHedges();
   }
-
   function toggleEdit(id) {
     if (openEditIds.includes(id)) openEditIds = openEditIds.filter(x => x !== id);
     else openEditIds.push(id);
     renderHedges();
   }
-
   function assignRole(hedgeId, buyAccId) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
@@ -707,19 +577,14 @@
     hedge.sellEntry = otherAcc.price;
     recalcFromEntries(hedgeId);
   }
-
   function updateHedgeSettings(hedgeId) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
-    const lotEl = document.getElementById('hedgeLot_' + hedgeId);
-    const targetEl = document.getElementById('hedgeTarget_' + hedgeId);
-    const bufferEl = document.getElementById('hedgeBuffer_' + hedgeId);
-    hedge.lot = parseFloat(lotEl.value) || 0;
-    hedge.target = parseFloat(targetEl.value) || 0;
-    hedge.buffer = parseFloat(bufferEl.value) || 0;
+    hedge.lot = parseFloat(document.getElementById('hedgeLot_' + hedgeId).value) || 0;
+    hedge.target = parseFloat(document.getElementById('hedgeTarget_' + hedgeId).value) || 0;
+    hedge.buffer = parseFloat(document.getElementById('hedgeBuffer_' + hedgeId).value) || 0;
     recalcFromEntries(hedgeId);
   }
-
   function updateEntry(hedgeId, side) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
@@ -727,33 +592,24 @@
     if (side === 'buy') hedge.buyEntry = val; else hedge.sellEntry = val;
     recalcFromEntries(hedgeId);
   }
-
   function recalcFromEntries(hedgeId) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
     if (hedge.buyEntry == null || hedge.sellEntry == null) return;
-
     const buffer = hedge.buffer != null ? hedge.buffer : 0.50;
     const sellSL = hedge.sellEntry + hedge.target;
     const buyTP = sellSL - buffer;
     const buySL = hedge.buyEntry - hedge.target;
     const sellTP = buySL + buffer;
-
-    hedge.buyTP = buyTP;
-    hedge.buySL = buySL;
-    hedge.sellTP = sellTP;
-    hedge.sellSL = sellSL;
+    hedge.buyTP = buyTP; hedge.buySL = buySL; hedge.sellTP = sellTP; hedge.sellSL = sellSL;
     hedge.configured = true;
-
     saveHedges();
     renderHedges();
   }
-
   function updateManualField(hedgeId, field) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
-    const val = parseFloat(document.getElementById(`${field}_${hedgeId}`).value) || 0;
-    hedge[field] = val;
+    hedge[field] = parseFloat(document.getElementById(`${field}_${hedgeId}`).value) || 0;
     saveHedges();
     renderHedges();
   }
@@ -771,10 +627,8 @@
       let minDistance = Infinity;
       if (h.configured) {
         minDistance = Math.min(
-          Math.abs(h.buyTP - currentPrice),
-          Math.abs(h.buySL - currentPrice),
-          Math.abs(h.sellTP - currentPrice),
-          Math.abs(h.sellSL - currentPrice)
+          Math.abs(h.buyTP - currentPrice), Math.abs(h.buySL - currentPrice),
+          Math.abs(h.sellTP - currentPrice), Math.abs(h.sellSL - currentPrice)
         );
       }
       const maxTP = h.configured ? Math.max(h.buyTP, h.sellTP) : -Infinity;
@@ -782,31 +636,21 @@
       return { ...h, minDistance, maxTP, maxSL };
     });
 
-    if (hedgeSortMode === 'tp') {
-      list.sort((a, b) => b.maxTP - a.maxTP);
-    } else if (hedgeSortMode === 'sl') {
-      list.sort((a, b) => b.maxSL - a.maxSL);
-    } else {
-      list.sort((a, b) => a.minDistance - b.minDistance);
-    }
+    if (hedgeSortMode === 'tp') list.sort((a, b) => b.maxTP - a.maxTP);
+    else if (hedgeSortMode === 'sl') list.sort((a, b) => b.maxSL - a.maxSL);
+    else list.sort((a, b) => a.minDistance - b.minDistance);
 
     container.innerHTML = '';
-
-    if (list.length === 0) {
-      container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge nahi banaya gaya.</p>';
-      return;
-    }
+    if (list.length === 0) { container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge nahi banaya gaya.</p>'; return; }
 
     list.forEach((h, i) => {
       const card = document.createElement('div');
       const isNearest = i === 0 && hedgeSortMode === 'nearest' && currentPrice > 0 && h.configured;
       card.className = 'hedge-card' + (isNearest ? ' nearest' : '');
-
       const isEditing = openEditIds.includes(h.id);
       const bufferValue = h.buffer != null ? h.buffer : 0.50;
 
       let bodyHtml = '';
-
       if (h.configured) {
         bodyHtml += `
           <div class="hedge-grid">
@@ -830,7 +674,6 @@
       if (isEditing) {
         const buy1Checked = h.buyAccId === h.account1.id ? 'checked' : '';
         const buy2Checked = h.buyAccId === h.account2.id ? 'checked' : '';
-
         bodyHtml += `
           <div class="edit-panel">
             <h5>Buy/Sell Tayy Karein</h5>
@@ -846,18 +689,9 @@
             </div>
             <h5>Lot Size, Target &amp; Buffer</h5>
             <div class="global-inputs">
-              <div class="input-group">
-                <label>Lot Size</label>
-                <input type="number" id="hedgeLot_${h.id}" step="0.01" value="${h.lot}" onchange="updateHedgeSettings(${h.id})">
-              </div>
-              <div class="input-group">
-                <label>Target ($ Movement)</label>
-                <input type="number" id="hedgeTarget_${h.id}" step="0.01" value="${h.target}" onchange="updateHedgeSettings(${h.id})">
-              </div>
-              <div class="input-group">
-                <label>Buffer ($ Safety Margin)</label>
-                <input type="number" id="hedgeBuffer_${h.id}" step="0.01" value="${bufferValue}" onchange="updateHedgeSettings(${h.id})">
-              </div>
+              <div class="input-group"><label>Lot Size</label><input type="number" id="hedgeLot_${h.id}" step="0.01" value="${h.lot}" onchange="updateHedgeSettings(${h.id})"></div>
+              <div class="input-group"><label>Target ($ Movement)</label><input type="number" id="hedgeTarget_${h.id}" step="0.01" value="${h.target}" onchange="updateHedgeSettings(${h.id})"></div>
+              <div class="input-group"><label>Buffer ($ Safety Margin)</label><input type="number" id="hedgeBuffer_${h.id}" step="0.01" value="${bufferValue}" onchange="updateHedgeSettings(${h.id})"></div>
             </div>
           </div>`;
       }
@@ -903,6 +737,123 @@
   }
   fetchLivePrice();
   setInterval(fetchLivePrice, 30000);
+
+  // ===== FAQ Center =====
+  const faqData = [
+    {
+      title: "MetaTrader 5 (MT5) Related",
+      items: [
+        ["MT5 aur MT4 mein kya farq hai?", "MT5 zyada timeframes (21 vs 9), zyada order types, built-in economic calendar, aur depth of market (DOM) deta hai. MT4 sirf Forex-focused tha, MT5 stocks/futures/crypto ke liye bhi bana hai."],
+        ["MT5 mein Hedging mode kaise enable hoti hai?", "Yeh broker ke server settings par depend karta hai — kuch brokers 'Netting' mode use karte hain (same pair ki positions merge ho jati hain), kuch 'Hedging' mode dete hain. Yeh account open karte waqt tay hota hai."],
+        ["MT5 mein Pending Orders kitni types ki hoti hain?", "Buy Limit, Sell Limit, Buy Stop, Sell Stop, Buy Stop Limit, Sell Stop Limit — total 6 types."],
+        ["MT5 mein Expert Advisors (EAs) kaise kaam karte hain?", "MQL5 language mein likhe jate hain, chart par attach karke automatic trading karte hain — entry, exit, risk management sab code ke mutabiq khud hota hai."],
+        ["MT5 mobile app se trading safe hai?", "Haan, official app secure hai — bas login/password kabhi share na karein aur available ho to 2FA enable karein."]
+      ]
+    },
+    {
+      title: "Currency Pairs Related",
+      items: [
+        ["Major, Minor, aur Exotic pairs mein kya farq hai?", "Major: USD ke sath (EURUSD, GBPUSD) — sabse liquid. Minor: USD ke bagair majors (EURGBP, AUDNZD). Exotic: ek major + developing economy currency (USDTRY) — zyada spread/volatility."],
+        ["Sabse zyada trade hone wala pair kaunsa hai?", "EURUSD — duniya ka sabse zyada traded pair, tightest spreads aur sabse zyada liquidity."],
+        ["Correlated pairs kya hote hain?", "Woh pairs jo aapas mein similar ya opposite move karte hain — jaise EURUSD/GBPUSD same direction, EURUSD/USDCHF opposite direction."],
+        ["Pip aur Point mein kya farq hai?", "Pip generally 4th decimal place hoti hai (0.0001), Point 5th decimal (0.00001) — JPY pairs mein pip 2nd decimal hoti hai."]
+      ]
+    },
+    {
+      title: "XAUUSD (Gold) Related",
+      items: [
+        ["XAUUSD kis waqt sabse zyada move karta hai?", "London-New York session overlap (roughly 12PM-4PM GMT) ke waqt sabse zyada volatility hoti hai."],
+        ["Gold ki price kis se affect hoti hai?", "US Dollar strength, inflation data, Fed rate decisions, geopolitical tensions, aur safe-haven demand."],
+        ["XAUUSD mein 1 lot ki value kya hoti hai?", "Standard lot mein contract size generally 100 oz hota hai — $1 price move = $100 profit/loss per standard lot (0.01 lot mein $1)."],
+        ["Gold trading ke liye best timeframe kya hai?", "Trading style par depend karta hai — scalpers 1-5min, day traders 15min-1hr, swing traders 4hr-daily."],
+        ["XAUUSD news events se kaise bacha jaye?", "High-impact news (NFP, CPI, Fed decisions) ke waqt spread barh jata hai aur price gap kar sakti hai — naye positions avoid karna ya lot size kam karna safe rehta hai."]
+      ]
+    },
+    {
+      title: "Forex (General) Related",
+      items: [
+        ["Forex market kab khulti hai?", "24 hours/5 din khuli rehti hai — Sydney se Tokyo, London, New York session tak, phir dobara Sydney se."],
+        ["Leverage kya hoti hai?", "Broker se udhaar li gayi capital jo chote deposit se bara position control karne deti hai — 1:100 leverage mein $100 se $10,000 control ho sakta hai."],
+        ["Spread kya hota hai?", "Buy aur Sell price ke darmiyan ka farq — broker ka basic transaction cost, har trade par lagta hai."],
+        ["Demo account se real trading mein farq kya hai?", "Demo mein emotions involve nahi hote — real trading mein slippage, emotional pressure, aur real money ka fear alag experience deta hai."]
+      ]
+    },
+    {
+      title: "Strategy Related",
+      items: [
+        ["Scalping, Day Trading, aur Swing Trading mein farq?", "Scalping: seconds-minutes, chote profits, bohot trades. Day Trading: din ke andar close, overnight risk nahi. Swing Trading: kai din/hafte hold, bare moves capture."],
+        ["Trend-following aur Counter-trend mein kya farq hai?", "Trend-following existing direction ke sath trade karta hai, Counter-trend reversal points par opposite trade leta hai."],
+        ["Support aur Resistance kya hote hain?", "Support woh level hai jahan se price generally bounce karti hai, Resistance woh level hai jahan se reject hoti hai."],
+        ["Backtesting kyun zaroori hai?", "Live use se pehle historical data par test karna zaroori hai — is se win rate aur risk/reward pata chalta hai."]
+      ]
+    },
+    {
+      title: "Risk Management Related",
+      items: [
+        ["1-2% Risk Rule kya hai?", "Har trade mein total account balance ka sirf 1-2% risk karna — ek/do consecutive losses bhi account ko bara nuksan nahi pohanchate."],
+        ["Risk-Reward Ratio kya hota hai?", "Kitna risk (SL) le rahe hain us ke muqable kitna reward (TP) expect kar rahe hain — jaise 1:2 ratio matlab $10 risk par $20 target."],
+        ["Position Sizing kaise calculate karte hain?", "Account balance × Risk % ÷ Stop Loss (pips/dollars) = Lot Size — is se har trade ka dollar risk fixed rehta hai."],
+        ["Overtrading se kaise bachein?", "Daily/weekly trade limit set karein, aur emotional decisions se bachne ke liye trading journal maintain karein."],
+        ["Drawdown kya hota hai?", "Account balance ka peak se lowest point tak girna — prop firms mein maximum drawdown limit hoti hai jise cross karne se account fail ho jata hai."]
+      ]
+    },
+    {
+      title: "FundedNext Payout Related",
+      items: [
+        ["FundedNext ka profit split kya hai?", "Base split 80% hota hai, jo upgrade ke sath 95% tak ja sakta hai. Zyada tar accounts par funded-phase split 90% hai."],
+        ["Pehla payout kitne din baad milta hai?", "Sources mein thora farq milta hai — kuch 21 din (2-Step), kuch 5 din bhi bataye gaye hain. Apne dashboard se official cycle zaroor verify karein, policies update hoti rehti hain."],
+        ["Payout kitni jaldi process hota hai?", "24-hour payout guarantee hai — agar 24 ghante mein na mile to firm $1,000 additional pay karti hai. Average processing time roughly 5 ghante hai."],
+        ["Pehle payout ke baad cycle kya banta hai?", "Pehle payout ke baad account biweekly on-demand payouts par shift ho jata hai."],
+        ["Challenge fee wapis milti hai?", "Haan — pehle funded payout par challenge fee fully refund hoti hai."],
+        ["Withdrawal ki koi maximum limit hoti hai?", "Haan, account size ke mutabiq — chote accounts $1,500-$2,500, bare accounts $3,000-$6,000+ tak."]
+      ]
+    },
+    {
+      title: "2-Step Account Rules Related",
+      items: [
+        ["Stellar 2-Step ka profit target kya hai?", "Phase 1 mein 8% growth, Phase 2 mein 5% growth — dono phases mein koi time limit nahi hai."],
+        ["Stellar 2-Step ka drawdown kya hai?", "5% daily loss limit aur 10% overall maximum drawdown — static (starting balance se fixed, kabhi move nahi karta)."],
+        ["Funded Account mein bhi profit target hota hai?", "Nahi — dono phases pass karne aur KYC complete karne ke baad milne wali FundedNext Account mein koi profit target requirement nahi hoti."],
+        ["Consistency Rule kya hoti hai?", "Koi ek trading din total profit ka ek certain percentage (commonly 30-40%) se zyada contribute nahi kar sakta — is se ek 'lucky trade' se pass hone ko rokte hain."],
+        ["Minimum trading days kitne hain?", "Har phase ke liye kam se kam 5 trading days chahiye hote hain."]
+      ]
+    }
+  ];
+
+  function renderFaq() {
+    const container = document.getElementById('faqContainer');
+    container.innerHTML = '';
+    faqData.forEach((folder, fi) => {
+      const folderEl = document.createElement('div');
+      folderEl.className = 'faq-folder';
+      folderEl.id = 'faqFolder_' + fi;
+
+      let itemsHtml = '';
+      folder.items.forEach(([q, a]) => {
+        itemsHtml += `
+          <div class="faq-item">
+            <div class="faq-q">Q: ${q}</div>
+            <div class="faq-a">${a}</div>
+          </div>`;
+      });
+
+      folderEl.innerHTML = `
+        <div class="faq-folder-header" onclick="toggleFaqFolder(${fi})">
+          <h4>📁 ${folder.title} <span class="faq-icon">${folder.items.length} Q&amp;A</span></h4>
+          <span class="faq-folder-arrow">▼</span>
+        </div>
+        <div class="faq-folder-body">${itemsHtml}</div>
+      `;
+      container.appendChild(folderEl);
+    });
+  }
+
+  function toggleFaqFolder(index) {
+    const el = document.getElementById('faqFolder_' + index);
+    el.classList.toggle('open');
+  }
+
+  renderFaq();
 </script>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -926,10 +877,7 @@
     "details": true,
     "hotlist": true,
     "calendar": true,
-    "studies": [
-      "MASimple@tv-basicstudies",
-      "RSI@tv-basicstudies"
-    ],
+    "studies": ["MASimple@tv-basicstudies", "RSI@tv-basicstudies"],
     "show_popup_button": true,
     "popup_width": "1000",
     "popup_height": "650",
