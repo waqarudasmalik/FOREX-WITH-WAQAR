@@ -6,16 +6,7 @@
 <title>Forex With Waqar</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #05070f;
-    color: #e2e8f0;
-    line-height: 1.6;
-    position: relative;
-    overflow-x: hidden;
-    min-height: 100vh;
-  }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05070f; color: #e2e8f0; line-height: 1.6; position: relative; overflow-x: hidden; min-height: 100vh; }
 
   .bg-orb { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.35; z-index: 0; pointer-events: none; }
   .bg-orb.orb1 { width: 500px; height: 500px; background: radial-gradient(circle, #22c55e, transparent 70%); top: -100px; left: -100px; animation: floatOrb1 18s ease-in-out infinite; }
@@ -122,12 +113,8 @@
 
   .tradingview-widget-container { border-radius:16px; overflow:hidden; border:1px solid rgba(148,163,184,0.2); }
 
-  /* ===== FAQ Accordion ===== */
   .faq-folder { background: rgba(17,24,39,0.7); border: 1px solid rgba(148,163,184,0.15); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
-  .faq-folder-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 18px 22px; cursor: pointer; user-select: none;
-  }
+  .faq-folder-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; cursor: pointer; user-select: none; }
   .faq-folder-header h4 { color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px; }
   .faq-folder-header .faq-icon { color: #facc15; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.3); }
   .faq-folder-arrow { color: #94a3b8; transition: transform 0.25s; font-size: 18px; }
@@ -138,7 +125,14 @@
   .faq-item:first-child { border-top: none; }
   .faq-item .faq-q { color: #4ade80; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
   .faq-item .faq-a { color: #cbd5e1; font-size: 13.5px; }
-  .faq-note { color: #facc15; font-size: 12px; margin-top: 6px; display: block; }
+
+  .buffer-calc-grid { display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 20px; }
+  .buffer-result-box { flex:1; min-width:180px; background: rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:18px; text-align:center; }
+  .buffer-result-box .label { font-size:12px; color:#94a3b8; margin-bottom:6px; }
+  .buffer-result-box .value { font-size:20px; font-weight:bold; }
+  .buffer-total-box { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.1)); border: 1px solid rgba(239,68,68,0.4); border-radius: 16px; padding: 25px; text-align: center; margin-top: 10px; }
+  .buffer-total-box .label { font-size: 13px; color: #fca5a5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .buffer-total-box .value { font-size: 34px; font-weight: 800; color: #ef4444; }
 
   @media (max-width: 700px) {
     header { padding: 15px 20px; }
@@ -162,10 +156,12 @@
     <a href="#hedging">Hedging System</a>
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
+    <a href="#buffercalc">Buffer Loss Calc</a>
     <a href="#accountmanager">Accounts</a>
     <a href="#hedgeslist">Hedges</a>
     <a href="#tradingview">Live Chart</a>
     <a href="#faq">FAQs</a>
+    <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
 </header>
 
@@ -245,6 +241,43 @@
       <div class="outcome-box"><div class="label">Buy SL Outcome</div><div class="value negative" id="hsBuySLUsd">$0.00</div></div>
       <div class="outcome-box"><div class="label">Sell TP Outcome</div><div class="value positive" id="hsSellTPUsd">$0.00</div></div>
       <div class="outcome-box"><div class="label">Sell SL Outcome</div><div class="value negative" id="hsSellSLUsd">$0.00</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="buffercalc">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Entry Difference &amp; Buffer Loss Calculator</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
+      Buy aur Sell entry prices ke darmiyan farq, aur Buffer value — dono ko dollar loss mein convert kar ke total nikalta hai.
+    </p>
+
+    <div class="global-inputs">
+      <div class="input-group"><label>Lot Size</label><input type="number" id="bcLot" step="0.01" value="0.10" oninput="calcBufferLoss()"></div>
+      <div class="input-group"><label>Buy Entry Price</label><input type="number" id="bcBuyEntry" step="0.01" value="0.00" oninput="calcBufferLoss()"></div>
+      <div class="input-group"><label>Sell Entry Price</label><input type="number" id="bcSellEntry" step="0.01" value="0.00" oninput="calcBufferLoss()"></div>
+      <div class="input-group"><label>Buffer ($ Value)</label><input type="number" id="bcBuffer" step="0.01" value="0.40" oninput="calcBufferLoss()"></div>
+    </div>
+
+    <div class="buffer-calc-grid">
+      <div class="buffer-result-box">
+        <div class="label">Entry Price Difference</div>
+        <div class="value" id="bcEntryDiff" style="color:#38bdf8;">0.00</div>
+      </div>
+      <div class="buffer-result-box">
+        <div class="label">Entry Diff Loss ($)</div>
+        <div class="value" id="bcEntryDiffLoss" style="color:#ef4444;">$0.00</div>
+      </div>
+      <div class="buffer-result-box">
+        <div class="label">Buffer Loss ($)</div>
+        <div class="value" id="bcBufferLoss" style="color:#ef4444;">$0.00</div>
+      </div>
+    </div>
+
+    <div class="buffer-total-box">
+      <div class="label">Total Combined Loss</div>
+      <div class="value" id="bcTotalLoss">$0.00</div>
     </div>
   </div>
 </section>
@@ -398,6 +431,27 @@
     document.getElementById('hsSellSLUsd').textContent = `$${(lot*(sellEntry-sellSL)*100).toFixed(2)}`;
   }
   calcHedge();
+
+  // ===== Entry Difference & Buffer Loss Calculator =====
+  function calcBufferLoss() {
+    const lot = parseFloat(document.getElementById('bcLot').value) || 0;
+    const buyEntry = parseFloat(document.getElementById('bcBuyEntry').value) || 0;
+    const sellEntry = parseFloat(document.getElementById('bcSellEntry').value) || 0;
+    const buffer = parseFloat(document.getElementById('bcBuffer').value) || 0;
+
+    const ounces = lot * 100; // e.g. 0.10 lot = 10 oz
+
+    const entryDiff = Math.abs(buyEntry - sellEntry);
+    const entryDiffLoss = entryDiff * ounces;
+    const bufferLoss = buffer * ounces;
+    const totalLoss = entryDiffLoss + bufferLoss;
+
+    document.getElementById('bcEntryDiff').textContent = entryDiff.toFixed(2);
+    document.getElementById('bcEntryDiffLoss').textContent = `$${entryDiffLoss.toFixed(2)}`;
+    document.getElementById('bcBufferLoss').textContent = `$${bufferLoss.toFixed(2)}`;
+    document.getElementById('bcTotalLoss').textContent = `$${totalLoss.toFixed(2)}`;
+  }
+  calcBufferLoss();
 
   // ===== Accounts =====
   let accounts = JSON.parse(localStorage.getItem('waqarAccounts')) || [];
@@ -740,84 +794,60 @@
 
   // ===== FAQ Center =====
   const faqData = [
-    {
-      title: "MetaTrader 5 (MT5) Related",
-      items: [
-        ["MT5 aur MT4 mein kya farq hai?", "MT5 zyada timeframes (21 vs 9), zyada order types, built-in economic calendar, aur depth of market (DOM) deta hai. MT4 sirf Forex-focused tha, MT5 stocks/futures/crypto ke liye bhi bana hai."],
-        ["MT5 mein Hedging mode kaise enable hoti hai?", "Yeh broker ke server settings par depend karta hai — kuch brokers 'Netting' mode use karte hain (same pair ki positions merge ho jati hain), kuch 'Hedging' mode dete hain. Yeh account open karte waqt tay hota hai."],
-        ["MT5 mein Pending Orders kitni types ki hoti hain?", "Buy Limit, Sell Limit, Buy Stop, Sell Stop, Buy Stop Limit, Sell Stop Limit — total 6 types."],
-        ["MT5 mein Expert Advisors (EAs) kaise kaam karte hain?", "MQL5 language mein likhe jate hain, chart par attach karke automatic trading karte hain — entry, exit, risk management sab code ke mutabiq khud hota hai."],
-        ["MT5 mobile app se trading safe hai?", "Haan, official app secure hai — bas login/password kabhi share na karein aur available ho to 2FA enable karein."]
-      ]
-    },
-    {
-      title: "Currency Pairs Related",
-      items: [
-        ["Major, Minor, aur Exotic pairs mein kya farq hai?", "Major: USD ke sath (EURUSD, GBPUSD) — sabse liquid. Minor: USD ke bagair majors (EURGBP, AUDNZD). Exotic: ek major + developing economy currency (USDTRY) — zyada spread/volatility."],
-        ["Sabse zyada trade hone wala pair kaunsa hai?", "EURUSD — duniya ka sabse zyada traded pair, tightest spreads aur sabse zyada liquidity."],
-        ["Correlated pairs kya hote hain?", "Woh pairs jo aapas mein similar ya opposite move karte hain — jaise EURUSD/GBPUSD same direction, EURUSD/USDCHF opposite direction."],
-        ["Pip aur Point mein kya farq hai?", "Pip generally 4th decimal place hoti hai (0.0001), Point 5th decimal (0.00001) — JPY pairs mein pip 2nd decimal hoti hai."]
-      ]
-    },
-    {
-      title: "XAUUSD (Gold) Related",
-      items: [
-        ["XAUUSD kis waqt sabse zyada move karta hai?", "London-New York session overlap (roughly 12PM-4PM GMT) ke waqt sabse zyada volatility hoti hai."],
-        ["Gold ki price kis se affect hoti hai?", "US Dollar strength, inflation data, Fed rate decisions, geopolitical tensions, aur safe-haven demand."],
-        ["XAUUSD mein 1 lot ki value kya hoti hai?", "Standard lot mein contract size generally 100 oz hota hai — $1 price move = $100 profit/loss per standard lot (0.01 lot mein $1)."],
-        ["Gold trading ke liye best timeframe kya hai?", "Trading style par depend karta hai — scalpers 1-5min, day traders 15min-1hr, swing traders 4hr-daily."],
-        ["XAUUSD news events se kaise bacha jaye?", "High-impact news (NFP, CPI, Fed decisions) ke waqt spread barh jata hai aur price gap kar sakti hai — naye positions avoid karna ya lot size kam karna safe rehta hai."]
-      ]
-    },
-    {
-      title: "Forex (General) Related",
-      items: [
-        ["Forex market kab khulti hai?", "24 hours/5 din khuli rehti hai — Sydney se Tokyo, London, New York session tak, phir dobara Sydney se."],
-        ["Leverage kya hoti hai?", "Broker se udhaar li gayi capital jo chote deposit se bara position control karne deti hai — 1:100 leverage mein $100 se $10,000 control ho sakta hai."],
-        ["Spread kya hota hai?", "Buy aur Sell price ke darmiyan ka farq — broker ka basic transaction cost, har trade par lagta hai."],
-        ["Demo account se real trading mein farq kya hai?", "Demo mein emotions involve nahi hote — real trading mein slippage, emotional pressure, aur real money ka fear alag experience deta hai."]
-      ]
-    },
-    {
-      title: "Strategy Related",
-      items: [
-        ["Scalping, Day Trading, aur Swing Trading mein farq?", "Scalping: seconds-minutes, chote profits, bohot trades. Day Trading: din ke andar close, overnight risk nahi. Swing Trading: kai din/hafte hold, bare moves capture."],
-        ["Trend-following aur Counter-trend mein kya farq hai?", "Trend-following existing direction ke sath trade karta hai, Counter-trend reversal points par opposite trade leta hai."],
-        ["Support aur Resistance kya hote hain?", "Support woh level hai jahan se price generally bounce karti hai, Resistance woh level hai jahan se reject hoti hai."],
-        ["Backtesting kyun zaroori hai?", "Live use se pehle historical data par test karna zaroori hai — is se win rate aur risk/reward pata chalta hai."]
-      ]
-    },
-    {
-      title: "Risk Management Related",
-      items: [
-        ["1-2% Risk Rule kya hai?", "Har trade mein total account balance ka sirf 1-2% risk karna — ek/do consecutive losses bhi account ko bara nuksan nahi pohanchate."],
-        ["Risk-Reward Ratio kya hota hai?", "Kitna risk (SL) le rahe hain us ke muqable kitna reward (TP) expect kar rahe hain — jaise 1:2 ratio matlab $10 risk par $20 target."],
-        ["Position Sizing kaise calculate karte hain?", "Account balance × Risk % ÷ Stop Loss (pips/dollars) = Lot Size — is se har trade ka dollar risk fixed rehta hai."],
-        ["Overtrading se kaise bachein?", "Daily/weekly trade limit set karein, aur emotional decisions se bachne ke liye trading journal maintain karein."],
-        ["Drawdown kya hota hai?", "Account balance ka peak se lowest point tak girna — prop firms mein maximum drawdown limit hoti hai jise cross karne se account fail ho jata hai."]
-      ]
-    },
-    {
-      title: "FundedNext Payout Related",
-      items: [
-        ["FundedNext ka profit split kya hai?", "Base split 80% hota hai, jo upgrade ke sath 95% tak ja sakta hai. Zyada tar accounts par funded-phase split 90% hai."],
-        ["Pehla payout kitne din baad milta hai?", "Sources mein thora farq milta hai — kuch 21 din (2-Step), kuch 5 din bhi bataye gaye hain. Apne dashboard se official cycle zaroor verify karein, policies update hoti rehti hain."],
-        ["Payout kitni jaldi process hota hai?", "24-hour payout guarantee hai — agar 24 ghante mein na mile to firm $1,000 additional pay karti hai. Average processing time roughly 5 ghante hai."],
-        ["Pehle payout ke baad cycle kya banta hai?", "Pehle payout ke baad account biweekly on-demand payouts par shift ho jata hai."],
-        ["Challenge fee wapis milti hai?", "Haan — pehle funded payout par challenge fee fully refund hoti hai."],
-        ["Withdrawal ki koi maximum limit hoti hai?", "Haan, account size ke mutabiq — chote accounts $1,500-$2,500, bare accounts $3,000-$6,000+ tak."]
-      ]
-    },
-    {
-      title: "2-Step Account Rules Related",
-      items: [
-        ["Stellar 2-Step ka profit target kya hai?", "Phase 1 mein 8% growth, Phase 2 mein 5% growth — dono phases mein koi time limit nahi hai."],
-        ["Stellar 2-Step ka drawdown kya hai?", "5% daily loss limit aur 10% overall maximum drawdown — static (starting balance se fixed, kabhi move nahi karta)."],
-        ["Funded Account mein bhi profit target hota hai?", "Nahi — dono phases pass karne aur KYC complete karne ke baad milne wali FundedNext Account mein koi profit target requirement nahi hoti."],
-        ["Consistency Rule kya hoti hai?", "Koi ek trading din total profit ka ek certain percentage (commonly 30-40%) se zyada contribute nahi kar sakta — is se ek 'lucky trade' se pass hone ko rokte hain."],
-        ["Minimum trading days kitne hain?", "Har phase ke liye kam se kam 5 trading days chahiye hote hain."]
-      ]
-    }
+    { title: "MetaTrader 5 (MT5) Related", items: [
+      ["MT5 aur MT4 mein kya farq hai?", "MT5 zyada timeframes (21 vs 9), zyada order types, built-in economic calendar, aur depth of market (DOM) deta hai."],
+      ["MT5 mein Hedging mode kaise enable hoti hai?", "Broker ke server settings par depend karta hai — 'Netting' ya 'Hedging' mode account open karte waqt tay hota hai."],
+      ["MT5 mein Pending Orders kitni types ki hoti hain?", "Buy Limit, Sell Limit, Buy Stop, Sell Stop, Buy Stop Limit, Sell Stop Limit — total 6 types."],
+      ["MT5 mein Expert Advisors (EAs) kaise kaam karte hain?", "MQL5 language mein likhe jate hain, chart par attach karke automatic trading karte hain."],
+      ["MT5 mobile app se trading safe hai?", "Haan, official app secure hai — login/password kabhi share na karein."]
+    ]},
+    { title: "Currency Pairs Related", items: [
+      ["Major, Minor, aur Exotic pairs mein kya farq hai?", "Major: USD ke sath. Minor: USD ke bagair majors. Exotic: major + developing economy currency."],
+      ["Sabse zyada trade hone wala pair kaunsa hai?", "EURUSD — duniya ka sabse zyada traded pair."],
+      ["Correlated pairs kya hote hain?", "Woh pairs jo aapas mein similar ya opposite move karte hain."],
+      ["Pip aur Point mein kya farq hai?", "Pip generally 4th decimal, Point 5th decimal place hoti hai."]
+    ]},
+    { title: "XAUUSD (Gold) Related", items: [
+      ["XAUUSD kis waqt sabse zyada move karta hai?", "London-New York session overlap ke waqt sabse zyada volatility hoti hai."],
+      ["Gold ki price kis se affect hoti hai?", "US Dollar strength, inflation data, Fed rate decisions, geopolitical tensions."],
+      ["XAUUSD mein 1 lot ki value kya hoti hai?", "Standard lot mein $1 move = $100 profit/loss per lot."],
+      ["Gold trading ke liye best timeframe kya hai?", "Trading style par depend karta hai — scalpers chote, swing traders bare timeframes."],
+      ["XAUUSD news events se kaise bacha jaye?", "High-impact news ke waqt spread barh jata hai — naye positions avoid karein."]
+    ]},
+    { title: "Forex (General) Related", items: [
+      ["Forex market kab khulti hai?", "24 hours/5 din khuli rehti hai."],
+      ["Leverage kya hoti hai?", "Broker se udhaar li gayi capital jo chota deposit se bara position control karne deti hai."],
+      ["Spread kya hota hai?", "Buy aur Sell price ke darmiyan ka farq."],
+      ["Demo account se real trading mein farq kya hai?", "Real trading mein slippage aur emotional pressure hoti hai."]
+    ]},
+    { title: "Strategy Related", items: [
+      ["Scalping, Day Trading, aur Swing Trading mein farq?", "Scalping: seconds-minutes. Day Trading: din ke andar. Swing Trading: kai din/hafte."],
+      ["Trend-following aur Counter-trend mein kya farq hai?", "Trend-following existing direction, Counter-trend reversal points par."],
+      ["Support aur Resistance kya hote hain?", "Support se price bounce karti hai, Resistance se reject hoti hai."],
+      ["Backtesting kyun zaroori hai?", "Live use se pehle historical data par test karna zaroori hai."]
+    ]},
+    { title: "Risk Management Related", items: [
+      ["1-2% Risk Rule kya hai?", "Har trade mein total balance ka sirf 1-2% risk karna."],
+      ["Risk-Reward Ratio kya hota hai?", "Risk ke muqable expected reward — jaise 1:2 ratio."],
+      ["Position Sizing kaise calculate karte hain?", "Balance × Risk % ÷ SL = Lot Size."],
+      ["Overtrading se kaise bachein?", "Daily/weekly trade limit set karein."],
+      ["Drawdown kya hota hai?", "Account balance ka peak se lowest tak girna."]
+    ]},
+    { title: "FundedNext Payout Related", items: [
+      ["FundedNext ka profit split kya hai?", "Base 80%, upgrade ke sath 95% tak — funded-phase generally 90%."],
+      ["Pehla payout kitne din baad milta hai?", "Sources mein farq hai — dashboard se verify karein."],
+      ["Payout kitni jaldi process hota hai?", "24-hour guarantee — average 5 ghante."],
+      ["Pehle payout ke baad cycle kya banta hai?", "Biweekly on-demand payouts."],
+      ["Challenge fee wapis milti hai?", "Haan, pehle funded payout par refund hoti hai."],
+      ["Withdrawal ki koi maximum limit hoti hai?", "Haan, account size ke mutabiq."]
+    ]},
+    { title: "2-Step Account Rules Related", items: [
+      ["Stellar 2-Step ka profit target kya hai?", "Phase 1: 8%, Phase 2: 5% — koi time limit nahi."],
+      ["Stellar 2-Step ka drawdown kya hai?", "5% daily, 10% overall maximum — static."],
+      ["Funded Account mein bhi profit target hota hai?", "Nahi, funded account mein profit target requirement nahi hoti."],
+      ["Consistency Rule kya hoti hai?", "Ek din total profit ka certain % (30-40%) se zyada nahi hona chahiye."],
+      ["Minimum trading days kitne hain?", "Har phase ke liye kam se kam 5 trading days."]
+    ]}
   ];
 
   function renderFaq() {
@@ -827,16 +857,10 @@
       const folderEl = document.createElement('div');
       folderEl.className = 'faq-folder';
       folderEl.id = 'faqFolder_' + fi;
-
       let itemsHtml = '';
       folder.items.forEach(([q, a]) => {
-        itemsHtml += `
-          <div class="faq-item">
-            <div class="faq-q">Q: ${q}</div>
-            <div class="faq-a">${a}</div>
-          </div>`;
+        itemsHtml += `<div class="faq-item"><div class="faq-q">Q: ${q}</div><div class="faq-a">${a}</div></div>`;
       });
-
       folderEl.innerHTML = `
         <div class="faq-folder-header" onclick="toggleFaqFolder(${fi})">
           <h4>📁 ${folder.title} <span class="faq-icon">${folder.items.length} Q&amp;A</span></h4>
@@ -847,12 +871,9 @@
       container.appendChild(folderEl);
     });
   }
-
   function toggleFaqFolder(index) {
-    const el = document.getElementById('faqFolder_' + index);
-    el.classList.toggle('open');
+    document.getElementById('faqFolder_' + index).classList.toggle('open');
   }
-
   renderFaq();
 </script>
 
