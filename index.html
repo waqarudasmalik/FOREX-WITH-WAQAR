@@ -296,13 +296,12 @@
     <div class="brand-watermark">Forex With Waqar</div>
     <h3>Account Loss Tracker</h3>
     <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
-      Account number aur loss amount add karein — har naya loss usi account ke total mein jama hota jayega. Data browser mein hamesha ke liye save rehta hai (reload/close ke baad bhi).
+      Pehle account add karein, phir us account ke andar "Add Loss" se jitni chahein losses jama karte jayein. Sab kuch permanently save rehta hai.
     </p>
 
     <div class="form-row">
-      <input type="text" id="ltAccount" placeholder="Account Number">
-      <input type="number" id="ltAmount" placeholder="Loss Amount ($)" step="0.01">
-      <button onclick="addLossEntry()">Add Loss</button>
+      <input type="text" id="ltNewAccount" placeholder="Naya Account Number/Name">
+      <button onclick="addLossAccount()">Add Account</button>
     </div>
 
     <div id="lossTrackerContainer"></div>
@@ -477,80 +476,88 @@
   }
   calcBufferLoss();
 
-  // ===== Account Loss Tracker =====
-  let lossEntries = JSON.parse(localStorage.getItem('waqarLossEntries')) || [];
-  let lossEntryIdCounter = parseInt(localStorage.getItem('waqarLossEntryIdCounter')) || 5000;
+  // ===== Account Loss Tracker (multiple accounts) =====
+  let lossAccounts = JSON.parse(localStorage.getItem('waqarLossAccounts')) || [];
+  let lossAccountIdCounter = parseInt(localStorage.getItem('waqarLossAccountIdCounter')) || 6000;
+  let lossEntryIdCounter = parseInt(localStorage.getItem('waqarLossEntryIdCounter')) || 7000;
 
-  function saveLossEntries() {
-    localStorage.setItem('waqarLossEntries', JSON.stringify(lossEntries));
+  function saveLossAccounts() {
+    localStorage.setItem('waqarLossAccounts', JSON.stringify(lossAccounts));
+    localStorage.setItem('waqarLossAccountIdCounter', lossAccountIdCounter.toString());
     localStorage.setItem('waqarLossEntryIdCounter', lossEntryIdCounter.toString());
     renderLossTracker();
   }
 
-  function addLossEntry() {
-    const account = document.getElementById('ltAccount').value.trim();
-    const amount = parseFloat(document.getElementById('ltAmount').value);
-    if (!account || isNaN(amount)) { alert('Account Number aur Loss Amount zaroor darj karein.'); return; }
-
-    lossEntryIdCounter += 1;
-    lossEntries.push({
-      id: lossEntryIdCounter,
-      account,
-      amount,
-      date: new Date().toLocaleString()
-    });
-
-    document.getElementById('ltAccount').value = account; // keep account number for quick re-add
-    document.getElementById('ltAmount').value = '';
-
-    saveLossEntries();
+  function addLossAccount() {
+    const name = document.getElementById('ltNewAccount').value.trim();
+    if (!name) { alert('Account Number/Name zaroor darj karein.'); return; }
+    lossAccountIdCounter += 1;
+    lossAccounts.push({ id: lossAccountIdCounter, name, entries: [] });
+    document.getElementById('ltNewAccount').value = '';
+    saveLossAccounts();
   }
 
-  function deleteLossEntry(id) {
-    lossEntries = lossEntries.filter(e => e.id !== id);
-    saveLossEntries();
+  function deleteLossAccount(accountId) {
+    lossAccounts = lossAccounts.filter(a => a.id !== accountId);
+    saveLossAccounts();
+  }
+
+  function addLossToAccount(accountId) {
+    const account = lossAccounts.find(a => a.id === accountId);
+    if (!account) return;
+    const amountEl = document.getElementById('lossAmount_' + accountId);
+    const amount = parseFloat(amountEl.value);
+    if (isNaN(amount)) { alert('Loss Amount zaroor darj karein.'); return; }
+    lossEntryIdCounter += 1;
+    account.entries.push({ id: lossEntryIdCounter, amount, date: new Date().toLocaleString() });
+    saveLossAccounts();
+  }
+
+  function deleteLossEntryFromAccount(accountId, entryId) {
+    const account = lossAccounts.find(a => a.id === accountId);
+    if (!account) return;
+    account.entries = account.entries.filter(e => e.id !== entryId);
+    saveLossAccounts();
   }
 
   function renderLossTracker() {
     const container = document.getElementById('lossTrackerContainer');
     container.innerHTML = '';
 
-    if (lossEntries.length === 0) {
-      container.innerHTML = '<p style="color:#64748b;">Abhi tak koi loss entry add nahi hui.</p>';
+    if (lossAccounts.length === 0) {
+      container.innerHTML = '<p style="color:#64748b;">Abhi tak koi account add nahi hua.</p>';
       return;
     }
 
-    // Group entries by account
-    const grouped = {};
-    lossEntries.forEach(entry => {
-      if (!grouped[entry.account]) grouped[entry.account] = [];
-      grouped[entry.account].push(entry);
-    });
-
-    Object.keys(grouped).forEach(account => {
-      const entries = grouped[account];
-      const total = entries.reduce((sum, e) => sum + e.amount, 0);
-
-      const card = document.createElement('div');
-      card.className = 'loss-account-card';
+    lossAccounts.forEach(account => {
+      const total = account.entries.reduce((sum, e) => sum + e.amount, 0);
 
       let entriesHtml = '';
-      entries.forEach(e => {
+      account.entries.forEach(e => {
         entriesHtml += `
           <div class="loss-entry-row">
             <span class="loss-entry-info">${e.date}</span>
             <span>
               <span class="loss-entry-amount">$${e.amount.toFixed(2)}</span>
-              <button class="delete-btn" style="margin-left:10px;" onclick="deleteLossEntry(${e.id})">Delete</button>
+              <button class="delete-btn" style="margin-left:10px;" onclick="deleteLossEntryFromAccount(${account.id}, ${e.id})">Delete</button>
             </span>
           </div>`;
       });
 
+      const card = document.createElement('div');
+      card.className = 'loss-account-card';
       card.innerHTML = `
         <div class="loss-account-header">
-          <h4>Account: ${account}</h4>
+          <h4>Account: ${account.name}</h4>
           <span class="loss-total-badge">Total: $${total.toFixed(2)}</span>
         </div>
+
+        <div class="form-row">
+          <input type="number" id="lossAmount_${account.id}" placeholder="Loss Amount ($)" step="0.01">
+          <button onclick="addLossToAccount(${account.id})">Add Loss</button>
+          <button class="delete-btn" onclick="deleteLossAccount(${account.id})">Delete Account</button>
+        </div>
+
         ${entriesHtml}
       `;
       container.appendChild(card);
