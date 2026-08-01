@@ -142,6 +142,15 @@
   .loss-entry-row .loss-entry-info { color: #cbd5e1; }
   .loss-entry-row .loss-entry-amount { color: #ef4444; font-weight: 700; margin-left: 10px; }
 
+  .adv-calc-tabs { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+  .adv-calc-tab-btn { padding:10px 18px; background:rgba(15,23,42,0.7); border:1px solid rgba(148,163,184,0.25); color:#e2e8f0; border-radius:8px; cursor:pointer; font-weight:500; }
+  .adv-calc-tab-btn.active { background: linear-gradient(135deg, #22c55e, #16a34a); color:#0f172a; border-color: transparent; font-weight:700; }
+  .adv-calc-box { display:none; }
+  .adv-calc-box.active { display:block; }
+  .adv-result-box { background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(14,165,233,0.1)); border: 1px solid rgba(56,189,248,0.4); border-radius: 16px; padding: 25px; text-align: center; margin-top: 15px; }
+  .adv-result-box .label { font-size: 13px; color: #93c5fd; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .adv-result-box .value { font-size: 32px; font-weight: 800; color: #38bdf8; }
+
   @media (max-width: 700px) {
     header { padding: 15px 20px; }
     nav a { margin-left: 0; margin-right: 15px; }
@@ -165,6 +174,7 @@
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
     <a href="#buffercalc">Buffer Loss Calc</a>
+    <a href="#advcalc">Position Calculator</a>
     <a href="#losstracker">Loss Tracker</a>
     <a href="#accountmanager">Accounts</a>
     <a href="#hedgeslist">Hedges</a>
@@ -287,6 +297,100 @@
     <div class="buffer-total-box">
       <div class="label">Total Combined Loss</div>
       <div class="value" id="bcTotalLoss">$0.00</div>
+    </div>
+  </div>
+</section>
+
+<section id="advcalc">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Advanced Position Calculator</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
+      Lot Size, Movement (Dollars/Pips/Points), aur Total Loss/Profit nikalne ke liye teen alag formula-based calculators.
+    </p>
+
+    <div class="adv-calc-tabs">
+      <button class="adv-calc-tab-btn active" onclick="showAdvCalc('lot')">Find Lot Size</button>
+      <button class="adv-calc-tab-btn" onclick="showAdvCalc('move')">Find Movement</button>
+      <button class="adv-calc-tab-btn" onclick="showAdvCalc('total')">Find Total Loss/Profit</button>
+    </div>
+
+    <!-- Find Lot Size -->
+    <div class="adv-calc-box active" id="advBox-lot">
+      <div class="global-inputs">
+        <div class="input-group">
+          <label>Loss / Profit Amount ($)</label>
+          <input type="number" id="lotLoss" step="0.01" value="0" oninput="calcLotSizeAdv()">
+        </div>
+        <div class="input-group">
+          <label>Movement Type</label>
+          <select id="lotType" onchange="calcLotSizeAdv()">
+            <option value="dollars">Dollars Movement</option>
+            <option value="pips">Pips</option>
+            <option value="points">Points</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label id="lotMoveLabel">Dollars Movement</label>
+          <input type="number" id="lotMove" step="0.01" value="0" oninput="calcLotSizeAdv()">
+        </div>
+        <div class="input-group">
+          <label id="lotValueLabel">Dollar Value (per unit)</label>
+          <input type="number" id="lotValue" step="0.01" value="100" oninput="calcLotSizeAdv()">
+        </div>
+      </div>
+      <div class="adv-result-box">
+        <div class="label">Required Lot Size</div>
+        <div class="value" id="lotResult">0.00</div>
+      </div>
+    </div>
+
+    <!-- Find Movement -->
+    <div class="adv-calc-box" id="advBox-move">
+      <div class="global-inputs">
+        <div class="input-group">
+          <label>Loss / Profit Amount ($)</label>
+          <input type="number" id="moveLoss" step="0.01" value="0" oninput="calcMovementAdv()">
+        </div>
+        <div class="input-group">
+          <label>Lot Size</label>
+          <input type="number" id="moveLot" step="0.01" value="0.10" oninput="calcMovementAdv()">
+        </div>
+        <div class="input-group">
+          <label>Movement Type</label>
+          <select id="moveType" onchange="calcMovementAdv()">
+            <option value="dollars">Dollars Movement</option>
+            <option value="pips">Pips</option>
+            <option value="points">Points</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label id="moveValueLabel">Dollar Value (per unit)</label>
+          <input type="number" id="moveValue" step="0.01" value="100" oninput="calcMovementAdv()">
+        </div>
+      </div>
+      <div class="adv-result-box">
+        <div class="label" id="moveResultLabel">Required Dollars Movement</div>
+        <div class="value" id="moveResult">0.00</div>
+      </div>
+    </div>
+
+    <!-- Find Total Loss/Profit -->
+    <div class="adv-calc-box" id="advBox-total">
+      <div class="global-inputs">
+        <div class="input-group">
+          <label>Dollars Movement</label>
+          <input type="number" id="totalMove" step="0.01" value="0" oninput="calcTotalAdv()">
+        </div>
+        <div class="input-group">
+          <label>Lot Size</label>
+          <input type="number" id="totalLot" step="0.01" value="0.10" oninput="calcTotalAdv()">
+        </div>
+      </div>
+      <div class="adv-result-box">
+        <div class="label">Total Loss / Profit</div>
+        <div class="value" id="totalResult">$0.00</div>
+      </div>
     </div>
   </div>
 </section>
@@ -475,6 +579,64 @@
     document.getElementById('bcTotalLoss').textContent = `$${totalLoss.toFixed(2)}`;
   }
   calcBufferLoss();
+
+  // ===== Advanced Position Calculator =====
+  const unitLabels = {
+    dollars: { move: "Dollars Movement", value: "Dollar Value (per unit)" },
+    pips: { move: "Pips Movement", value: "Pips Value (per pip)" },
+    points: { move: "Points Movement", value: "Point Value (per point)" }
+  };
+
+  function showAdvCalc(which) {
+    document.querySelectorAll('.adv-calc-box').forEach(box => box.classList.remove('active'));
+    document.getElementById('advBox-' + which).classList.add('active');
+    document.querySelectorAll('.adv-calc-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // Formula: Lot Size = Loss / (Movement * Unit Value)
+  function calcLotSizeAdv() {
+    const loss = parseFloat(document.getElementById('lotLoss').value) || 0;
+    const type = document.getElementById('lotType').value;
+    const move = parseFloat(document.getElementById('lotMove').value) || 0;
+    const value = parseFloat(document.getElementById('lotValue').value) || 0;
+
+    document.getElementById('lotMoveLabel').textContent = unitLabels[type].move;
+    document.getElementById('lotValueLabel').textContent = unitLabels[type].value;
+
+    const denominator = move * value;
+    const lotSize = denominator !== 0 ? loss / denominator : 0;
+    document.getElementById('lotResult').textContent = lotSize.toFixed(4);
+  }
+
+  // Formula: Movement = Loss / (Lot Size * Unit Value)
+  function calcMovementAdv() {
+    const loss = parseFloat(document.getElementById('moveLoss').value) || 0;
+    const lotSize = parseFloat(document.getElementById('moveLot').value) || 0;
+    const type = document.getElementById('moveType').value;
+    const value = parseFloat(document.getElementById('moveValue').value) || 0;
+
+    document.getElementById('moveResultLabel').textContent = "Required " + unitLabels[type].move;
+    document.getElementById('moveValueLabel').textContent = unitLabels[type].value;
+
+    const denominator = lotSize * value;
+    const movement = denominator !== 0 ? loss / denominator : 0;
+    document.getElementById('moveResult').textContent = movement.toFixed(4);
+  }
+
+  // Formula: Loss/Profit = Dollars Movement * Lot Size * 100
+  function calcTotalAdv() {
+    const move = parseFloat(document.getElementById('totalMove').value) || 0;
+    const lotSize = parseFloat(document.getElementById('totalLot').value) || 0;
+    const total = move * lotSize * 100;
+    const el = document.getElementById('totalResult');
+    el.textContent = `$${total.toFixed(2)}`;
+    el.style.color = total >= 0 ? '#22c55e' : '#ef4444';
+  }
+
+  calcLotSizeAdv();
+  calcMovementAdv();
+  calcTotalAdv();
 
   // ===== Account Loss Tracker (multiple accounts) =====
   let lossAccounts = JSON.parse(localStorage.getItem('waqarLossAccounts')) || [];
