@@ -120,7 +120,7 @@
   .faq-folder-arrow { color: #94a3b8; transition: transform 0.25s; font-size: 18px; }
   .faq-folder.open .faq-folder-arrow { transform: rotate(180deg); color: #22c55e; }
   .faq-folder-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 22px; }
-  .faq-folder.open .faq-folder-body { max-height: 3000px; padding: 0 22px 22px; }
+  .faq-folder.open .faq-folder-body { max-height: 6000px; padding: 0 22px 22px; }
   .faq-item { border-top: 1px solid rgba(148,163,184,0.1); padding: 14px 0; }
   .faq-item:first-child { border-top: none; }
   .faq-item .faq-q { color: #4ade80; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
@@ -315,7 +315,6 @@
       <button class="adv-calc-tab-btn" onclick="showAdvCalc('total')">Find Total Loss/Profit</button>
     </div>
 
-    <!-- Find Lot Size -->
     <div class="adv-calc-box active" id="advBox-lot">
       <div class="global-inputs">
         <div class="input-group">
@@ -345,7 +344,6 @@
       </div>
     </div>
 
-    <!-- Find Movement -->
     <div class="adv-calc-box" id="advBox-move">
       <div class="global-inputs">
         <div class="input-group">
@@ -375,7 +373,6 @@
       </div>
     </div>
 
-    <!-- Find Total Loss/Profit -->
     <div class="adv-calc-box" id="advBox-total">
       <div class="global-inputs">
         <div class="input-group">
@@ -594,37 +591,30 @@
     event.target.classList.add('active');
   }
 
-  // Formula: Lot Size = Loss / (Movement * Unit Value)
   function calcLotSizeAdv() {
     const loss = parseFloat(document.getElementById('lotLoss').value) || 0;
     const type = document.getElementById('lotType').value;
     const move = parseFloat(document.getElementById('lotMove').value) || 0;
     const value = parseFloat(document.getElementById('lotValue').value) || 0;
-
     document.getElementById('lotMoveLabel').textContent = unitLabels[type].move;
     document.getElementById('lotValueLabel').textContent = unitLabels[type].value;
-
     const denominator = move * value;
     const lotSize = denominator !== 0 ? loss / denominator : 0;
     document.getElementById('lotResult').textContent = lotSize.toFixed(4);
   }
 
-  // Formula: Movement = Loss / (Lot Size * Unit Value)
   function calcMovementAdv() {
     const loss = parseFloat(document.getElementById('moveLoss').value) || 0;
     const lotSize = parseFloat(document.getElementById('moveLot').value) || 0;
     const type = document.getElementById('moveType').value;
     const value = parseFloat(document.getElementById('moveValue').value) || 0;
-
     document.getElementById('moveResultLabel').textContent = "Required " + unitLabels[type].move;
     document.getElementById('moveValueLabel').textContent = unitLabels[type].value;
-
     const denominator = lotSize * value;
     const movement = denominator !== 0 ? loss / denominator : 0;
     document.getElementById('moveResult').textContent = movement.toFixed(4);
   }
 
-  // Formula: Loss/Profit = Dollars Movement * Lot Size * 100
   function calcTotalAdv() {
     const move = parseFloat(document.getElementById('totalMove').value) || 0;
     const lotSize = parseFloat(document.getElementById('totalLot').value) || 0;
@@ -1122,6 +1112,112 @@
       ["Funded Account mein bhi profit target hota hai?", "Nahi, funded account mein profit target requirement nahi hoti."],
       ["Consistency Rule kya hoti hai?", "Ek din total profit ka certain % (30-40%) se zyada nahi hona chahiye."],
       ["Minimum trading days kitne hain?", "Har phase ke liye kam se kam 5 trading days."]
+    ]},
+    { title: "Forex Account Concepts", items: [
+      ["Balance kya hota hai?", "Account me total paise jo trade close hone ke baad dikhte hain."],
+      ["Equity kya hoti hai?", "Balance + floating profit ya loss."],
+      ["Margin kya hai?", "Wo amount jo broker trade open karne ke liye lock karta hai."],
+      ["Free Margin kya hai?", "Wo paisa jo naye trade open karne ke liye available hota hai."],
+      ["Used Margin kya hai?", "Wo margin jo already open trades me use ho chuki hoti hai."],
+      ["Leverage kya hai?", "Broker ki madad se choti amount se badi trade open karna."],
+      ["Margin Level kya hota hai?", "Equity ÷ Margin × 100."],
+      ["Margin Call kya hai?", "Broker ki warning jab account balance bahut kam ho jaye."],
+      ["Stop Out kya hota hai?", "Jab broker automatically trade close kar deta hai."],
+      ["Spread kya hai?", "Buy aur Sell price ka difference."],
+      ["Commission kya hota hai?", "Broker ki service fee."],
+      ["Swap kya hota hai?", "Overnight trade rakhne ka interest."],
+      ["Lot size kya hai?", "Trade ka volume ya size."],
+      ["Standard lot kya hota hai?", "100,000 units."],
+      ["Mini lot kya hota hai?", "10,000 units."],
+      ["Micro lot kya hota hai?", "1,000 units."],
+      ["Pip kya hota hai?", "Currency price ki sabse choti movement."],
+      ["Pipette kya hota hai?", "Pip ka 1/10 part."],
+      ["Floating profit kya hota hai?", "Open trade ka profit."],
+      ["Floating loss kya hota hai?", "Open trade ka loss."],
+      ["Deposit kya hai?", "Account me paise add karna."],
+      ["Withdrawal kya hai?", "Account se paise nikalna."],
+      ["Demo account kya hai?", "Practice account jisme real paisa nahi hota."],
+      ["Live account kya hai?", "Real money trading account."],
+      ["Risk management kya hai?", "Trade me loss control karna."],
+      ["Stop Loss kya hai?", "Loss limit karne ka tool."],
+      ["Take Profit kya hai?", "Profit lock karne ka level."],
+      ["Risk per trade kya hota hai?", "Ek trade me kitna percent risk lena."],
+      ["Account leverage kya hota hai?", "Account ka leverage ratio (1:100 etc)."],
+      ["Account currency kya hoti hai?", "Account kis currency me hai (USD etc)."],
+      ["Hedging kya hoti hai?", "Ek hi pair par buy aur sell dono."],
+      ["Scalping kya hoti hai?", "Choti choti trades lena."],
+      ["Swing trading kya hoti hai?", "Kai din tak trade hold karna."],
+      ["Position trading kya hai?", "Long term trading."],
+      ["Money management kya hai?", "Capital ko safe rakhne ki strategy."]
+    ]},
+    { title: "Market Mechanics", items: [
+      ["Forex market kya hai?", "Currency buying aur selling ka market."],
+      ["Currency pair kya hota hai?", "Do currencies ka pair (EUR/USD)."],
+      ["Base currency kya hoti hai?", "Pair ki pehli currency."],
+      ["Quote currency kya hoti hai?", "Pair ki second currency."],
+      ["Bid price kya hai?", "Wo price jahan market buy karti hai."],
+      ["Ask price kya hai?", "Wo price jahan market sell karti hai."],
+      ["Bullish market kya hai?", "Market upar ja rahi ho."],
+      ["Bearish market kya hai?", "Market neeche ja rahi ho."],
+      ["Trend kya hota hai?", "Market ki direction."],
+      ["Uptrend kya hai?", "Higher highs aur higher lows."],
+      ["Downtrend kya hai?", "Lower highs aur lower lows."],
+      ["Sideways market kya hai?", "Market range me ho."],
+      ["Volatility kya hai?", "Market ki speed aur movement."],
+      ["Liquidity kya hai?", "Jahan zyada orders hote hain."],
+      ["Market session kya hai?", "Trading time zones."],
+      ["Asian session kya hai?", "Tokyo session."],
+      ["London session kya hai?", "Europe trading session."],
+      ["New York session kya hai?", "US trading session."],
+      ["Market open kab hoti hai?", "Monday."],
+      ["Market close kab hoti hai?", "Friday."],
+      ["Gap kya hota hai?", "Price ka achanak jump."],
+      ["News impact kya hota hai?", "Economic news ka market par effect."],
+      ["Fundamental analysis kya hai?", "Economic news analysis."],
+      ["Technical analysis kya hai?", "Chart analysis."],
+      ["Order kya hota hai?", "Trade instruction."],
+      ["Market order kya hai?", "Current price par trade."],
+      ["Pending order kya hai?", "Future price par trade."],
+      ["Buy limit kya hai?", "Neeche price par buy."],
+      ["Sell limit kya hai?", "Upar price par sell."],
+      ["Buy stop kya hai?", "Current price se upar buy."],
+      ["Sell stop kya hai?", "Current price se neeche sell."],
+      ["Slippage kya hai?", "Order different price par fill hona."],
+      ["Requote kya hai?", "Broker new price offer kare."],
+      ["Market depth kya hai?", "Market me orders ki quantity."],
+      ["Order execution kya hai?", "Trade ka complete hona."]
+    ]},
+    { title: "Professional Trading Structure", items: [
+      ["Trading plan kya hai?", "Rules jinke according trade li jati hai."],
+      ["Strategy kya hai?", "Trade entry ka system."],
+      ["Setup kya hota hai?", "Trade opportunity."],
+      ["Entry kya hai?", "Jahan trade open ki jaye."],
+      ["Exit kya hai?", "Jahan trade close ki jaye."],
+      ["Risk reward ratio kya hai?", "Risk aur profit ka comparison."],
+      ["1:2 risk reward kya hai?", "1 loss = 2 profit target."],
+      ["Trading psychology kya hai?", "Trader ki mental state."],
+      ["Fear kya hai trading me?", "Loss ka dar."],
+      ["Greed kya hai?", "Zyada profit ki lalach."],
+      ["Discipline kya hai?", "Rules follow karna."],
+      ["Patience kya hai?", "Setup ka wait karna."],
+      ["Overtrading kya hai?", "Zarurat se zyada trades lena."],
+      ["Revenge trading kya hai?", "Loss ke baad emotional trading."],
+      ["Trading journal kya hai?", "Trades ka record."],
+      ["Backtesting kya hai?", "Strategy ko past data par check karna."],
+      ["Forward testing kya hai?", "Strategy ko live market me test karna."],
+      ["Win rate kya hai?", "Kitni trades win hui."],
+      ["Loss rate kya hai?", "Kitni trades lose hui."],
+      ["Drawdown kya hai?", "Account ka biggest loss period."],
+      ["Consistency kya hai?", "Regular profit."],
+      ["Edge kya hai?", "Market me advantage."],
+      ["Trading routine kya hai?", "Daily trading schedule."],
+      ["Session trading kya hai?", "Specific session me trade."],
+      ["Trade management kya hai?", "Open trade handle karna."],
+      ["Scaling in kya hai?", "Trade me aur position add karna."],
+      ["Scaling out kya hai?", "Trade ka kuch part close karna."],
+      ["Break even kya hai?", "Trade ko zero risk par lana."],
+      ["Professional trader ka rule kya hai?", "Capital protect karna."],
+      ["Sabse important rule kya hai?", "Risk management."]
     ]}
   ];
 
