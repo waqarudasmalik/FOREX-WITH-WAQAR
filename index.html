@@ -120,11 +120,12 @@
   .faq-folder-arrow { color: #94a3b8; transition: transform 0.25s; font-size: 18px; }
   .faq-folder.open .faq-folder-arrow { transform: rotate(180deg); color: #22c55e; }
   .faq-folder-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; padding: 0 22px; }
-  .faq-folder.open .faq-folder-body { max-height: 6000px; padding: 0 22px 22px; }
+  .faq-folder.open .faq-folder-body { max-height: 8000px; padding: 0 22px 22px; }
   .faq-item { border-top: 1px solid rgba(148,163,184,0.1); padding: 14px 0; }
   .faq-item:first-child { border-top: none; }
   .faq-item .faq-q { color: #4ade80; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
   .faq-item .faq-a { color: #cbd5e1; font-size: 13.5px; }
+  .faq-item .faq-example { color: #facc15; font-size: 12.5px; margin-top: 4px; font-style: italic; }
 
   .buffer-calc-grid { display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 20px; }
   .buffer-result-box { flex:1; min-width:180px; background: rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:18px; text-align:center; }
@@ -151,6 +152,10 @@
   .adv-result-box .label { font-size: 13px; color: #93c5fd; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
   .adv-result-box .value { font-size: 32px; font-weight: 800; color: #38bdf8; }
 
+  .calclog-card { background: rgba(17,24,39,0.7); border: 1px solid rgba(56,189,248,0.25); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+  .calclog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .calclog-header h4 { color: #38bdf8; font-size: 16px; }
+
   @media (max-width: 700px) {
     header { padding: 15px 20px; }
     nav a { margin-left: 0; margin-right: 15px; }
@@ -170,9 +175,9 @@
 <header>
   <h1>Forex With Waqar</h1>
   <nav>
-    <a href="#hedging">Hedging System</a>
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
+    <a href="#calclog">Calculated Hedges Log</a>
     <a href="#buffercalc">Buffer Loss Calc</a>
     <a href="#advcalc">Position Calculator</a>
     <a href="#losstracker">Loss Tracker</a>
@@ -190,38 +195,24 @@
   <p>Apni trades track karein, hedge lagayein aur apna zati trading record khud-badh (auto-update) rakhein.</p>
 </div>
 
-<section id="hedging">
-  <div class="glass-panel">
-    <div class="brand-watermark">Forex With Waqar</div>
-    <h3>Hedging System</h3>
-    <div class="card">
-      <h4>Hedging Kya Hai?</h4>
-      <p>Hedging aik risk-management strategy hai jismein trader ek position ke against dusri opposite position khol kar apne losses ko limit karta hai.</p>
-    </div>
-    <div class="card">
-      <h4>Basic Hedging Rule</h4>
-      <p>Agar aapki BUY position loss mein ja rahi hai, to same pair par ek SELL position khol dein taake dono positions ka net loss control mein rahe.</p>
-    </div>
-  </div>
-</section>
-
 <section id="record">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
     <h3>Apna Trade Record (Auto-Update)</h3>
     <div class="form-row">
+      <input type="text" id="trAccount" placeholder="Account Number">
       <input type="text" id="pair" placeholder="Pair (e.g. EURUSD)">
       <select id="type">
         <option value="BUY">BUY</option>
         <option value="SELL">SELL</option>
       </select>
       <input type="number" id="lot" placeholder="Lot Size" step="0.01">
-      <input type="number" id="entry" placeholder="Entry Price" step="0.00001">
-      <input type="number" id="profit" placeholder="Profit/Loss ($)" step="0.01">
+      <input type="number" id="entry" placeholder="Entry Price" step="0.01">
+      <input type="number" id="exit" placeholder="Exit Price" step="0.01">
       <button onclick="addTrade()">Add Trade</button>
     </div>
     <table>
-      <thead><tr><th>Date</th><th>Pair</th><th>Type</th><th>Lot</th><th>Entry</th><th>P/L ($)</th><th>Action</th></tr></thead>
+      <thead><tr><th>Date</th><th>Account</th><th>Pair</th><th>Type</th><th>Lot</th><th>Entry</th><th>Exit</th><th>P/L ($)</th><th>Action</th></tr></thead>
       <tbody id="tradeTable"></tbody>
     </table>
     <div class="summary">
@@ -244,12 +235,14 @@
     <div class="hedge-grid">
       <div class="hedge-side">
         <div class="side-title" style="color:#22c55e;">BUY</div>
+        <div class="field-row"><label>Buy Account Number</label><input type="text" id="hsBuyAccount" placeholder="e.g. 12345" oninput="calcHedge()"></div>
         <div class="field-row"><label>Buy Entry Price</label><input type="number" id="hsBuyEntry" step="0.01" value="0.00" oninput="calcHedge()"></div>
         <div class="field-row"><label>Buy Take Profit (TP)</label><input type="text" id="hsBuyTP" class="tp-glow" readonly></div>
         <div class="field-row"><label>Buy Stop Loss (SL)</label><input type="text" id="hsBuySL" class="sl-glow" readonly></div>
       </div>
       <div class="hedge-side">
         <div class="side-title" style="color:#ef4444;">SELL</div>
+        <div class="field-row"><label>Sell Account Number</label><input type="text" id="hsSellAccount" placeholder="e.g. 67890" oninput="calcHedge()"></div>
         <div class="field-row"><label>Sell Entry Price</label><input type="number" id="hsSellEntry" step="0.01" value="0.00" oninput="calcHedge()"></div>
         <div class="field-row"><label>Sell Take Profit (TP)</label><input type="text" id="hsSellTP" class="tp-glow" readonly></div>
         <div class="field-row"><label>Sell Stop Loss (SL)</label><input type="text" id="hsSellSL" class="sl-glow" readonly></div>
@@ -261,6 +254,17 @@
       <div class="outcome-box"><div class="label">Sell TP Outcome</div><div class="value positive" id="hsSellTPUsd">$0.00</div></div>
       <div class="outcome-box"><div class="label">Sell SL Outcome</div><div class="value negative" id="hsSellSLUsd">$0.00</div></div>
     </div>
+  </div>
+</section>
+
+<section id="calclog">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Calculated Hedges Log</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
+      Upar wale Calculator mein jab bhi Account Numbers ke sath calculation ki jayegi, yahan khud-ba-khud uska SL/TP record ban jayega.
+    </p>
+    <div id="calcLogContainer"></div>
   </div>
 </section>
 
@@ -500,34 +504,56 @@
 </footer>
 
 <script>
-  // ===== Trade Record =====
+  // ===== Trade Record (with Account Number + Exit Price, auto P/L) =====
   let trades = JSON.parse(localStorage.getItem('waqarTrades')) || [];
   function saveTrades() { localStorage.setItem('waqarTrades', JSON.stringify(trades)); renderTrades(); }
+
   function addTrade() {
+    const account = document.getElementById('trAccount').value.trim();
     const pair = document.getElementById('pair').value.trim();
     const type = document.getElementById('type').value;
-    const lot = document.getElementById('lot').value;
-    const entry = document.getElementById('entry').value;
-    const profit = parseFloat(document.getElementById('profit').value);
-    if (!pair || isNaN(profit)) { alert('Pair aur Profit/Loss zaroor darj karein.'); return; }
-    trades.push({ date: new Date().toLocaleDateString(), pair, type, lot, entry, profit });
+    const lot = parseFloat(document.getElementById('lot').value) || 0;
+    const entry = parseFloat(document.getElementById('entry').value);
+    const exit = parseFloat(document.getElementById('exit').value);
+
+    if (!pair || isNaN(entry) || isNaN(exit) || !lot) {
+      alert('Pair, Lot Size, Entry Price aur Exit Price zaroor darj karein.');
+      return;
+    }
+
+    let profit;
+    if (type === 'BUY') {
+      profit = (exit - entry) * lot * 100;
+    } else {
+      profit = (entry - exit) * lot * 100;
+    }
+
+    trades.push({
+      date: new Date().toLocaleDateString(),
+      account: account || '-',
+      pair, type, lot, entry, exit, profit
+    });
+
+    document.getElementById('trAccount').value = '';
     document.getElementById('pair').value = '';
     document.getElementById('lot').value = '';
     document.getElementById('entry').value = '';
-    document.getElementById('profit').value = '';
+    document.getElementById('exit').value = '';
     saveTrades();
   }
+
   function deleteTrade(index) { trades.splice(index, 1); saveTrades(); }
+
   function renderTrades() {
     const tbody = document.getElementById('tradeTable');
     tbody.innerHTML = '';
     let totalPL = 0, wins = 0;
     trades.forEach((t, i) => {
-      totalPL += parseFloat(t.profit);
-      if (parseFloat(t.profit) > 0) wins++;
+      totalPL += t.profit;
+      if (t.profit > 0) wins++;
       const row = document.createElement('tr');
-      row.innerHTML = `<td>${t.date}</td><td>${t.pair}</td><td>${t.type}</td><td>${t.lot}</td><td>${t.entry}</td>
-        <td style="color:${t.profit >= 0 ? '#22c55e' : '#ef4444'}">${t.profit}</td>
+      row.innerHTML = `<td>${t.date}</td><td>${t.account}</td><td>${t.pair}</td><td>${t.type}</td><td>${t.lot}</td><td>${t.entry}</td><td>${t.exit}</td>
+        <td style="color:${t.profit >= 0 ? '#22c55e' : '#ef4444'}">$${t.profit.toFixed(2)}</td>
         <td><button class="delete-btn" onclick="deleteTrade(${i})">Delete</button></td>`;
       tbody.appendChild(row);
     });
@@ -537,11 +563,20 @@
   }
   renderTrades();
 
-  // ===== Standalone XAUUSD Calculator =====
+  // ===== Standalone XAUUSD Calculator (with Account Numbers + Auto Log) =====
+  let calcLogEntries = JSON.parse(localStorage.getItem('waqarCalcLogEntries')) || [];
+
+  function saveCalcLog() {
+    localStorage.setItem('waqarCalcLogEntries', JSON.stringify(calcLogEntries));
+    renderCalcLog();
+  }
+
   function calcHedge() {
     const lot = parseFloat(document.getElementById('hsLot').value) || 0;
     const target = parseFloat(document.getElementById('hsTarget').value) || 0;
     const buffer = parseFloat(document.getElementById('hsBuffer').value) || 0;
+    const buyAccount = document.getElementById('hsBuyAccount').value.trim();
+    const sellAccount = document.getElementById('hsSellAccount').value.trim();
     const buyEntry = parseFloat(document.getElementById('hsBuyEntry').value) || 0;
     const sellEntry = parseFloat(document.getElementById('hsSellEntry').value) || 0;
     const sellSL = sellEntry + target;
@@ -556,8 +591,63 @@
     document.getElementById('hsBuySLUsd').textContent = `$${(lot*(buySL-buyEntry)*100).toFixed(2)}`;
     document.getElementById('hsSellTPUsd').textContent = `$${(lot*(sellEntry-sellTP)*100).toFixed(2)}`;
     document.getElementById('hsSellSLUsd').textContent = `$${(lot*(sellEntry-sellSL)*100).toFixed(2)}`;
+
+    if (buyAccount && sellAccount) {
+      const existingIndex = calcLogEntries.findIndex(e => e.buyAccount === buyAccount && e.sellAccount === sellAccount);
+      const entryData = {
+        buyAccount, sellAccount,
+        buyEntry, sellEntry, buyTP, buySL, sellTP, sellSL,
+        lastUpdated: new Date().toLocaleString()
+      };
+      if (existingIndex >= 0) calcLogEntries[existingIndex] = entryData;
+      else calcLogEntries.push(entryData);
+      saveCalcLog();
+    }
   }
+
+  function deleteCalcLogEntry(index) {
+    calcLogEntries.splice(index, 1);
+    saveCalcLog();
+  }
+
+  function renderCalcLog() {
+    const container = document.getElementById('calcLogContainer');
+    container.innerHTML = '';
+
+    if (calcLogEntries.length === 0) {
+      container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge log nahi hua. Calculator mein Account Numbers bhar kar calculate karein.</p>';
+      return;
+    }
+
+    calcLogEntries.forEach((e, i) => {
+      const card = document.createElement('div');
+      card.className = 'calclog-card';
+      card.innerHTML = `
+        <div class="calclog-header">
+          <h4>Hedge Log #${i + 1} — Updated: ${e.lastUpdated}</h4>
+          <button class="delete-btn" onclick="deleteCalcLogEntry(${i})">Delete</button>
+        </div>
+        <div class="hedge-grid">
+          <div class="hedge-side">
+            <div class="side-title" style="color:#22c55e;">BUY — Account ${e.buyAccount}</div>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">Entry: ${e.buyEntry.toFixed(2)}</p>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">TP: <span style="color:#67e8f9; font-weight:bold;">${e.buyTP.toFixed(2)}</span></p>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">SL: <span style="color:#fda4af; font-weight:bold;">${e.buySL.toFixed(2)}</span></p>
+          </div>
+          <div class="hedge-side">
+            <div class="side-title" style="color:#ef4444;">SELL — Account ${e.sellAccount}</div>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">Entry: ${e.sellEntry.toFixed(2)}</p>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">TP: <span style="color:#67e8f9; font-weight:bold;">${e.sellTP.toFixed(2)}</span></p>
+            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">SL: <span style="color:#fda4af; font-weight:bold;">${e.sellSL.toFixed(2)}</span></p>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
   calcHedge();
+  renderCalcLog();
 
   // ===== Entry Difference & Buffer Loss Calculator =====
   function calcBufferLoss() {
@@ -1114,110 +1204,110 @@
       ["Minimum trading days kitne hain?", "Har phase ke liye kam se kam 5 trading days."]
     ]},
     { title: "Forex Account Concepts", items: [
-      ["Balance kya hota hai?", "Account me total paise jo trade close hone ke baad dikhte hain."],
-      ["Equity kya hoti hai?", "Balance + floating profit ya loss."],
-      ["Margin kya hai?", "Wo amount jo broker trade open karne ke liye lock karta hai."],
-      ["Free Margin kya hai?", "Wo paisa jo naye trade open karne ke liye available hota hai."],
-      ["Used Margin kya hai?", "Wo margin jo already open trades me use ho chuki hoti hai."],
-      ["Leverage kya hai?", "Broker ki madad se choti amount se badi trade open karna."],
-      ["Margin Level kya hota hai?", "Equity ÷ Margin × 100."],
-      ["Margin Call kya hai?", "Broker ki warning jab account balance bahut kam ho jaye."],
-      ["Stop Out kya hota hai?", "Jab broker automatically trade close kar deta hai."],
-      ["Spread kya hai?", "Buy aur Sell price ka difference."],
-      ["Commission kya hota hai?", "Broker ki service fee."],
-      ["Swap kya hota hai?", "Overnight trade rakhne ka interest."],
-      ["Lot size kya hai?", "Trade ka volume ya size."],
-      ["Standard lot kya hota hai?", "100,000 units."],
-      ["Mini lot kya hota hai?", "10,000 units."],
-      ["Micro lot kya hota hai?", "1,000 units."],
-      ["Pip kya hota hai?", "Currency price ki sabse choti movement."],
-      ["Pipette kya hota hai?", "Pip ka 1/10 part."],
-      ["Floating profit kya hota hai?", "Open trade ka profit."],
-      ["Floating loss kya hota hai?", "Open trade ka loss."],
-      ["Deposit kya hai?", "Account me paise add karna."],
-      ["Withdrawal kya hai?", "Account se paise nikalna."],
-      ["Demo account kya hai?", "Practice account jisme real paisa nahi hota."],
-      ["Live account kya hai?", "Real money trading account."],
-      ["Risk management kya hai?", "Trade me loss control karna."],
-      ["Stop Loss kya hai?", "Loss limit karne ka tool."],
-      ["Take Profit kya hai?", "Profit lock karne ka level."],
-      ["Risk per trade kya hota hai?", "Ek trade me kitna percent risk lena."],
-      ["Account leverage kya hota hai?", "Account ka leverage ratio (1:100 etc)."],
-      ["Account currency kya hoti hai?", "Account kis currency me hai (USD etc)."],
-      ["Hedging kya hoti hai?", "Ek hi pair par buy aur sell dono."],
-      ["Scalping kya hoti hai?", "Choti choti trades lena."],
-      ["Swing trading kya hoti hai?", "Kai din tak trade hold karna."],
-      ["Position trading kya hai?", "Long term trading."],
-      ["Money management kya hai?", "Capital ko safe rakhne ki strategy."]
+      ["Balance kya hota hai?", "Account me total paise jo trade close hone ke baad dikhte hain.", "Misal: aapne $1000 deposit kiya aur koi trade open nahi, to Balance $1000 dikhega."],
+      ["Equity kya hoti hai?", "Balance + floating profit ya loss.", "Misal: Balance $1000 hai aur ek open trade $50 profit mein hai, to Equity $1050 hogi."],
+      ["Margin kya hai?", "Wo amount jo broker trade open karne ke liye lock karta hai.", "Misal: 0.10 lot XAUUSD trade ke liye broker $50 margin lock kar sakta hai."],
+      ["Free Margin kya hai?", "Wo paisa jo naye trade open karne ke liye available hota hai.", "Misal: Equity $1050 hai aur Used Margin $50 hai, to Free Margin $1000 hoga."],
+      ["Used Margin kya hai?", "Wo margin jo already open trades me use ho chuki hoti hai.", "Misal: 2 open trades ne total $150 margin use kiya, to Used Margin $150 hai."],
+      ["Leverage kya hai?", "Broker ki madad se choti amount se badi trade open karna.", "Misal: 1:100 leverage se $10 margin se $1000 ki position control ho sakti hai."],
+      ["Margin Level kya hota hai?", "Equity ÷ Margin × 100.", "Misal: Equity $1000 aur Margin $200 hai, to Margin Level = (1000/200)×100 = 500%."],
+      ["Margin Call kya hai?", "Broker ki warning jab account balance bahut kam ho jaye.", "Misal: Margin Level 100% se neeche jaye to broker warning email/notification bhejta hai."],
+      ["Stop Out kya hota hai?", "Jab broker automatically trade close kar deta hai.", "Misal: Margin Level 20% tak gir jaye to broker aapke open trades khud band kar dega."],
+      ["Spread kya hai?", "Buy aur Sell price ka difference.", "Misal: EURUSD ka Bid 1.1000 aur Ask 1.1002 hai, to spread 2 pips hai."],
+      ["Commission kya hota hai?", "Broker ki service fee.", "Misal: broker har 1.0 lot trade par $7 commission le sakta hai."],
+      ["Swap kya hota hai?", "Overnight trade rakhne ka interest.", "Misal: trade raat bhar khuli rakhne par account se -$2 ya +$2 kata/mila ja sakta hai."],
+      ["Lot size kya hai?", "Trade ka volume ya size.", "Misal: 1.0 lot XAUUSD lene ka matlab 100 ounces gold control karna."],
+      ["Standard lot kya hota hai?", "100,000 units.", "Misal: 1.0 lot EURUSD = 100,000 Euros ki base amount."],
+      ["Mini lot kya hota hai?", "10,000 units.", "Misal: 0.1 lot lena = 10,000 units trade karna."],
+      ["Micro lot kya hota hai?", "1,000 units.", "Misal: 0.01 lot lena = 1,000 units trade karna, chote accounts ke liye common."],
+      ["Pip kya hota hai?", "Currency price ki sabse choti movement.", "Misal: EURUSD 1.1000 se 1.1001 jaye to yeh 1 pip movement hai."],
+      ["Pipette kya hota hai?", "Pip ka 1/10 part.", "Misal: 1.10001 se 1.10002 jana 1 pipette movement hai."],
+      ["Floating profit kya hota hai?", "Open trade ka profit.", "Misal: open BUY trade abhi $30 profit dikha raha hai jab tak close na ho."],
+      ["Floating loss kya hota hai?", "Open trade ka loss.", "Misal: open SELL trade abhi -$20 dikha raha hai jab tak close na ho."],
+      ["Deposit kya hai?", "Account me paise add karna.", "Misal: bank se $500 apne trading account mein transfer karna."],
+      ["Withdrawal kya hai?", "Account se paise nikalna.", "Misal: account se $200 profit apne bank account mein nikalna."],
+      ["Demo account kya hai?", "Practice account jisme real paisa nahi hota.", "Misal: $10,000 virtual balance se bina real risk ke practice karna."],
+      ["Live account kya hai?", "Real money trading account.", "Misal: apna $500 real paisa deposit karke asli trades lena."],
+      ["Risk management kya hai?", "Trade me loss control karna.", "Misal: har trade mein sirf $10 risk lena, poora account risk mein na dalna."],
+      ["Stop Loss kya hai?", "Loss limit karne ka tool.", "Misal: Buy entry 4000 par SL 3980 set karke maximum loss tay karna."],
+      ["Take Profit kya hai?", "Profit lock karne ka level.", "Misal: Buy entry 4000 par TP 4030 set karke profit automatically lock karna."],
+      ["Risk per trade kya hota hai?", "Ek trade me kitna percent risk lena.", "Misal: $1000 account par 2% risk = $20 per trade."],
+      ["Account leverage kya hota hai?", "Account ka leverage ratio (1:100 etc).", "Misal: account settings mein 1:500 leverage set hona."],
+      ["Account currency kya hoti hai?", "Account kis currency me hai (USD etc).", "Misal: account USD mein hai to profit/loss bhi USD mein dikhega."],
+      ["Hedging kya hoti hai?", "Ek hi pair par buy aur sell dono.", "Misal: EURUSD par ek sath BUY aur SELL position khol dena."],
+      ["Scalping kya hoti hai?", "Choti choti trades lena.", "Misal: 2-3 minute mein hi $5 profit lekar trade close kar dena."],
+      ["Swing trading kya hoti hai?", "Kai din tak trade hold karna.", "Misal: ek trade ko 3-4 din tak open rakhna bare move ke liye."],
+      ["Position trading kya hai?", "Long term trading.", "Misal: ek trade ko mahinon tak hold karna long-term trend ke liye."],
+      ["Money management kya hai?", "Capital ko safe rakhne ki strategy.", "Misal: total capital ka sirf 20% hi kisi ek waqt trades mein lagana."]
     ]},
     { title: "Market Mechanics", items: [
-      ["Forex market kya hai?", "Currency buying aur selling ka market."],
-      ["Currency pair kya hota hai?", "Do currencies ka pair (EUR/USD)."],
-      ["Base currency kya hoti hai?", "Pair ki pehli currency."],
-      ["Quote currency kya hoti hai?", "Pair ki second currency."],
-      ["Bid price kya hai?", "Wo price jahan market buy karti hai."],
-      ["Ask price kya hai?", "Wo price jahan market sell karti hai."],
-      ["Bullish market kya hai?", "Market upar ja rahi ho."],
-      ["Bearish market kya hai?", "Market neeche ja rahi ho."],
-      ["Trend kya hota hai?", "Market ki direction."],
-      ["Uptrend kya hai?", "Higher highs aur higher lows."],
-      ["Downtrend kya hai?", "Lower highs aur lower lows."],
-      ["Sideways market kya hai?", "Market range me ho."],
-      ["Volatility kya hai?", "Market ki speed aur movement."],
-      ["Liquidity kya hai?", "Jahan zyada orders hote hain."],
-      ["Market session kya hai?", "Trading time zones."],
-      ["Asian session kya hai?", "Tokyo session."],
-      ["London session kya hai?", "Europe trading session."],
-      ["New York session kya hai?", "US trading session."],
-      ["Market open kab hoti hai?", "Monday."],
-      ["Market close kab hoti hai?", "Friday."],
-      ["Gap kya hota hai?", "Price ka achanak jump."],
-      ["News impact kya hota hai?", "Economic news ka market par effect."],
-      ["Fundamental analysis kya hai?", "Economic news analysis."],
-      ["Technical analysis kya hai?", "Chart analysis."],
-      ["Order kya hota hai?", "Trade instruction."],
-      ["Market order kya hai?", "Current price par trade."],
-      ["Pending order kya hai?", "Future price par trade."],
-      ["Buy limit kya hai?", "Neeche price par buy."],
-      ["Sell limit kya hai?", "Upar price par sell."],
-      ["Buy stop kya hai?", "Current price se upar buy."],
-      ["Sell stop kya hai?", "Current price se neeche sell."],
-      ["Slippage kya hai?", "Order different price par fill hona."],
-      ["Requote kya hai?", "Broker new price offer kare."],
-      ["Market depth kya hai?", "Market me orders ki quantity."],
-      ["Order execution kya hai?", "Trade ka complete hona."]
+      ["Forex market kya hai?", "Currency buying aur selling ka market.", "Misal: EURUSD, GBPUSD jaise pairs 24/5 trade hote hain."],
+      ["Currency pair kya hota hai?", "Do currencies ka pair (EUR/USD).", "Misal: EUR/USD mein EUR base aur USD quote currency hai."],
+      ["Base currency kya hoti hai?", "Pair ki pehli currency.", "Misal: EUR/USD mein EUR base currency hai."],
+      ["Quote currency kya hoti hai?", "Pair ki second currency.", "Misal: EUR/USD mein USD quote currency hai."],
+      ["Bid price kya hai?", "Wo price jahan market buy karti hai.", "Misal: agar Bid 1.1000 hai, market usi price par aapse buy karegi (aap sell karenge)."],
+      ["Ask price kya hai?", "Wo price jahan market sell karti hai.", "Misal: agar Ask 1.1002 hai, aap usi price par buy karenge."],
+      ["Bullish market kya hai?", "Market upar ja rahi ho.", "Misal: price 1.1000 se 1.1200 tak continuously upar ja rahi ho."],
+      ["Bearish market kya hai?", "Market neeche ja rahi ho.", "Misal: price 1.1200 se 1.1000 tak continuously neeche ja rahi ho."],
+      ["Trend kya hota hai?", "Market ki direction.", "Misal: last 3 mahine se price consistently upar ja rahi hai, yeh uptrend hai."],
+      ["Uptrend kya hai?", "Higher highs aur higher lows.", "Misal: har naya high pichle high se upar aur har low pichle low se upar ho raha hai."],
+      ["Downtrend kya hai?", "Lower highs aur lower lows.", "Misal: har naya low pichle low se neeche ja raha ho."],
+      ["Sideways market kya hai?", "Market range me ho.", "Misal: price 1.1000-1.1050 ke darmiyan hi ghoom rahi ho."],
+      ["Volatility kya hai?", "Market ki speed aur movement.", "Misal: news event ke waqt price 50 pips ek minute mein move kar jaye."],
+      ["Liquidity kya hai?", "Jahan zyada orders hote hain.", "Misal: London session mein EURUSD mein liquidity sabse zyada hoti hai."],
+      ["Market session kya hai?", "Trading time zones.", "Misal: Asian, London, aur New York session alag alag time zones mein hote hain."],
+      ["Asian session kya hai?", "Tokyo session.", "Misal: raat tak Tokyo session active hota hai."],
+      ["London session kya hai?", "Europe trading session.", "Misal: London session mein volume sabse zyada hota hai."],
+      ["New York session kya hai?", "US trading session.", "Misal: NY session mein USD pairs mein volatility barh jati hai."],
+      ["Market open kab hoti hai?", "Monday.", "Misal: Sunday raat se market Monday session ke liye khul jati hai."],
+      ["Market close kab hoti hai?", "Friday.", "Misal: Friday raat market band ho jati hai weekend ke liye."],
+      ["Gap kya hota hai?", "Price ka achanak jump.", "Misal: Friday close 2000 par thi aur Monday open 2015 par hui, yeh gap hai."],
+      ["News impact kya hota hai?", "Economic news ka market par effect.", "Misal: NFP report aane par USD pairs mein sudden movement aa sakta hai."],
+      ["Fundamental analysis kya hai?", "Economic news analysis.", "Misal: Fed interest rate announcement dekh kar trade decide karna."],
+      ["Technical analysis kya hai?", "Chart analysis.", "Misal: chart par support/resistance dekh kar entry lena."],
+      ["Order kya hota hai?", "Trade instruction.", "Misal: 'Buy 0.10 lot XAUUSD at market' ek order hai."],
+      ["Market order kya hai?", "Current price par trade.", "Misal: abhi jo price chal rahi hai usi par turant buy/sell karna."],
+      ["Pending order kya hai?", "Future price par trade.", "Misal: price 3990 tak aane par buy karne ka order pehle se laga dena."],
+      ["Buy limit kya hai?", "Neeche price par buy.", "Misal: current price 4000 hai, 3990 par Buy Limit lagana."],
+      ["Sell limit kya hai?", "Upar price par sell.", "Misal: current price 4000 hai, 4010 par Sell Limit lagana."],
+      ["Buy stop kya hai?", "Current price se upar buy.", "Misal: current price 4000 hai, 4010 par Buy Stop lagana breakout ke liye."],
+      ["Sell stop kya hai?", "Current price se neeche sell.", "Misal: current price 4000 hai, 3990 par Sell Stop lagana breakdown ke liye."],
+      ["Slippage kya hai?", "Order different price par fill hona.", "Misal: order 4000 par dena chaha lekin fast market ki wajah se 4001 par fill hua."],
+      ["Requote kya hai?", "Broker new price offer kare.", "Misal: broker kahe 'price change ho gayi, naya price accept karein?'"],
+      ["Market depth kya hai?", "Market me orders ki quantity.", "Misal: 4000 level par kitne buy/sell orders queue mein hain, yeh dikhana."],
+      ["Order execution kya hai?", "Trade ka complete hona.", "Misal: order place karne ke 1 second baad trade confirm ho jana."]
     ]},
     { title: "Professional Trading Structure", items: [
-      ["Trading plan kya hai?", "Rules jinke according trade li jati hai."],
-      ["Strategy kya hai?", "Trade entry ka system."],
-      ["Setup kya hota hai?", "Trade opportunity."],
-      ["Entry kya hai?", "Jahan trade open ki jaye."],
-      ["Exit kya hai?", "Jahan trade close ki jaye."],
-      ["Risk reward ratio kya hai?", "Risk aur profit ka comparison."],
-      ["1:2 risk reward kya hai?", "1 loss = 2 profit target."],
-      ["Trading psychology kya hai?", "Trader ki mental state."],
-      ["Fear kya hai trading me?", "Loss ka dar."],
-      ["Greed kya hai?", "Zyada profit ki lalach."],
-      ["Discipline kya hai?", "Rules follow karna."],
-      ["Patience kya hai?", "Setup ka wait karna."],
-      ["Overtrading kya hai?", "Zarurat se zyada trades lena."],
-      ["Revenge trading kya hai?", "Loss ke baad emotional trading."],
-      ["Trading journal kya hai?", "Trades ka record."],
-      ["Backtesting kya hai?", "Strategy ko past data par check karna."],
-      ["Forward testing kya hai?", "Strategy ko live market me test karna."],
-      ["Win rate kya hai?", "Kitni trades win hui."],
-      ["Loss rate kya hai?", "Kitni trades lose hui."],
-      ["Drawdown kya hai?", "Account ka biggest loss period."],
-      ["Consistency kya hai?", "Regular profit."],
-      ["Edge kya hai?", "Market me advantage."],
-      ["Trading routine kya hai?", "Daily trading schedule."],
-      ["Session trading kya hai?", "Specific session me trade."],
-      ["Trade management kya hai?", "Open trade handle karna."],
-      ["Scaling in kya hai?", "Trade me aur position add karna."],
-      ["Scaling out kya hai?", "Trade ka kuch part close karna."],
-      ["Break even kya hai?", "Trade ko zero risk par lana."],
-      ["Professional trader ka rule kya hai?", "Capital protect karna."],
-      ["Sabse important rule kya hai?", "Risk management."]
+      ["Trading plan kya hai?", "Rules jinke according trade li jati hai.", "Misal: 'sirf London session mein trade karunga, max 2 trades per din.'"],
+      ["Strategy kya hai?", "Trade entry ka system.", "Misal: 'jab price moving average cross kare tab entry lena.'"],
+      ["Setup kya hota hai?", "Trade opportunity.", "Misal: price support level ke pass pahunch kar reversal candle bana rahi ho."],
+      ["Entry kya hai?", "Jahan trade open ki jaye.", "Misal: 4000 par Buy order execute hona."],
+      ["Exit kya hai?", "Jahan trade close ki jaye.", "Misal: 4020 par trade close karna profit lene ke liye."],
+      ["Risk reward ratio kya hai?", "Risk aur profit ka comparison.", "Misal: $10 risk par $30 target rakhna, yani 1:3 ratio."],
+      ["1:2 risk reward kya hai?", "1 loss = 2 profit target.", "Misal: $10 loss risk par kam se kam $20 profit target rakhna."],
+      ["Trading psychology kya hai?", "Trader ki mental state.", "Misal: loss ke baad bhi shant rehna aur plan follow karna."],
+      ["Fear kya hai trading me?", "Loss ka dar.", "Misal: profitable trade ko jaldi close kar dena dar ki wajah se."],
+      ["Greed kya hai?", "Zyada profit ki lalach.", "Misal: TP hit hone ke bawajood trade band na karna aur ulta chala jana."],
+      ["Discipline kya hai?", "Rules follow karna.", "Misal: apni SL/TP levels ko bina wajah move na karna."],
+      ["Patience kya hai?", "Setup ka wait karna.", "Misal: perfect setup na banay to trade na lena, wait karna."],
+      ["Overtrading kya hai?", "Zarurat se zyada trades lena.", "Misal: ek hi din mein 15-20 trades le lena bina strategy ke."],
+      ["Revenge trading kya hai?", "Loss ke baad emotional trading.", "Misal: loss hone ke foran baad bara lot le kar dobara trade lena."],
+      ["Trading journal kya hai?", "Trades ka record.", "Misal: har trade ki entry, exit, aur reason likh kar rakhna."],
+      ["Backtesting kya hai?", "Strategy ko past data par check karna.", "Misal: pichle 6 mahine ke data par apni strategy test karna."],
+      ["Forward testing kya hai?", "Strategy ko live market me test karna.", "Misal: strategy ko demo account par live market mein test karna."],
+      ["Win rate kya hai?", "Kitni trades win hui.", "Misal: 100 trades mein se 60 win huin, to win rate 60% hai."],
+      ["Loss rate kya hai?", "Kitni trades lose hui.", "Misal: 100 trades mein se 40 lose huin, to loss rate 40% hai."],
+      ["Drawdown kya hai?", "Account ka biggest loss period.", "Misal: account $1000 se $800 tak gira, yani 20% drawdown hua."],
+      ["Consistency kya hai?", "Regular profit.", "Misal: har mahine 5-10% profit banana, bina bare swings ke."],
+      ["Edge kya hai?", "Market me advantage.", "Misal: aapki strategy ka win rate aur risk-reward mila kar long-term profit deta ho."],
+      ["Trading routine kya hai?", "Daily trading schedule.", "Misal: roz shaam 6 baje chart check karna aur setups dhoondhna."],
+      ["Session trading kya hai?", "Specific session me trade.", "Misal: sirf London-NY overlap mein trade karna."],
+      ["Trade management kya hai?", "Open trade handle karna.", "Misal: profit mein jate hi SL ko breakeven par la dena."],
+      ["Scaling in kya hai?", "Trade me aur position add karna.", "Misal: pehle 0.05 lot liya, price favor mein jane par aur 0.05 lot add kiya."],
+      ["Scaling out kya hai?", "Trade ka kuch part close karna.", "Misal: 0.10 lot mein se half (0.05) TP par close kar dena, baaki chalne dena."],
+      ["Break even kya hai?", "Trade ko zero risk par lana.", "Misal: SL ko entry price (4000) par la dena taake loss na ho."],
+      ["Professional trader ka rule kya hai?", "Capital protect karna.", "Misal: kabhi bhi ek trade mein poori capital risk na karna."],
+      ["Sabse important rule kya hai?", "Risk management.", "Misal: chahe profit ho ya loss, hamesha predetermined risk limit follow karna."]
     ]}
   ];
 
@@ -1229,8 +1319,9 @@
       folderEl.className = 'faq-folder';
       folderEl.id = 'faqFolder_' + fi;
       let itemsHtml = '';
-      folder.items.forEach(([q, a]) => {
-        itemsHtml += `<div class="faq-item"><div class="faq-q">Q: ${q}</div><div class="faq-a">${a}</div></div>`;
+      folder.items.forEach(item => {
+        const q = item[0], a = item[1], ex = item[2];
+        itemsHtml += `<div class="faq-item"><div class="faq-q">Q: ${q}</div><div class="faq-a">${a}</div>${ex ? `<div class="faq-example">${ex}</div>` : ''}</div>`;
       });
       folderEl.innerHTML = `
         <div class="faq-folder-header" onclick="toggleFaqFolder(${fi})">
