@@ -151,10 +151,6 @@
   .adv-result-box .label { font-size: 13px; color: #93c5fd; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
   .adv-result-box .value { font-size: 32px; font-weight: 800; color: #38bdf8; }
 
-  .calclog-card { background: rgba(17,24,39,0.7); border: 1px solid rgba(56,189,248,0.25); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-  .calclog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
-  .calclog-header h4 { color: #38bdf8; font-size: 16px; }
-
   @media (max-width: 700px) {
     header { padding: 15px 20px; }
     nav a { margin-left: 0; margin-right: 15px; }
@@ -177,7 +173,6 @@
     <a href="#hedging">Hedging System</a>
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
-    <a href="#calclog">Calculated Hedges Log</a>
     <a href="#buffercalc">Buffer Loss Calc</a>
     <a href="#advcalc">Position Calculator</a>
     <a href="#losstracker">Loss Tracker</a>
@@ -249,14 +244,12 @@
     <div class="hedge-grid">
       <div class="hedge-side">
         <div class="side-title" style="color:#22c55e;">BUY</div>
-        <div class="field-row"><label>Buy Account Number</label><input type="text" id="hsBuyAccount" placeholder="e.g. 12345" oninput="calcHedge()"></div>
         <div class="field-row"><label>Buy Entry Price</label><input type="number" id="hsBuyEntry" step="0.01" value="0.00" oninput="calcHedge()"></div>
         <div class="field-row"><label>Buy Take Profit (TP)</label><input type="text" id="hsBuyTP" class="tp-glow" readonly></div>
         <div class="field-row"><label>Buy Stop Loss (SL)</label><input type="text" id="hsBuySL" class="sl-glow" readonly></div>
       </div>
       <div class="hedge-side">
         <div class="side-title" style="color:#ef4444;">SELL</div>
-        <div class="field-row"><label>Sell Account Number</label><input type="text" id="hsSellAccount" placeholder="e.g. 67890" oninput="calcHedge()"></div>
         <div class="field-row"><label>Sell Entry Price</label><input type="number" id="hsSellEntry" step="0.01" value="0.00" oninput="calcHedge()"></div>
         <div class="field-row"><label>Sell Take Profit (TP)</label><input type="text" id="hsSellTP" class="tp-glow" readonly></div>
         <div class="field-row"><label>Sell Stop Loss (SL)</label><input type="text" id="hsSellSL" class="sl-glow" readonly></div>
@@ -268,17 +261,6 @@
       <div class="outcome-box"><div class="label">Sell TP Outcome</div><div class="value positive" id="hsSellTPUsd">$0.00</div></div>
       <div class="outcome-box"><div class="label">Sell SL Outcome</div><div class="value negative" id="hsSellSLUsd">$0.00</div></div>
     </div>
-  </div>
-</section>
-
-<section id="calclog">
-  <div class="glass-panel">
-    <div class="brand-watermark">Forex With Waqar</div>
-    <h3>Calculated Hedges Log</h3>
-    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
-      Upar wale Calculator mein jab bhi Account Numbers ke sath calculation ki jayegi, yahan khud-ba-khud uska SL/TP record ban jayega. Naye Account Numbers se naya alag entry banega; same numbers ki entry live update hoti rahegi.
-    </p>
-    <div id="calcLogContainer"></div>
   </div>
 </section>
 
@@ -555,20 +537,11 @@
   }
   renderTrades();
 
-  // ===== Standalone XAUUSD Calculator (with Account Numbers + Auto Log) =====
-  let calcLogEntries = JSON.parse(localStorage.getItem('waqarCalcLogEntries')) || [];
-
-  function saveCalcLog() {
-    localStorage.setItem('waqarCalcLogEntries', JSON.stringify(calcLogEntries));
-    renderCalcLog();
-  }
-
+  // ===== Standalone XAUUSD Calculator =====
   function calcHedge() {
     const lot = parseFloat(document.getElementById('hsLot').value) || 0;
     const target = parseFloat(document.getElementById('hsTarget').value) || 0;
     const buffer = parseFloat(document.getElementById('hsBuffer').value) || 0;
-    const buyAccount = document.getElementById('hsBuyAccount').value.trim();
-    const sellAccount = document.getElementById('hsSellAccount').value.trim();
     const buyEntry = parseFloat(document.getElementById('hsBuyEntry').value) || 0;
     const sellEntry = parseFloat(document.getElementById('hsSellEntry').value) || 0;
     const sellSL = sellEntry + target;
@@ -583,67 +556,8 @@
     document.getElementById('hsBuySLUsd').textContent = `$${(lot*(buySL-buyEntry)*100).toFixed(2)}`;
     document.getElementById('hsSellTPUsd').textContent = `$${(lot*(sellEntry-sellTP)*100).toFixed(2)}`;
     document.getElementById('hsSellSLUsd').textContent = `$${(lot*(sellEntry-sellSL)*100).toFixed(2)}`;
-
-    // Auto-log: only when both account numbers are filled
-    if (buyAccount && sellAccount) {
-      const existingIndex = calcLogEntries.findIndex(e => e.buyAccount === buyAccount && e.sellAccount === sellAccount);
-      const entryData = {
-        buyAccount, sellAccount,
-        buyEntry, sellEntry, buyTP, buySL, sellTP, sellSL,
-        lastUpdated: new Date().toLocaleString()
-      };
-      if (existingIndex >= 0) {
-        calcLogEntries[existingIndex] = entryData;
-      } else {
-        calcLogEntries.push(entryData);
-      }
-      saveCalcLog();
-    }
   }
-
-  function deleteCalcLogEntry(index) {
-    calcLogEntries.splice(index, 1);
-    saveCalcLog();
-  }
-
-  function renderCalcLog() {
-    const container = document.getElementById('calcLogContainer');
-    container.innerHTML = '';
-
-    if (calcLogEntries.length === 0) {
-      container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge log nahi hua. Calculator mein Account Numbers bhar kar calculate karein.</p>';
-      return;
-    }
-
-    calcLogEntries.forEach((e, i) => {
-      const card = document.createElement('div');
-      card.className = 'calclog-card';
-      card.innerHTML = `
-        <div class="calclog-header">
-          <h4>Hedge Log #${i + 1} — Updated: ${e.lastUpdated}</h4>
-          <button class="delete-btn" onclick="deleteCalcLogEntry(${i})">Delete</button>
-        </div>
-        <div class="hedge-grid">
-          <div class="hedge-side">
-            <div class="side-title" style="color:#22c55e;">BUY — Account ${e.buyAccount}</div>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">Entry: ${e.buyEntry.toFixed(2)}</p>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">TP: <span style="color:#67e8f9; font-weight:bold;">${e.buyTP.toFixed(2)}</span></p>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">SL: <span style="color:#fda4af; font-weight:bold;">${e.buySL.toFixed(2)}</span></p>
-          </div>
-          <div class="hedge-side">
-            <div class="side-title" style="color:#ef4444;">SELL — Account ${e.sellAccount}</div>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">Entry: ${e.sellEntry.toFixed(2)}</p>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">TP: <span style="color:#67e8f9; font-weight:bold;">${e.sellTP.toFixed(2)}</span></p>
-            <p style="color:#cbd5e1; font-size:13px; margin:4px 0;">SL: <span style="color:#fda4af; font-weight:bold;">${e.sellSL.toFixed(2)}</span></p>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
-
   calcHedge();
-  renderCalcLog();
 
   // ===== Entry Difference & Buffer Loss Calculator =====
   function calcBufferLoss() {
