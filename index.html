@@ -4,13 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forex With Waqar</title>
- .auth-overlay { position: fixed; inset:0; background: rgba(5,7,15,0.98); z-index: 9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px; padding:20px; }
-.auth-box { background: rgba(15,23,42,0.9); border:1px solid rgba(148,163,184,0.2); border-radius:20px; padding:40px; text-align:center; max-width:400px; }
-.google-btn { background:#fff; color:#111; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; margin:0 auto; }
-.admin-fab { position: fixed; bottom:20px; right:20px; z-index: 9000; background: linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; border:none; padding:14px 20px; border-radius:999px; font-weight:800; cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
-.admin-panel { position: fixed; top:0; right:0; width:380px; max-width:90vw; height:100vh; background: rgba(10,14,25,0.98); border-left:1px solid rgba(148,163,184,0.2); z-index:9500; overflow-y:auto; padding:20px; display:none; }
-.admin-user-card { background: rgba(17,24,39,0.7); border:1px solid rgba(148,163,184,0.15); border-radius:12px; padding:14px; margin-bottom:12px; }
-.admin-user-card button { padding:6px 10px; font-size:12px; border-radius:6px; border:none; cursor:pointer; background:#38bdf8; color:#0f172a; font-weight:600; }
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05070f; color: #e2e8f0; line-height: 1.6; position: relative; overflow-x: hidden; min-height: 100vh; }
@@ -163,6 +159,14 @@
   .calclog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
   .calclog-header h4 { color: #38bdf8; font-size: 16px; }
 
+  .auth-overlay { position: fixed; inset:0; background: rgba(5,7,15,0.98); z-index: 9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px; padding:20px; }
+  .auth-box { background: rgba(15,23,42,0.9); border:1px solid rgba(148,163,184,0.2); border-radius:20px; padding:40px; text-align:center; max-width:400px; }
+  .google-btn { background:#fff; color:#111; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; margin:0 auto; }
+  .admin-fab { position: fixed; bottom:20px; right:20px; z-index: 9000; background: linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; border:none; padding:14px 20px; border-radius:999px; font-weight:800; cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+  .admin-panel { position: fixed; top:0; right:0; width:380px; max-width:90vw; height:100vh; background: rgba(10,14,25,0.98); border-left:1px solid rgba(148,163,184,0.2); z-index:9500; overflow-y:auto; padding:20px; display:none; }
+  .admin-user-card { background: rgba(17,24,39,0.7); border:1px solid rgba(148,163,184,0.15); border-radius:12px; padding:14px; margin-bottom:12px; }
+  .admin-user-card button { padding:6px 10px; font-size:12px; border-radius:6px; border:none; cursor:pointer; background:#38bdf8; color:#0f172a; font-weight:600; }
+
   @media (max-width: 700px) {
     header { padding: 15px 20px; }
     nav a { margin-left: 0; margin-right: 15px; }
@@ -170,21 +174,10 @@
     section { padding: 25px 15px; }
     .glass-panel { padding: 20px; }
   }
- .ict-card { background: rgba(17,24,39,0.7); border: 1px solid rgba(148,163,184,0.15); border-radius: 16px; padding: 22px; margin-bottom: 18px; }
-.ict-card h4 { color: #38bdf8; font-size: 18px; margin-bottom: 6px; }
-.ict-card .ict-sub { color: #94a3b8; font-size: 13px; margin-bottom: 14px; }
-.ict-checklist { list-style: none; margin-bottom: 16px; }
-.ict-checklist li { color: #cbd5e1; font-size: 13.5px; padding: 6px 0 6px 26px; position: relative; border-bottom: 1px solid rgba(148,163,184,0.08); }
-.ict-checklist li:last-child { border-bottom: none; }
-.ict-checklist li::before { content: "✅"; position: absolute; left: 0; top: 6px; font-size: 12px; }
-.ict-diagram { background: rgba(15,23,42,0.6); border: 1px solid rgba(148,163,184,0.15); border-radius: 12px; padding: 10px; text-align: center; }
-.ict-diagram svg { max-width: 100%; height: auto; }
 </style>
- <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
 <div id="authOverlay" class="auth-overlay">
   <div class="auth-box">
     <h2 style="color:#fff;margin-bottom:10px;">Forex With Waqar</h2>
@@ -213,8 +206,9 @@
 <div id="adminPanel" class="admin-panel">
   <h3 style="color:#fff;margin-bottom:15px;">Admin Panel — Users</h3>
   <div id="adminUserList"></div>
-  <button class="form-row button" onclick="toggleAdminPanel()" style="margin-top:15px; width:100%;">Close</button>
+  <button class="form-row button" onclick="toggleAdminPanel()" style="margin-top:15px; width:100%; padding:11px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
 </div>
+
 <div class="bg-grid"></div>
 <div class="bg-orb orb1"></div>
 <div class="bg-orb orb2"></div>
@@ -233,7 +227,6 @@
     <a href="#hedgeslist">Hedges</a>
     <a href="#tradingview">Live Chart</a>
     <a href="#faq">FAQs</a>
-   <a href="#ictsmc">ICT/SMC Guide</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
 </header>
@@ -529,214 +522,6 @@
 </section>
 
 <section id="tradingview">
- <section id="ictsmc">
-  <div class="glass-panel">
-    <div class="brand-watermark">Forex With Waqar</div>
-    <h3>ICT / SMC Strategy Confirmation Guide</h3>
-    <p style="color:#94a3b8; margin-bottom:25px; font-size:14px;">
-      Har concept ke sath uski confirmation conditions di gayi hain — jab tak yeh sab conditions pass na hon, entry na lein. Diagram sirf pattern samajhne ke liye illustrative example hai.
-    </p>
-
-    <!-- Order Block -->
-    <div class="ict-card">
-      <h4>Order Block (Bullish / Bearish)</h4>
-      <div class="ict-sub">Woh last opposite-direction candle jiske baad strong impulsive move aayi.</div>
-      <ul class="ict-checklist">
-        <li>Order Block se pehle ek clear strong impulsive move (BOS ya CHoCH) honi chahiye</li>
-        <li>Order Block candle woh aakhri opposite candle ho jisse move shuru hui</li>
-        <li>Price wapis usi Order Block zone mein aani chahiye (retest)</li>
-        <li>Retest par lower timeframe confirmation (chhota BOS/CHoCH) dekhein</li>
-        <li>Ideally Order Block kisi liquidity sweep ke baad bana ho</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <rect x="40" y="120" width="14" height="30" fill="#ef4444"/>
-          <line x1="47" y1="115" x2="47" y2="155" stroke="#ef4444" stroke-width="2"/>
-          <rect x="70" y="60" width="14" height="55" fill="#22c55e"/>
-          <line x1="77" y1="55" x2="77" y2="120" stroke="#22c55e" stroke-width="2"/>
-          <rect x="100" y="30" width="14" height="35" fill="#22c55e"/>
-          <line x1="107" y1="25" x2="107" y2="70" stroke="#22c55e" stroke-width="2"/>
-          <rect x="35" y="118" width="24" height="34" fill="none" stroke="#facc15" stroke-width="1.5" stroke-dasharray="3,2"/>
-          <text x="20" y="170" fill="#facc15" font-size="11">Order Block</text>
-          <path d="M130 45 C 200 45, 250 100, 300 135" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
-          <rect x="290" y="118" width="14" height="34" fill="#22c55e"/>
-          <text x="270" y="170" fill="#38bdf8" font-size="11">Retest + Entry</text>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Fair Value Gap -->
-    <div class="ict-card">
-      <h4>Fair Value Gap (FVG)</h4>
-      <div class="ict-sub">3-candle pattern jahan beech wali candle ki wick pehli aur teesri candle se overlap na kare.</div>
-      <ul class="ict-checklist">
-        <li>3 candles: pehli, drastic move wali beech ki, aur teesri</li>
-        <li>Candle 1 ki high/low aur Candle 3 ki low/high ke darmiyan gap (imbalance) ho</li>
-        <li>Yeh gap higher-timeframe trend ki direction mein bana ho</li>
-        <li>Price wapis FVG zone mein aane par reaction dekhein (rejection wick/BOS)</li>
-        <li>FVG ideally kisi Order Block ke sath align ho (confluence)</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <rect x="60" y="90" width="14" height="30" fill="#22c55e"/>
-          <line x1="67" y1="85" x2="67" y2="125" stroke="#22c55e" stroke-width="2"/>
-          <rect x="100" y="45" width="14" height="45" fill="#22c55e"/>
-          <line x1="107" y1="40" x2="107" y2="95" stroke="#22c55e" stroke-width="2"/>
-          <rect x="140" y="20" width="14" height="35" fill="#22c55e"/>
-          <line x1="147" y1="15" x2="147" y2="60" stroke="#22c55e" stroke-width="2"/>
-          <rect x="60" y="60" width="94" height="25" fill="rgba(250,204,21,0.15)" stroke="#facc15" stroke-dasharray="3,2"/>
-          <text x="60" y="55" fill="#facc15" font-size="11">Fair Value Gap</text>
-          <path d="M200 40 C 250 60, 280 90, 300 110" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
-          <rect x="293" y="63" width="14" height="30" fill="#ef4444"/>
-          <text x="270" y="170" fill="#38bdf8" font-size="11">FVG Retest</text>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Inverse FVG -->
-    <div class="ict-card">
-      <h4>Inverse Fair Value Gap (IFVG)</h4>
-      <div class="ict-sub">Jab ek FVG break/close ho jaye, to wahi zone opposite direction ke liye support/resistance ban jati hai.</div>
-      <ul class="ict-checklist">
-        <li>Ek valid FVG identify karein (jaisa upar bataya gaya)</li>
-        <li>Price us FVG ke through candle-close ke sath cleanly nikal jaye (mitigate ho jaye)</li>
-        <li>FVG ab reverse role mein kaam karega — pehle jo support tha wo ab resistance (ya opposite)</li>
-        <li>Price ka usi zone par wapis aana aur reaction dena confirmation hai</li>
-        <li>Higher-timeframe trend ke direction mein hi IFVG ka use karein</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <rect x="60" y="40" width="200" height="25" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-dasharray="3,2"/>
-          <text x="60" y="35" fill="#38bdf8" font-size="11">Original FVG</text>
-          <path d="M50 130 C 120 100, 180 70, 260 55" stroke="#22c55e" stroke-width="1.5" fill="none"/>
-          <path d="M260 55 C 300 45, 330 90, 350 130" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
-          <rect x="60" y="40" width="200" height="25" fill="rgba(239,68,68,0.1)"/>
-          <text x="270" y="150" fill="#facc15" font-size="11">Now acts as Resistance</text>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Balanced Price Range (BPR) -->
-    <div class="ict-card">
-      <h4>Balanced Price Range (BPR)</h4>
-      <div class="ict-sub">Do overlapping FVGs (ek bullish, ek bearish) jo same price zone mein bante hain — sabse strong reaction zones mein se ek.</div>
-      <ul class="ict-checklist">
-        <li>Ek bullish FVG aur ek bearish FVG identify karein jo overlap karte hon</li>
-        <li>Yeh overlap area hi BPR hai</li>
-        <li>BPR ideally kisi liquidity sweep ke baad bana ho</li>
-        <li>Price wapis BPR zone mein aane par strong rejection dekhein</li>
-        <li>Confluence ke liye BPR ka kisi Order Block/Fib zone se milna behtar hai</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <rect x="80" y="50" width="180" height="30" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-dasharray="3,2"/>
-          <rect x="80" y="70" width="180" height="30" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-dasharray="3,2"/>
-          <rect x="80" y="70" width="180" height="10" fill="rgba(250,204,21,0.4)"/>
-          <text x="80" y="45" fill="#facc15" font-size="11">Overlap = BPR Zone</text>
-          <path d="M290 30 C 320 60, 300 90, 270 110" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Support & Resistance -->
-    <div class="ict-card">
-      <h4>Support &amp; Resistance</h4>
-      <div class="ict-sub">Price levels jahan se bar bar reaction (bounce/reject) hoti aayi ho.</div>
-      <ul class="ict-checklist">
-        <li>Level kam se kam 2 baar pehle bhi respect hua ho (double touch)</li>
-        <li>Support/Resistance zone hona chahiye, exact single line nahi</li>
-        <li>Higher-timeframe level ko priority dein (Daily/4H se strong hota hai)</li>
-        <li>Entry lower-timeframe rejection candle (pin bar/engulfing) ke sath confirm karein</li>
-        <li>Volume/momentum indicator (agar use karte hon) se bhi support lein</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <line x1="20" y1="120" x2="380" y2="120" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4,3"/>
-          <text x="20" y="112" fill="#facc15" font-size="11">Support Zone</text>
-          <path d="M40 60 C 80 100, 100 118, 120 118 C 140 118, 160 60, 180 80 C 210 105, 230 118, 250 118 C 270 118, 300 50, 340 90" stroke="#38bdf8" stroke-width="1.5" fill="none"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Fibonacci Retracement -->
-    <div class="ict-card">
-      <h4>Fibonacci Retracement (Golden Zone)</h4>
-      <div class="ict-sub">Impulsive move ke baad 61.8%-79% (golden zone) retracement par entry dhoondhna.</div>
-      <ul class="ict-checklist">
-        <li>Pehle ek clear impulsive swing (high se low, ya low se high) mark karein</li>
-        <li>Fib tool ko swing start se swing end tak lagayein</li>
-        <li>Price ka 61.8%-79% zone (golden zone) tak retrace karna wait karein</li>
-        <li>Us zone mein Order Block ya FVG ka confluence dekhein</li>
-        <li>Entry sirf lower-timeframe confirmation candle ke sath lein</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <path d="M40 140 L 200 30" stroke="#22c55e" stroke-width="1.5"/>
-          <path d="M200 30 L 260 100" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
-          <line x1="40" y1="93" x2="260" y2="93" stroke="#facc15" stroke-width="1" stroke-dasharray="2,2"/>
-          <text x="265" y="97" fill="#facc15" font-size="10">61.8%</text>
-          <line x1="40" y1="82" x2="260" y2="82" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2,2"/>
-          <text x="265" y="86" fill="#f59e0b" font-size="10">79%</text>
-          <path d="M260 100 C 300 70, 330 40, 360 25" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- BOS / CHoCH -->
-    <div class="ict-card">
-      <h4>Break of Structure (BOS) &amp; Change of Character (CHoCH)</h4>
-      <div class="ict-sub">BOS = trend continuation confirm karta hai. CHoCH = possible trend reversal signal deta hai.</div>
-      <ul class="ict-checklist">
-        <li>BOS: price ka pichle swing high/low ko candle-close ke sath break karna (trend ke sath)</li>
-        <li>CHoCH: price ka opposite direction ka pehla structure point break karna (trend ke against)</li>
-        <li>Wick-break kaafi nahi — candle body close se break confirm karein</li>
-        <li>CHoCH ke baad wait karein naye structure (BOS) ke liye confirmation ke liye</li>
-        <li>BOS/CHoCH ko Order Block ya FVG ke sath combine kar ke entry lein</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <path d="M30 120 L 100 60 L 160 90 L 230 30 L 290 70 L 350 20" stroke="#38bdf8" stroke-width="1.5" fill="none"/>
-          <line x1="100" y1="60" x2="230" y2="60" stroke="#facc15" stroke-width="1" stroke-dasharray="3,2"/>
-          <text x="235" y="55" fill="#facc15" font-size="10">BOS</text>
-          <line x1="160" y1="90" x2="290" y2="90" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2"/>
-          <text x="295" y="93" fill="#ef4444" font-size="10">CHoCH area</text>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Liquidity Sweep -->
-    <div class="ict-card">
-      <h4>Liquidity Sweep (Stop Hunt)</h4>
-      <div class="ict-sub">Price jaan-boojh kar pichle high/low ko thora sa toot kar wapis aati hai — stop losses hunt karne ke liye.</div>
-      <ul class="ict-checklist">
-        <li>Ek clear pichla high/low identify karein jahan retail traders ke SL/pending orders ho sakte hain</li>
-        <li>Price us level ko sirf wick se break kare, candle body close us level ke andar wapis aaye</li>
-        <li>Sweep ke foran baad strong reversal candle ya BOS dekhein</li>
-        <li>Sweep ke sath Order Block/FVG ka confluence hona confirmation ko mazboot karta hai</li>
-        <li>News ke waqt sweeps zyada reliable nahi hote — normal session mein prefer karein</li>
-      </ul>
-      <div class="ict-diagram">
-        <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="0" width="400" height="180" fill="#0f172a"/>
-          <line x1="20" y1="60" x2="380" y2="60" stroke="#facc15" stroke-width="1" stroke-dasharray="3,2"/>
-          <text x="20" y="52" fill="#facc15" font-size="11">Previous High (Liquidity)</text>
-          <path d="M40 100 C 100 80, 150 40, 200 30" stroke="#22c55e" stroke-width="1.5" fill="none"/>
-          <path d="M200 30 L 220 45" stroke="#ef4444" stroke-width="2"/>
-          <path d="M220 45 C 260 90, 310 100, 360 60" stroke="#38bdf8" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
-          <text x="225" y="70" fill="#ef4444" font-size="10">Wick sweep</text>
-        </svg>
-      </div>
-    </div>
-
-  </div>
-</section>
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
     <h3>XAUUSD Live Chart &amp; Analysis Tools</h3>
@@ -779,17 +564,10 @@
     }
 
     let profit;
-    if (type === 'BUY') {
-      profit = (exit - entry) * lot * 100;
-    } else {
-      profit = (entry - exit) * lot * 100;
-    }
+    if (type === 'BUY') profit = (exit - entry) * lot * 100;
+    else profit = (entry - exit) * lot * 100;
 
-    trades.push({
-      date: new Date().toLocaleDateString(),
-      account: account || '-',
-      pair, type, lot, entry, exit, profit
-    });
+    trades.push({ date: new Date().toLocaleDateString(), account: account || '-', pair, type, lot, entry, exit, profit });
 
     document.getElementById('trAccount').value = '';
     document.getElementById('pair').value = '';
@@ -851,31 +629,22 @@
 
     if (buyAccount && sellAccount) {
       const existingIndex = calcLogEntries.findIndex(e => e.buyAccount === buyAccount && e.sellAccount === sellAccount);
-      const entryData = {
-        buyAccount, sellAccount,
-        buyEntry, sellEntry, buyTP, buySL, sellTP, sellSL,
-        lastUpdated: new Date().toLocaleString()
-      };
+      const entryData = { buyAccount, sellAccount, buyEntry, sellEntry, buyTP, buySL, sellTP, sellSL, lastUpdated: new Date().toLocaleString() };
       if (existingIndex >= 0) calcLogEntries[existingIndex] = entryData;
       else calcLogEntries.push(entryData);
       saveCalcLog();
     }
   }
 
-  function deleteCalcLogEntry(index) {
-    calcLogEntries.splice(index, 1);
-    saveCalcLog();
-  }
+  function deleteCalcLogEntry(index) { calcLogEntries.splice(index, 1); saveCalcLog(); }
 
   function renderCalcLog() {
     const container = document.getElementById('calcLogContainer');
     container.innerHTML = '';
-
     if (calcLogEntries.length === 0) {
       container.innerHTML = '<p style="color:#64748b;">Abhi tak koi hedge log nahi hua. Calculator mein Account Numbers bhar kar calculate karein.</p>';
       return;
     }
-
     calcLogEntries.forEach((e, i) => {
       const card = document.createElement('div');
       card.className = 'calclog-card';
@@ -996,10 +765,7 @@
     saveLossAccounts();
   }
 
-  function deleteLossAccount(accountId) {
-    lossAccounts = lossAccounts.filter(a => a.id !== accountId);
-    saveLossAccounts();
-  }
+  function deleteLossAccount(accountId) { lossAccounts = lossAccounts.filter(a => a.id !== accountId); saveLossAccounts(); }
 
   function addLossToAccount(accountId) {
     const account = lossAccounts.find(a => a.id === accountId);
@@ -1022,15 +788,12 @@
   function renderLossTracker() {
     const container = document.getElementById('lossTrackerContainer');
     container.innerHTML = '';
-
     if (lossAccounts.length === 0) {
       container.innerHTML = '<p style="color:#64748b;">Abhi tak koi account add nahi hua.</p>';
       return;
     }
-
     lossAccounts.forEach(account => {
       const total = account.entries.reduce((sum, e) => sum + e.amount, 0);
-
       let entriesHtml = '';
       account.entries.forEach(e => {
         entriesHtml += `
@@ -1042,7 +805,6 @@
             </span>
           </div>`;
       });
-
       const card = document.createElement('div');
       card.className = 'loss-account-card';
       card.innerHTML = `
@@ -1050,19 +812,16 @@
           <h4>Account: ${account.name}</h4>
           <span class="loss-total-badge">Total: $${total.toFixed(2)}</span>
         </div>
-
         <div class="form-row">
           <input type="number" id="lossAmount_${account.id}" placeholder="Loss Amount ($)" step="0.01">
           <button onclick="addLossToAccount(${account.id})">Add Loss</button>
           <button class="delete-btn" onclick="deleteLossAccount(${account.id})">Delete Account</button>
         </div>
-
         ${entriesHtml}
       `;
       container.appendChild(card);
     });
   }
-
   renderLossTracker();
 
   // ===== Accounts =====
@@ -1594,37 +1353,8 @@
     document.getElementById('faqFolder_' + index).classList.toggle('open');
   }
   renderFaq();
-</script>
 
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-<script type="text/javascript">
-  new TradingView.widget({
-    "width": "100%",
-    "height": 650,
-    "symbol": "OANDA:XAUUSD",
-    "interval": "15",
-    "timezone": "Etc/UTC",
-    "theme": "dark",
-    "style": "1",
-    "locale": "en",
-    "toolbar_bg": "#0f172a",
-    "enable_publishing": false,
-    "allow_symbol_change": true,
-    "hide_top_toolbar": false,
-    "hide_side_toolbar": false,
-    "hide_legend": false,
-    "withdateranges": true,
-    "details": true,
-    "hotlist": true,
-    "calendar": true,
-    "studies": ["MASimple@tv-basicstudies", "RSI@tv-basicstudies"],
-    "show_popup_button": true,
-    "popup_width": "1000",
-    "popup_height": "650",
-    "container_id": "tradingview_xauusd"
-  });
-</script>
-<script>
+  // ===== Firebase Auth + Admin System =====
   const firebaseConfig = {
     apiKey: "AIzaSyCm_1x5ZsAL-VwvGbGbDuxHO6hpJo3IrE6Lg",
     authDomain: "forex-with-waqar.firebaseapp.com",
@@ -1767,5 +1497,35 @@
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
   }
 </script>
+
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script type="text/javascript">
+  new TradingView.widget({
+    "width": "100%",
+    "height": 650,
+    "symbol": "OANDA:XAUUSD",
+    "interval": "15",
+    "timezone": "Etc/UTC",
+    "theme": "dark",
+    "style": "1",
+    "locale": "en",
+    "toolbar_bg": "#0f172a",
+    "enable_publishing": false,
+    "allow_symbol_change": true,
+    "hide_top_toolbar": false,
+    "hide_side_toolbar": false,
+    "hide_legend": false,
+    "withdateranges": true,
+    "details": true,
+    "hotlist": true,
+    "calendar": true,
+    "studies": ["MASimple@tv-basicstudies", "RSI@tv-basicstudies"],
+    "show_popup_button": true,
+    "popup_width": "1000",
+    "popup_height": "650",
+    "container_id": "tradingview_xauusd"
+  });
+</script>
+
 </body>
 </html>
