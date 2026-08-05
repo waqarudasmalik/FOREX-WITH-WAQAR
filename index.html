@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forex With Waqar</title>
+ .auth-overlay { position: fixed; inset:0; background: rgba(5,7,15,0.98); z-index: 9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px; padding:20px; }
+.auth-box { background: rgba(15,23,42,0.9); border:1px solid rgba(148,163,184,0.2); border-radius:20px; padding:40px; text-align:center; max-width:400px; }
+.google-btn { background:#fff; color:#111; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; margin:0 auto; }
+.admin-fab { position: fixed; bottom:20px; right:20px; z-index: 9000; background: linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; border:none; padding:14px 20px; border-radius:999px; font-weight:800; cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+.admin-panel { position: fixed; top:0; right:0; width:380px; max-width:90vw; height:100vh; background: rgba(10,14,25,0.98); border-left:1px solid rgba(148,163,184,0.2); z-index:9500; overflow-y:auto; padding:20px; display:none; }
+.admin-user-card { background: rgba(17,24,39,0.7); border:1px solid rgba(148,163,184,0.15); border-radius:12px; padding:14px; margin-bottom:12px; }
+.admin-user-card button { padding:6px 10px; font-size:12px; border-radius:6px; border:none; cursor:pointer; background:#38bdf8; color:#0f172a; font-weight:600; }
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05070f; color: #e2e8f0; line-height: 1.6; position: relative; overflow-x: hidden; min-height: 100vh; }
@@ -173,9 +180,41 @@
 .ict-diagram { background: rgba(15,23,42,0.6); border: 1px solid rgba(148,163,184,0.15); border-radius: 12px; padding: 10px; text-align: center; }
 .ict-diagram svg { max-width: 100%; height: auto; }
 </style>
+ <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-box">
+    <h2 style="color:#fff;margin-bottom:10px;">Forex With Waqar</h2>
+    <p style="color:#94a3b8;margin-bottom:20px;">Is website ko access karne ke liye apne Google account se sign in karein.</p>
+    <button class="google-btn" onclick="signInWithGoogle()">Sign in with Google</button>
+  </div>
+</div>
 
+<div id="pendingOverlay" class="auth-overlay" style="display:none;">
+  <div class="auth-box">
+    <h2 style="color:#facc15;">Approval Pending</h2>
+    <p style="color:#94a3b8;">Aapka login request admin ko bhej diya gaya hai. Approve hote hi aap website use kar sakenge.</p>
+    <button class="google-btn" onclick="signOutUser()">Sign Out</button>
+  </div>
+</div>
+
+<div id="rejectedOverlay" class="auth-overlay" style="display:none;">
+  <div class="auth-box">
+    <h2 style="color:#ef4444;">Access Denied</h2>
+    <p style="color:#94a3b8;">Aapko access nahi diya gaya. Admin se raabta karein.</p>
+    <button class="google-btn" onclick="signOutUser()">Sign Out</button>
+  </div>
+</div>
+
+<button id="adminFab" class="admin-fab" style="display:none;" onclick="toggleAdminPanel()">👑 Admin Panel</button>
+<div id="adminPanel" class="admin-panel">
+  <h3 style="color:#fff;margin-bottom:15px;">Admin Panel — Users</h3>
+  <div id="adminUserList"></div>
+  <button class="form-row button" onclick="toggleAdminPanel()" style="margin-top:15px; width:100%;">Close</button>
+</div>
 <div class="bg-grid"></div>
 <div class="bg-orb orb1"></div>
 <div class="bg-orb orb2"></div>
@@ -1585,6 +1624,148 @@
     "container_id": "tradingview_xauusd"
   });
 </script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCm_1x5ZsAL-VwvGbGbDuxHO6hpJo3IrE6Lg",
+    authDomain: "forex-with-waqar.firebaseapp.com",
+    projectId: "forex-with-waqar",
+    storageBucket: "forex-with-waqar.firebasestorage.app",
+    messagingSenderId: "1081225569208",
+    appId: "1:1081225569208:web:ab17030da76c5c1918654d"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
+  const ADMIN_EMAILS = ["ghulammurtaza3334m@gmail.com", "waqarudasmalik11@gmail.com"];
+  let currentUserDocUnsub = null;
+  let currentUID = null;
+
+  function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err => alert("Login error: " + err.message));
+  }
+  function signOutUser() { auth.signOut(); }
+
+  function logActivity(action) {
+    if (!currentUID) return;
+    db.collection('users').doc(currentUID).collection('activity').add({
+      action, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('nav a, .form-row button, .edit-btn, .delete-btn, .save-btn');
+    if (el) logActivity(el.textContent.trim().substring(0, 60));
+  });
+
+  auth.onAuthStateChanged(async (user) => {
+    if (currentUserDocUnsub) { currentUserDocUnsub(); currentUserDocUnsub = null; }
+
+    if (!user) {
+      currentUID = null;
+      document.getElementById('authOverlay').style.display = 'flex';
+      document.getElementById('pendingOverlay').style.display = 'none';
+      document.getElementById('rejectedOverlay').style.display = 'none';
+      document.getElementById('adminFab').style.display = 'none';
+      return;
+    }
+
+    currentUID = user.uid;
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+    const userRef = db.collection('users').doc(user.uid);
+    const docSnap = await userRef.get();
+
+    if (!docSnap.exists) {
+      await userRef.set({
+        email: user.email,
+        name: user.displayName || '',
+        photo: user.photoURL || '',
+        status: isAdmin ? 'approved' : 'pending',
+        role: isAdmin ? 'admin' : 'member',
+        forceLogout: false,
+        lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await userRef.update({ lastActive: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+
+    currentUserDocUnsub = userRef.onSnapshot(snap => {
+      const data = snap.data();
+      if (!data) return;
+
+      if (data.forceLogout) {
+        userRef.update({ forceLogout: false }).then(() => auth.signOut());
+        return;
+      }
+
+      document.getElementById('authOverlay').style.display = 'none';
+
+      if (data.status === 'approved') {
+        document.getElementById('pendingOverlay').style.display = 'none';
+        document.getElementById('rejectedOverlay').style.display = 'none';
+        document.getElementById('adminFab').style.display = (data.role === 'admin') ? 'block' : 'none';
+        logActivity('Session active');
+      } else if (data.status === 'rejected') {
+        document.getElementById('pendingOverlay').style.display = 'none';
+        document.getElementById('rejectedOverlay').style.display = 'flex';
+        document.getElementById('adminFab').style.display = 'none';
+      } else {
+        document.getElementById('pendingOverlay').style.display = 'flex';
+        document.getElementById('rejectedOverlay').style.display = 'none';
+        document.getElementById('adminFab').style.display = 'none';
+      }
+    });
+
+    if (isAdmin) loadAdminUsers();
+  });
+
+  function loadAdminUsers() {
+    db.collection('users').onSnapshot(snap => {
+      const container = document.getElementById('adminUserList');
+      container.innerHTML = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (ADMIN_EMAILS.includes(d.email)) return;
+        const card = document.createElement('div');
+        card.className = 'admin-user-card';
+        card.innerHTML = `
+          <p style="color:#fff;font-weight:bold;">${d.name || d.email}</p>
+          <p style="color:#94a3b8;font-size:12px;">${d.email}</p>
+          <p style="color:#facc15;font-size:12px;">Status: ${d.status}</p>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+            <button onclick="approveUser('${doc.id}')">Approve</button>
+            <button onclick="rejectUser('${doc.id}')">Reject</button>
+            <button onclick="forceLogoutUser('${doc.id}')">Logout</button>
+            <button onclick="viewActivity('${doc.id}', '${(d.name||d.email).replace(/'/g,"")}')">Activity</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    });
+  }
+
+  function approveUser(uid) { db.collection('users').doc(uid).update({ status: 'approved' }); }
+  function rejectUser(uid) { db.collection('users').doc(uid).update({ status: 'rejected' }); }
+  function forceLogoutUser(uid) { db.collection('users').doc(uid).update({ forceLogout: true }); }
+
+  function viewActivity(uid, name) {
+    db.collection('users').doc(uid).collection('activity').orderBy('timestamp','desc').limit(50).get().then(snap => {
+      let msg = `Activity for ${name}:\n\n`;
+      snap.forEach(d => {
+        const a = d.data();
+        const t = a.timestamp ? a.timestamp.toDate().toLocaleString() : '';
+        msg += `${t} — ${a.action}\n`;
+      });
+      alert(msg || 'No activity yet.');
+    });
+  }
+
+  function toggleAdminPanel() {
+    const panel = document.getElementById('adminPanel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  }
+</script>
 </body>
 </html>
