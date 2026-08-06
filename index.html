@@ -364,7 +364,295 @@
   <h2>Master the Hedging System</h2>
   <p>Apni trades track karein, hedge lagayein aur apna zati trading record khud-badh (auto-update) rakhein.</p>
 </div>
+<section id="trade-entry-rules" class="glass-panel" style="margin-top:10px;">
+  <div class="brand-watermark">Forex With Waqar</div>
+  <h3>ICT Strategy Reference — Trade Entry Rules</h3>
+  <p style="color:#94a3b8; margin-bottom:18px; font-size:14px;">
+    Ye section aapko 8 core ICT/SMC entry setups deta hai — har setup ke saath conditions, exact trigger/SL/TP aur ek visual SVG chart diya gaya hai. Sirf un entries ko lein jo tamam checklist conditions pass karein.
+  </p>
 
+  <!-- Strategy grid -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px;">
+
+    <!-- 1. Fair Value Gap (FVG) / Imbalance -->
+    <div class="ict-card" aria-labelledby="fvgtitle">
+      <h4 id="fvgtitle">1. Fair Value Gap (FVG) / Imbalance</h4>
+      <div class="ict-sub">3-candle imbalance — beech wali candle ka body/wick market se gap chhor jati hai.</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <!-- candles -->
+          <rect x="38" y="78" width="22" height="44" fill="#ef4444" rx="3"/>
+          <rect x="84" y="28" width="22" height="94" fill="#22c55e" rx="3"/>
+          <rect x="130" y="10" width="22" height="112" fill="#22c55e" rx="3"/>
+          <!-- FVG highlight -->
+          <rect x="96" y="46" width="58" height="28" fill="rgba(250,204,21,0.08)" stroke="#facc15" stroke-dasharray="4,3" rx="4"/>
+          <text x="102" y="64" fill="#facc15" font-size="11">FVG / Imbalance</text>
+          <path d="M190 30 C 230 35, 260 60, 320 80" stroke="#38bdf8" stroke-width="1.4" fill="none" stroke-dasharray="4,3"/>
+          <text x="280" y="28" fill="#38bdf8" font-size="11">Fill → Entry</text>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>HTF (e.g., 4H / Daily) shows a clear impulsive leg creating the FVG.</li>
+          <li>FVG must show a visible unfilled gap between Candle 1 and Candle 3 (wick/body non-overlap).</li>
+          <li>Trade direction should align with HTF bias (trend or structural bias).</li>
+          <li>Lower timeframe confirmation (LTF rejection/engulf) preferred at retest.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> Price retraces into the FVG and LTF closes a clear rejection candle (pin, engulfing) inside or just beyond the FVG.</li>
+          <li><strong>SL:</strong> Place SL beyond the far edge of the FVG (HTF extreme) + 2–4 pip/tick buffer depending on instrument.</li>
+          <li><strong>TP:</strong> Scale: partial at first HTF structure (50% move), next at recent swing, final at next HTF liquidity cluster. Aim R:R ≥ 1:1, prefer 1:2+ when confluence present.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 2. Institutional Order Block (OB) -->
+    <div class="ict-card" aria-labelledby="obtitle">
+      <h4 id="obtitle">2. Institutional Order Block (OB)</h4>
+      <div class="ict-sub">Last opposite-direction candle before a strong impulse — area of institutional interest.</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <rect x="46" y="64" width="26" height="58" fill="#ef4444" rx="3"/>
+          <rect x="96" y="22" width="26" height="100" fill="#22c55e" rx="3"/>
+          <rect x="146" y="12" width="26" height="110" fill="#22c55e" rx="3"/>
+          <rect x="88" y="54" width="92" height="32" fill="rgba(250,204,21,0.12)" stroke="#facc15" stroke-dasharray="4,3" rx="4"/>
+          <text x="96" y="73" fill="#facc15" font-size="11">Order Block Zone</text>
+          <text x="280" y="20" fill="#38bdf8" font-size="11">Retest → Entry</text>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>Identify the last bearish candle before a bullish impulse (bullish OB) or vice versa for sell OB.</li>
+          <li>OB must align with HTF structural support/resistance or round-number liquidity regions.</li>
+          <li>Expect price to retest OB and show acceptance/rejection on LTF.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> On retest, wait for LTF confirmation candle inside or near OB (bullish engulf/pin for buy OB).</li>
+          <li><strong>SL:</strong> Place SL beyond OB candle extreme (for buy OB, below the low of the OB candle) + small buffer.</li>
+          <li><strong>TP:</strong> Partial at first structural level, remainder to next HTF swing or measured move. Adjust TP to maintain favorable R:R relative to SL.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 3. Liquidity Sweeps (Buy-side & Sell-side) -->
+    <div class="ict-card" aria-labelledby="liquiditytitle">
+      <h4 id="liquiditytitle">3. Liquidity Sweeps (Buy-side &amp; Sell-side)</h4>
+      <div class="ict-sub">Price hunts stop clusters (sweep) then reverses — common institutional behaviour.</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <path d="M38 120 L110 40 L170 72 L240 20 L320 80" stroke="#38bdf8" stroke-width="2" fill="none"/>
+          <rect x="226" y="6" width="68" height="22" fill="rgba(239,68,68,0.12)" stroke="#ef4444" rx="4"/>
+          <text x="234" y="22" fill="#ef4444" font-size="11">Buy-side Sweep</text>
+          <circle cx="240" cy="16" r="4" fill="#facc15"/>
+          <text x="316" y="86" fill="#38bdf8" font-size="11">Liquidity Taken → Reverse</text>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>Clear prior liquidity node (swing highs/lows, clustered stops) exists.</li>
+          <li>Wick extends beyond liquidity then price reverses with rejection candle.</li>
+          <li>Volume spike / large wick indicating hunt (if volume available) strengthens the setup.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> After the sweep wick completes and an opposite-direction LTF candle closes (confirm), enter on break of that confirming candle or on a pullback into it.</li>
+          <li><strong>SL:</strong> Beyond the wick/luxury-extreme that performed the sweep + buffer.</li>
+          <li><strong>TP:</strong> First structural level (recent swing). If momentum strong, target next HTF liquidity clusters. Manage partial exits to lock profit.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 4. Market Structure Shift (MSS) / Break of Structure (BOS) -->
+    <div class="ict-card" aria-labelledby="msstitle">
+      <h4 id="msstitle">4. Market Structure Shift (MSS) / Break of Structure (BOS)</h4>
+      <div class="ict-sub">Price breaks HTF structure indicating a potential trend change (BOS) and later retest (MSS).</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <polyline points="30,110 88,62 146,100 204,46 262,94 320,30" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <rect x="196" y="36" width="44" height="12" fill="rgba(34,197,94,0.08)" stroke="#22c55e" rx="3"/>
+          <text x="206" y="44" fill="#22c55e" font-size="11">BOS</text>
+          <text x="330" y="28" fill="#facc15" font-size="11">MSS Confirm</text>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>HTF candle(s) close beyond a clear swing extreme indicating BOS.</li>
+          <li>Prefer retest of the broken structure (now S/R) for cleaner entry and lower slippage.</li>
+          <li>Confirmation on LTF (small BOS, rejection candle) strengthens the trade validity.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> Enter on retest after BOS when LTF confirms (e.g., LTF BOS or a reversal candle aligned with HTF BOS direction).</li>
+          <li><strong>SL:</strong> Beyond the retest wick/structure extreme (outside the MSS) + buffer.</li>
+          <li><strong>TP:</strong> Use measured move equal to the initiating impulse or next HTF swing; consider scaling out as structure confirms.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 5. Optimal Trade Entry (OTE) -->
+    <div class="ict-card" aria-labelledby="otetitle">
+      <h4 id="otetitle">5. Optimal Trade Entry (OTE)</h4>
+      <div class="ict-sub">Fibonacci-based optimal entry (61.8% → 79%) within HTF impulse/corrective structure.</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <path d="M38 112 L120 36 L198 96 L318 20" stroke="#38bdf8" stroke-width="2" fill="none"/>
+          <rect x="138" y="46" width="84" height="28" fill="rgba(56,189,248,0.06)" stroke="#38bdf8" stroke-dasharray="4,3" rx="4"/>
+          <text x="154" y="64" fill="#38bdf8" font-size="11">OTE Zone 61.8% - 79%</text>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>Identify HTF impulse and corrective leg; plot Fibonacci from swing start to swing end.</li>
+          <li>OTE must lie inside 61.8%–79% retracement band; confluence with OB/FVG or HTF S/R boosts probability.</li>
+          <li>LTF confirmation required (rejection/engulf) for entry.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> Price enters the OTE band (61.8%–79%) and LTF shows reversal confirmation (engulf/pin/inside-bar rejection).</li>
+          <li><strong>SL:</strong> Beyond the corrective swing low/high outside OTE + buffer.</li>
+          <li><strong>TP:</strong> Partial at nearby HTF structure, final at measured impulse projection or next HTF liquidity. Maintain R:R > 1:1 where possible.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 6. ICT Silver Bullet Strategy -->
+    <div class="ict-card" aria-labelledby="silverbullettitle">
+      <h4 id="silverbullettitle">6. ICT Silver Bullet Strategy</h4>
+      <div class="ict-sub">High-probability confluence trade: Order Block + FVG + Liquidity Sweep + MSS alignment required.</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <rect x="70" y="48" width="64" height="28" fill="rgba(250,204,21,0.08)" stroke="#facc15" rx="4"/>
+          <rect x="160" y="30" width="64" height="28" fill="rgba(34,197,94,0.06)" stroke="#22c55e" rx="4"/>
+          <path d="M38 120 L110 40 L190 100 L270 20 L350 80" stroke="#38bdf8" stroke-width="1.6" fill="none" stroke-dasharray="4,3"/>
+          <text x="84" y="66" fill="#facc15" font-size="11">OB</text>
+          <text x="168" y="48" fill="#22c55e" font-size="11">FVG</text>
+          <text x="304" y="18" fill="#facc15" font-size="11">Sweep + MSS</text>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions (all required):</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>HTF trend/bias aligns with trade direction.</li>
+          <li>Order Block and FVG overlap (confluence zone) or close proximity.</li>
+          <li>Liquidity sweep occurred beyond the zone and price rejected back into the confluence.</li>
+          <li>MSS / BOS confirms the intended direction on HTF or after retest.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> After all items above align, enter on a LTF confirmation candle inside the confluence zone. Consider staggered entries: half at first confirm, half on continuation break.</li>
+          <li><strong>SL:</strong> Beyond the OB/FVG extreme and sweep wick (a conservative placement to avoid being stopped by volatility).</li>
+          <li><strong>TP:</strong> Multi-leg targets: first partial at nearest structure, then to a measured move, final at HTF liquidity zone. Expect higher R:R due to multiple confluences.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 7. Balanced Price Range (BPR) -->
+    <div class="ict-card" aria-labelledby="bprtitle">
+      <h4 id="bprtitle">7. Balanced Price Range (BPR)</h4>
+      <div class="ict-sub">Zone where opposing FVGs overlap creating mean-reversion or range-play opportunities.</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <rect x="60" y="48" width="260" height="28" fill="rgba(99,102,241,0.06)" stroke="#60a5fa" rx="4"/>
+          <text x="162" y="66" fill="#60a5fa" font-size="11">BPR — Balanced Zone</text>
+          <path d="M38 120 L96 64 L154 94 L212 52 L270 94 L330 40" stroke="#38bdf8" stroke-width="1.4" fill="none"/>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>Two opposite imbalances/FVGs overlap to create a balanced zone where supply meets demand.</li>
+          <li>Volatility contraction / range behavior near zone — favors mean reversion setups with tight risk.</li>
+          <li>Prefer additional confluence (round numbers, OB edges) for better edge.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> Enter on LTF rejection off the BPR center (wick rejection, inside-bar flip, or breakout-back into range).</li>
+          <li><strong>SL:</strong> Tight SL just outside the BPR edge (small because this is mean-reversion play).</li>
+          <li><strong>TP:</strong> Opposite side of BPR or nearest HTF structure; set R:R at least 1:1 and tighten if range shows low volatility.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- 8. Inverted Fair Value Gap (IFVG) -->
+    <div class="ict-card" aria-labelledby="ifvgtitle">
+      <h4 id="ifvgtitle">8. Inverted Fair Value Gap (IFVG)</h4>
+      <div class="ict-sub">When an FVG is decisively broken and the zone flips role (support → resistance or vice versa).</div>
+
+      <div class="ict-diagram" style="margin-bottom:12px;">
+        <svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+          <rect x="60" y="30" width="300" height="24" fill="rgba(239,68,68,0.06)" stroke="#ef4444" stroke-dasharray="4,3" rx="4"/>
+          <text x="78" y="46" fill="#ef4444" font-size="11">Broken FVG → IFVG</text>
+          <path d="M38 120 L110 40 L192 92 L272 16 L352 74" stroke="#38bdf8" stroke-width="1.4" fill="none"/>
+        </svg>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.45); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <strong style="color:#38bdf8;">Conditions:</strong>
+        <ul style="color:#cbd5e1; margin:8px 0 0 18px; line-height:1.5;">
+          <li>Original FVG has been decisively closed/broken by HTF close beyond the gap.</li>
+          <li>On retest, market treats the broken gap as new S/R (IFVG) with clear rejection.</li>
+          <li>Prefer confluence with OB/MSS or round-number liquidity for higher confidence.</li>
+        </ul>
+      </div>
+
+      <div style="color:#cbd5e1; font-size:13px; margin-bottom:6px;">
+        <strong style="color:#facc15;">Entry Rules (exact):</strong>
+        <ol style="margin:8px 0 0 18px; line-height:1.5;">
+          <li><strong>Trigger:</strong> After HTF close beyond FVG and subsequent retest, enter when LTF shows rejection (e.g., bearish engulf at IFVG acting as resistance).</li>
+          <li><strong>SL:</strong> Beyond the retest wick / broken zone extreme + small buffer.</li>
+          <li><strong>TP:</strong> Nearest structural level; if IFVG aligns with OB or MSS, extend TP to next HTF liquidity. Use partial exits to protect gains.</li>
+        </ol>
+      </div>
+    </div>
+
+  </div> <!-- end grid -->
+
+  <p style="color:#94a3b8; margin-top:16px; font-size:13px;">
+    Notes: Hamesha risk management follow karein. In rules ko apne pair/timeframe aur broker spread ke mutabiq chhote adjustments ke sath use karein. Agar aap chahein, main in entries ke example annotated screenshots ya TradingView shapes bhi add kar sakta hoon.
+  </p>
+</section>
 <section id="record">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
