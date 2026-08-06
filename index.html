@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Forex With Waqar</title>
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
-<script src="https://gstatic.com"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05070f; color: #e2e8f0; line-height: 1.6; position: relative; overflow-x: hidden; min-height: 100vh; }
@@ -81,24 +81,4 @@
   .field-row input, .field-row select { padding:10px 12px; border-radius:10px; border:1px solid rgba(148,163,184,0.25); background:rgba(15,23,42,0.8); color:#fff; font-size:15px; }
   .tp-glow { background:rgba(34,211,238,0.12)!important; border-color:rgba(34,211,238,0.6)!important; box-shadow:0 0 12px rgba(34,211,238,0.35); color:#67e8f9!important; font-weight:bold; }
   .sl-glow { background:rgba(244,63,94,0.12)!important; border-color:rgba(244,63,94,0.6)!important; box-shadow:0 0 12px rgba(244,63,94,0.35); color:#fda4af!important; font-weight:bold; }
-  
-  /* Fixed incomplete original line safely below */
-  .outcome-summary { display:flex; gap:15px; flex-wrap:wrap; }
-
-  /* ======================================================= */
-  /* NEW TRADE ENTRY RULES CONTAINER STYLES (NO DELETIONS)   */
-  /* ======================================================= */
-  .ict-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; margin-top: 30px; }
-  .ict-card { display: flex; flex-direction: column; justify-content: space-between; height: 100%; transition: all 0.3s ease; position: relative; overflow: hidden; }
-  .ict-card:hover { box-shadow: 0 12px 30px rgba(34,197,94,0.15); border-color: #22c55e; }
-  .ict-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; width: max-content; }
-  .badge-bullish { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
-  .badge-bearish { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-  .ict-meta { font-size: 13px; color: #94a3b8; margin: 10px 0 15px; padding-left: 12px; border-left: 2px solid #38bdf8; }
-  .rule-block { margin-top: 15px; background: rgba(5,7,15,0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(148,163,184,0.08); }
-  .rule-block h5 { font-size: 13px; font-weight: 700; color: #facc15; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .rule-block ul { list-style: none; padding-left: 0; }
-  .rule-block li { font-size: 12.5px; color: #cbd5e1; margin-bottom: 4px; display: flex; gap: 6px; align-items: flex-start; }
-  .rule-block li::before { content: "•"; color: #38bdf8; font-weight: bold; }
-  
-  /* Dynamic HTML/CSS Strategy Visual Charts */
+  .outcome-summary { display:flex; gap:15px; flex-wrap:wra
