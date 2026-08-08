@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05070f; color: #e2e8f0; line-height: 1.6; position: relative; overflow-x: hidden; min-height: 100vh; }
@@ -183,6 +184,38 @@
 .ict-checklist li::before { content: "✅"; position: absolute; left: 0; top: 6px; font-size: 12px; }
 .ict-diagram { background: rgba(15,23,42,0.6); border: 1px solid rgba(148,163,184,0.15); border-radius: 12px; padding: 10px; text-align: center; }
 .ict-diagram svg { max-width: 100%; height: auto; }
+ /* ===== Interview Feature Styles ===== */
+.interview-hero { text-align:center; margin-bottom:25px; }
+.interview-hero p { color:#94a3b8; font-size:14px; max-width:650px; margin:8px auto 0; }
+.interview-setup { display:flex; flex-wrap:wrap; gap:20px; margin-bottom:20px; }
+.interview-video-box { flex:1; min-width:280px; background:#000; border-radius:16px; overflow:hidden; border:1px solid rgba(148,163,184,0.25); position:relative; aspect-ratio:16/9; }
+.interview-video-box video { width:100%; height:100%; object-fit:cover; display:block; }
+.rec-badge { position:absolute; top:12px; left:12px; background:rgba(239,68,68,0.9); color:#fff; font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; display:none; align-items:center; gap:6px; }
+.rec-badge.active { display:flex; }
+.rec-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:recPulse 1s infinite; }
+@keyframes recPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.interview-panel { flex:1; min-width:280px; background: rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:22px; display:flex; flex-direction:column; gap:14px; }
+.interview-qcount { color:#94a3b8; font-size:13px; font-weight:600; }
+.interview-qtype { display:inline-block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; padding:3px 10px; border-radius:999px; margin-bottom:8px; }
+.interview-qtype.faq { background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); }
+.interview-qtype.strategy { background:rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.4); }
+.interview-qtype.calc { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.4); }
+.interview-question { color:#fff; font-size:18px; font-weight:700; line-height:1.5; min-height:80px; }
+.interview-timer-wrap { display:flex; align-items:center; gap:15px; }
+.interview-timer-ring { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#fff; border:4px solid rgba(148,163,184,0.2); flex-shrink:0; }
+.interview-timer-ring.warn { border-color:#facc15; color:#facc15; }
+.interview-timer-ring.danger { border-color:#ef4444; color:#ef4444; animation:recPulse 0.6s infinite; }
+.interview-progress-bar { flex:1; height:8px; background:rgba(148,163,184,0.15); border-radius:999px; overflow:hidden; }
+.interview-progress-fill { height:100%; background:linear-gradient(90deg,#22c55e,#38bdf8); border-radius:999px; transition:width 0.3s linear; width:0%; }
+.interview-controls { display:flex; gap:10px; flex-wrap:wrap; }
+.interview-btn { padding:11px 20px; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
+.interview-btn.start { background:linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; }
+.interview-btn.end { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+.interview-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.interview-status-msg { color:#facc15; font-size:13px; }
+.interview-result-box { background: rgba(15,23,42,0.6); border:1px solid rgba(34,197,94,0.3); border-radius:16px; padding:20px; margin-top:20px; }
+.interview-result-box video { width:100%; border-radius:12px; margin:12px 0; background:#000; }
+.admin-interview-video { width:100%; border-radius:8px; margin:8px 0; background:#000; }
 </style>
 </head>
 <body>
@@ -215,6 +248,8 @@
 <div id="adminPanel" class="admin-panel">
   <h3 style="color:#fff;margin-bottom:15px;">Admin Panel — Users</h3>
   <div id="adminUserList"></div>
+ <h3 style="color:#facc15;margin:20px 0 15px;">Admin Panel — Interview Videos</h3>
+<div id="adminInterviewList"></div>
   <button class="form-row button" onclick="toggleAdminPanel()" style="margin-top:15px; width:100%; padding:11px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">Close</button>
 </div>
 
@@ -236,6 +271,7 @@
     <a href="#hedgeslist">Hedges</a>
     <a href="#tradingview">Live Chart</a>
   <a href="#ictsmc">ICT/SMC Guide</a>
+   <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -1046,7 +1082,40 @@
     <div id="faqContainer"></div>
   </div>
 </section>
+<section id="interview">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Live Interview Practice (150 Questions)</h3>
+    <div class="interview-hero">
+      <p>Camera on karein aur is website ke andar hi apni live mock interview dein. FAQs, strategy explanation aur lot size/pips/profit-loss calculation — total 150 sawalat, har sawal ke liye <strong style="color:#facc15;">60 seconds</strong>. Time khatam hote hi agla sawal khud-ba-khud aa jayega. Poori interview video record ho kar seedha admin ke pass mehfooz ho jayegi.</p>
+    </div>
 
+    <div class="interview-setup">
+      <div class="interview-video-box">
+        <video id="interviewVideo" autoplay muted playsinline></video>
+        <span id="recBadge" class="rec-badge"><span class="rec-dot"></span> REC</span>
+      </div>
+      <div class="interview-panel">
+        <div>
+          <span id="interviewQCount" class="interview-qcount">Interview shuru nahi hui</span>
+          <div id="interviewQType" class="interview-qtype faq" style="display:none;">FAQ</div>
+          <div id="interviewQuestion" class="interview-question">"Start Interview" button dabayein — camera permission allow karein, phir sawalat shuru honge.</div>
+        </div>
+        <div class="interview-timer-wrap">
+          <div id="interviewTimerRing" class="interview-timer-ring">60</div>
+          <div class="interview-progress-bar"><div id="interviewProgressFill" class="interview-progress-fill"></div></div>
+        </div>
+        <div class="interview-controls">
+          <button id="interviewStartBtn" class="interview-btn start" onclick="startInterview()">🎥 Start Live Interview</button>
+          <button id="interviewEndBtn" class="interview-btn end" onclick="endInterview()" disabled>⏹ End Interview</button>
+        </div>
+        <div id="interviewStatusMsg" class="interview-status-msg"></div>
+      </div>
+    </div>
+
+    <div id="interviewResultBox" style="display:none;"></div>
+  </div>
+</section>
 <footer>
   © 2026 All records saved locally in your browser.
   <span class="foot-brand">Forex With Waqar</span>
@@ -2005,6 +2074,219 @@
   }
 </script>
 
+ <script>
+(function(){
+  const INTERVIEW_TOTAL = 150;
+  const INTERVIEW_SECONDS = 60;
+  const storage = firebase.storage();
+
+  const strategyTopics = [
+    "Fair Value Gap (FVG) / Imbalance",
+    "Institutional Order Block (OB)",
+    "Liquidity Sweep (Buy-side & Sell-side)",
+    "Market Structure Shift (MSS) / Break of Structure (BOS)",
+    "Optimal Trade Entry (OTE)",
+    "ICT Silver Bullet Strategy",
+    "Balanced Price Range (BPR)",
+    "Inverted Fair Value Gap (IFVG)"
+  ];
+
+  const calcTemplateFns = [
+    () => { const lot=(Math.random()*0.9+0.1).toFixed(2); const move=(Math.random()*5+0.5).toFixed(2);
+      return `XAUUSD Lot Size ${lot} hai aur price $${move} move kare, to Total Profit/Loss ($) kitna banega? Formula bata kar calculate karein.`; },
+    () => { const risk=(Math.floor(Math.random()*400)+50); const slPips=(Math.floor(Math.random()*80)+10);
+      return `Aap ek trade mein $${risk} risk karna chahte hain aur SL ${slPips} pips door hai — required Lot Size kya hoga?`; },
+    () => { const lot=(Math.random()*0.9+0.1).toFixed(2); const target=(Math.floor(Math.random()*300)+50);
+      return `Lot Size ${lot} hai aur $${target} ka profit target chahiye — Dollars Movement kitni chahiye hogi?`; },
+    () => { const balance=(Math.floor(Math.random()*9000)+1000); const riskPct=(Math.floor(Math.random()*2)+1);
+      return `Account Balance $${balance} hai aur ${riskPct}% risk-per-trade rule follow karte hain — maximum kitna dollar risk kar sakte hain?`; },
+    () => { const buy=(Math.random()*50+2000).toFixed(2); const sell=(Math.random()*50+2000).toFixed(2);
+      return `Buy Entry $${buy} aur Sell Entry $${sell} hai (Lot 0.10) — Entry Diff Loss ($) calculate karein.`; },
+    () => { const pips=(Math.floor(Math.random()*100)+10); const pipValue=(Math.random()*8+1).toFixed(2);
+      return `Movement ${pips} pips hai aur pip value $${pipValue} per pip hai — Total Profit/Loss kya hoga?`; },
+    () => { const lot=(Math.random()*0.9+0.1).toFixed(2);
+      return `${lot} Lot Size XAUUSD mein 1 dollar price movement ka Profit/Loss kitna banta hai? Formula ke sath bataiye.`; },
+    () => { const buffer=(Math.random()*0.9+0.1).toFixed(2); const lot=(Math.random()*0.9+0.1).toFixed(2);
+      return `Buffer value $${buffer} aur Lot Size ${lot} hai — Buffer Loss ($) kitna banega?`; }
+  ];
+
+  function buildInterviewQuestions(){
+    let qs = [];
+    if (typeof faqData !== 'undefined') {
+      faqData.forEach(folder => folder.items.forEach(item => qs.push({ type:'faq', text: item[0] })));
+    }
+    strategyTopics.forEach(t => qs.push({ type:'strategy', text: `"${t}" strategy apne alfaz mein explain karein — Trigger, Stop Loss (SL) aur Take Profit (TP) kaise decide hote hain?` }));
+    let ci = 0;
+    while (qs.length < INTERVIEW_TOTAL) { qs.push({ type:'calc', text: calcTemplateFns[ci % calcTemplateFns.length]() }); ci++; }
+    return qs.slice(0, INTERVIEW_TOTAL);
+  }
+
+  let interviewQuestions = [], currentQIndex = -1, interviewTimerInterval = null, secondsLeft = INTERVIEW_SECONDS;
+  let mediaStream = null, mediaRecorder = null, recordedChunks = [], interviewActive = false;
+  const qTypeLabels = { faq:'FAQ Question', strategy:'Strategy Explain', calc:'Calculation' };
+
+  async function startInterview(){
+    const statusEl = document.getElementById('interviewStatusMsg');
+    statusEl.style.color = '#facc15';
+    statusEl.textContent = 'Camera permission maang rahe hain...';
+    try { mediaStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true }); }
+    catch(err){ statusEl.textContent = 'Camera/Microphone access nahi mila.'; statusEl.style.color = '#ef4444'; return; }
+
+    document.getElementById('interviewVideo').srcObject = mediaStream;
+    statusEl.textContent = '';
+
+    interviewQuestions = buildInterviewQuestions();
+    currentQIndex = -1;
+    recordedChunks = [];
+    interviewActive = true;
+
+    let mimeType = 'video/webm;codecs=vp9,opus';
+    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8,opus';
+    if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+    try { mediaRecorder = new MediaRecorder(mediaStream, { mimeType }); }
+    catch(e){ mediaRecorder = new MediaRecorder(mediaStream); }
+    mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.start();
+
+    document.getElementById('recBadge').classList.add('active');
+    document.getElementById('interviewStartBtn').disabled = true;
+    document.getElementById('interviewEndBtn').disabled = false;
+    document.getElementById('interviewResultBox').style.display = 'none';
+    document.getElementById('interviewResultBox').innerHTML = '';
+
+    nextInterviewQuestion();
+  }
+
+  function nextInterviewQuestion(){
+    if (!interviewActive) return;
+    clearInterval(interviewTimerInterval);
+    currentQIndex++;
+    if (currentQIndex >= interviewQuestions.length) { endInterview(); return; }
+
+    const q = interviewQuestions[currentQIndex];
+    document.getElementById('interviewQCount').textContent = `Sawal ${currentQIndex+1} / ${interviewQuestions.length}`;
+    const typeEl = document.getElementById('interviewQType');
+    typeEl.style.display = 'inline-block';
+    typeEl.className = 'interview-qtype ' + q.type;
+    typeEl.textContent = qTypeLabels[q.type];
+    document.getElementById('interviewQuestion').textContent = q.text;
+    document.getElementById('interviewProgressFill').style.width = ((currentQIndex+1)/interviewQuestions.length*100)+'%';
+
+    secondsLeft = INTERVIEW_SECONDS;
+    updateTimerRing();
+    interviewTimerInterval = setInterval(() => {
+      secondsLeft--;
+      updateTimerRing();
+      if (secondsLeft <= 0) { clearInterval(interviewTimerInterval); nextInterviewQuestion(); }
+    }, 1000);
+  }
+
+  function updateTimerRing(){
+    const ring = document.getElementById('interviewTimerRing');
+    ring.textContent = secondsLeft;
+    ring.className = 'interview-timer-ring' + (secondsLeft <= 10 ? ' danger' : secondsLeft <= 25 ? ' warn' : '');
+  }
+
+  function endInterview(){
+    if (!interviewActive) return;
+    interviewActive = false;
+    clearInterval(interviewTimerInterval);
+    document.getElementById('recBadge').classList.remove('active');
+    document.getElementById('interviewEndBtn').disabled = true;
+    document.getElementById('interviewStartBtn').disabled = false;
+    document.getElementById('interviewQuestion').textContent = 'Interview khatam ho gayi. Video upload ho rahi hai...';
+    document.getElementById('interviewQType').style.display = 'none';
+
+    const questionsCompleted = Math.min(currentQIndex + 1, interviewQuestions.length);
+
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.onstop = () => uploadInterview(questionsCompleted);
+      mediaRecorder.stop();
+    } else { uploadInterview(questionsCompleted); }
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  }
+
+  function uploadInterview(questionsCompleted){
+    const statusEl = document.getElementById('interviewStatusMsg');
+    const blob = new Blob(recordedChunks, { type:'video/webm' });
+    const user = firebase.auth().currentUser;
+    const fileName = `interviews/${user ? user.uid : 'unknown'}/${Date.now()}.webm`;
+    const storageRef = storage.ref().child(fileName);
+    const uploadTask = storageRef.put(blob);
+
+    uploadTask.on('state_changed', (snap) => {
+      const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+      statusEl.style.color = '#facc15';
+      statusEl.textContent = `Video upload ho rahi hai... ${pct}%`;
+    }, (err) => {
+      statusEl.style.color = '#ef4444';
+      statusEl.textContent = 'Upload nahi ho saki: ' + err.message;
+    }, async () => {
+      const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+      await db.collection('interviews').add({
+        uid: user ? user.uid : null,
+        name: user ? (user.displayName || '') : '',
+        email: user ? user.email : '',
+        questionsCompleted,
+        totalQuestions: interviewQuestions.length,
+        videoUrl: downloadURL,
+        storagePath: fileName,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      statusEl.style.color = '#22c55e';
+      statusEl.textContent = 'Interview video admin ke pass mehfooz ho gayi.';
+      const box = document.getElementById('interviewResultBox');
+      box.style.display = 'block';
+      box.innerHTML = `
+        <h4 style="color:#22c55e;">Interview Complete — ${questionsCompleted} / ${interviewQuestions.length} Sawalat</h4>
+        <video controls src="${downloadURL}"></video>`;
+    });
+  }
+
+  // ===== Admin: view + delete interview videos =====
+  function loadAdminInterviews(){
+    db.collection('interviews').orderBy('createdAt','desc').onSnapshot(snap => {
+      const container = document.getElementById('adminInterviewList');
+      if (!container) return;
+      container.innerHTML = '';
+      if (snap.empty) { container.innerHTML = '<p style="color:#64748b;font-size:13px;">Abhi tak koi interview submit nahi hui.</p>'; return; }
+      snap.forEach(doc => {
+        const d = doc.data();
+        const t = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+        const card = document.createElement('div');
+        card.className = 'admin-user-card';
+        card.innerHTML = `
+          <p style="color:#fff;font-weight:bold;">${d.name || d.email || 'Unknown User'}</p>
+          <p style="color:#94a3b8;font-size:12px;">${d.email || ''}</p>
+          <p style="color:#facc15;font-size:12px;">${d.questionsCompleted}/${d.totalQuestions} sawalat — ${t}</p>
+          <video controls class="admin-interview-video" src="${d.videoUrl}"></video>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a href="${d.videoUrl}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Open</a>
+            <button onclick="deleteInterview('${doc.id}', '${d.storagePath}')">Delete</button>
+          </div>`;
+        container.appendChild(card);
+      });
+    });
+  }
+
+  function deleteInterview(docId, storagePath){
+    if (!confirm('Kya aap waqai is interview video ko delete karna chahte hain?')) return;
+    storage.ref().child(storagePath).delete().catch(()=>{});
+    db.collection('interviews').doc(docId).delete();
+  }
+
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user && typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes(user.email)) {
+      loadAdminInterviews();
+    }
+  });
+
+  window.startInterview = startInterview;
+  window.endInterview = endInterview;
+  window.deleteInterview = deleteInterview;
+})();
+</script>
+ 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script type="text/javascript">
   new TradingView.widget({
