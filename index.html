@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+ <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #05070f; color: #e2e8f0; line-height: 1.6; position: relative; overflow-x: hidden; min-height: 100vh; }
@@ -2074,11 +2075,38 @@
   }
 </script>
 
- <script>
+<script>
 (function(){
   const INTERVIEW_TOTAL = 150;
   const INTERVIEW_SECONDS = 60;
-  const storage = firebase.storage();
+
+  // ===== YouTube OAuth Config =====
+  const YT_CLIENT_ID = '1081225569208-f3e9qb5jt2loim7gguonqaga82nsb3mq.apps.googleusercontent.com';
+  const YT_SCOPE = 'https://www.googleapis.com/auth/youtube.upload';
+  let ytAccessToken = null;
+  let ytTokenClient = null;
+
+  function initYouTubeTokenClient(){
+    if (ytTokenClient || typeof google === 'undefined' || !google.accounts) return;
+    ytTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: YT_CLIENT_ID,
+      scope: YT_SCOPE,
+      callback: '' // set dynamically before requesting
+    });
+  }
+
+  function requestYouTubeAccess(){
+    return new Promise((resolve, reject) => {
+      if (typeof google === 'undefined' || !google.accounts) { reject(new Error('Google auth library load nahi hui.')); return; }
+      if (!ytTokenClient) initYouTubeTokenClient();
+      ytTokenClient.callback = (resp) => {
+        if (resp.error) { reject(resp); return; }
+        ytAccessToken = resp.access_token;
+        resolve(resp.access_token);
+      };
+      ytTokenClient.requestAccessToken({ prompt: ytAccessToken ? '' : 'consent' });
+    });
+  }
 
   const strategyTopics = [
     "Fair Value Gap (FVG) / Imbalance",
@@ -2127,7 +2155,14 @@
 
   async function startInterview(){
     const statusEl = document.getElementById('interviewStatusMsg');
+
+    // Step 1: YouTube account se pehle permission lein (candidate apne YouTube account se authorize karega)
     statusEl.style.color = '#facc15';
+    statusEl.textContent = 'YouTube account se permission maang rahe hain...';
+    try { await requestYouTubeAccess(); }
+    catch(err){ statusEl.textContent = 'YouTube permission nahi mili. Dobara koshish karein.'; statusEl.style.color = '#ef4444'; return; }
+
+    // Step 2: Camera/mic permission
     statusEl.textContent = 'Camera permission maang rahe hain...';
     try { mediaStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true }); }
     catch(err){ statusEl.textContent = 'Camera/Microphone access nahi mila.'; statusEl.style.color = '#ef4444'; return; }
@@ -2194,56 +2229,103 @@
     document.getElementById('recBadge').classList.remove('active');
     document.getElementById('interviewEndBtn').disabled = true;
     document.getElementById('interviewStartBtn').disabled = false;
-    document.getElementById('interviewQuestion').textContent = 'Interview khatam ho gayi. Video upload ho rahi hai...';
+    document.getElementById('interviewQuestion').textContent = 'Interview khatam ho gayi. Video YouTube par upload ho rahi hai...';
     document.getElementById('interviewQType').style.display = 'none';
 
     const questionsCompleted = Math.min(currentQIndex + 1, interviewQuestions.length);
 
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.onstop = () => uploadInterview(questionsCompleted);
+      mediaRecorder.onstop = () => uploadInterviewToYouTube(questionsCompleted);
       mediaRecorder.stop();
-    } else { uploadInterview(questionsCompleted); }
+    } else { uploadInterviewToYouTube(questionsCompleted); }
     if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
   }
 
-  function uploadInterview(questionsCompleted){
+  // ===== YouTube resumable upload =====
+  async function uploadInterviewToYouTube(questionsCompleted){
     const statusEl = document.getElementById('interviewStatusMsg');
-    const blob = new Blob(recordedChunks, { type:'video/webm' });
     const user = firebase.auth().currentUser;
-    const fileName = `interviews/${user ? user.uid : 'unknown'}/${Date.now()}.webm`;
-    const storageRef = storage.ref().child(fileName);
-    const uploadTask = storageRef.put(blob);
+    const blob = new Blob(recordedChunks, { type:'video/webm' });
 
-    uploadTask.on('state_changed', (snap) => {
-      const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-      statusEl.style.color = '#facc15';
-      statusEl.textContent = `Video upload ho rahi hai... ${pct}%`;
-    }, (err) => {
+    if (!ytAccessToken) {
       statusEl.style.color = '#ef4444';
-      statusEl.textContent = 'Upload nahi ho saki: ' + err.message;
-    }, async () => {
-      const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+      statusEl.textContent = 'YouTube authorization nahi mili — video upload nahi ho saki.';
+      return;
+    }
+
+    statusEl.style.color = '#facc15';
+    statusEl.textContent = 'YouTube par upload shuru ho raha hai...';
+
+    const title = `Interview - ${user ? (user.displayName || user.email) : 'Candidate'} - ${new Date().toLocaleString()}`;
+    const metadata = {
+      snippet: {
+        title: title,
+        description: `Forex With Waqar interview. ${questionsCompleted}/${interviewQuestions.length} sawalat complete.`
+      },
+      status: { privacyStatus: 'unlisted' }
+    };
+
+    try {
+      // Step 1: resumable session shuru karein
+      const initRes = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + ytAccessToken,
+          'Content-Type': 'application/json',
+          'X-Upload-Content-Type': 'video/webm'
+        },
+        body: JSON.stringify(metadata)
+      });
+
+      if (!initRes.ok) {
+        const errText = await initRes.text();
+        throw new Error('Upload session start nahi hui: ' + errText);
+      }
+
+      const uploadUrl = initRes.headers.get('Location');
+
+      // Step 2: actual video bytes upload karein
+      const uploadRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'video/webm' },
+        body: blob
+      });
+
+      if (!uploadRes.ok) {
+        const errText = await uploadRes.text();
+        throw new Error('Video upload fail hui: ' + errText);
+      }
+
+      const videoData = await uploadRes.json();
+      const videoId = videoData.id;
+      const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
       await db.collection('interviews').add({
         uid: user ? user.uid : null,
         name: user ? (user.displayName || '') : '',
         email: user ? user.email : '',
         questionsCompleted,
         totalQuestions: interviewQuestions.length,
-        videoUrl: downloadURL,
-        storagePath: fileName,
+        videoUrl: videoUrl,
+        youtubeVideoId: videoId,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
       statusEl.style.color = '#22c55e';
-      statusEl.textContent = 'Interview video admin ke pass mehfooz ho gayi.';
+      statusEl.textContent = 'Interview video YouTube par upload ho gayi aur admin ke pass link mehfooz ho gaya.';
       const box = document.getElementById('interviewResultBox');
       box.style.display = 'block';
       box.innerHTML = `
         <h4 style="color:#22c55e;">Interview Complete — ${questionsCompleted} / ${interviewQuestions.length} Sawalat</h4>
-        <video controls src="${downloadURL}"></video>`;
-    });
+        <iframe width="100%" height="360" style="border-radius:12px;margin:12px 0;" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+
+    } catch (err) {
+      statusEl.style.color = '#ef4444';
+      statusEl.textContent = 'Upload mein masla hua: ' + err.message;
+    }
   }
 
-  // ===== Admin: view + delete interview videos =====
+  // ===== Admin: view + delete interview links (sirf Firestore se, YouTube se nahi) =====
   function loadAdminInterviews(){
     db.collection('interviews').orderBy('createdAt','desc').onSnapshot(snap => {
       const container = document.getElementById('adminInterviewList');
@@ -2259,19 +2341,17 @@
           <p style="color:#fff;font-weight:bold;">${d.name || d.email || 'Unknown User'}</p>
           <p style="color:#94a3b8;font-size:12px;">${d.email || ''}</p>
           <p style="color:#facc15;font-size:12px;">${d.questionsCompleted}/${d.totalQuestions} sawalat — ${t}</p>
-          <video controls class="admin-interview-video" src="${d.videoUrl}"></video>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <a href="${d.videoUrl}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Open</a>
-            <button onclick="deleteInterview('${doc.id}', '${d.storagePath}')">Delete</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+            <a href="${d.videoUrl}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Watch on YouTube</a>
+            <button onclick="deleteInterview('${doc.id}')">Delete Link</button>
           </div>`;
         container.appendChild(card);
       });
     });
   }
 
-  function deleteInterview(docId, storagePath){
-    if (!confirm('Kya aap waqai is interview video ko delete karna chahte hain?')) return;
-    storage.ref().child(storagePath).delete().catch(()=>{});
+  function deleteInterview(docId){
+    if (!confirm('Kya aap is interview ka link delete karna chahte hain? (YouTube video delete nahi hogi, sirf link hatega)')) return;
     db.collection('interviews').doc(docId).delete();
   }
 
@@ -2286,6 +2366,7 @@
   window.deleteInterview = deleteInterview;
 })();
 </script>
+
  
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script type="text/javascript">
