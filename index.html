@@ -231,6 +231,20 @@
 .interview-result-box { background: rgba(15,23,42,0.6); border:1px solid rgba(34,197,94,0.3); border-radius:16px; padding:20px; margin-top:20px; }
 .interview-result-box video { width:100%; border-radius:12px; margin:12px 0; background:#000; }
 .admin-interview-video { width:100%; border-radius:8px; margin:8px 0; background:#000; }
+ /* ===== AI Chat Widget ===== */
+ .aichat-fab { position: fixed; bottom: 90px; right: 20px; z-index: 9400; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #38bdf8, #0ea5e9); border: none; color: #0f172a; font-size: 26px; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; }
+.aichat-window { position: fixed; bottom: 160px; right: 20px; width: 360px; max-width: 92vw; height: 480px; max-height: 70vh; background: rgba(10,14,25,0.98); border: 1px solid rgba(148,163,184,0.2); border-radius: 18px; z-index: 9400; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+.aichat-window.open { display: flex; }
+.aichat-header { background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; padding: 14px 16px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+.aichat-header button { background: none; border: none; color: #0f172a; font-size: 18px; cursor: pointer; font-weight: 900; }
+.aichat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.aichat-msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.6; white-space: pre-line; }
+.aichat-msg.user { align-self: flex-end; background: linear-gradient(135deg,#22c55e,#16a34a); color: #0f172a; font-weight: 600; border-bottom-right-radius: 2px; }
+.aichat-msg.bot { align-self: flex-start; background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.3); color: #e2e8f0; border-bottom-left-radius: 2px; }
+.aichat-inputrow { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(148,163,184,0.15); }
+.aichat-inputrow input { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(148,163,184,0.25); background: rgba(15,23,42,0.8); color: #fff; font-size: 13.5px; }
+.aichat-inputrow button { padding: 10px 16px; background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: #0f172a; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.aichat-typing { font-size: 12px; color: #64748b; padding: 0 14px 8px; }
 </style>
 </head>
 <body>
@@ -1153,6 +1167,19 @@
     <div id="interviewResultBox" style="display:none;"></div>
   </div>
 </section>
+ <button id="aichatFab" class="aichat-fab" onclick="aichatToggle()">💬</button>
+<div id="aichatWindow" class="aichat-window">
+  <div class="aichat-header">
+    <span>AI Chat Assistant</span>
+    <button onclick="aichatToggle()">✕</button>
+  </div>
+  <div class="aichat-messages" id="aichatMessages"></div>
+  <div class="aichat-typing" id="aichatTyping" style="display:none;">Likh raha hai...</div>
+  <div class="aichat-inputrow">
+    <input type="text" id="aichatInput" placeholder="Koi bhi sawal poochein..." onkeydown="if(event.key==='Enter') aichatSend();">
+    <button onclick="aichatSend()">Bhejein</button>
+  </div>
+</div>
 <footer>
   © 2026 All records saved locally in your browser.
   <span class="foot-brand">Forex With Waqar</span>
@@ -3608,6 +3635,80 @@ window.kycAdminDeleteSubmission = async function(uid){
       }
     });
   }
+})();
+</script>
+<script>
+(function(){
+  // ⚠️ Yahan apni Groq API key paste karein:
+  const GROQ_API_KEY = "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";
+  const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+  let aichatHistory = [];
+  let aichatOpen = false;
+
+  window.aichatToggle = function(){
+    aichatOpen = !aichatOpen;
+    const win = document.getElementById('aichatWindow');
+    win.classList.toggle('open', aichatOpen);
+    if (aichatOpen && document.getElementById('aichatMessages').children.length === 0){
+      aichatAddMessage('bot', 'Assalam-o-Alaikum! Main aapka AI assistant hoon. Mujh se koi bhi sawal poochh sakte hain.');
+    }
+  };
+
+  function aichatAddMessage(sender, text){
+    const box = document.getElementById('aichatMessages');
+    const el = document.createElement('div');
+    el.className = 'aichat-msg ' + sender;
+    el.textContent = text;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  window.aichatSend = async function(){
+    const input = document.getElementById('aichatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    aichatAddMessage('user', text);
+    input.value = '';
+    aichatHistory.push({ role: 'user', content: text });
+
+    const typingEl = document.getElementById('aichatTyping');
+    typingEl.style.display = 'block';
+
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_API_KEY
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: aichatHistory
+        })
+      });
+      const data = await res.json();
+      typingEl.style.display = 'none';
+
+      if (data.error){
+        aichatAddMessage('bot', 'Error: ' + data.error.message);
+        return;
+      }
+
+      const reply = data.choices && data.choices[0] && data.choices[0].message
+        ? data.choices[0].message.content
+        : 'Maaf kijiye, jawab nahi mil saka. Dobara koshish karein.';
+
+      aichatAddMessage('bot', reply);
+      aichatHistory.push({ role: 'assistant', content: reply });
+
+      if (aichatHistory.length > 20) aichatHistory = aichatHistory.slice(-20);
+
+    } catch(err){
+      typingEl.style.display = 'none';
+      aichatAddMessage('bot', 'Connection error: ' + err.message);
+    }
+  };
 })();
 </script>
 </body>
