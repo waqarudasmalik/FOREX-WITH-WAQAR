@@ -274,6 +274,7 @@
   <a href="#ictsmc">ICT/SMC Guide</a>
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
+   <a href="#ictsignals">ICT Signals</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
 </header>
@@ -2396,7 +2397,494 @@
     "container_id": "tradingview_xauusd"
   });
 </script>
+<!--
+==============================================================================
+ ICT SIGNALS — Forex With Waqar (Add-on Module) — v2
+==============================================================================
+-->
 
+<style>
+  .ictsig-wrap { display:flex; flex-direction:column; gap:20px; }
+  .ictsig-toprow { display:flex; gap:15px; flex-wrap:wrap; }
+  .ictsig-stat { flex:1; min-width:140px; background: rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:16px; text-align:center; }
+  .ictsig-stat .label { font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; }
+  .ictsig-stat .value { font-size:22px; font-weight:800; margin-top:6px; }
+  .ictsig-live-card { background: rgba(17,24,39,0.75); border:1px solid rgba(56,189,248,0.35); border-radius:18px; padding:22px; }
+  .ictsig-live-card.buy { border-color: rgba(34,197,94,0.5); box-shadow:0 0 24px rgba(34,197,94,0.15); }
+  .ictsig-live-card.sell { border-color: rgba(239,68,68,0.5); box-shadow:0 0 24px rgba(239,68,68,0.15); }
+  .ictsig-live-head { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .ictsig-dir-badge { font-weight:900; font-size:20px; padding:4px 16px; border-radius:999px; }
+  .ictsig-dir-badge.BUY { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.5); }
+  .ictsig-dir-badge.SELL { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); }
+  .ictsig-dir-badge.NONE { background:rgba(148,163,184,0.1); color:#94a3b8; border:1px solid rgba(148,163,184,0.3); }
+  .ictsig-time { color:#64748b; font-size:12px; }
+  .ictsig-levels { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .ictsig-level-box { flex:1; min-width:110px; background: rgba(15,23,42,0.6); border-radius:12px; padding:12px; text-align:center; }
+  .ictsig-level-box .label { font-size:11px; color:#94a3b8; }
+  .ictsig-level-box .value { font-size:18px; font-weight:800; margin-top:4px; }
+  .ictsig-reason { background: rgba(15,23,42,0.5); border-left:3px solid #38bdf8; border-radius:8px; padding:14px 16px; color:#cbd5e1; font-size:13.5px; line-height:1.7; white-space:pre-line; }
+  .ictsig-feed { max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+  .ictsig-feed-item { font-size:12.5px; color:#94a3b8; padding:8px 12px; background: rgba(15,23,42,0.45); border-radius:8px; border-left:2px solid rgba(148,163,184,0.3); }
+  .ictsig-feed-item .t { color:#facc15; margin-right:6px; }
+  .ictsig-history-item { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background: rgba(15,23,42,0.55); border-radius:10px; margin-bottom:8px; font-size:13px; flex-wrap:wrap; gap:6px; }
+  .ictsig-badge-status { font-weight:800; font-size:11px; padding:3px 10px; border-radius:999px; }
+  .ictsig-badge-status.tp_hit { background:rgba(34,197,94,0.15); color:#22c55e; }
+  .ictsig-badge-status.sl_hit { background:rgba(239,68,68,0.15); color:#ef4444; }
+  .ictsig-badge-status.open { background:rgba(250,204,21,0.15); color:#facc15; }
+  .ictsig-engine-status { font-size:12px; color:#64748b; display:flex; align-items:center; gap:8px; }
+  .ictsig-dot { width:8px; height:8px; border-radius:50%; background:#22c55e; animation: recPulse 1.2s infinite; }
+
+  .ictchat-box { background: rgba(17,24,39,0.75); border:1px solid rgba(148,163,184,0.2); border-radius:18px; padding:18px; display:flex; flex-direction:column; height:420px; }
+  .ictchat-messages { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px; }
+  .ictchat-msg { max-width:80%; padding:10px 14px; border-radius:14px; font-size:13.5px; line-height:1.6; white-space:pre-line; }
+  .ictchat-msg.user { align-self:flex-end; background: linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; font-weight:600; border-bottom-right-radius:2px; }
+  .ictchat-msg.bot { align-self:flex-start; background: rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#e2e8f0; border-bottom-left-radius:2px; }
+  .ictchat-inputrow { display:flex; gap:8px; margin-top:12px; }
+  .ictchat-inputrow input { flex:1; padding:11px 14px; border-radius:10px; border:1px solid rgba(148,163,184,0.25); background:rgba(15,23,42,0.8); color:#fff; }
+  .ictchat-inputrow button { padding:11px 20px; background: linear-gradient(135deg, #38bdf8, #0ea5e9); color:#0f172a; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
+  .ictchat-suggestions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .ictchat-suggestion { font-size:11.5px; padding:6px 12px; border-radius:999px; background:rgba(148,163,184,0.1); border:1px solid rgba(148,163,184,0.25); color:#cbd5e1; cursor:pointer; }
+  .ictchat-suggestion:hover { border-color:#38bdf8; color:#38bdf8; }
+</style>
+
+<section id="ictsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>ICT Signals — AI Gold Bot (XAUUSD)</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px; line-height:1.6;">
+      Ye bot khud-bakhud Higher Timeframe (1H) se Lower Timeframe (5M) tak analysis kar ke, upar diye gaye 8 ICT
+      concepts ke confluence par sirf XAUUSD (Gold) ke liye <strong>sirf valid setups</strong> par signal deta hai —
+      koi forced daily quota nahi. Har entry se pehle reason text mein diya jata hai. Chart yahan nahi dikhaya
+      jata, live chart ke liye <a href="#tradingview" style="color:#38bdf8;">Live Chart section</a> dekhein.
+    </p>
+
+    <div class="ictsig-engine-status" style="margin-bottom:16px;">
+      <span class="ictsig-dot" id="ictsigEngineDot"></span>
+      <span id="ictsigEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <div class="ictsig-wrap">
+      <div class="ictsig-toprow">
+        <div class="ictsig-stat"><div class="label">Total Signals (All Time)</div><div class="value" id="ictsigTotal" style="color:#38bdf8;">0</div></div>
+        <div class="ictsig-stat"><div class="label">TP Hits</div><div class="value" id="ictsigTpCount" style="color:#22c55e;">0</div></div>
+        <div class="ictsig-stat"><div class="label">SL Hits</div><div class="value" id="ictsigSlCount" style="color:#ef4444;">0</div></div>
+        <div class="ictsig-stat"><div class="label">Win Rate</div><div class="value" id="ictsigWinRate" style="color:#facc15;">0%</div></div>
+        <div class="ictsig-stat"><div class="label">Aaj Ke Signals</div><div class="value" id="ictsigTodayCount" style="color:#a5b4fc;">0</div></div>
+      </div>
+
+      <div class="ictsig-live-card" id="ictsigLiveCard">
+        <div class="ictsig-live-head">
+          <span class="ictsig-dir-badge NONE" id="ictsigDirBadge">NO ACTIVE SIGNAL</span>
+          <span class="ictsig-time" id="ictsigLiveTime">—</span>
+        </div>
+        <div class="ictsig-levels">
+          <div class="ictsig-level-box"><div class="label">Entry</div><div class="value" id="ictsigEntry" style="color:#e2e8f0;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Stop Loss</div><div class="value" id="ictsigSL" style="color:#fda4af;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Take Profit</div><div class="value" id="ictsigTP" style="color:#67e8f9;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Risk:Reward</div><div class="value" id="ictsigRR" style="color:#facc15;">—</div></div>
+        </div>
+        <div class="ictsig-reason" id="ictsigReason">Abhi koi active signal nahi hai. Bot market analyze kar raha hai — neeche "Live Commentary" mein updates dekhein.</div>
+      </div>
+
+      <div>
+        <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Live Commentary (Musalsal Guide)</h4>
+        <div class="ictsig-feed" id="ictsigFeed"></div>
+      </div>
+
+      <div>
+        <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Bot Se Baat Karein</h4>
+        <div class="ictchat-box">
+          <div class="ictchat-messages" id="ictchatMessages"></div>
+          <div class="ictchat-suggestions">
+            <span class="ictchat-suggestion" onclick="ictChatAsk('Abhi kya signal hai?')">Abhi kya signal hai?</span>
+            <span class="ictchat-suggestion" onclick="ictChatAsk('Win rate kitna hai?')">Win rate kitna hai?</span>
+            <span class="ictchat-suggestion" onclick="ictChatAsk('FVG kya hota hai?')">FVG kya hota hai?</span>
+            <span class="ictchat-suggestion" onclick="ictChatAsk('Aaj kitne signals aaye?')">Aaj kitne signals aaye?</span>
+          </div>
+          <div class="ictchat-inputrow">
+            <input type="text" id="ictchatInput" placeholder="Bot se sawal poochein... (e.g. 'SL kitni door hai?')" onkeydown="if(event.key==='Enter') ictChatSend();">
+            <button onclick="ictChatSend()">Bhejein</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Signal History</h4>
+        <div id="ictsigHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  // ========================= CONFIG =========================
+  const TWELVE_DATA_API_KEY = "faa70dee4cd94663a55ff3bc640aa831"; // twelvedata.com se free key lein
+  const SYMBOL = "XAU/USD";
+  const MIN_RR = 1.5;               // is se kam risk:reward wala setup skip ho jayega
+  const ALLOW_MULTIPLE_OPEN = false; // true karein agar ek se zyada open trades chahiye
+
+  const FETCH_INTERVAL = { "5min": 5*60*1000, "15min": 15*60*1000, "1h": 60*60*1000 };
+  let lastFetch = { "5min": 0, "15min": 0, "1h": 0 };
+  let candles = { "5min": [], "15min": [], "1h": [] };
+  let engineTimer = null;
+  let latestSignalsCache = [];
+
+  function loadCache(){
+    ["5min","15min","1h"].forEach(tf => {
+      try { candles[tf] = JSON.parse(localStorage.getItem('ictCandles_'+tf)) || []; } catch(e){ candles[tf] = []; }
+    });
+  }
+  function saveCache(tf){ localStorage.setItem('ictCandles_'+tf, JSON.stringify(candles[tf].slice(-300))); }
+
+  function logFeed(msg){
+    const feed = document.getElementById('ictsigFeed');
+    if (!feed) return;
+    const item = document.createElement('div');
+    item.className = 'ictsig-feed-item';
+    item.innerHTML = `<span class="t">${new Date().toLocaleTimeString()}</span>${msg}`;
+    feed.insertBefore(item, feed.firstChild);
+    while (feed.children.length > 40) feed.removeChild(feed.lastChild);
+  }
+  function setEngineStatus(text){ const el = document.getElementById('ictsigEngineStatusText'); if (el) el.textContent = text; }
+
+  // ========================= DATA FETCH =========================
+  async function fetchCandles(interval){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(SYMBOL)}&interval=${interval}&outputsize=120&apikey=${TWELVE_DATA_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) { logFeed(`Data fetch (${interval}) mein masla: ` + (data.message || 'unknown error')); return; }
+      candles[interval] = data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+      saveCache(interval);
+      lastFetch[interval] = Date.now();
+    } catch(err){ logFeed(`${interval} data fetch fail: ${err.message}`); }
+  }
+  async function refreshDataIfNeeded(){
+    const now = Date.now();
+    if (now - lastFetch["5min"] > FETCH_INTERVAL["5min"]) await fetchCandles("5min");
+    if (now - lastFetch["15min"] > FETCH_INTERVAL["15min"]) await fetchCandles("15min");
+    if (now - lastFetch["1h"] > FETCH_INTERVAL["1h"]) await fetchCandles("1h");
+  }
+
+  // ========================= ICT PRIMITIVES =========================
+  function findSwings(c, lookback=2){
+    const swings = [];
+    for (let i = lookback; i < c.length - lookback; i++){
+      let isHigh = true, isLow = true;
+      for (let k = 1; k <= lookback; k++){
+        if (c[i].high <= c[i-k].high || c[i].high <= c[i+k].high) isHigh = false;
+        if (c[i].low  >= c[i-k].low  || c[i].low  >= c[i+k].low)  isLow = false;
+      }
+      if (isHigh) swings.push({ index:i, type:'high', price:c[i].high });
+      if (isLow)  swings.push({ index:i, type:'low',  price:c[i].low });
+    }
+    return swings;
+  }
+  function getHTFBias(c){
+    const swings = findSwings(c, 2);
+    const highs = swings.filter(s => s.type==='high').slice(-2);
+    const lows  = swings.filter(s => s.type==='low').slice(-2);
+    if (highs.length===2 && lows.length===2){
+      const higherHigh = highs[1].price > highs[0].price;
+      const higherLow  = lows[1].price  > lows[0].price;
+      if (higherHigh && higherLow) return 'bullish';
+      if (!higherHigh && !higherLow) return 'bearish';
+    }
+    if (c.length > 20) return c[c.length-1].close > c[c.length-21].close ? 'bullish' : 'bearish';
+    return null;
+  }
+  function detectBOS(c, direction){
+    const swings = findSwings(c, 2);
+    const last = c[c.length-1];
+    if (direction === 'bullish'){
+      const lastSwingHigh = [...swings].reverse().find(s => s.type==='high');
+      if (lastSwingHigh && last.close > lastSwingHigh.price) return { level: lastSwingHigh.price };
+    } else {
+      const lastSwingLow = [...swings].reverse().find(s => s.type==='low');
+      if (lastSwingLow && last.close < lastSwingLow.price) return { level: lastSwingLow.price };
+    }
+    return null;
+  }
+  function detectLiquiditySweep(c, direction){
+    const swings = findSwings(c.slice(0, -1), 2);
+    const last = c[c.length-1];
+    if (direction === 'bullish'){
+      const recentLow = [...swings].reverse().find(s => s.type==='low');
+      if (recentLow && last.low < recentLow.price && last.close > recentLow.price) return { level: recentLow.price, wick: last.low };
+    } else {
+      const recentHigh = [...swings].reverse().find(s => s.type==='high');
+      if (recentHigh && last.high > recentHigh.price && last.close < recentHigh.price) return { level: recentHigh.price, wick: last.high };
+    }
+    return null;
+  }
+  function findLatestFVG(c, direction){
+    for (let i = c.length - 2; i >= 2; i--){
+      const c1 = c[i-2], c3 = c[i];
+      if (direction === 'bullish' && c1.high < c3.low){
+        const fvg = { low: c1.high, high: c3.low };
+        if (!c.slice(i+1).some(k => k.low <= fvg.low)) return fvg;
+      }
+      if (direction === 'bearish' && c1.low > c3.high){
+        const fvg = { low: c3.high, high: c1.low };
+        if (!c.slice(i+1).some(k => k.high >= fvg.high)) return fvg;
+      }
+    }
+    return null;
+  }
+  function inZone(price, zoneLow, zoneHigh){ return price >= zoneLow && price <= zoneHigh; }
+  function isSilverBulletWindow(){
+    const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'America/New_York' }).format(new Date()));
+    return nyHour === 10;
+  }
+
+  // ========================= SIGNAL ENGINE =========================
+  async function runAnalysisCycle(){
+    await refreshDataIfNeeded();
+    const c1h = candles["1h"], c15 = candles["15min"], c5 = candles["5min"];
+    if (c1h.length < 25 || c15.length < 10 || c5.length < 10){ setEngineStatus('Candle history jama ho rahi hai... (tab khula rakhein)'); return; }
+    setEngineStatus('Live — analysis chal rahi hai');
+
+    const bias = getHTFBias(c1h);
+    if (!bias){ logFeed('HTF (1H) bias abhi clear nahi.'); return; }
+
+    const bos = detectBOS(c15, bias);
+    const sweep = detectLiquiditySweep(c15, bias);
+    const fvg = findLatestFVG(c5, bias);
+    const currentPrice = c5[c5.length-1].close;
+
+    if (!bos && !sweep){ logFeed(`HTF bias: <b>${bias.toUpperCase()}</b>. MTF (15M) par abhi BOS ya sweep nahi bana.`); return; }
+    if (!fvg){ logFeed(`HTF bias: ${bias}. MTF confirmation mila (${bos?'BOS':'Liquidity Sweep'}), LTF (5M) FVG ka intezar.`); return; }
+
+    if (!inZone(currentPrice, fvg.low, fvg.high)){ logFeed(`${bias.toUpperCase()} setup ban raha hai — FVG zone (${fvg.low.toFixed(2)}-${fvg.high.toFixed(2)}) ka retest abhi baaki hai.`); return; }
+
+    const direction = bias === 'bullish' ? 'BUY' : 'SELL';
+    const entry = currentPrice;
+    let sl, tp;
+    if (direction === 'BUY'){
+      sl = Math.min(fvg.low, sweep ? sweep.wick : fvg.low) - 0.3;
+      const highs = findSwings(c15,2).filter(s=>s.type==='high');
+      tp = highs.length ? highs[highs.length-1].price : entry + (entry-sl)*2;
+    } else {
+      sl = Math.max(fvg.high, sweep ? sweep.wick : fvg.high) + 0.3;
+      const lows = findSwings(c15,2).filter(s=>s.type==='low');
+      tp = lows.length ? lows[lows.length-1].price : entry - (sl-entry)*2;
+    }
+    const risk = Math.abs(entry - sl), reward = Math.abs(tp - entry);
+    const rr = risk > 0 ? reward / risk : 0;
+    if (rr < MIN_RR){ logFeed(`Valid ${direction} setup mila lekin Risk:Reward sirf 1:${rr.toFixed(2)} hai (min 1:${MIN_RR}) — skip.`); return; }
+
+    const silverBullet = isSilverBulletWindow();
+    let reasonLines = [];
+    reasonLines.push(`HTF (1H) Bias: ${bias === 'bullish' ? 'Bullish (higher highs/higher lows)' : 'Bearish (lower highs/lower lows)'}.`);
+    if (sweep) reasonLines.push(`MTF (15M): Liquidity sweep — price ${sweep.level.toFixed(2)} ke paar wick tak gaya (${sweep.wick.toFixed(2)}) aur reject ho kar close hua.`);
+    if (bos) reasonLines.push(`MTF (15M): Break of Structure confirm — price ne ${bos.level.toFixed(2)} candle-close ke sath tor diya.`);
+    reasonLines.push(`LTF (5M): ${direction === 'BUY' ? 'Bullish' : 'Bearish'} FVG bana (${fvg.low.toFixed(2)} - ${fvg.high.toFixed(2)}), price retest kar ke reject ho rahi hai.`);
+    if (silverBullet) reasonLines.push(`Bonus: Yeh 10-11 AM New York "Silver Bullet" killzone window hai.`);
+    reasonLines.push(`Risk:Reward = 1:${rr.toFixed(2)}.`);
+
+    await createSignal({ direction, entry, sl, tp, rr, reason: reasonLines.join('\n'), strategy: sweep ? 'Liquidity Sweep + FVG' : 'BOS + FVG' });
+  }
+
+  // ========================= FIRESTORE =========================
+  async function createSignal(sig){
+    if (!ALLOW_MULTIPLE_OPEN){
+      const openSnap = await db.collection('ictSignals').where('status','==','open').limit(1).get();
+      if (!openSnap.empty){ logFeed('Ek signal pehle se open hai — naya signal us ke close hone tak nahi banaya jayega.'); return; }
+    }
+    await db.collection('ictSignals').add({
+      direction: sig.direction, entry: sig.entry, sl: sig.sl, tp: sig.tp, rr: sig.rr,
+      reason: sig.reason, strategy: sig.strategy, status: 'open',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    logFeed(`✅ Naya ${sig.direction} signal generate hua!`);
+    ictChatBotSay(`🔔 Naya ${sig.direction} signal aaya hai — Entry ${sig.entry.toFixed(2)}, SL ${sig.sl.toFixed(2)}, TP ${sig.tp.toFixed(2)}. Reason poochne ke liye "abhi kya signal hai" likhein.`);
+  }
+
+  async function monitorOpenSignal(){
+    const c5 = candles["5min"];
+    if (!c5.length) return;
+    const price = c5[c5.length-1].close;
+    const openSnap = await db.collection('ictSignals').where('status','==','open').limit(1).get();
+    if (openSnap.empty) return;
+    const doc = openSnap.docs[0];
+    const d = doc.data();
+    let newStatus = null;
+    if (d.direction === 'BUY'){ if (price >= d.tp) newStatus='tp_hit'; else if (price <= d.sl) newStatus='sl_hit'; }
+    else { if (price <= d.tp) newStatus='tp_hit'; else if (price >= d.sl) newStatus='sl_hit'; }
+    if (newStatus){
+      await doc.ref.update({ status: newStatus, closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      logFeed(newStatus === 'tp_hit' ? '🎯 Take Profit hit!' : '🛑 Stop Loss hit.');
+      ictChatBotSay(newStatus === 'tp_hit' ? `🎯 Signal ka Take Profit hit ho gaya!` : `🛑 Signal ka Stop Loss hit ho gaya.`);
+    }
+  }
+
+  // ========================= DASHBOARD RENDER =========================
+  function renderLiveCard(sig){
+    const card = document.getElementById('ictsigLiveCard');
+    const badge = document.getElementById('ictsigDirBadge');
+    if (!sig){
+      card.className = 'ictsig-live-card';
+      badge.className = 'ictsig-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('ictsigEntry').textContent = '—';
+      document.getElementById('ictsigSL').textContent = '—';
+      document.getElementById('ictsigTP').textContent = '—';
+      document.getElementById('ictsigRR').textContent = '—';
+      document.getElementById('ictsigReason').textContent = 'Abhi koi active signal nahi hai. Bot market analyze kar raha hai — neeche "Live Commentary" mein updates dekhein.';
+      document.getElementById('ictsigLiveTime').textContent = '—';
+      return;
+    }
+    card.className = 'ictsig-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
+    badge.className = 'ictsig-dir-badge ' + sig.direction;
+    badge.textContent = sig.direction + ' — ' + sig.strategy;
+    document.getElementById('ictsigEntry').textContent = sig.entry.toFixed(2);
+    document.getElementById('ictsigSL').textContent = sig.sl.toFixed(2);
+    document.getElementById('ictsigTP').textContent = sig.tp.toFixed(2);
+    document.getElementById('ictsigRR').textContent = '1:' + sig.rr.toFixed(2);
+    document.getElementById('ictsigReason').textContent = sig.reason;
+    document.getElementById('ictsigLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
+  }
+  function renderHistory(docs){
+    const container = document.getElementById('ictsigHistory');
+    container.innerHTML = '';
+    if (docs.length === 0){ container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'ictsig-history-item';
+      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)}</span>
+        <span class="ictsig-badge-status ${d.status}">${d.status.replace('_',' ').toUpperCase()}</span>`;
+      container.appendChild(row);
+    });
+  }
+  function listenSignals(){
+    db.collection('ictSignals').orderBy('createdAt','desc').limit(100).onSnapshot(snap => {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      latestSignalsCache = docs;
+      const open = docs.find(d => d.status === 'open');
+      renderLiveCard(open || null);
+      renderHistory(docs.slice(0, 15));
+
+      const total = docs.length;
+      const tpCount = docs.filter(d => d.status === 'tp_hit').length;
+      const slCount = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = tpCount + slCount;
+      const winRate = closed > 0 ? ((tpCount / closed) * 100).toFixed(1) : '0';
+      document.getElementById('ictsigTotal').textContent = total;
+      document.getElementById('ictsigTpCount').textContent = tpCount;
+      document.getElementById('ictsigSlCount').textContent = slCount;
+      document.getElementById('ictsigWinRate').textContent = winRate + '%';
+
+      const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+      const todayCount = docs.filter(d => d.createdAt && d.createdAt.toDate() >= startOfDay).length;
+      document.getElementById('ictsigTodayCount').textContent = todayCount;
+    });
+  }
+
+  // ========================= CHAT ASSISTANT (rule-based) =========================
+  const ictStrategyKB = {
+    'fvg|fair value gap|imbalance': `Fair Value Gap (FVG): 3 candles ka pattern jahan beech wali candle tezi se banti hai aur Candle 1 ki wick, Candle 3 ki wick se overlap nahi karti. Market is khaali jagah ko wapis "fill" karne aati hai — jab price zone ke 50% (CE) tak retrace ho kar reject ho, wahan se entry milti hai.`,
+    'order block|\\bob\\b': `Order Block: Woh aakhri opposite-colour candle jiske baad market ne strong impulsive move di. Institutions ka entry area samjha jata hai — retest par LTF confirmation ke sath entry li jati hai.`,
+    'sweep|liquidity': `Liquidity Sweep: Equal highs/lows ke paas stop-losses jama hote hain. Smart money wahan wick se price le jati hai (sweep) phir reverse ho jati hai — yehi reversal entry ka signal hota hai.`,
+    'bos|structure|mss': `Break of Structure (BOS)/Market Structure Shift: Jab price candle-close ke sath pichla swing high/low tor deti hai, trend shift/continue confirm hota hai.`,
+    'ote|optimal trade entry': `Optimal Trade Entry (OTE): Impulsive leg ke 61.8%-78.6% Fibonacci retracement zone — institutional discount/premium entry area.`,
+    'silver bullet': `ICT Silver Bullet: 10:00-11:00 AM New York time ka window — is mein sweep ke baad bane FVG par entry li jati hai.`,
+    'bpr|balanced price range': `Balanced Price Range (BPR): Do opposite-direction FVGs jo ek hi zone par overlap karte hain — market aksar wapis is overlap zone ko retest karti hai.`,
+    'ifvg|inverted fair value gap': `Inverted FVG: Jab ek FVG tootti hai, wahi zone opposite direction ke liye support/resistance ban jati hai.`
+  };
+
+  function findFaqAnswer(text){
+    if (typeof faqData === 'undefined') return null;
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    let best = null, bestScore = 0;
+    faqData.forEach(folder => folder.items.forEach(item => {
+      const q = item[0].toLowerCase();
+      const score = words.filter(w => q.includes(w)).length;
+      if (score > bestScore){ bestScore = score; best = item[1]; }
+    }));
+    return bestScore >= 2 ? best : null;
+  }
+
+  function answerQuestion(raw){
+    const text = raw.toLowerCase().trim();
+
+    if (/kya signal|current signal|abhi.*signal|live signal/.test(text)){
+      const open = latestSignalsCache.find(d => d.status === 'open');
+      if (!open) return 'Abhi koi active signal nahi hai. Jaisi hi valid setup banegi, main yahan aur "Live Commentary" mein bata dunga.';
+      return `Active Signal: ${open.direction} @ ${open.entry.toFixed(2)}\nSL: ${open.sl.toFixed(2)} | TP: ${open.tp.toFixed(2)} | RR: 1:${open.rr.toFixed(2)}\n\nReason:\n${open.reason}`;
+    }
+    if (/sl|stop loss/.test(text) && /kitn|door|value|price/.test(text)){
+      const open = latestSignalsCache.find(d => d.status === 'open');
+      return open ? `Current signal ka Stop Loss: ${open.sl.toFixed(2)}` : 'Abhi koi open signal nahi hai, is liye SL bhi nahi hai.';
+    }
+    if (/tp|take profit/.test(text) && /kitn|door|value|price/.test(text)){
+      const open = latestSignalsCache.find(d => d.status === 'open');
+      return open ? `Current signal ka Take Profit: ${open.tp.toFixed(2)}` : 'Abhi koi open signal nahi hai, is liye TP bhi nahi hai.';
+    }
+    if (/win rate/.test(text)){
+      return document.getElementById('ictsigWinRate').textContent + ' win rate hai ab tak (' + document.getElementById('ictsigTpCount').textContent + ' TP hits, ' + document.getElementById('ictsigSlCount').textContent + ' SL hits mein se).';
+    }
+    if (/aaj|today/.test(text) && /kitne|kitna/.test(text)){
+      return `Aaj ab tak ${document.getElementById('ictsigTodayCount').textContent} signals aaye hain. Koi daily limit nahi — market jitni valid setups degi, utne aayenge.`;
+    }
+    if (/bias/.test(text)){
+      const bias = candles["1h"].length >= 25 ? getHTFBias(candles["1h"]) : null;
+      return bias ? `HTF (1H) bias abhi: ${bias === 'bullish' ? 'Bullish' : 'Bearish'}.` : 'HTF bias abhi calculate nahi ho saka — candle history jama ho rahi hai.';
+    }
+
+    for (const key in ictStrategyKB){
+      if (new RegExp(key, 'i').test(text)) return ictStrategyKB[key];
+    }
+
+    const faqAns = findFaqAnswer(text);
+    if (faqAns) return faqAns;
+
+    return `Mujhe is sawal ka exact jawab nahi mila. Aap poochh sakte hain: "abhi kya signal hai", "win rate kitna hai", "SL/TP kya hai", "aaj kitne signals aaye", "HTF bias kya hai", ya kisi strategy ka naam (FVG, Order Block, Liquidity Sweep, BOS, OTE, Silver Bullet, BPR, IFVG).`;
+  }
+
+  function addChatMessage(sender, text){
+    const box = document.getElementById('ictchatMessages');
+    const el = document.createElement('div');
+    el.className = 'ictchat-msg ' + sender;
+    el.textContent = text;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
+  window.ictChatBotSay = function(text){ addChatMessage('bot', text); };
+  window.ictChatAsk = function(text){
+    document.getElementById('ictchatInput').value = text;
+    ictChatSend();
+  };
+  window.ictChatSend = function(){
+    const input = document.getElementById('ictchatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    addChatMessage('user', text);
+    input.value = '';
+    setTimeout(() => addChatMessage('bot', answerQuestion(text)), 300);
+  };
+
+  // ========================= INIT =========================
+  function startEngine(){
+    loadCache();
+    listenSignals();
+    addChatMessage('bot', 'Assalam-o-Alaikum! Main ICT Signals bot hoon. Mujh se live signal, SL/TP, win rate, ya kisi ICT strategy ke baare mein poochh sakte hain.');
+    logFeed('Bot start ho gaya — candle history load ki jaa rahi hai.');
+    runAnalysisCycle();
+    engineTimer = setInterval(async () => { await runAnalysisCycle(); await monitorOpenSignal(); }, 60 * 1000);
+  }
+
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) startEngine();
+      else if (engineTimer) { clearInterval(engineTimer); engineTimer = null; }
+    });
+  }
+})();
+</script>
 </body>
 </html>
 <!-- rebuild trigger -->
