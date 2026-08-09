@@ -212,6 +212,7 @@
 .interview-btn { padding:11px 20px; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
 .interview-btn.start { background:linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; }
 .interview-btn.end { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+ .interview-btn.next { background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#0f172a; }
 .interview-btn:disabled { opacity:0.4; cursor:not-allowed; }
 .interview-status-msg { color:#facc15; font-size:13px; }
 .interview-result-box { background: rgba(15,23,42,0.6); border:1px solid rgba(34,197,94,0.3); border-radius:16px; padding:20px; margin-top:20px; }
@@ -1107,8 +1108,9 @@
           <div id="interviewTimerRing" class="interview-timer-ring">60</div>
           <div class="interview-progress-bar"><div id="interviewProgressFill" class="interview-progress-fill"></div></div>
         </div>
-        <div class="interview-controls">
+<div class="interview-controls">
           <button id="interviewStartBtn" class="interview-btn start" onclick="startInterview()">🎥 Start Live Interview</button>
+          <button id="interviewNextBtn" class="interview-btn next" onclick="nextInterviewQuestion()" disabled>⏭ Next Question</button>
           <button id="interviewEndBtn" class="interview-btn end" onclick="endInterview()" disabled>⏹ End Interview</button>
         </div>
         <div id="interviewStatusMsg" class="interview-status-msg"></div>
@@ -2187,6 +2189,7 @@
     document.getElementById('recBadge').classList.add('active');
     document.getElementById('interviewStartBtn').disabled = true;
     document.getElementById('interviewEndBtn').disabled = false;
+   document.getElementById('interviewNextBtn').disabled = false;
     document.getElementById('interviewResultBox').style.display = 'none';
     document.getElementById('interviewResultBox').innerHTML = '';
 
@@ -2229,6 +2232,7 @@
     clearInterval(interviewTimerInterval);
     document.getElementById('recBadge').classList.remove('active');
     document.getElementById('interviewEndBtn').disabled = true;
+    document.getElementById('interviewNextBtn').disabled = true;
     document.getElementById('interviewStartBtn').disabled = false;
     document.getElementById('interviewQuestion').textContent = 'Interview khatam ho gayi. Video YouTube par upload ho rahi hai...';
     document.getElementById('interviewQType').style.display = 'none';
@@ -2363,6 +2367,7 @@
   });
 
   window.startInterview = startInterview;
+ window.nextInterviewQuestion = nextInterviewQuestion;
   window.endInterview = endInterview;
   window.deleteInterview = deleteInterview;
 })();
