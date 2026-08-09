@@ -185,6 +185,19 @@
 .ict-checklist li::before { content: "✅"; position: absolute; left: 0; top: 6px; font-size: 12px; }
 .ict-diagram { background: rgba(15,23,42,0.6); border: 1px solid rgba(148,163,184,0.15); border-radius: 12px; padding: 10px; text-align: center; }
 .ict-diagram svg { max-width: 100%; height: auto; }
+ .ff-alert-banner { width:100%; background: linear-gradient(90deg, rgba(239,68,68,0.18), rgba(220,38,38,0.1)); border-bottom:2px solid #ef4444; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; position:relative; z-index:8800; }
+.ff-alert-left { display:flex; align-items:center; gap:14px; flex:1; min-width:260px; }
+.ff-alert-icon { width:36px; height:36px; border-radius:50%; background:#ef4444; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; flex-shrink:0; }
+.ff-alert-text strong { color:#ef4444; font-size:15px; display:block; }
+.ff-alert-text span { color:#fca5a5; font-size:12.5px; }
+.ff-alert-btn { padding:9px 18px; border:1px solid rgba(239,68,68,0.5); border-radius:8px; color:#ef4444; background:transparent; font-weight:700; cursor:pointer; text-decoration:none; white-space:nowrap; }
+.ff-alert-btn:hover { background:rgba(239,68,68,0.12); }
+.ff-today-list { display:flex; flex-direction:column; gap:8px; }
+.ff-today-row { display:flex; align-items:center; gap:12px; background: rgba(17,24,39,0.7); border:1px solid rgba(148,163,184,0.12); border-radius:10px; padding:10px 14px; font-size:13.5px; flex-wrap:wrap; }
+.ff-today-time { color:#facc15; font-weight:700; min-width:95px; }
+.ff-today-title { color:#e2e8f0; flex:1; }
+.ff-today-country { color:#64748b; font-size:12px; }
+.ff-today-badge { background:rgba(239,68,68,0.15); color:#ef4444; font-weight:800; font-size:11px; padding:3px 10px; border-radius:999px; }
  /* ===== Interview Feature Styles ===== */
 .interview-hero { text-align:center; margin-bottom:25px; }
 .interview-hero p { color:#94a3b8; font-size:14px; max-width:650px; margin:8px auto 0; }
@@ -221,7 +234,16 @@
 </style>
 </head>
 <body>
-
+<div id="ffAlertBanner" class="ff-alert-banner" style="display:none;">
+  <div class="ff-alert-left">
+    <div class="ff-alert-icon">⛔</div>
+    <div class="ff-alert-text">
+      <strong id="ffAlertTitle">DO NOT TRADE —</strong>
+      <span id="ffAlertSub"></span>
+    </div>
+  </div>
+  <a class="ff-alert-btn" href="https://www.forexfactory.com/calendar" target="_blank">View Calendar</a>
+</div>
 <div id="authOverlay" class="auth-overlay">
   <div class="auth-box">
     <h2 style="color:#fff;margin-bottom:10px;">Forex With Waqar</h2>
@@ -263,6 +285,7 @@
 <header>
   <h1>Forex With Waqar</h1>
   <nav>
+   <a href="#redflagnews">🔴 Red Flag News</a>
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
     <a href="#calclog">Calculated Hedges Log</a>
@@ -285,7 +308,16 @@
   <h2>Master the Hedging System</h2>
   <p>Apni trades track karein, hedge lagayein aur apna zati trading record khud-badh (auto-update) rakhein.</p>
 </div>
-
+<section id="redflagnews">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Today's Red Flag News</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">ForexFactory high-impact events — Pakistan time (PKT). Har 30 minute mein khud-ba-khud update hoti hai.</p>
+    <div id="ffTodayListContainer" class="ff-today-list">
+      <p style="color:#64748b; text-align:center; padding:10px 0;">News load ho rahi hai...</p>
+    </div>
+  </div>
+</section>
 <section id="trade-entry-rules">
   <div class="glass-panel" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 16px; font-family: sans-serif; color: #fff; max-width: 800px; margin: 0 auto;">
     <div class="brand-watermark" style="font-size: 12px; color: rgba(255,255,255,0.2); letter-spacing: 2px; text-transform: uppercase; text-align: right; margin-bottom: 10px;">Forex With Waqar</div>
@@ -2888,6 +2920,109 @@
       else if (engineTimer) { clearInterval(engineTimer); engineTimer = null; }
     });
   }
+})();
+</script>
+ <script>
+(function(){
+  const FF_JSON_URL = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
+  const FF_CACHE_KEY = 'waqarFFCalendarCache';
+  const FF_CACHE_TIME_KEY = 'waqarFFCalendarCacheTime';
+  const FF_REFRESH_MS = 30 * 60 * 1000;
+
+  let ffEvents = [];
+
+  function getPakistanParts(date){
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Karachi', year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', hour12:true
+    }).formatToParts(date);
+  }
+  function pktDateKey(date){
+    const parts = getPakistanParts(date);
+    const get = t => parts.find(p=>p.type===t).value;
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  }
+  function pktTimeLabel(date){
+    const parts = getPakistanParts(date);
+    const get = t => parts.find(p=>p.type===t).value;
+    return `${get('hour')}:${get('minute')} ${get('dayPeriod')} PKT`;
+  }
+
+  function updateFFCountdown(dateObj){
+    const subEl = document.getElementById('ffAlertSub');
+    if (!subEl) return;
+    const diffMs = dateObj - new Date();
+    if (diffMs <= 0) { subEl.textContent = 'Ho chuka hai — extreme volatility ho sakti hai.'; return; }
+    const totalMin = Math.floor(diffMs / 60000);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    subEl.textContent = `Releases in ${h}h ${m}m at ${pktTimeLabel(dateObj)} · Extreme XAUUSD volatility expected. Avoid all new positions.`;
+  }
+
+  function renderFFAlert(){
+    const banner = document.getElementById('ffAlertBanner');
+    if (!banner) return;
+    const now = new Date();
+    const upcoming = ffEvents.filter(e => e.impact === 'High').map(e => ({...e, dateObj: new Date(e.date)}))
+      .filter(e => e.dateObj > now).sort((a,b)=>a.dateObj-b.dateObj);
+    if (upcoming.length === 0) { banner.style.display = 'none'; return; }
+    const next = upcoming[0];
+    banner.style.display = 'flex';
+    document.getElementById('ffAlertTitle').textContent = `DO NOT TRADE — ${next.title}`;
+    updateFFCountdown(next.dateObj);
+    banner.dataset.nextTime = next.dateObj.getTime();
+  }
+
+  function renderFFTodayList(){
+    const container = document.getElementById('ffTodayListContainer');
+    if (!container) return;
+    const now = new Date();
+    const todayKey = pktDateKey(now);
+    const todayHigh = ffEvents.filter(e => e.impact === 'High' && pktDateKey(new Date(e.date)) === todayKey)
+      .sort((a,b)=> new Date(a.date) - new Date(b.date));
+    if (todayHigh.length === 0) {
+      container.innerHTML = '<p style="color:#64748b; text-align:center; padding:10px 0;">✅ No high-impact events scheduled for today.</p>';
+      return;
+    }
+    container.innerHTML = '';
+    todayHigh.forEach(e => {
+      const row = document.createElement('div');
+      row.className = 'ff-today-row';
+      row.innerHTML = `<span class="ff-today-time">${pktTimeLabel(new Date(e.date))}</span>
+        <span class="ff-today-title">${e.title} <span class="ff-today-country">(${e.country})</span></span>
+        <span class="ff-today-badge">HIGH</span>`;
+      container.appendChild(row);
+    });
+  }
+
+  async function fetchFFCalendar(){
+    const cachedTime = parseInt(localStorage.getItem(FF_CACHE_TIME_KEY)) || 0;
+    const cached = localStorage.getItem(FF_CACHE_KEY);
+    if (cached && (Date.now() - cachedTime) < FF_REFRESH_MS) {
+      ffEvents = JSON.parse(cached);
+      renderFFAlert(); renderFFTodayList();
+      return;
+    }
+    try {
+      const res = await fetch(FF_JSON_URL);
+      const data = await res.json();
+      ffEvents = data;
+      localStorage.setItem(FF_CACHE_KEY, JSON.stringify(data));
+      localStorage.setItem(FF_CACHE_TIME_KEY, Date.now().toString());
+    } catch(err) {
+      if (cached) ffEvents = JSON.parse(cached);
+    }
+    renderFFAlert(); renderFFTodayList();
+  }
+
+  fetchFFCalendar();
+  setInterval(fetchFFCalendar, FF_REFRESH_MS);
+  setInterval(() => {
+    const banner = document.getElementById('ffAlertBanner');
+    if (banner && banner.style.display !== 'none' && banner.dataset.nextTime) {
+      updateFFCountdown(new Date(parseInt(banner.dataset.nextTime)));
+    }
+  }, 60000);
 })();
 </script>
 </body>
