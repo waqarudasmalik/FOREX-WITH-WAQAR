@@ -2846,6 +2846,8 @@
       const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
       const todayCount = docs.filter(d => d.createdAt && d.createdAt.toDate() >= startOfDay).length;
       document.getElementById('ictsigTodayCount').textContent = todayCount;
+     window.ictOpenSignal = open || null;
+      window.ictSignalStats = { total, tpCount, slCount, winRate, todayCount };
     });
   }
 
@@ -3663,7 +3665,28 @@ window.kycAdminDeleteSubmission = async function(uid){
     box.appendChild(el);
     box.scrollTop = box.scrollHeight;
   }
-
+function aichatBuildSystemPrompt(){
+    let text = 'Aap "Forex With Waqar" website ka AI assistant hain. Aap dosti aur asaan andaaz mein jawab dete hain.';
+    const sig = window.ictOpenSignal;
+    if (sig){
+      text += '\n\nAbhi ek active ICT trading signal hai:\n' +
+        'Direction: ' + sig.direction + '\n' +
+        'Entry: ' + sig.entry + '\n' +
+        'Stop Loss: ' + sig.sl + '\n' +
+        'Take Profit: ' + sig.tp + '\n' +
+        'Risk:Reward: 1:' + (sig.rr ? sig.rr.toFixed(2) : 'N/A') + '\n' +
+        'Strategy: ' + (sig.strategy || '') + '\n' +
+        'Reason:\n' + (sig.reason || '');
+    } else {
+      text += '\n\nAbhi koi active ICT signal nahi hai.';
+    }
+    if (window.ictSignalStats){
+      const s = window.ictSignalStats;
+      text += '\n\nOverall stats: Total signals ' + s.total + ', TP hits ' + s.tpCount + ', SL hits ' + s.slCount + ', Win rate ' + s.winRate + '%, Aaj ke signals ' + s.todayCount + '.';
+    }
+    text += '\n\nAgar user signal, entry, SL, TP, ya reason ke baare mein poochhe, upar diye gaye data se jawab dein. Baaki kisi bhi sawal mein normal AI assistant ki tarah madad karein.';
+    return text;
+  }
   window.aichatSend = async function(){
     const input = document.getElementById('aichatInput');
     const text = input.value.trim();
@@ -3676,6 +3699,7 @@ window.kycAdminDeleteSubmission = async function(uid){
     typingEl.style.display = 'block';
 
     try {
+const messages = [{ role: 'system', content: aichatBuildSystemPrompt() }, ...aichatHistory];
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -3684,7 +3708,7 @@ window.kycAdminDeleteSubmission = async function(uid){
         },
         body: JSON.stringify({
           model: GROQ_MODEL,
-          messages: aichatHistory
+          messages: messages
         })
       });
       const data = await res.json();
