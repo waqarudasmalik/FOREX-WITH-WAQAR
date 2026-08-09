@@ -299,6 +299,7 @@
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
    <a href="#ictsignals">ICT Signals</a>
+   <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
 </header>
@@ -3023,6 +3024,590 @@
       updateFFCountdown(new Date(parseInt(banner.dataset.nextTime)));
     }
   }, 60000);
+})();
+</script>
+ <!--
+==============================================================================
+ KYC VERIFICATION — Forex With Waqar (Add-on Module)
+==============================================================================
+KYA HAI: ID document (upload ya live camera) + guided face capture (4 prompts)
++ basic quality checks. Submission Firebase Storage + Firestore mein jati hai.
+Asli verification ADMIN manually karta hai (Approve/Reject) — is mein koi
+automated AI face-match ya cryptographic liveness detection nahi hai.
+
+INTEGRATION STEPS:
+1) Ye poora block (<style> se </script> tak) apni index.html mein paste
+   karein (kisi bhi section se pehle, </body> se pehle).
+2) Nav mein: <a href="#kycverify">KYC Verification</a>
+3) FIRESTORE RULES mein ye bhi add karna hoga:
+     match /kycSubmissions/{uid} {
+       allow read: if request.auth != null;
+       allow write: if request.auth != null && request.auth.uid == uid;
+       allow update: if request.auth != null;
+     }
+4) STORAGE RULES mein (Firebase Console > Storage > Rules):
+     match /kyc/{userId}/{allPaths=**} {
+       allow read: if request.auth != null;
+       allow write: if request.auth != null && request.auth.uid == userId;
+     }
+==============================================================================
+-->
+
+<style>
+  .kyc-steps-bar { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+  .kyc-step-pill { flex:1; min-width:100px; text-align:center; padding:10px 8px; border-radius:10px; background:rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.15); color:#64748b; font-size:12px; font-weight:700; }
+  .kyc-step-pill.active { background:rgba(56,189,248,0.15); border-color:rgba(56,189,248,0.5); color:#38bdf8; }
+  .kyc-step-pill.done { background:rgba(34,197,94,0.15); border-color:rgba(34,197,94,0.5); color:#22c55e; }
+
+  .kyc-panel { display:none; }
+  .kyc-panel.active { display:block; }
+
+  .kyc-consent-box { background: rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.2); border-radius:14px; padding:20px; margin-bottom:18px; font-size:13.5px; color:#cbd5e1; line-height:1.7; }
+  .kyc-consent-box ul { margin:10px 0 10px 20px; }
+
+  .kyc-method-choice { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+  .kyc-method-btn { flex:1; min-width:180px; padding:20px; border-radius:14px; background:rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.2); color:#e2e8f0; cursor:pointer; text-align:center; font-weight:700; }
+  .kyc-method-btn:hover { border-color:#38bdf8; }
+  .kyc-method-btn.selected { border-color:#22c55e; background:rgba(34,197,94,0.1); }
+
+  .kyc-camera-box { position:relative; background:#000; border-radius:16px; overflow:hidden; border:1px solid rgba(148,163,184,0.25); max-width:520px; margin:0 auto 16px; aspect-ratio:4/3; }
+  .kyc-camera-box video, .kyc-camera-box img { width:100%; height:100%; object-fit:cover; display:block; }
+  .kyc-camera-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .kyc-id-guide { width:85%; height:60%; border:3px dashed rgba(250,204,21,0.7); border-radius:12px; }
+  .kyc-face-guide { width:55%; height:75%; border:3px dashed rgba(56,189,248,0.7); border-radius:50%; }
+  .kyc-prompt-banner { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); background:rgba(15,23,42,0.9); color:#facc15; padding:8px 20px; border-radius:999px; font-weight:700; font-size:14px; }
+
+  .kyc-upload-drop { border:2px dashed rgba(148,163,184,0.3); border-radius:14px; padding:40px 20px; text-align:center; cursor:pointer; color:#94a3b8; margin-bottom:16px; }
+  .kyc-upload-drop:hover { border-color:#38bdf8; color:#38bdf8; }
+  .kyc-upload-drop input { display:none; }
+
+  .kyc-quality-msg { padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:14px; display:none; }
+  .kyc-quality-msg.error { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4); color:#fda4af; display:block; }
+  .kyc-quality-msg.ok { background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.4); color:#86efac; display:block; }
+
+  .kyc-review-grid { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+  .kyc-review-thumb { flex:1; min-width:120px; }
+  .kyc-review-thumb img { width:100%; border-radius:10px; border:1px solid rgba(148,163,184,0.2); }
+  .kyc-review-thumb .cap { font-size:11px; color:#94a3b8; text-align:center; margin-top:4px; }
+
+  .kyc-status-badge { display:inline-block; padding:6px 16px; border-radius:999px; font-weight:800; font-size:13px; }
+  .kyc-status-badge.pending { background:rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.4); }
+  .kyc-status-badge.approved { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.4); }
+  .kyc-status-badge.rejected { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4); }
+
+  .kyc-admin-card { background: rgba(17,24,39,0.7); border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:16px; margin-bottom:14px; }
+  .kyc-admin-imgs { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .kyc-admin-imgs img { width:90px; height:90px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid rgba(148,163,184,0.2); }
+</style>
+
+<section id="kycverify">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>KYC Verification</h3>
+    <p style="color:#94a3b8; margin-bottom:24px; font-size:14px; line-height:1.6;">
+      Apni identity verify karne ke liye ID card aur live face capture submit karein. Submission ke baad admin
+      review kar ke Approve ya Reject karega — aap status neeche dekh sakte hain.
+    </p>
+
+    <div class="kyc-steps-bar">
+      <div class="kyc-step-pill active" id="kycPill_consent">1. Consent</div>
+      <div class="kyc-step-pill" id="kycPill_id">2. ID Document</div>
+      <div class="kyc-step-pill" id="kycPill_face">3. Face Capture</div>
+     <div class="kyc-step-pill" id="kycPill_address">4. Address Proof</div>
+      <div class="kyc-step-pill" id="kycPill_review">5. Review &amp; Submit</div>
+      <div class="kyc-step-pill" id="kycPill_status">6. Status</div>
+    </div>
+
+    <div class="kyc-panel active" id="kycPanel_consent">
+      <div class="kyc-consent-box">
+        <strong style="color:#fff;">Rizamandi (Consent):</strong>
+        <ul>
+          <li>Aap apni ID document aur chehre ki tasveerein jama karwa rahe hain identity verification ke maqsad se.</li>
+          <li>Ye data secure Firebase storage mein rakha jayega aur sirf admin ke review ke liye istemal hoga.</li>
+          <li>Verification automated AI se nahi, admin ki manual review se hoti hai.</li>
+          <li>Aap kisi bhi waqt admin se apna data delete karne ki darkhwast kar sakte hain.</li>
+        </ul>
+      </div>
+      <button class="form-row button" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; cursor: pointer;" onclick="kycGoStep('id')">Main Rizamand Hoon — Aagay Badhein</button>
+    </div>
+
+    <div class="kyc-panel" id="kycPanel_id">
+      <h4 style="color:#38bdf8; margin-bottom:14px;">ID Card / Document</h4>
+      <div class="kyc-method-choice">
+        <div class="kyc-method-btn" id="kycIdMethod_upload" onclick="kycSelectIdMethod('upload')">📁 File Upload Karein</div>
+        <div class="kyc-method-btn" id="kycIdMethod_camera" onclick="kycSelectIdMethod('camera')">📷 Camera Se Live Photo Lein</div>
+      </div>
+
+      <div id="kycIdUploadBox" style="display:none;">
+        <div class="kyc-upload-drop" onclick="document.getElementById('kycIdFileInput').click()">
+          <div>Yahan click kar ke ID card ki image ya PDF select karein</div>
+          <div style="font-size:11px; margin-top:6px;">JPG, PNG ya PDF — max 8MB</div>
+          <input type="file" id="kycIdFileInput" accept="image/*,.pdf" onchange="kycHandleIdUpload(event)">
+        </div>
+      </div>
+
+      <div id="kycIdCameraBox" style="display:none;">
+        <div class="kyc-camera-box">
+          <video id="kycIdVideo" autoplay playsinline></video>
+          <div class="kyc-camera-overlay"><div class="kyc-id-guide"></div></div>
+        </div>
+        <div style="text-align:center; margin-bottom:14px;">
+          <button class="edit-btn" onclick="kycCaptureId()">📸 ID Ki Photo Lein</button>
+        </div>
+      </div>
+
+      <div id="kycIdQualityMsg" class="kyc-quality-msg"></div>
+
+      <div id="kycIdPreviewBox" style="display:none; text-align:center; margin-bottom:16px;">
+        <img id="kycIdPreviewImg" style="max-width:320px; border-radius:12px; border:1px solid rgba(148,163,184,0.3);">
+        <div style="margin-top:8px;"><button class="delete-btn" onclick="kycRetakeId()">Dobara Lein</button></div>
+      </div>
+
+      <button class="form-row button" id="kycIdNextBtn" disabled style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; opacity:0.5;" onclick="kycGoStep('face')">Agla Step — Face Capture</button>
+    </div>
+
+    <div class="kyc-panel" id="kycPanel_face">
+      <h4 style="color:#38bdf8; margin-bottom:14px;">Live Face Capture</h4>
+      <p style="color:#94a3b8; font-size:13px; margin-bottom:14px;">Camera on karein aur nichay diye jane wale ishaaron ko follow karein — har prompt par khud khud photo li jayegi.</p>
+      <div class="kyc-camera-box">
+        <video id="kycFaceVideo" autoplay playsinline muted></video>
+        <div class="kyc-camera-overlay"><div class="kyc-face-guide"></div></div>
+        <div class="kyc-prompt-banner" id="kycFacePromptBanner" style="display:none;">Seedha camera ki taraf dekhein</div>
+      </div>
+      <div style="text-align:center; margin-bottom:16px;">
+        <button class="edit-btn" id="kycFaceStartBtn" onclick="kycStartFaceCapture()">🎥 Camera Start Karein</button>
+      </div>
+      <div id="kycFaceQualityMsg" class="kyc-quality-msg"></div>
+      <div class="kyc-review-grid" id="kycFaceThumbs"></div>
+      <button class="form-row button" id="kycFaceNextBtn" disabled style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; opacity:0.5;" onclick="kycGoStep('address')">Agla Step — Address Proof</button>
+    </div>
+<div class="kyc-panel" id="kycPanel_address">
+  <h4 style="color:#38bdf8; margin-bottom:14px;">Address Proof Document</h4>
+  <p style="color:#94a3b8; font-size:13px; margin-bottom:14px;">
+    Koi bhi recent utility bill, bank statement, ya residence proof upload karein jis par aapka naam aur address saaf dikhta ho.
+  </p>
+  <div class="kyc-upload-drop" onclick="document.getElementById('kycAddressFileInput').click()">
+    <div>Yahan click kar ke address proof select karein</div>
+    <div style="font-size:11px; margin-top:6px;">JPG, PNG ya PDF — max 8MB</div>
+    <input type="file" id="kycAddressFileInput" accept="image/*,.pdf" onchange="kycHandleAddressUpload(event)">
+  </div>
+  <div id="kycAddressQualityMsg" class="kyc-quality-msg"></div>
+  <div id="kycAddressPreviewBox" style="display:none; text-align:center; margin-bottom:16px;">
+    <img id="kycAddressPreviewImg" style="max-width:320px; border-radius:12px; border:1px solid rgba(148,163,184,0.3);">
+    <div style="margin-top:8px;"><button class="delete-btn" onclick="kycRetakeAddress()">Dobara Upload Karein</button></div>
+  </div>
+  <button class="form-row button" id="kycAddressNextBtn" disabled style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; opacity:0.5;" onclick="kycGoStep('review')">Agla Step — Review</button>
+</div>
+    <div class="kyc-panel" id="kycPanel_review">
+      <h4 style="color:#38bdf8; margin-bottom:14px;">Review Karein</h4>
+      <p style="color:#cbd5e1; font-size:13px; margin-bottom:10px;">ID Document:</p>
+      <div class="kyc-review-grid" id="kycReviewIdThumb"></div>
+      <p style="color:#cbd5e1; font-size:13px; margin-bottom:10px;">Face Captures:</p>
+      <div class="kyc-review-grid" id="kycReviewFaceThumbs"></div>
+     <p style="color:#cbd5e1; font-size:13px; margin-bottom:10px;">Address Proof:</p>
+<div class="kyc-review-grid" id="kycReviewAddressThumb"></div>
+      <button class="form-row button" id="kycSubmitBtn" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; cursor: pointer;" onclick="kycSubmit()">✅ Submit Karein</button>
+      <div id="kycSubmitMsg" style="color:#facc15; font-size:13px; margin-top:10px;"></div>
+    </div>
+
+    <div class="kyc-panel" id="kycPanel_status">
+      <h4 style="color:#38bdf8; margin-bottom:14px;">Aapka Verification Status</h4>
+      <div id="kycStatusBox"><p style="color:#64748b; font-size:13px;">Abhi koi submission nahi hui.</p></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  let kycIdMethod = null;
+  let kycIdBlob = null, kycIdMime = null;
+  let kycIdStream = null;
+  let kycFaceStream = null;
+  const kycFacePrompts = [
+    { text: 'Seedha camera ki taraf dekhein', delay: 3000 },
+    { text: 'Halka sa muskurayein 🙂', delay: 3000 },
+    { text: 'Sar thoda LEFT ghumayein', delay: 3000 },
+    { text: 'Sar thoda RIGHT ghumayein', delay: 3000 }
+  ];
+  let kycFaceBlobs = [];
+ let kycAddressBlob = null, kycAddressMime = null;
+
+  function kycGoStep(step){
+    document.querySelectorAll('.kyc-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('kycPanel_' + step).classList.add('active');
+    document.querySelectorAll('.kyc-step-pill').forEach(p => p.classList.remove('active'));
+    const order = ['consent','id','face','address','review','status'];
+    const idx = order.indexOf(step);
+    order.forEach((s, i) => {
+      const pill = document.getElementById('kycPill_' + s);
+      if (i < idx) pill.classList.add('done');
+      if (i === idx) pill.classList.add('active');
+    });
+    if (step === 'status') kycLoadStatus();
+  }
+  window.kycGoStep = kycGoStep;
+
+  function kycCheckImageQuality(canvas){
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    if (w < 300 || h < 300) return { ok:false, msg:'Image resolution bohot chhoti hai — dobara koshish karein.' };
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let total = 0;
+    for (let i = 0; i < data.length; i += 4*50){ total += (data[i] + data[i+1] + data[i+2]) / 3; }
+    const avgBrightness = total / (data.length / (4*50));
+    if (avgBrightness < 35) return { ok:false, msg:'Tasveer bohot dark hai — behtar roshni mein dobara koshish karein.' };
+    if (avgBrightness > 235) return { ok:false, msg:'Tasveer bohot overexposed hai — roshni kam kar ke dobara koshish karein.' };
+    return { ok:true, msg:'Quality theek hai.' };
+  }
+
+  async function kycTryDetectFace(canvas){
+    if (typeof FaceDetector === 'undefined') return { supported:false, faceFound:null };
+    try {
+      const detector = new FaceDetector({ maxDetectedFaces: 1 });
+      const faces = await detector.detect(canvas);
+      return { supported:true, faceFound: faces.length > 0 };
+    } catch(e){ return { supported:false, faceFound:null }; }
+  }
+
+  window.kycSelectIdMethod = async function(method){
+    kycIdMethod = method;
+    document.getElementById('kycIdMethod_upload').classList.toggle('selected', method==='upload');
+    document.getElementById('kycIdMethod_camera').classList.toggle('selected', method==='camera');
+    document.getElementById('kycIdUploadBox').style.display = method==='upload' ? 'block' : 'none';
+    document.getElementById('kycIdCameraBox').style.display = method==='camera' ? 'block' : 'none';
+    if (method === 'camera' && !kycIdStream){
+      try {
+        kycIdStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        document.getElementById('kycIdVideo').srcObject = kycIdStream;
+      } catch(e){
+        document.getElementById('kycIdQualityMsg').className = 'kyc-quality-msg error';
+        document.getElementById('kycIdQualityMsg').textContent = 'Camera access nahi mila: ' + e.message;
+      }
+    }
+  };
+
+  window.kycHandleIdUpload = function(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 8*1024*1024){ alert('File 8MB se choti honi chahiye.'); return; }
+    kycIdMime = file.type;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      if (file.type === 'application/pdf'){
+        kycIdBlob = file;
+        document.getElementById('kycIdPreviewImg').style.display = 'none';
+        document.getElementById('kycIdPreviewBox').style.display = 'block';
+        document.getElementById('kycIdQualityMsg').className = 'kyc-quality-msg ok';
+        document.getElementById('kycIdQualityMsg').textContent = 'PDF select ho gayi: ' + file.name;
+        kycEnableIdNext();
+      } else {
+        const img = new Image();
+        img.onload = function(){
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          const quality = kycCheckImageQuality(canvas);
+          const msgEl = document.getElementById('kycIdQualityMsg');
+          msgEl.className = 'kyc-quality-msg ' + (quality.ok ? 'ok' : 'error');
+          msgEl.textContent = quality.msg;
+          if (quality.ok){
+            kycIdBlob = file;
+            document.getElementById('kycIdPreviewImg').src = ev.target.result;
+            document.getElementById('kycIdPreviewImg').style.display = 'block';
+            document.getElementById('kycIdPreviewBox').style.display = 'block';
+            kycEnableIdNext();
+          }
+        };
+        img.src = ev.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+window.kycHandleAddressUpload = function(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 8*1024*1024){ alert('File 8MB se choti honi chahiye.'); return; }
+  kycAddressMime = file.type;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    if (file.type === 'application/pdf'){
+      kycAddressBlob = file;
+      document.getElementById('kycAddressPreviewImg').style.display = 'none';
+      document.getElementById('kycAddressPreviewBox').style.display = 'block';
+      document.getElementById('kycAddressQualityMsg').className = 'kyc-quality-msg ok';
+      document.getElementById('kycAddressQualityMsg').textContent = 'PDF select ho gayi: ' + file.name;
+      kycEnableAddressNext();
+    } else {
+      const img = new Image();
+      img.onload = function(){
+        kycAddressBlob = file;
+        document.getElementById('kycAddressPreviewImg').src = ev.target.result;
+        document.getElementById('kycAddressPreviewImg').style.display = 'block';
+        document.getElementById('kycAddressPreviewBox').style.display = 'block';
+        document.getElementById('kycAddressQualityMsg').className = 'kyc-quality-msg ok';
+        document.getElementById('kycAddressQualityMsg').textContent = 'Document theek se load ho gaya.';
+        kycEnableAddressNext();
+      };
+      img.src = ev.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+window.kycRetakeAddress = function(){
+  kycAddressBlob = null;
+  document.getElementById('kycAddressPreviewBox').style.display = 'none';
+  document.getElementById('kycAddressQualityMsg').className = 'kyc-quality-msg';
+  document.getElementById('kycAddressNextBtn').disabled = true;
+  document.getElementById('kycAddressNextBtn').style.opacity = '0.5';
+};
+
+function kycEnableAddressNext(){
+  document.getElementById('kycAddressNextBtn').disabled = false;
+  document.getElementById('kycAddressNextBtn').style.opacity = '1';
+}
+  window.kycCaptureId = function(){
+    const video = document.getElementById('kycIdVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const quality = kycCheckImageQuality(canvas);
+    const msgEl = document.getElementById('kycIdQualityMsg');
+    msgEl.className = 'kyc-quality-msg ' + (quality.ok ? 'ok' : 'error');
+    msgEl.textContent = quality.msg;
+    if (!quality.ok) return;
+    canvas.toBlob(blob => {
+      kycIdBlob = blob; kycIdMime = 'image/jpeg';
+      document.getElementById('kycIdPreviewImg').src = canvas.toDataURL('image/jpeg');
+      document.getElementById('kycIdPreviewImg').style.display = 'block';
+      document.getElementById('kycIdPreviewBox').style.display = 'block';
+      kycEnableIdNext();
+    }, 'image/jpeg', 0.9);
+  };
+
+  window.kycRetakeId = function(){
+    kycIdBlob = null;
+    document.getElementById('kycIdPreviewBox').style.display = 'none';
+    document.getElementById('kycIdQualityMsg').className = 'kyc-quality-msg';
+    document.getElementById('kycIdNextBtn').disabled = true;
+    document.getElementById('kycIdNextBtn').style.opacity = '0.5';
+  };
+
+  function kycEnableIdNext(){
+    document.getElementById('kycIdNextBtn').disabled = false;
+    document.getElementById('kycIdNextBtn').style.opacity = '1';
+  }
+
+  window.kycStartFaceCapture = async function(){
+    try {
+      kycFaceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      document.getElementById('kycFaceVideo').srcObject = kycFaceStream;
+      document.getElementById('kycFaceStartBtn').disabled = true;
+      kycFaceBlobs = [];
+      document.getElementById('kycFaceThumbs').innerHTML = '';
+      await kycRunFacePrompts();
+    } catch(e){
+      document.getElementById('kycFaceQualityMsg').className = 'kyc-quality-msg error';
+      document.getElementById('kycFaceQualityMsg').textContent = 'Camera access nahi mila: ' + e.message;
+    }
+  };
+
+  async function kycRunFacePrompts(){
+    const banner = document.getElementById('kycFacePromptBanner');
+    banner.style.display = 'block';
+    for (let i = 0; i < kycFacePrompts.length; i++){
+      banner.textContent = kycFacePrompts[i].text + ` (${i+1}/${kycFacePrompts.length})`;
+      await new Promise(r => setTimeout(r, kycFacePrompts[i].delay));
+      await kycCaptureFaceFrame(i);
+    }
+    banner.textContent = 'Mukammal! ✅';
+    setTimeout(() => { banner.style.display = 'none'; }, 1500);
+    if (kycFaceStream) kycFaceStream.getTracks().forEach(t => t.stop());
+  }
+
+  async function kycCaptureFaceFrame(index){
+    const video = document.getElementById('kycFaceVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    const quality = kycCheckImageQuality(canvas);
+    const faceCheck = await kycTryDetectFace(canvas);
+    const msgEl = document.getElementById('kycFaceQualityMsg');
+    if (!quality.ok){
+      msgEl.className = 'kyc-quality-msg error';
+      msgEl.textContent = `Frame ${index+1}: ` + quality.msg;
+    } else if (faceCheck.supported && faceCheck.faceFound === false){
+      msgEl.className = 'kyc-quality-msg error';
+      msgEl.textContent = `Frame ${index+1}: Face clearly detect nahi hui — behtar roshni/angle mein dobara try karein baad mein.`;
+    } else {
+      msgEl.className = 'kyc-quality-msg ok';
+      msgEl.textContent = `Frame ${index+1} li gayi — quality theek hai.`;
+    }
+
+    await new Promise(resolve => {
+      canvas.toBlob(blob => {
+        kycFaceBlobs.push(blob);
+        const thumbs = document.getElementById('kycFaceThumbs');
+        const div = document.createElement('div');
+        div.className = 'kyc-review-thumb';
+        div.innerHTML = `<img src="${canvas.toDataURL('image/jpeg')}"><div class="cap">Frame ${index+1}</div>`;
+        thumbs.appendChild(div);
+        resolve();
+      }, 'image/jpeg', 0.9);
+    });
+
+    if (kycFaceBlobs.length === kycFacePrompts.length){
+      document.getElementById('kycFaceNextBtn').disabled = false;
+      document.getElementById('kycFaceNextBtn').style.opacity = '1';
+    }
+  }
+
+ function kycRenderReview(){
+  document.getElementById('kycReviewIdThumb').innerHTML =
+    kycIdMime === 'application/pdf'
+      ? `<div class="kyc-review-thumb"><div class="cap">PDF document selected</div></div>`
+      : `<div class="kyc-review-thumb"><img src="${document.getElementById('kycIdPreviewImg').src}"><div class="cap">ID Document</div></div>`;
+  const faceContainer = document.getElementById('kycReviewFaceThumbs');
+  faceContainer.innerHTML = document.getElementById('kycFaceThumbs').innerHTML;
+  document.getElementById('kycReviewAddressThumb').innerHTML =
+    kycAddressMime === 'application/pdf'
+      ? `<div class="kyc-review-thumb"><div class="cap">PDF document selected</div></div>`
+      : `<div class="kyc-review-thumb"><img src="${document.getElementById('kycAddressPreviewImg').src}"><div class="cap">Address Proof</div></div>`;
+} 
+  const origGoStep = kycGoStep;
+  window.kycGoStep = function(step){ origGoStep(step); if (step === 'review') kycRenderReview(); };
+
+ window.kycSubmit = async function(){
+  const user = firebase.auth().currentUser;
+  if (!user){ alert('Pehle login karein.'); return; }
+  if (!kycIdBlob || kycFaceBlobs.length < kycFacePrompts.length || !kycAddressBlob){
+    alert('ID, face captures, aur address proof — teeno mukammal nahi hain.');
+    return;
+  }
+
+  const msgEl = document.getElementById('kycSubmitMsg');
+  msgEl.textContent = 'Upload ho raha hai...';
+  document.getElementById('kycSubmitBtn').disabled = true;
+
+  try {
+    const storage = firebase.storage();
+    const idExt = kycIdMime === 'application/pdf' ? 'pdf' : 'jpg';
+    const idRef = storage.ref(`kyc/${user.uid}/id_document.${idExt}`);
+    await idRef.put(kycIdBlob);
+    const idUrl = await idRef.getDownloadURL();
+
+    const faceUrls = [];
+    for (let i = 0; i < kycFaceBlobs.length; i++){
+      const fRef = storage.ref(`kyc/${user.uid}/face_${i+1}.jpg`);
+      await fRef.put(kycFaceBlobs[i]);
+      faceUrls.push(await fRef.getDownloadURL());
+    }
+
+    const addrExt = kycAddressMime === 'application/pdf' ? 'pdf' : 'jpg';
+    const addrRef = storage.ref(`kyc/${user.uid}/address_document.${addrExt}`);
+    await addrRef.put(kycAddressBlob);
+    const addressUrl = await addrRef.getDownloadURL();
+
+    await firebase.firestore().collection('kycSubmissions').doc(user.uid).set({
+      name: user.displayName || '', email: user.email,
+      idDocUrl: idUrl, idDocType: idExt,
+      faceUrls,
+      addressDocUrl: addressUrl, addressDocType: addrExt,
+      status: 'pending', submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    msgEl.style.color = '#22c55e';
+    msgEl.textContent = 'Submit ho gaya! Admin review karega.';
+    setTimeout(() => kycGoStep('status'), 1200);
+  } catch(err){
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = 'Error: ' + err.message;
+    document.getElementById('kycSubmitBtn').disabled = false;
+  }
+};
+
+  function kycLoadStatus(){
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+    firebase.firestore().collection('kycSubmissions').doc(user.uid).onSnapshot(doc => {
+      const box = document.getElementById('kycStatusBox');
+      if (!doc.exists){ box.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi submission nahi hui.</p>'; return; }
+      const d = doc.data();
+      const time = d.submittedAt ? d.submittedAt.toDate().toLocaleString() : '';
+      box.innerHTML = `
+        <p style="margin-bottom:10px;">Status: <span class="kyc-status-badge ${d.status}">${d.status.toUpperCase()}</span></p>
+        <p style="color:#94a3b8; font-size:12px;">Submitted: ${time}</p>
+        ${d.adminNote ? `<p style="color:#fda4af; font-size:13px; margin-top:8px;">Admin note: ${d.adminNote}</p>` : ''}
+      `;
+    });
+  }
+
+  function kycLoadAdminSubmissions(){
+    if (!document.getElementById('adminUserList')) return;
+    let adminSection = document.getElementById('kycAdminSection');
+    if (!adminSection){
+      adminSection = document.createElement('div');
+      adminSection.id = 'kycAdminSection';
+      adminSection.innerHTML = `<h3 style="color:#facc15;margin:20px 0 15px;">Admin Panel — KYC Submissions</h3><div id="kycAdminList"></div>`;
+      document.getElementById('adminPanel').insertBefore(adminSection, document.getElementById('adminPanel').lastElementChild);
+    }
+    firebase.firestore().collection('kycSubmissions').orderBy('submittedAt','desc').onSnapshot(snap => {
+      const list = document.getElementById('kycAdminList');
+      list.innerHTML = '';
+      if (snap.empty){ list.innerHTML = '<p style="color:#64748b;font-size:13px;">Koi submission nahi.</p>'; return; }
+      snap.forEach(doc => {
+        const d = doc.data();
+        const card = document.createElement('div');
+        card.className = 'kyc-admin-card';
+       card.innerHTML = `
+  <p style="color:#fff;font-weight:bold;">${d.name || d.email}</p>
+  <p style="color:#94a3b8;font-size:12px;">${d.email} — <span class="kyc-status-badge ${d.status}">${d.status.toUpperCase()}</span></p>
+  <div class="kyc-admin-imgs">
+    <img src="${d.idDocUrl}" onclick="window.open('${d.idDocUrl}','_blank')" title="ID Document">
+    ${d.faceUrls.map(u => `<img src="${u}" onclick="window.open('${u}','_blank')" title="Face">`).join('')}
+    ${d.addressDocUrl ? `<img src="${d.addressDocUrl}" onclick="window.open('${d.addressDocUrl}','_blank')" title="Address Proof">` : ''}
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <button onclick="kycAdminSetStatus('${doc.id}','approved')">Approve</button>
+    <button onclick="kycAdminSetStatus('${doc.id}','rejected')">Reject</button>
+    <button class="delete-btn" onclick="kycAdminDeleteSubmission('${doc.id}')">Delete (User dobara KYC kar sake)</button>
+  </div>
+`;
+        list.appendChild(card);
+      });
+    });
+  }
+  window.kycAdminSetStatus = function(uid, status){
+    let note = '';
+    if (status === 'rejected') note = prompt('Rejection ki wajah likhein (optional):') || '';
+    firebase.firestore().collection('kycSubmissions').doc(uid).update({ status, adminNote: note });
+  };
+window.kycAdminDeleteSubmission = async function(uid){
+  if (!confirm('Kya aap is user ki KYC submission delete karna chahte hain? Delete hone ke baad user dobara KYC (practice ke liye) kar sakega.')) return;
+  try {
+    const storage = firebase.storage();
+    const doc = await firebase.firestore().collection('kycSubmissions').doc(uid).get();
+    const d = doc.data();
+    if (d) {
+      const filesToDelete = [`kyc/${uid}/id_document.${d.idDocType || 'jpg'}`];
+      if (d.faceUrls) d.faceUrls.forEach((_, i) => filesToDelete.push(`kyc/${uid}/face_${i+1}.jpg`));
+      if (d.addressDocType) filesToDelete.push(`kyc/${uid}/address_document.${d.addressDocType}`);
+      await Promise.all(filesToDelete.map(path => storage.ref(path).delete().catch(() => {})));
+    }
+    await firebase.firestore().collection('kycSubmissions').doc(uid).delete();
+    alert('Submission delete ho gayi. User ab dobara KYC kar sakega.');
+  } catch(err){
+    alert('Delete karte waqt error: ' + err.message);
+  }
+};
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user && typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes(user.email)){
+        kycLoadAdminSubmissions();
+      }
+    });
+  }
 })();
 </script>
 </body>
