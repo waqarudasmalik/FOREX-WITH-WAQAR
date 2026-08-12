@@ -2580,27 +2580,31 @@
     </div>
   </div>
 </section>
-
-<script>
+ <script>
 (function(){
   // ========================= CONFIG =========================
-  const TWELVE_DATA_API_KEY = "faa70dee4cd94663a55ff3bc640aa831"; // twelvedata.com se free key lein
+  const TWELVE_DATA_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
   const SYMBOL = "XAU/USD";
-  const MIN_RR = 1.5;               // is se kam risk:reward wala setup skip ho jayega
-  const ALLOW_MULTIPLE_OPEN = false; // true karein agar ek se zyada open trades chahiye
+  const MIN_RR = 2;
+  const MIN_TP1_USD = 20;
+  const TP2_MULTIPLIER = 1.8;
+  const ZONE_LOOKBACK = 300;
+  const ZONE_MITIGATION_PCT = 0.5;
+  const ALLOW_MULTIPLE_OPEN = false;
 
-  const FETCH_INTERVAL = { "5min": 5*60*1000, "15min": 15*60*1000, "1h": 60*60*1000 };
-  let lastFetch = { "5min": 0, "15min": 0, "1h": 0 };
-  let candles = { "5min": [], "15min": [], "1h": [] };
+  const FETCH_INTERVAL = { "3min": 3*60*1000, "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000 };
+  let lastFetch = { "3min": 0, "15min": 0, "1h": 0, "4h": 0 };
+  let candles = { "3min": [], "15min": [], "1h": [], "4h": [] };
   let engineTimer = null;
   let latestSignalsCache = [];
+  let htfZones = { h1: [], m15: [] };
 
   function loadCache(){
-    ["5min","15min","1h"].forEach(tf => {
+    ["3min","15min","1h","4h"].forEach(tf => {
       try { candles[tf] = JSON.parse(localStorage.getItem('ictCandles_'+tf)) || []; } catch(e){ candles[tf] = []; }
     });
   }
-  function saveCache(tf){ localStorage.setItem('ictCandles_'+tf, JSON.stringify(candles[tf].slice(-300))); }
+  function saveCache(tf){ localStorage.setItem('ictCandles_'+tf, JSON.stringify(candles[tf].slice(-400))); }
 
   function logFeed(msg){
     const feed = document.getElementById('ictsigFeed');
@@ -2616,13 +2620,13 @@
   // ========================= DATA FETCH =========================
   async function fetchCandles(interval){
     try {
-      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(SYMBOL)}&interval=${interval}&outputsize=120&apikey=${TWELVE_DATA_API_KEY}`;
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(SYMBOL)}&interval=${interval}&outputsize=${ZONE_LOOKBACK}&apikey=${TWELVE_DATA_API_KEY}`;
       const res = await fetch(url);
       const data = await res.json();
       if (!data.values) { logFeed(`Data fetch (${interval}) mein masla: ` + (data.message || 'unknown error')); return; }
       candles[interval] = data.values.reverse().map(v => ({
         time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
-        low: parseFloat(v.low), close: parseFloat(v.close)
+        low: parseFloat(v.low), close: parseFloat(v.close), volume: parseFloat(v.volume) || 0
       }));
       saveCache(interval);
       lastFetch[interval] = Date.now();
@@ -2630,9 +2634,10 @@
   }
   async function refreshDataIfNeeded(){
     const now = Date.now();
-    if (now - lastFetch["5min"] > FETCH_INTERVAL["5min"]) await fetchCandles("5min");
+    if (now - lastFetch["3min"] > FETCH_INTERVAL["3min"]) await fetchCandles("3min");
     if (now - lastFetch["15min"] > FETCH_INTERVAL["15min"]) await fetchCandles("15min");
     if (now - lastFetch["1h"] > FETCH_INTERVAL["1h"]) await fetchCandles("1h");
+    if (now - lastFetch["4h"] > FETCH_INTERVAL["4h"]) await fetchCandles("4h");
   }
 
   // ========================= ICT PRIMITIVES =========================
@@ -2674,120 +2679,317 @@
     }
     return null;
   }
-  function detectLiquiditySweep(c, direction){
-    const swings = findSwings(c.slice(0, -1), 2);
-    const last = c[c.length-1];
-    if (direction === 'bullish'){
-      const recentLow = [...swings].reverse().find(s => s.type==='low');
-      if (recentLow && last.low < recentLow.price && last.close > recentLow.price) return { level: recentLow.price, wick: last.low };
-    } else {
-      const recentHigh = [...swings].reverse().find(s => s.type==='high');
-      if (recentHigh && last.high > recentHigh.price && last.close < recentHigh.price) return { level: recentHigh.price, wick: last.high };
-    }
-    return null;
-  }
   function findLatestFVG(c, direction){
     for (let i = c.length - 2; i >= 2; i--){
       const c1 = c[i-2], c3 = c[i];
       if (direction === 'bullish' && c1.high < c3.low){
-        const fvg = { low: c1.high, high: c3.low };
+        const fvg = { low: c1.high, high: c3.low, index:i };
         if (!c.slice(i+1).some(k => k.low <= fvg.low)) return fvg;
       }
       if (direction === 'bearish' && c1.low > c3.high){
-        const fvg = { low: c3.high, high: c1.low };
+        const fvg = { low: c3.high, high: c1.low, index:i };
         if (!c.slice(i+1).some(k => k.high >= fvg.high)) return fvg;
       }
     }
     return null;
   }
-  function inZone(price, zoneLow, zoneHigh){ return price >= zoneLow && price <= zoneHigh; }
-  function isSilverBulletWindow(){
-    const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'America/New_York' }).format(new Date()));
-    return nyHour === 10;
+  function avgBodySize(candles, idx){
+    const slice = candles.slice(Math.max(0,idx-20), idx);
+    if (!slice.length) return 0.5;
+    return slice.reduce((s,k)=>s+Math.abs(k.close-k.open),0) / slice.length;
   }
 
-  // ========================= SIGNAL ENGINE =========================
+  // ========================= HTF ZONE ENGINE (FVG/OB/BPR/IFVG) =========================
+  function detectAllZones(c, tf){
+    const zones = [];
+    for (let i = 2; i < c.length; i++){
+      const c1 = c[i-2], c3 = c[i];
+      if (c1.high < c3.low) zones.push({ type:'FVG', dir:'bullish', low:c1.high, high:c3.low, tf, index:i, mitigated:false });
+      if (c1.low > c3.high) zones.push({ type:'FVG', dir:'bearish', low:c3.high, high:c1.low, tf, index:i, mitigated:false });
+    }
+    for (let i = 3; i < c.length; i++){
+      const prev = c[i-1], curr = c[i];
+      const bigMove = Math.abs(curr.close - curr.open) > (avgBodySize(c, i) * 1.8);
+      if (bigMove && curr.close > curr.open && prev.close < prev.open){
+        zones.push({ type:'OB', dir:'bullish', low:prev.low, high:prev.high, tf, index:i, mitigated:false });
+      }
+      if (bigMove && curr.close < curr.open && prev.close > prev.open){
+        zones.push({ type:'OB', dir:'bearish', low:prev.low, high:prev.high, tf, index:i, mitigated:false });
+      }
+    }
+    const fvgs = zones.filter(z => z.type === 'FVG');
+    for (let a = 0; a < fvgs.length; a++){
+      for (let b = a+1; b < fvgs.length; b++){
+        if (fvgs[a].dir !== fvgs[b].dir){
+          const lo = Math.max(fvgs[a].low, fvgs[b].low);
+          const hi = Math.min(fvgs[a].high, fvgs[b].high);
+          if (lo < hi) zones.push({ type:'BPR', dir:fvgs[b].dir, low:lo, high:hi, tf, index:fvgs[b].index, mitigated:false });
+        }
+      }
+    }
+    fvgs.forEach(f => {
+      const brokeThrough = c.slice(f.index+1).some(k => f.dir === 'bullish' ? k.close < f.low : k.close > f.high);
+      if (brokeThrough) zones.push({ type:'IFVG', dir: f.dir==='bullish'?'bearish':'bullish', low:f.low, high:f.high, tf, index:f.index, mitigated:false });
+    });
+    return zones.slice(-40);
+  }
+  function updateZoneMitigation(zones, c){
+    zones.forEach(z => {
+      if (z.mitigated) return;
+      const afterZone = c.slice(z.index+1);
+      const midpoint = z.low + (z.high - z.low) * ZONE_MITIGATION_PCT;
+      const testedDeep = afterZone.some(k => z.dir === 'bullish' ? k.low <= midpoint : k.high >= midpoint);
+      if (testedDeep) z.mitigated = true;
+    });
+    return zones;
+  }
+  function getNearestUnmitigatedZone(zones, currentPrice, biasDir){
+    const valid = zones.filter(z => !z.mitigated && z.dir === biasDir);
+    if (!valid.length) return null;
+    return valid.reduce((closest, z) => {
+      const distZ = Math.abs((z.low+z.high)/2 - currentPrice);
+      const distC = Math.abs((closest.low+closest.high)/2 - currentPrice);
+      return distZ < distC ? z : closest;
+    });
+  }
+
+  // ========================= SUPPORT/RESISTANCE MODULE (tough rules) =========================
+  function findValidatedSRLevels(c1h){
+    const swings = findSwings(c1h, 2);
+    const levels = [];
+    const tolerance = 0.5; // $0.50 tolerance to group touches
+    const grouped = [];
+    swings.forEach(s => {
+      let group = grouped.find(g => Math.abs(g.price - s.price) < tolerance);
+      if (group) { group.touches++; group.price = (group.price + s.price)/2; }
+      else grouped.push({ price: s.price, type: s.type, touches: 1 });
+    });
+    return grouped.filter(g => g.touches >= 3); // kam se kam 3 touches = validated
+  }
+  function checkSRSetup(c1h, c15, c3, bias){
+    const levels = findValidatedSRLevels(c1h);
+    if (!levels.length) return null;
+    const price = c3[c3.length-1].close;
+    const nearLevel = levels.find(l => Math.abs(l.price - price) < 1.0 &&
+      ((bias==='bullish' && l.type==='low') || (bias==='bearish' && l.type==='high')));
+    if (!nearLevel) return null;
+
+    // approach with exhaustion: last 3x 15min candle bodies shrinking
+    const last3_15 = c15.slice(-4, -1);
+    if (last3_15.length < 3) return null;
+    const bodies = last3_15.map(k => Math.abs(k.close - k.open));
+    const shrinking = bodies[2] < bodies[1] && bodies[1] < bodies[0];
+    if (!shrinking) return null;
+
+    // rejection candle on 15min: wick >= 60% of range
+    const rejCandle = c15[c15.length-1];
+    const range = rejCandle.high - rejCandle.low;
+    if (range <= 0) return null;
+    const wick = bias === 'bullish' ? (rejCandle.close - rejCandle.low) : (rejCandle.high - rejCandle.close);
+    if (wick / range < 0.6) return null;
+
+    // 3min CHOCH away from the level required
+    const bos3 = detectBOS(c3, bias);
+    if (!bos3) return null;
+
+    return { level: nearLevel.price, structurePoint: nearLevel.price, bos3 };
+  }
+
+  // ========================= BREAKOUT MODULE (tough rules) =========================
+  function checkBreakoutSetup(c15, c3, bias){
+    const range15 = c15.slice(-10, -2); // consolidation check, breakout candle excluded
+    if (range15.length < 8) return null;
+    const hi = Math.max(...range15.map(k=>k.high));
+    const lo = Math.min(...range15.map(k=>k.low));
+    const rangeWidth = hi - lo;
+    const midPrice = (hi+lo)/2;
+    if (rangeWidth / midPrice > 0.004) return null; // range 0.4% se tight honi chahiye
+
+    const breakoutCandle = c15[c15.length-2];
+    const bodySize = Math.abs(breakoutCandle.close - breakoutCandle.open);
+    const avgBody = avgBodySize(c15, c15.length-2);
+    const strongClose = bias==='bullish' ? breakoutCandle.close > hi : breakoutCandle.close < lo;
+    if (!strongClose || bodySize < avgBody * 1.5) return null;
+
+    // retest of broken edge on 3min, price must hold (not re-enter range)
+    const edge = bias === 'bullish' ? hi : lo;
+    const last2_3min = c3.slice(-3);
+    const retested = last2_3min.some(k => bias==='bullish' ? (k.low <= edge + 0.4 && k.close > edge) : (k.high >= edge - 0.4 && k.close < edge));
+    if (!retested) return null;
+
+    // false-breakout filter: price re-entered range in last 2 (15min) candles => invalid
+    const reEntered = c15.slice(-2).some(k => bias==='bullish' ? k.close < hi : k.close > lo);
+    if (reEntered) return null;
+
+    return { level: edge, structurePoint: bias==='bullish' ? lo : hi };
+  }
+
+  // ========================= FILTERS =========================
+  function isNewsBlackout(){
+    if (typeof ffEvents === 'undefined' || !ffEvents.length) return false;
+    const now = Date.now();
+    return ffEvents.some(e => {
+      if (e.impact !== 'High') return false;
+      const t = new Date(e.date).getTime();
+      return Math.abs(now - t) < 30 * 60 * 1000;
+    });
+  }
+  function isLondonNYOverlap(){
+    const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'America/New_York' }).format(new Date()));
+    return nyHour >= 8 && nyHour < 12;
+  }
+  function hasVolumeData(c){ return c.length > 5 && c.some(k => k.volume && k.volume > 0); }
+  function volumeConfirmed(c){
+    if (c.length < 15) return false;
+    const last = c[c.length-1];
+    if (hasVolumeData(c)){
+      const avgVol = c.slice(-15,-1).reduce((s,k)=>s+(k.volume||0),0) / 14;
+      return last.volume > avgVol * 1.2;
+    }
+    const avgRange = c.slice(-15,-1).reduce((s,k)=>s+(k.high-k.low),0) / 14;
+    return (last.high - last.low) > avgRange * 1.3;
+  }
+  function computeSafeLevels(direction, entry, structurePoint){
+    const buffer = 0.35;
+    const sl = direction === 'BUY' ? structurePoint - buffer : structurePoint + buffer;
+    const risk = Math.abs(entry - sl);
+    const tp1Dist = Math.max(MIN_TP1_USD, risk * 2);
+    const tp2Dist = tp1Dist * TP2_MULTIPLIER;
+    const tp1 = direction === 'BUY' ? entry + tp1Dist : entry - tp1Dist;
+    const tp2 = direction === 'BUY' ? entry + tp2Dist : entry - tp2Dist;
+    return { sl, tp1, tp2, risk, rr1: tp1Dist/risk, rr2: tp2Dist/risk };
+  }
+
+  // ========================= MAIN ENGINE =========================
   async function runAnalysisCycle(){
     await refreshDataIfNeeded();
-    const c1h = candles["1h"], c15 = candles["15min"], c5 = candles["5min"];
-    if (c1h.length < 25 || c15.length < 10 || c5.length < 10){ setEngineStatus('Candle history jama ho rahi hai... (tab khula rakhein)'); return; }
-    setEngineStatus('Live — analysis chal rahi hai');
 
-    const bias = getHTFBias(c1h);
-    if (!bias){ logFeed('HTF (1H) bias abhi clear nahi.'); return; }
+    if (isNewsBlackout()){ logFeed('⛔ High-impact news ke 30min window mein — signal paused.'); return; }
+    if (!isLondonNYOverlap()){ logFeed('London-NY overlap session nahi — bot standby.'); return; }
 
-    const bos = detectBOS(c15, bias);
-    const sweep = detectLiquiditySweep(c15, bias);
-    const fvg = findLatestFVG(c5, bias);
-    const currentPrice = c5[c5.length-1].close;
+    const c4h = candles["4h"], c1h = candles["1h"], c15 = candles["15min"], c3 = candles["3min"];
+    if (c4h.length < 25 || c1h.length < 25 || c15.length < 20 || c3.length < 20){
+      setEngineStatus('History jama ho rahi hai...'); return;
+    }
 
-    if (!bos && !sweep){ logFeed(`HTF bias: <b>${bias.toUpperCase()}</b>. MTF (15M) par abhi BOS ya sweep nahi bana.`); return; }
-    if (!fvg){ logFeed(`HTF bias: ${bias}. MTF confirmation mila (${bos?'BOS':'Liquidity Sweep'}), LTF (5M) FVG ka intezar.`); return; }
+    const biasH4 = getHTFBias(c4h);
+    const biasH1 = getHTFBias(c1h);
+    if (!biasH4 || biasH4 !== biasH1){ logFeed('H4/H1 bias align nahi — wait.'); return; }
+    const bias = biasH4;
+    setEngineStatus(`Live — HTF bias ${bias.toUpperCase()}, 3 strategies scan ho rahi hain`);
 
-    if (!inZone(currentPrice, fvg.low, fvg.high)){ logFeed(`${bias.toUpperCase()} setup ban raha hai — FVG zone (${fvg.low.toFixed(2)}-${fvg.high.toFixed(2)}) ka retest abhi baaki hai.`); return; }
+    htfZones.h1  = updateZoneMitigation(detectAllZones(c1h.slice(-ZONE_LOOKBACK), 'H1'), c1h);
+    htfZones.m15 = updateZoneMitigation(detectAllZones(c15.slice(-ZONE_LOOKBACK), '15M'), c15);
+    const currentPrice = c3[c3.length-1].close;
+
+    let setup = null, strategyName = '', extraReason = '';
+
+    // --- Strategy 1: ICT Zone (H1/15M FVG/OB/BPR/IFVG) + 3min CHOCH/FVG-break ---
+    const zone = getNearestUnmitigatedZone(htfZones.h1, currentPrice, bias) || getNearestUnmitigatedZone(htfZones.m15, currentPrice, bias);
+    if (zone){
+      const midpoint = zone.low + (zone.high - zone.low) * ZONE_MITIGATION_PCT;
+      const zoneTested = bias === 'bullish' ? currentPrice <= midpoint + 0.3 : currentPrice >= midpoint - 0.3;
+      if (zoneTested){
+        const bos3 = detectBOS(c3, bias);
+        const fvg3 = bos3 ? findLatestFVG(c3, bias) : null;
+        const brokeAway = fvg3 && (bias === 'bullish' ? c3[c3.length-1].close > fvg3.high : c3[c3.length-1].close < fvg3.low);
+        if (bos3 && fvg3 && brokeAway){
+          setup = { structurePoint: bias==='bullish' ? fvg3.low : fvg3.high };
+          strategyName = `${zone.type} (${zone.tf}) + 3min CHOCH/FVG-Break`;
+          extraReason = `${zone.tf} ${zone.type} zone (${zone.low.toFixed(2)}-${zone.high.toFixed(2)}) tested. 3min CHOCH @ ${bos3.level.toFixed(2)} + naya FVG (${fvg3.low.toFixed(2)}-${fvg3.high.toFixed(2)}) chhorte hue break-away.`;
+        } else logFeed(`${zone.tf} zone tested — 3min CHOCH/FVG-break ka wait.`);
+      } else logFeed(`${zone.tf} ${zone.type} zone track ho rahi, abhi test nahi hui.`);
+    }
+
+    // --- Strategy 2: Support/Resistance (agar zone setup na mila) ---
+    if (!setup){
+      const sr = checkSRSetup(c1h, c15, c3, bias);
+      if (sr){
+        setup = { structurePoint: sr.structurePoint };
+        strategyName = 'Support/Resistance Rejection + 3min CHOCH';
+        extraReason = `Validated S/R level @ ${sr.level.toFixed(2)} (3+ touches, H1). Exhaustion approach + 15min rejection wick + 3min CHOCH @ ${sr.bos3.level.toFixed(2)}.`;
+      } else logFeed('S/R module: koi validated (3+ touch) level ke pass exhaustion+rejection setup nahi mila.');
+    }
+
+    // --- Strategy 3: Breakout (agar upar dono na milein) ---
+    if (!setup){
+      const bo = checkBreakoutSetup(c15, c3, bias);
+      if (bo){
+        setup = { structurePoint: bo.structurePoint };
+        strategyName = 'Range Breakout + Retest';
+        extraReason = `Tight 15min consolidation range broke with strong close @ ${bo.level.toFixed(2)}, 3min retest held (no re-entry into range).`;
+      } else logFeed('Breakout module: koi valid tight-range breakout+retest nahi mila.');
+    }
+
+    if (!setup){ return; } // is cycle mein koi strategy trigger nahi hui
+
+    if (!volumeConfirmed(c3)){ logFeed(`${strategyName} setup mila lekin participation weak — skip.`); return; }
 
     const direction = bias === 'bullish' ? 'BUY' : 'SELL';
     const entry = currentPrice;
-    let sl, tp;
-    if (direction === 'BUY'){
-      sl = Math.min(fvg.low, sweep ? sweep.wick : fvg.low) - 0.3;
-      const highs = findSwings(c15,2).filter(s=>s.type==='high');
-      tp = highs.length ? highs[highs.length-1].price : entry + (entry-sl)*2;
-    } else {
-      sl = Math.max(fvg.high, sweep ? sweep.wick : fvg.high) + 0.3;
-      const lows = findSwings(c15,2).filter(s=>s.type==='low');
-      tp = lows.length ? lows[lows.length-1].price : entry - (sl-entry)*2;
-    }
-    const risk = Math.abs(entry - sl), reward = Math.abs(tp - entry);
-    const rr = risk > 0 ? reward / risk : 0;
-    if (rr < MIN_RR){ logFeed(`Valid ${direction} setup mila lekin Risk:Reward sirf 1:${rr.toFixed(2)} hai (min 1:${MIN_RR}) — skip.`); return; }
+    const lv = computeSafeLevels(direction, entry, setup.structurePoint);
+    if (lv.rr1 < MIN_RR){ logFeed(`${strategyName}: RR sirf 1:${lv.rr1.toFixed(2)} — skip.`); return; }
 
-    const silverBullet = isSilverBulletWindow();
-    let reasonLines = [];
-    reasonLines.push(`HTF (1H) Bias: ${bias === 'bullish' ? 'Bullish (higher highs/higher lows)' : 'Bearish (lower highs/lower lows)'}.`);
-    if (sweep) reasonLines.push(`MTF (15M): Liquidity sweep — price ${sweep.level.toFixed(2)} ke paar wick tak gaya (${sweep.wick.toFixed(2)}) aur reject ho kar close hua.`);
-    if (bos) reasonLines.push(`MTF (15M): Break of Structure confirm — price ne ${bos.level.toFixed(2)} candle-close ke sath tor diya.`);
-    reasonLines.push(`LTF (5M): ${direction === 'BUY' ? 'Bullish' : 'Bearish'} FVG bana (${fvg.low.toFixed(2)} - ${fvg.high.toFixed(2)}), price retest kar ke reject ho rahi hai.`);
-    if (silverBullet) reasonLines.push(`Bonus: Yeh 10-11 AM New York "Silver Bullet" killzone window hai.`);
-    reasonLines.push(`Risk:Reward = 1:${rr.toFixed(2)}.`);
+    const reason = [
+      `Strategy: ${strategyName}`,
+      `H4 & H1 Bias aligned: ${bias.toUpperCase()}.`,
+      extraReason,
+      `Session: London-NY overlap. News blackout: nahi.`,
+      `Participation: ${hasVolumeData(c3)?'volume':'range-proxy'} confirmed.`,
+      `SL: safe structure buffer. TP1: ${Math.abs(lv.tp1-entry).toFixed(2)}$ (1:${lv.rr1.toFixed(2)}) — 50% partial. TP2: ${Math.abs(lv.tp2-entry).toFixed(2)}$ (1:${lv.rr2.toFixed(2)}) — trail baaki.`
+    ].join('\n');
 
-    await createSignal({ direction, entry, sl, tp, rr, reason: reasonLines.join('\n'), strategy: sweep ? 'Liquidity Sweep + FVG' : 'BOS + FVG' });
+    await createSignal({ direction, entry, sl: lv.sl, tp1: lv.tp1, tp2: lv.tp2, rr1: lv.rr1, rr2: lv.rr2, reason, strategy: strategyName });
   }
 
   // ========================= FIRESTORE =========================
   async function createSignal(sig){
     if (!ALLOW_MULTIPLE_OPEN){
-      const openSnap = await db.collection('ictSignals').where('status','==','open').limit(1).get();
-      if (!openSnap.empty){ logFeed('Ek signal pehle se open hai — naya signal us ke close hone tak nahi banaya jayega.'); return; }
+      const openSnap = await db.collection('ictSignals').where('status','in',['open','partial']).limit(1).get();
+      if (!openSnap.empty){ logFeed('Ek signal pehle se open/partial hai — naya signal skip.'); return; }
     }
     await db.collection('ictSignals').add({
-      direction: sig.direction, entry: sig.entry, sl: sig.sl, tp: sig.tp, rr: sig.rr,
-      reason: sig.reason, strategy: sig.strategy, status: 'open',
+      direction: sig.direction, entry: sig.entry, sl: sig.sl, tp1: sig.tp1, tp2: sig.tp2,
+      rr1: sig.rr1, rr2: sig.rr2, reason: sig.reason, strategy: sig.strategy, status: 'open',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    logFeed(`✅ Naya ${sig.direction} signal generate hua!`);
-    ictChatBotSay(`🔔 Naya ${sig.direction} signal aaya hai — Entry ${sig.entry.toFixed(2)}, SL ${sig.sl.toFixed(2)}, TP ${sig.tp.toFixed(2)}. Reason poochne ke liye "abhi kya signal hai" likhein.`);
+    logFeed(`✅ Naya ${sig.direction} signal — ${sig.strategy}`);
+    ictChatBotSay(`🔔 Naya ${sig.direction} signal (${sig.strategy}) — Entry ${sig.entry.toFixed(2)}, SL ${sig.sl.toFixed(2)}, TP1 ${sig.tp1.toFixed(2)}, TP2 ${sig.tp2.toFixed(2)}.`);
   }
 
   async function monitorOpenSignal(){
-    const c5 = candles["5min"];
-    if (!c5.length) return;
-    const price = c5[c5.length-1].close;
-    const openSnap = await db.collection('ictSignals').where('status','==','open').limit(1).get();
+    const c3 = candles["3min"];
+    if (!c3.length) return;
+    const price = c3[c3.length-1].close;
+    const openSnap = await db.collection('ictSignals').where('status','in',['open','partial']).limit(1).get();
     if (openSnap.empty) return;
-    const doc = openSnap.docs[0];
-    const d = doc.data();
-    let newStatus = null;
-    if (d.direction === 'BUY'){ if (price >= d.tp) newStatus='tp_hit'; else if (price <= d.sl) newStatus='sl_hit'; }
-    else { if (price <= d.tp) newStatus='tp_hit'; else if (price >= d.sl) newStatus='sl_hit'; }
-    if (newStatus){
-      await doc.ref.update({ status: newStatus, closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
-      logFeed(newStatus === 'tp_hit' ? '🎯 Take Profit hit!' : '🛑 Stop Loss hit.');
-      ictChatBotSay(newStatus === 'tp_hit' ? `🎯 Signal ka Take Profit hit ho gaya!` : `🛑 Signal ka Stop Loss hit ho gaya.`);
+    const doc = openSnap.docs[0], d = doc.data();
+
+    if (d.status === 'open'){
+      const hitTP1 = d.direction === 'BUY' ? price >= d.tp1 : price <= d.tp1;
+      const hitSL  = d.direction === 'BUY' ? price <= d.sl  : price >= d.sl;
+      if (hitTP1){
+        await doc.ref.update({ status:'partial', tp1HitPrice: price, sl: d.entry });
+        logFeed('🎯 TP1 hit — 50% booked, SL breakeven, TP2 tak trail.');
+        ictChatBotSay('🎯 TP1 hit ho gaya! 50% profit book, baaki TP2 tak chal rahi hai (SL breakeven).');
+      } else if (hitSL){
+        await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+        logFeed('🛑 Full SL hit.');
+      }
+    } else if (d.status === 'partial'){
+      const hitTP2 = d.direction === 'BUY' ? price >= d.tp2 : price <= d.tp2;
+      const hitBE  = d.direction === 'BUY' ? price <= d.entry : price >= d.entry;
+      if (hitTP2){
+        await doc.ref.update({ status:'tp2_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+        logFeed('🎯🎯 TP2 hit — full target!');
+      } else if (hitBE){
+        await doc.ref.update({ status:'breakeven_exit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+        logFeed('⚪ Baaki position breakeven par close (TP1 profit safe).');
+      }
     }
   }
 
-  // ========================= DASHBOARD RENDER =========================
+  // ========================= DASHBOARD =========================
   function renderLiveCard(sig){
     const card = document.getElementById('ictsigLiveCard');
     const badge = document.getElementById('ictsigDirBadge');
@@ -2798,17 +3000,17 @@
       document.getElementById('ictsigSL').textContent = '—';
       document.getElementById('ictsigTP').textContent = '—';
       document.getElementById('ictsigRR').textContent = '—';
-      document.getElementById('ictsigReason').textContent = 'Abhi koi active signal nahi hai. Bot market analyze kar raha hai — neeche "Live Commentary" mein updates dekhein.';
+      document.getElementById('ictsigReason').textContent = 'Abhi koi active signal nahi hai.';
       document.getElementById('ictsigLiveTime').textContent = '—';
       return;
     }
     card.className = 'ictsig-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
     badge.className = 'ictsig-dir-badge ' + sig.direction;
-    badge.textContent = sig.direction + ' — ' + sig.strategy;
+    badge.textContent = sig.direction + ' — ' + sig.strategy + (sig.status==='partial' ? ' (TP1 done)' : '');
     document.getElementById('ictsigEntry').textContent = sig.entry.toFixed(2);
     document.getElementById('ictsigSL').textContent = sig.sl.toFixed(2);
-    document.getElementById('ictsigTP').textContent = sig.tp.toFixed(2);
-    document.getElementById('ictsigRR').textContent = '1:' + sig.rr.toFixed(2);
+    document.getElementById('ictsigTP').textContent = `TP1: ${sig.tp1.toFixed(2)} | TP2: ${sig.tp2.toFixed(2)}`;
+    document.getElementById('ictsigRR').textContent = `1:${sig.rr1.toFixed(2)} / 1:${sig.rr2.toFixed(2)}`;
     document.getElementById('ictsigReason').textContent = sig.reason;
     document.getElementById('ictsigLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
   }
@@ -2820,7 +3022,7 @@
       const row = document.createElement('div');
       row.className = 'ictsig-history-item';
       const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
-      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)}</span>
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${d.strategy||''})</em></span>
         <span class="ictsig-badge-status ${d.status}">${d.status.replace('_',' ').toUpperCase()}</span>`;
       container.appendChild(row);
     });
@@ -2829,40 +3031,39 @@
     db.collection('ictSignals').orderBy('createdAt','desc').limit(100).onSnapshot(snap => {
       const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       latestSignalsCache = docs;
-      const open = docs.find(d => d.status === 'open');
-      renderLiveCard(open || null);
+      const active = docs.find(d => d.status === 'open' || d.status === 'partial');
+      renderLiveCard(active || null);
       renderHistory(docs.slice(0, 15));
 
-      const total = docs.length;
-      const tpCount = docs.filter(d => d.status === 'tp_hit').length;
-      const slCount = docs.filter(d => d.status === 'sl_hit').length;
-      const closed = tpCount + slCount;
-      const winRate = closed > 0 ? ((tpCount / closed) * 100).toFixed(1) : '0';
-      document.getElementById('ictsigTotal').textContent = total;
-      document.getElementById('ictsigTpCount').textContent = tpCount;
-      document.getElementById('ictsigSlCount').textContent = slCount;
+      const fullWin = docs.filter(d => d.status === 'tp2_hit').length;
+      const partialWin = docs.filter(d => d.status === 'breakeven_exit').length;
+      const fullLoss = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = fullWin + partialWin + fullLoss;
+      const winRate = closed > 0 ? (((fullWin + partialWin) / closed) * 100).toFixed(1) : '0';
+
+      document.getElementById('ictsigTotal').textContent = docs.length;
+      document.getElementById('ictsigTpCount').textContent = fullWin + partialWin;
+      document.getElementById('ictsigSlCount').textContent = fullLoss;
       document.getElementById('ictsigWinRate').textContent = winRate + '%';
 
       const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
       const todayCount = docs.filter(d => d.createdAt && d.createdAt.toDate() >= startOfDay).length;
       document.getElementById('ictsigTodayCount').textContent = todayCount;
-     window.ictOpenSignal = open || null;
-      window.ictSignalStats = { total, tpCount, slCount, winRate, todayCount };
+      window.ictOpenSignal = active || null;
+      window.ictSignalStats = { total: docs.length, fullWin, partialWin, fullLoss, winRate, todayCount };
     });
   }
 
-  // ========================= CHAT ASSISTANT (rule-based) =========================
+  // ========================= CHAT ASSISTANT =========================
   const ictStrategyKB = {
-    'fvg|fair value gap|imbalance': `Fair Value Gap (FVG): 3 candles ka pattern jahan beech wali candle tezi se banti hai aur Candle 1 ki wick, Candle 3 ki wick se overlap nahi karti. Market is khaali jagah ko wapis "fill" karne aati hai — jab price zone ke 50% (CE) tak retrace ho kar reject ho, wahan se entry milti hai.`,
-    'order block|\\bob\\b': `Order Block: Woh aakhri opposite-colour candle jiske baad market ne strong impulsive move di. Institutions ka entry area samjha jata hai — retest par LTF confirmation ke sath entry li jati hai.`,
-    'sweep|liquidity': `Liquidity Sweep: Equal highs/lows ke paas stop-losses jama hote hain. Smart money wahan wick se price le jati hai (sweep) phir reverse ho jati hai — yehi reversal entry ka signal hota hai.`,
-    'bos|structure|mss': `Break of Structure (BOS)/Market Structure Shift: Jab price candle-close ke sath pichla swing high/low tor deti hai, trend shift/continue confirm hota hai.`,
-    'ote|optimal trade entry': `Optimal Trade Entry (OTE): Impulsive leg ke 61.8%-78.6% Fibonacci retracement zone — institutional discount/premium entry area.`,
-    'silver bullet': `ICT Silver Bullet: 10:00-11:00 AM New York time ka window — is mein sweep ke baad bane FVG par entry li jati hai.`,
-    'bpr|balanced price range': `Balanced Price Range (BPR): Do opposite-direction FVGs jo ek hi zone par overlap karte hain — market aksar wapis is overlap zone ko retest karti hai.`,
-    'ifvg|inverted fair value gap': `Inverted FVG: Jab ek FVG tootti hai, wahi zone opposite direction ke liye support/resistance ban jati hai.`
+    'fvg|fair value gap|imbalance': `Fair Value Gap (FVG): 3 candles ka pattern jahan beech wali candle tezi se banti hai. Market khaali jagah fill karne wapis aati hai.`,
+    'order block|\\bob\\b': `Order Block: Aakhri opposite-colour candle jiske baad strong impulsive move aayi — institutional entry area.`,
+    'bos|structure|choch': `BOS/CHOCH: Jab price candle-close ke sath pichla swing tor deti hai, structure shift/continue confirm hota hai.`,
+    'bpr|balanced price range': `BPR: Do opposite FVGs jo overlap karte hain — market wahan retest karti hai.`,
+    'ifvg|inverted': `IFVG: Jab FVG toot jaye, wahi zone opposite direction ke liye support/resistance ban jati hai.`,
+    'support|resistance|\\bsr\\b': `S/R Strategy: Sirf 3+ baar touch huay validated level, exhaustion approach (shrinking bodies), aur rejection wick (60%+) par entry — plus 3min CHOCH confirmation.`,
+    'breakout': `Breakout Strategy: Tight 15min range (0.4% se kam width) ka strong-body breakout, phir 3min par retest hold hona zaroori — false breakout filter bhi hai.`
   };
-
   function findFaqAnswer(text){
     if (typeof faqData === 'undefined') return null;
     const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 3);
@@ -2874,44 +3075,20 @@
     }));
     return bestScore >= 2 ? best : null;
   }
-
   function answerQuestion(raw){
     const text = raw.toLowerCase().trim();
-
     if (/kya signal|current signal|abhi.*signal|live signal/.test(text)){
-      const open = latestSignalsCache.find(d => d.status === 'open');
-      if (!open) return 'Abhi koi active signal nahi hai. Jaisi hi valid setup banegi, main yahan aur "Live Commentary" mein bata dunga.';
-      return `Active Signal: ${open.direction} @ ${open.entry.toFixed(2)}\nSL: ${open.sl.toFixed(2)} | TP: ${open.tp.toFixed(2)} | RR: 1:${open.rr.toFixed(2)}\n\nReason:\n${open.reason}`;
+      const active = latestSignalsCache.find(d => d.status === 'open' || d.status === 'partial');
+      if (!active) return 'Abhi koi active signal nahi hai.';
+      return `Active Signal (${active.strategy}): ${active.direction} @ ${active.entry.toFixed(2)}\nSL: ${active.sl.toFixed(2)} | TP1: ${active.tp1.toFixed(2)} | TP2: ${active.tp2.toFixed(2)}\nStatus: ${active.status}\n\nReason:\n${active.reason}`;
     }
-    if (/sl|stop loss/.test(text) && /kitn|door|value|price/.test(text)){
-      const open = latestSignalsCache.find(d => d.status === 'open');
-      return open ? `Current signal ka Stop Loss: ${open.sl.toFixed(2)}` : 'Abhi koi open signal nahi hai, is liye SL bhi nahi hai.';
-    }
-    if (/tp|take profit/.test(text) && /kitn|door|value|price/.test(text)){
-      const open = latestSignalsCache.find(d => d.status === 'open');
-      return open ? `Current signal ka Take Profit: ${open.tp.toFixed(2)}` : 'Abhi koi open signal nahi hai, is liye TP bhi nahi hai.';
-    }
-    if (/win rate/.test(text)){
-      return document.getElementById('ictsigWinRate').textContent + ' win rate hai ab tak (' + document.getElementById('ictsigTpCount').textContent + ' TP hits, ' + document.getElementById('ictsigSlCount').textContent + ' SL hits mein se).';
-    }
-    if (/aaj|today/.test(text) && /kitne|kitna/.test(text)){
-      return `Aaj ab tak ${document.getElementById('ictsigTodayCount').textContent} signals aaye hain. Koi daily limit nahi — market jitni valid setups degi, utne aayenge.`;
-    }
-    if (/bias/.test(text)){
-      const bias = candles["1h"].length >= 25 ? getHTFBias(candles["1h"]) : null;
-      return bias ? `HTF (1H) bias abhi: ${bias === 'bullish' ? 'Bullish' : 'Bearish'}.` : 'HTF bias abhi calculate nahi ho saka — candle history jama ho rahi hai.';
-    }
-
-    for (const key in ictStrategyKB){
-      if (new RegExp(key, 'i').test(text)) return ictStrategyKB[key];
-    }
-
+    if (/win rate/.test(text)) return document.getElementById('ictsigWinRate').textContent + ' win rate hai (partial+full wins ko mila kar).';
+    if (/aaj|today/.test(text) && /kitne|kitna/.test(text)) return `Aaj ab tak ${document.getElementById('ictsigTodayCount').textContent} signals aaye hain.`;
+    for (const key in ictStrategyKB){ if (new RegExp(key,'i').test(text)) return ictStrategyKB[key]; }
     const faqAns = findFaqAnswer(text);
     if (faqAns) return faqAns;
-
-    return `Mujhe is sawal ka exact jawab nahi mila. Aap poochh sakte hain: "abhi kya signal hai", "win rate kitna hai", "SL/TP kya hai", "aaj kitne signals aaye", "HTF bias kya hai", ya kisi strategy ka naam (FVG, Order Block, Liquidity Sweep, BOS, OTE, Silver Bullet, BPR, IFVG).`;
+    return `Poochh sakte hain: "abhi kya signal hai", "win rate", "S/R strategy kya hai", "breakout strategy kya hai", ya kisi ICT concept ka naam.`;
   }
-
   function addChatMessage(sender, text){
     const box = document.getElementById('ictchatMessages');
     const el = document.createElement('div');
@@ -2921,10 +3098,7 @@
     box.scrollTop = box.scrollHeight;
   }
   window.ictChatBotSay = function(text){ addChatMessage('bot', text); };
-  window.ictChatAsk = function(text){
-    document.getElementById('ictchatInput').value = text;
-    ictChatSend();
-  };
+  window.ictChatAsk = function(text){ document.getElementById('ictchatInput').value = text; ictChatSend(); };
   window.ictChatSend = function(){
     const input = document.getElementById('ictchatInput');
     const text = input.value.trim();
@@ -2938,12 +3112,11 @@
   function startEngine(){
     loadCache();
     listenSignals();
-    addChatMessage('bot', 'Assalam-o-Alaikum! Main ICT Signals bot hoon. Mujh se live signal, SL/TP, win rate, ya kisi ICT strategy ke baare mein poochh sakte hain.');
-    logFeed('Bot start ho gaya — candle history load ki jaa rahi hai.');
+    addChatMessage('bot', 'Assalam-o-Alaikum! Ab main ICT Zones + Support/Resistance + Breakout — teeno strategies check karta hoon, tough confluence rules ke sath.');
+    logFeed('Bot start ho gaya — H4/H1/15min/3min data jama ho raha hai.');
     runAnalysisCycle();
     engineTimer = setInterval(async () => { await runAnalysisCycle(); await monitorOpenSignal(); }, 60 * 1000);
   }
-
   if (typeof firebase !== 'undefined'){
     firebase.auth().onAuthStateChanged(user => {
       if (user) startEngine();
