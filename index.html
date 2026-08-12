@@ -1017,51 +1017,39 @@ function ccTogglePart(uid, folderKey, partId, el){
 
 // 1) Jab user login ho / page load ho, uska access object load karo:
 function ccLoadUserAccess(){
-  // ---- APNI SITE MEIN YAHAN YE LOGIC LAGAYEIN ----
-  // var user = firebase.auth().currentUser;
-  // if(!user){ ccAccess = null; ccRenderFolders(); return; }
-  // db.collection('users').doc(user.uid).get().then(function(doc){
-  //   var data = doc.data() || {};
-  //   ccAccess = data.courseAccess || {};
-  //   ccIsAdmin = !!data.isAdmin;     // <-- apni site ka existing admin-flag field yahan lagayein
-  //   ccRenderFolders();
-  //   if(ccIsAdmin) ccLoadAllUsersForAdmin();
-  // });
-  // -------------------------------------------------
-  ccRenderFolders(); // placeholder call taake demo mein folders dikh jayein
+  var user = firebase.auth().currentUser;
+  if(!user){ ccAccess = null; ccIsAdmin = false; ccRenderFolders(); return; }
+  db.collection('users').doc(user.uid).get().then(function(doc){
+    var data = doc.data() || {};
+    ccAccess = data.courseAccess || {};
+    ccIsAdmin = (typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes(user.email)) || data.role === 'admin';
+    ccRenderFolders();
+    if(ccIsAdmin) ccLoadAllUsersForAdmin();
+  });
 }
 
-// 2) Admin panel ke liye sab users ki list + unka access load karo:
 function ccLoadAllUsersForAdmin(){
-  // ---- APNI SITE MEIN YAHAN YE LOGIC LAGAYEIN ----
-  // db.collection('users').get().then(function(snap){
-  //   var list = [];
-  //   snap.forEach(function(doc){
-  //     var d = doc.data();
-  //     list.push({ uid:doc.id, name:d.name, email:d.email, access:d.courseAccess || {} });
-  //   });
-  //   ccRenderAdminPanel(list);
-  // });
-  // -------------------------------------------------
+  db.collection('users').get().then(function(snap){
+    var list = [];
+    snap.forEach(function(doc){
+      var d = doc.data();
+      if (typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes(d.email)) return;
+      list.push({ uid:doc.id, name:d.name || d.email, email:d.email, access:d.courseAccess || {} });
+    });
+    ccRenderAdminPanel(list);
+  });
 }
 
-// 3) Admin jab koi toggle dabaye, Firestore mein save karo (real-time):
 function ccSaveAccessToFirestore(uid, folderKey, partId, turnOn){
-  // ---- APNI SITE MEIN YAHAN YE LOGIC LAGAYEIN ----
-  // var ref = db.collection('users').doc(uid);
-  // if(partId){
-  //   var field = 'courseAccess.'+folderKey+'.parts.'+partId;
-  //   ref.update(field, turnOn);
-  // } else {
-  //   var field = 'courseAccess.'+folderKey+'.unlocked';
-  //   ref.update(field, turnOn);
-  // }
-  // -------------------------------------------------
-  console.log('[Course Access] uid:'+uid+' folder:'+folderKey+' part:'+partId+' -> '+turnOn);
+  var ref = db.collection('users').doc(uid);
+  var field = partId ? ('courseAccess.'+folderKey+'.parts.'+partId) : ('courseAccess.'+folderKey+'.unlocked');
+  ref.update(field, turnOn).catch(function(err){
+    console.error('Course access save error:', err);
+  });
 }
 
-// Page load par shuru karo:
-document.addEventListener('DOMContentLoaded', function(){
+// Firebase login/logout hote hi Course Center ka access dobara load ho:
+firebase.auth().onAuthStateChanged(function(){
   ccLoadUserAccess();
 });
 
@@ -1967,9 +1955,7 @@ window.ccTogglePart = ccTogglePart;
 <!-- ==========================================
      COURSE CENTER SECTION (HTML)
      ========================================== -->
-<section id="courseCenterSection" class="glass-panel cc-wrap" style="display:none;">
-  <div class="brand-watermark">Academy Core Engine</div>
-  <h2>📚 Educational Module Vault</h2>
+
   <p style="color:var(--cc-mute); margin-bottom: 20px;">Master Smart Money Concepts (SMC), Inner Circle Trader (ICT), and institutional Price Action models.</p>
 
   <div id="ccFolderView" class="cc-folders"></div>
