@@ -308,6 +308,7 @@
     <a href="#losstracker">Loss Tracker</a>
     <a href="#accountmanager">Accounts</a>
     <a href="#hedgeslist">Hedges</a>
+   <a href="#sessions">Market Sessions</a>
     <a href="#tradingview">Live Chart</a>
   <a href="#ictsmc">ICT/SMC Guide</a>
    <a href="#interview">Live Interview</a>
@@ -962,7 +963,15 @@
     <div id="hedgesContainer"></div>
   </div>
 </section>
-
+<section id="sessions">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Live Market Sessions (PKT)</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">Sydney, Tokyo (Asian), London, aur New York session — live status Pakistan time mein.</p>
+    <div id="sessionsGrid" style="display:flex; gap:15px; flex-wrap:wrap;"></div>
+    <div id="overlapBanner" style="margin-top:15px; padding:12px 18px; border-radius:12px; font-size:13.5px; font-weight:700; display:none;"></div>
+  </div>
+</section>
 <section id="tradingview">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
@@ -2433,7 +2442,71 @@
 })();
 </script>
 
- 
+ <script>
+(function(){
+  const SESSIONS = [
+    { name: 'Sydney',  utcOpen: 22, utcClose: 7,  color: '#a78bfa' },
+    { name: 'Tokyo (Asian)', utcOpen: 0, utcClose: 9, color: '#facc15' },
+    { name: 'London',  utcOpen: 8,  utcClose: 17, color: '#38bdf8' },
+    { name: 'New York', utcOpen: 13, utcClose: 22, color: '#22c55e' }
+  ];
+
+  function utcHourToPKT(h){
+    const pkt = (h + 5) % 24;
+    return pkt;
+  }
+  function fmtHour(h){
+    const period = h >= 12 ? 'PM' : 'AM';
+    let disp = h % 12; if (disp === 0) disp = 12;
+    return `${disp}:00 ${period}`;
+  }
+  function isSessionOpen(utcOpen, utcClose, nowUtcHour){
+    if (utcOpen < utcClose) return nowUtcHour >= utcOpen && nowUtcHour < utcClose;
+    return nowUtcHour >= utcOpen || nowUtcHour < utcClose; // wraps past midnight
+  }
+
+  function renderSessions(){
+    const now = new Date();
+    const nowUtcHour = now.getUTCHours() + now.getUTCMinutes()/60;
+    const grid = document.getElementById('sessionsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    let openSessions = [];
+
+    SESSIONS.forEach(s => {
+      const open = isSessionOpen(s.utcOpen, s.utcClose, nowUtcHour);
+      if (open) openSessions.push(s.name);
+      const pktOpen = utcHourToPKT(s.utcOpen);
+      const pktClose = utcHourToPKT(s.utcClose);
+      const card = document.createElement('div');
+      card.style.cssText = `flex:1; min-width:180px; background:rgba(15,23,42,0.6); border:1px solid ${open ? s.color+'80' : 'rgba(148,163,184,0.15)'}; border-radius:14px; padding:16px; ${open ? 'box-shadow:0 0 18px '+s.color+'40;' : ''}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:${s.color}; font-size:14px;">${s.name}</strong>
+          <span style="font-size:10px; font-weight:800; padding:3px 10px; border-radius:999px; background:${open ? s.color+'25' : 'rgba(148,163,184,0.15)'}; color:${open ? s.color : '#64748b'};">${open ? '● OPEN' : 'CLOSED'}</span>
+        </div>
+        <div style="color:#cbd5e1; font-size:13px;">${fmtHour(pktOpen)} – ${fmtHour(pktClose)} PKT</div>
+      `;
+      grid.appendChild(card);
+    });
+
+    const banner = document.getElementById('overlapBanner');
+    if (openSessions.length >= 2){
+      banner.style.display = 'block';
+      banner.style.background = 'rgba(34,197,94,0.12)';
+      banner.style.border = '1px solid rgba(34,197,94,0.4)';
+      banner.style.color = '#4ade80';
+      banner.textContent = `🔥 Session Overlap Active: ${openSessions.join(' + ')} — high liquidity window.`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  renderSessions();
+  setInterval(renderSessions, 60000);
+})();
+</script>
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script type="text/javascript">
   new TradingView.widget({
