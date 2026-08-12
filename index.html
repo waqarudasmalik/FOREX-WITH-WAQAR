@@ -2907,10 +2907,12 @@
       return Math.abs(now - t) < 30 * 60 * 1000;
     });
   }
-  function isLondonNYOverlap(){
-    const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'America/New_York' }).format(new Date()));
-    return nyHour >= 8 && nyHour < 12;
-  }
+ function isLondonNYOverlap(){
+  const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'America/New_York' }).format(new Date()));
+  // London session: 3 AM - 12 PM NY time | NY session: 8 AM - 5 PM NY time
+  // Combined (London open se NY close tak): 3 AM - 5 PM NY time
+  return nyHour >= 3 && nyHour < 17;
+}
   function hasVolumeData(c){ return c.length > 5 && c.some(k => k.volume && k.volume > 0); }
   function volumeConfirmed(c){
     if (c.length < 15) return false;
