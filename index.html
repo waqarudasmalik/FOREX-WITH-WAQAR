@@ -303,6 +303,7 @@
 <header>
   <h1>Forex With Waqar</h1>
   <nav>
+   <a href="#siteDashboard">🗂️ Dashboard</a>
    <a href="#redflagnews">🔴 Red Flag News</a>
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
@@ -329,6 +330,46 @@
   <h2>Master the Hedging System</h2>
   <p>Apni trades track karein, hedge lagayein aur apna zati trading record khud-badh (auto-update) rakhein.</p>
 </div>
+
+<!-- ==========================================
+     SITE DASHBOARD — folder-style navigation
+     ========================================== -->
+<style>
+  .sd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:20px;}
+  .sd-folder{background:rgba(17,24,39,0.7);border:1px solid rgba(148,163,184,0.15);border-radius:14px;
+    padding:20px;cursor:pointer;transition:transform .2s, border-color .2s;text-decoration:none;display:block;color:inherit;}
+  .sd-folder:hover{border-color:#facc15;transform:translateY(-3px);}
+  .sd-folder .sd-icon{font-size:28px;margin-bottom:8px;}
+  .sd-folder h4{color:#38bdf8;font-size:16px;margin-bottom:6px;}
+  .sd-folder p{color:#94a3b8;font-size:12.5px;margin:0;line-height:1.5;}
+</style>
+<section id="siteDashboard">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🗂️ Dashboard</h3>
+    <p style="color:#94a3b8;margin-bottom:10px;">Site ke tamam tools aur guides ek jagah — kisi bhi folder par click karke seedha us section mein pahunch jayein.</p>
+    <div class="sd-grid">
+      <a class="sd-folder" href="#redflagnews"><div class="sd-icon">🔴</div><h4>Red Flag News</h4><p>High-impact news alerts jo trading ko affect kar sakti hain.</p></a>
+      <a class="sd-folder" href="#record"><div class="sd-icon">📒</div><h4>Apna Trade Record (Auto-Update)</h4><p>Apni trades track karein, khud-badh (auto-update) hone wale record ke sath.</p></a>
+      <a class="sd-folder" href="#hedgecalc"><div class="sd-icon">🧮</div><h4>XAUUSD Hedging Calculator</h4><p>Standalone calculator — hedge positions plan karne ke liye.</p></a>
+      <a class="sd-folder" href="#calclog"><div class="sd-icon">📊</div><h4>Calculated Hedges Log</h4><p>Pehle calculate ki gayi hedges ka history/log.</p></a>
+      <a class="sd-folder" href="#buffercalc"><div class="sd-icon">⚖️</div><h4>Entry Difference & Buffer Loss Calculator</h4><p>Entry difference aur buffer loss nikalne ka tool.</p></a>
+      <a class="sd-folder" href="#advcalc"><div class="sd-icon">🧠</div><h4>Advanced Position Calculator</h4><p>Position sizing ke liye advanced calculator.</p></a>
+      <a class="sd-folder" href="#losstracker"><div class="sd-icon">📉</div><h4>Account Loss Tracker</h4><p>Account-wise losses track karne ka tool.</p></a>
+      <a class="sd-folder" href="#accountmanager"><div class="sd-icon">👥</div><h4>Hedging Accounts Manager</h4><p>Apne hedging accounts manage karein.</p></a>
+      <a class="sd-folder" href="#hedgeslist"><div class="sd-icon">🔗</div><h4>Live Hedges</h4><p>Currently active hedges ki list.</p></a>
+      <a class="sd-folder" href="#sessions"><div class="sd-icon">🕐</div><h4>Live Market Sessions (PKT)</h4><p>Asian, London, NY sessions ka live status.</p></a>
+      <a class="sd-folder" href="#tradingview"><div class="sd-icon">📈</div><h4>XAUUSD Live Chart</h4><p>Live chart aur analysis tools.</p></a>
+      <a class="sd-folder" href="#ictsmc"><div class="sd-icon">🧭</div><h4>ICT / SMC Guide</h4><p>ICT/SMC strategy confirmation guide.</p></a>
+      <a class="sd-folder" href="#courseCenterSection"><div class="sd-icon">📚</div><h4>Course Center</h4><p>SMC, ICT aur Price Action — diagram, practice aur quiz ke sath.</p></a>
+      <a class="sd-folder" href="#interview"><div class="sd-icon">🎤</div><h4>Live Interview Practice</h4><p>150 practice questions ke sath interview prep.</p></a>
+      <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
+      <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🤖</div><h4>ICT Signals — AI Gold Bot</h4><p>XAUUSD ke liye AI-generated ICT signals.</p></a>
+      <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
+    </div>
+  </div>
+</section>
+
 <section id="redflagnews">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
@@ -2164,6 +2205,17 @@
       });
     } else {
       await userRef.update({ lastActive: firebase.firestore.FieldValue.serverTimestamp() });
+      // Self-heal: agar ye email ADMIN_EMAILS mein hai lekin purana Firestore
+      // record 'role: admin' ya 'status: approved' nahi bata raha (chahe kisi
+      // bhi wajah se), to yahan turant theek kar do — status check se pehle,
+      // taake admin kabhi bhi 'pending'/'rejected' overlay mein phans na jaye
+      // aur Admin Panel button hamesha sahi se dikhe.
+      if (isAdmin) {
+        const d = docSnap.data() || {};
+        if (d.role !== 'admin' || d.status !== 'approved') {
+          await userRef.update({ role: 'admin', status: 'approved' });
+        }
+      }
     }
 
     currentUserDocUnsub = userRef.onSnapshot(snap => {
@@ -2181,21 +2233,15 @@
         document.getElementById('pendingOverlay').style.display = 'none';
         document.getElementById('rejectedOverlay').style.display = 'none';
         document.getElementById('adminFab').style.display = (isAdmin || data.role === 'admin') ? 'block' : 'none';
-        // Self-heal: agar ye email ADMIN_EMAILS mein hai lekin Firestore ka
-        // purana record 'role: admin' nahi bata raha, to record theek kar do
-        // taake ye bug dobara na ho.
-        if (isAdmin && data.role !== 'admin') {
-          userRef.update({ role: 'admin', status: 'approved' });
-        }
         logActivity('Session active');
       } else if (data.status === 'rejected') {
         document.getElementById('pendingOverlay').style.display = 'none';
         document.getElementById('rejectedOverlay').style.display = 'flex';
-        document.getElementById('adminFab').style.display = 'none';
+        document.getElementById('adminFab').style.display = isAdmin ? 'block' : 'none';
       } else {
         document.getElementById('pendingOverlay').style.display = 'flex';
         document.getElementById('rejectedOverlay').style.display = 'none';
-        document.getElementById('adminFab').style.display = 'none';
+        document.getElementById('adminFab').style.display = isAdmin ? 'block' : 'none';
       }
     });
 
@@ -4111,34 +4157,65 @@ const messages = [{ role: 'system', content: aichatBuildSystemPrompt() }, ...aic
 */
 function renderCandles(id, candles, zones, notes){
   zones = zones || []; notes = notes || [];
-  var n = candles.length;
-  var W = 90 + n*72, H = 260;
-  var topPad = 20, botPad = 20, leftPad = 16, rightPad = 16;
-  var px = function(v){ return topPad + (100 - v) / 100 * (H - topPad - botPad); };
-  var cx = function(i){ return leftPad + 40 + i*72; };
+
+  // ---- generate muted "context" candles before/after the real lesson
+  // candles so the chart reads like a continuous live feed instead of an
+  // isolated illustration (real charts always have surrounding price action) ----
+  function fillerCandles(startPrice, count, volatility){
+    var arr = [], price = startPrice;
+    for (var i=0;i<count;i++){
+      var open = price;
+      var close = Math.max(6, Math.min(94, open + (Math.random()-0.5)*volatility));
+      var high = Math.min(97, Math.max(open,close) + Math.random()*volatility*0.35);
+      var low  = Math.max(3,  Math.min(open,close) - Math.random()*volatility*0.35);
+      arr.push({o:open,h:high,l:low,c:close});
+      price = close;
+    }
+    return arr;
+  }
+  var LEAD = 3, TAIL = 3, VOL = 7;
+  var leadIn  = fillerCandles(candles[0].o, LEAD, VOL).reverse().map(function(c,idx,arr){
+    // reverse-walk so it ends smoothly at the real first candle's open
+    return c;
+  });
+  var tailOut = fillerCandles(candles[candles.length-1].c, TAIL, VOL);
+  var allCandles = leadIn.concat(candles, tailOut);
+  var offset = leadIn.length; // real candle i -> allCandles[i+offset]
+  var cxr = function(i){ return leftAt(i+offset); }; // real-index-aware x()
+
+  var n = allCandles.length;
+  var W = 90 + n*58, H = 280;
+  var topPad = 20, botPad = 46, leftPad = 16, rightPad = 34;
+  var plotBot = H - botPad;
+  var px = function(v){ return topPad + (100 - v) / 100 * (plotBot - topPad); };
+  function leftAt(i){ return leftPad + 30 + i*58; }
+  var cx = leftAt;
+
   var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="cc-diagram" xmlns="http://www.w3.org/2000/svg">';
 
   // dark chart panel background
   svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="10" fill="#0a0f1a"/>';
 
-  // horizontal gridlines (like a real chart's price grid)
+  // horizontal price gridlines
   for (var g = 0; g <= 4; g++){
-    var gy = topPad + g*(H-topPad-botPad)/4;
+    var gy = topPad + g*(plotBot-topPad)/4;
     svg += '<line x1="10" y1="'+gy+'" x2="'+(W-10)+'" y2="'+gy+'" stroke="rgba(148,163,184,0.09)" stroke-width="1"/>';
   }
-  // vertical gridlines per candle
-  candles.forEach(function(c,i){
-    svg += '<line x1="'+cx(i)+'" y1="'+topPad+'" x2="'+cx(i)+'" y2="'+(H-botPad)+'" stroke="rgba(148,163,184,0.05)" stroke-width="1"/>';
+  // faint vertical gridlines every few candles
+  allCandles.forEach(function(c,i){
+    if (i % 3 !== 0) return;
+    svg += '<line x1="'+cx(i)+'" y1="'+topPad+'" x2="'+cx(i)+'" y2="'+plotBot+'" stroke="rgba(148,163,184,0.04)" stroke-width="1"/>';
   });
 
-  // zones drawn first so candles sit on top, like OB/FVG boxes on a real chart
+  // zones drawn first so real candles sit on top, like OB/FVG boxes on a real chart
   zones.forEach(function(z){
-    var x1=cx(z.from)-27, x2=cx(z.to)+27, y1=px(z.top), y2=px(z.bottom);
+    var x1=cxr(z.from)-22, x2=cxr(z.to)+22, y1=px(z.top), y2=px(z.bottom);
     svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.15" stroke="'+z.color+'" stroke-width="1.3" stroke-dasharray="5 3" rx="4"/>';
   });
 
-  // candlesticks — thin wicks + narrow bodies, like a real candlestick chart
-  candles.forEach(function(c,i){
+  // candlesticks — muted context bars + full-opacity real lesson candles
+  allCandles.forEach(function(c,i){
+    var isReal = i >= offset && i < offset + candles.length;
     var up = c.c>=c.o;
     var color = up? 'var(--cc-green)':'var(--cc-red)';
     var x = cx(i);
@@ -4146,21 +4223,31 @@ function renderCandles(id, candles, zones, notes){
     var bodyTop = px(Math.max(c.o,c.c));
     var bodyBot = px(Math.min(c.o,c.c));
     var bodyH = Math.max(3, bodyBot-bodyTop);
-    svg += '<line x1="'+x+'" y1="'+wickTop+'" x2="'+x+'" y2="'+wickBot+'" stroke="'+color+'" stroke-width="1.4" opacity="0.95"/>';
-    svg += '<rect x="'+(x-8)+'" y="'+bodyTop+'" width="16" height="'+bodyH+'" rx="2" fill="'+color+'"/>';
+    var op = isReal ? '1' : '0.4';
+    svg += '<line x1="'+x+'" y1="'+wickTop+'" x2="'+x+'" y2="'+wickBot+'" stroke="'+color+'" stroke-width="1.3" opacity="'+op+'"/>';
+    svg += '<rect x="'+(x-6)+'" y="'+bodyTop+'" width="12" height="'+bodyH+'" rx="1.5" fill="'+color+'" opacity="'+op+'"/>';
+    // mini volume bar strip at the bottom, like a real platform
+    var volH = Math.max(3, Math.abs(bodyBot-bodyTop) * 0.6 + 4);
+    svg += '<rect x="'+(x-6)+'" y="'+(H-14-volH)+'" width="12" height="'+volH+'" rx="1" fill="'+color+'" opacity="'+(isReal?'0.55':'0.22')+'"/>';
   });
+
+  // last real candle's close: dashed crosshair "current price" line, like live platforms
+  var lastReal = candles[candles.length-1];
+  var lastY = px(lastReal.c);
+  svg += '<line x1="14" y1="'+lastY+'" x2="'+(W-22)+'" y2="'+lastY+'" stroke="var(--cc-gold)" stroke-width="1" stroke-dasharray="4 3" opacity="0.55"/>';
+  svg += '<path d="M '+(W-22)+' '+(lastY-5)+' L '+(W-10)+' '+lastY+' L '+(W-22)+' '+(lastY+5)+' Z" fill="var(--cc-gold)" opacity="0.85"/>';
 
   // zone labels as small chips (like real chart annotation tags)
   zones.forEach(function(z){
     if(!z.label) return;
-    var x1=cx(z.from)-27, y1=px(z.top);
+    var x1=cxr(z.from)-22, y1=px(z.top);
     var labelW = 14 + z.label.length*5.6;
     svg += '<rect x="'+(x1+2)+'" y="'+(y1+4)+'" width="'+labelW+'" height="14" rx="4" fill="#000000b3"/>';
     svg += '<text x="'+(x1+2+labelW/2)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'" text-anchor="middle">'+z.label+'</text>';
   });
 
   notes.forEach(function(n){
-    svg += '<text x="'+cx(n.at)+'" y="'+px(n.y)+'" class="cc-note" text-anchor="middle" fill="'+(n.color||'#e8c46a')+'">'+n.text+'</text>';
+    svg += '<text x="'+cxr(n.at)+'" y="'+px(n.y)+'" class="cc-note" text-anchor="middle" fill="'+(n.color||'#e8c46a')+'">'+n.text+'</text>';
   });
 
   // chart border
