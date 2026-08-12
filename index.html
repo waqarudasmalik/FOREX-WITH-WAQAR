@@ -2665,15 +2665,15 @@
   const ZONE_MITIGATION_PCT = 0.5;
   const ALLOW_MULTIPLE_OPEN = false;
 
-  const FETCH_INTERVAL = { "3min": 3*60*1000, "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000 };
-  let lastFetch = { "3min": 0, "15min": 0, "1h": 0, "4h": 0 };
-  let candles = { "3min": [], "15min": [], "1h": [], "4h": [] };
+  const FETCH_INTERVAL = { "1min": 60*1000, "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000 };
+  let lastFetch = { "1min": 0, "15min": 0, "1h": 0, "4h": 0 };
+  let candles = { "1min": [], "15min": [], "1h": [], "4h": [] };
   let engineTimer = null;
   let latestSignalsCache = [];
   let htfZones = { h1: [], m15: [] };
 
   function loadCache(){
-    ["3min","15min","1h","4h"].forEach(tf => {
+    ["1min","15min","1h","4h"].forEach(tf => {
       try { candles[tf] = JSON.parse(localStorage.getItem('ictCandles_'+tf)) || []; } catch(e){ candles[tf] = []; }
     });
   }
@@ -2707,7 +2707,7 @@
   }
   async function refreshDataIfNeeded(){
     const now = Date.now();
-    if (now - lastFetch["3min"] > FETCH_INTERVAL["3min"]) await fetchCandles("3min");
+    if (now - lastFetch["1min"] > FETCH_INTERVAL["1min"]) await fetchCandles("1min");
     if (now - lastFetch["15min"] > FETCH_INTERVAL["15min"]) await fetchCandles("15min");
     if (now - lastFetch["1h"] > FETCH_INTERVAL["1h"]) await fetchCandles("1h");
     if (now - lastFetch["4h"] > FETCH_INTERVAL["4h"]) await fetchCandles("4h");
@@ -2861,7 +2861,7 @@
     const wick = bias === 'bullish' ? (rejCandle.close - rejCandle.low) : (rejCandle.high - rejCandle.close);
     if (wick / range < 0.6) return null;
 
-    // 3min CHOCH away from the level required
+    // 1min CHOCH away from the level required
     const bos3 = detectBOS(c3, bias);
     if (!bos3) return null;
 
@@ -2884,10 +2884,10 @@
     const strongClose = bias==='bullish' ? breakoutCandle.close > hi : breakoutCandle.close < lo;
     if (!strongClose || bodySize < avgBody * 1.5) return null;
 
-    // retest of broken edge on 3min, price must hold (not re-enter range)
+    // retest of broken edge on 1min, price must hold (not re-enter range)
     const edge = bias === 'bullish' ? hi : lo;
-    const last2_3min = c3.slice(-3);
-    const retested = last2_3min.some(k => bias==='bullish' ? (k.low <= edge + 0.4 && k.close > edge) : (k.high >= edge - 0.4 && k.close < edge));
+    const last2_1min = c3.slice(-3);
+    const retested = last2_1min.some(k => bias==='bullish' ? (k.low <= edge + 0.4 && k.close > edge) : (k.high >= edge - 0.4 && k.close < edge));
     if (!retested) return null;
 
     // false-breakout filter: price re-entered range in last 2 (15min) candles => invalid
@@ -2940,7 +2940,7 @@
     if (isNewsBlackout()){ logFeed('⛔ High-impact news ke 30min window mein — signal paused.'); return; }
     if (!isLondonNYOverlap()){ logFeed('London-NY overlap session nahi — bot standby.'); return; }
 
-    const c4h = candles["4h"], c1h = candles["1h"], c15 = candles["15min"], c3 = candles["3min"];
+    const c4h = candles["4h"], c1h = candles["1h"], c15 = candles["15min"], c3 = candles["1min"];
     if (c4h.length < 25 || c1h.length < 25 || c15.length < 20 || c3.length < 20){
       setEngineStatus('History jama ho rahi hai...'); return;
     }
@@ -2957,7 +2957,7 @@
 
     let setup = null, strategyName = '', extraReason = '';
 
-    // --- Strategy 1: ICT Zone (H1/15M FVG/OB/BPR/IFVG) + 3min CHOCH/FVG-break ---
+    // --- Strategy 1: ICT Zone (H1/15M FVG/OB/BPR/IFVG) + 1min CHOCH/FVG-break ---
     const zone = getNearestUnmitigatedZone(htfZones.h1, currentPrice, bias) || getNearestUnmitigatedZone(htfZones.m15, currentPrice, bias);
     if (zone){
       const midpoint = zone.low + (zone.high - zone.low) * ZONE_MITIGATION_PCT;
@@ -2968,9 +2968,9 @@
         const brokeAway = fvg3 && (bias === 'bullish' ? c3[c3.length-1].close > fvg3.high : c3[c3.length-1].close < fvg3.low);
         if (bos3 && fvg3 && brokeAway){
           setup = { structurePoint: bias==='bullish' ? fvg3.low : fvg3.high };
-          strategyName = `${zone.type} (${zone.tf}) + 3min CHOCH/FVG-Break`;
-          extraReason = `${zone.tf} ${zone.type} zone (${zone.low.toFixed(2)}-${zone.high.toFixed(2)}) tested. 3min CHOCH @ ${bos3.level.toFixed(2)} + naya FVG (${fvg3.low.toFixed(2)}-${fvg3.high.toFixed(2)}) chhorte hue break-away.`;
-        } else logFeed(`${zone.tf} zone tested — 3min CHOCH/FVG-break ka wait.`);
+          strategyName = `${zone.type} (${zone.tf}) + 1min CHOCH/FVG-Break`;
+          extraReason = `${zone.tf} ${zone.type} zone (${zone.low.toFixed(2)}-${zone.high.toFixed(2)}) tested. 1min CHOCH @ ${bos3.level.toFixed(2)} + naya FVG (${fvg3.low.toFixed(2)}-${fvg3.high.toFixed(2)}) chhorte hue break-away.`;
+        } else logFeed(`${zone.tf} zone tested — 1min CHOCH/FVG-break ka wait.`);
       } else logFeed(`${zone.tf} ${zone.type} zone track ho rahi, abhi test nahi hui.`);
     }
 
@@ -2979,8 +2979,8 @@
       const sr = checkSRSetup(c1h, c15, c3, bias);
       if (sr){
         setup = { structurePoint: sr.structurePoint };
-        strategyName = 'Support/Resistance Rejection + 3min CHOCH';
-        extraReason = `Validated S/R level @ ${sr.level.toFixed(2)} (3+ touches, H1). Exhaustion approach + 15min rejection wick + 3min CHOCH @ ${sr.bos3.level.toFixed(2)}.`;
+        strategyName = 'Support/Resistance Rejection + 1min CHOCH';
+        extraReason = `Validated S/R level @ ${sr.level.toFixed(2)} (3+ touches, H1). Exhaustion approach + 15min rejection wick + 1min CHOCH @ ${sr.bos3.level.toFixed(2)}.`;
       } else logFeed('S/R module: koi validated (3+ touch) level ke pass exhaustion+rejection setup nahi mila.');
     }
 
@@ -2990,7 +2990,7 @@
       if (bo){
         setup = { structurePoint: bo.structurePoint };
         strategyName = 'Range Breakout + Retest';
-        extraReason = `Tight 15min consolidation range broke with strong close @ ${bo.level.toFixed(2)}, 3min retest held (no re-entry into range).`;
+        extraReason = `Tight 15min consolidation range broke with strong close @ ${bo.level.toFixed(2)}, 1min retest held (no re-entry into range).`;
       } else logFeed('Breakout module: koi valid tight-range breakout+retest nahi mila.');
     }
 
@@ -3031,7 +3031,7 @@
   }
 
   async function monitorOpenSignal(){
-    const c3 = candles["3min"];
+    const c3 = candles["1min"];
     if (!c3.length) return;
     const price = c3[c3.length-1].close;
     const openSnap = await db.collection('ictSignals').where('status','in',['open','partial']).limit(1).get();
@@ -3134,8 +3134,8 @@
     'bos|structure|choch': `BOS/CHOCH: Jab price candle-close ke sath pichla swing tor deti hai, structure shift/continue confirm hota hai.`,
     'bpr|balanced price range': `BPR: Do opposite FVGs jo overlap karte hain — market wahan retest karti hai.`,
     'ifvg|inverted': `IFVG: Jab FVG toot jaye, wahi zone opposite direction ke liye support/resistance ban jati hai.`,
-    'support|resistance|\\bsr\\b': `S/R Strategy: Sirf 3+ baar touch huay validated level, exhaustion approach (shrinking bodies), aur rejection wick (60%+) par entry — plus 3min CHOCH confirmation.`,
-    'breakout': `Breakout Strategy: Tight 15min range (0.4% se kam width) ka strong-body breakout, phir 3min par retest hold hona zaroori — false breakout filter bhi hai.`
+    'support|resistance|\\bsr\\b': `S/R Strategy: Sirf 3+ baar touch huay validated level, exhaustion approach (shrinking bodies), aur rejection wick (60%+) par entry — plus 1min CHOCH confirmation.`,
+    'breakout': `Breakout Strategy: Tight 15min range (0.4% se kam width) ka strong-body breakout, phir 1min par retest hold hona zaroori — false breakout filter bhi hai.`
   };
   function findFaqAnswer(text){
     if (typeof faqData === 'undefined') return null;
@@ -3186,7 +3186,7 @@
     loadCache();
     listenSignals();
     addChatMessage('bot', 'Assalam-o-Alaikum! Ab main ICT Zones + Support/Resistance + Breakout — teeno strategies check karta hoon, tough confluence rules ke sath.');
-    logFeed('Bot start ho gaya — H4/H1/15min/3min data jama ho raha hai.');
+    logFeed('Bot start ho gaya — H4/H1/15min/1min data jama ho raha hai.');
     runAnalysisCycle();
     engineTimer = setInterval(async () => { await runAnalysisCycle(); await monitorOpenSignal(); }, 60 * 1000);
   }
