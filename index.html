@@ -246,812 +246,93 @@
 .aichat-inputrow button { padding: 10px 16px; background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: #0f172a; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
 .aichat-typing { font-size: 12px; color: #64748b; padding: 0 14px 8px; }
  <!--
-================================================================================
-  FOREX WITH WAQAR — FULL COURSE CENTER MODULE
-  (SMC · ICT · Price Action — admin-controlled access, diagrams, practice, quiz)
-================================================================================
-
-  YE FILE STANDALONE HAI. Apni asal site (Firebase wali index.html) mein isay
-  paste karne ke liye neeche di gayi "INTEGRATION STEPS" section zaroor parhein.
-
-  Is file mein 3 hisse hain:
-    1) <style>   -> course center ka CSS
-    2) <section> -> course center ka HTML (page ka wo hissa jo dikhta hai)
-    3) <script>  -> COURSES data (27 parts) + diagram engine + quiz engine +
-                     admin access-control system (Firestore ke sath)
-
-  =============================== CONTENTS ====================================
-  SMC (9 parts)
-    Order Block:  Bullish OB, Bearish OB, Breaker Block, Mitigation Block,
-                   Rejection Block
-    FVG:           Bullish FVG, Bearish FVG, Inverse FVG (IFVG),
-                   Balanced Price Range (BPR)
-
-  ICT (8 parts)
-    Liquidity (Buyside/Sellside), Market Structure (BOS/CHoCH),
-    Premium & Discount (OTE), Killzones, Judas Swing, Power of Three (AMD),
-    Silver Bullet, SMT Divergence
-
-  Price Action (10 parts)
-    Support & Resistance, Trendlines & Channels, Candlestick Patterns,
-    Reversal Chart Patterns, Continuation Chart Patterns, Breakout & Retest,
-    Multiple Timeframe Analysis, Trend vs Range, Risk Management &
-    Position Sizing, Confluence & Trade Journal Discipline
-  ==============================================================================
--->
-
-<style>
-  .cc-wrap{--cc-green:#3ecf8e;--cc-red:#ef5b5b;--cc-gold:#e8c46a;--cc-bg:#0e1420;
-    --cc-panel:#151d2e;--cc-line:#26314a;--cc-text:#dbe3f0;--cc-mute:#8492ab;
-    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--cc-text);}
-  .cc-folders{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin:18px 0 28px;}
-  .cc-folder{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:14px;
-    padding:20px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
-  .cc-folder:hover{border-color:var(--cc-gold);transform:translateY(-2px);}
-  .cc-folder h3{margin:8px 0 4px;font-size:19px;}
-  .cc-folder p{margin:0;color:var(--cc-mute);font-size:13px;}
-  .cc-folder .cc-count{position:absolute;top:14px;right:16px;background:#000a;padding:3px 9px;
-    border-radius:20px;font-size:11px;color:var(--cc-gold);}
-  .cc-folder.cc-locked{opacity:.55;cursor:not-allowed;}
-  .cc-folder .cc-lock-badge{font-size:12px;color:var(--cc-red);margin-top:8px;display:block;}
-  .cc-parts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0;}
-  .cc-part-card{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;}
-  .cc-part-card:hover{border-color:var(--cc-gold);}
-  .cc-part-card .cc-tag{font-size:11px;color:var(--cc-gold);text-transform:uppercase;letter-spacing:.5px;}
-  .cc-part-card h4{margin:6px 0;font-size:15px;}
-  .cc-part-card.cc-locked{opacity:.5;cursor:not-allowed;}
-  .cc-back-btn{background:none;border:1px solid var(--cc-line);color:var(--cc-text);padding:7px 16px;
-    border-radius:8px;cursor:pointer;margin-bottom:14px;font-size:13px;}
-  .cc-back-btn:hover{border-color:var(--cc-gold);}
-  .cc-part-detail{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:14px;padding:24px;}
-  .cc-part-detail h2{margin-top:0;color:var(--cc-gold);}
-  .cc-diagram-box{background:var(--cc-bg);border:1px solid var(--cc-line);border-radius:10px;
-    padding:14px;margin:16px 0;overflow-x:auto;}
-  .cc-diagram{width:100%;min-width:420px;height:auto;display:block;}
-  .cc-zone-label{font-size:10px;font-weight:600;}
-  .cc-note{font-size:11px;font-weight:600;}
-  .cc-explain{background:#0e1420;border-left:3px solid var(--cc-gold);padding:12px 16px;
-    border-radius:6px;line-height:1.7;font-size:14.5px;}
-  .cc-practice{background:#0e1420;border:1px dashed var(--cc-line);border-radius:10px;padding:16px;margin-top:18px;}
-  .cc-practice h4{margin-top:0;color:var(--cc-green);}
-  .cc-show-answer{background:var(--cc-gold);color:#1a1408;border:none;padding:8px 18px;
-    border-radius:8px;cursor:pointer;font-weight:600;margin-top:10px;}
-  .cc-answer-box{display:none;margin-top:12px;padding:12px;background:#0a1f16;border-radius:8px;
-    border:1px solid var(--cc-green);font-size:14px;}
-  .cc-answer-box.show{display:block;}
-  .cc-quiz{margin-top:22px;}
-  .cc-quiz-q{background:#0e1420;border:1px solid var(--cc-line);border-radius:10px;padding:14px;margin-bottom:12px;}
-  .cc-quiz-q p{margin:0 0 10px;font-weight:600;}
-  .cc-quiz-opt{display:block;width:100%;text-align:left;background:var(--cc-panel);
-    border:1px solid var(--cc-line);color:var(--cc-text);padding:9px 12px;border-radius:8px;
-    margin-bottom:7px;cursor:pointer;font-size:13.5px;}
-  .cc-quiz-opt:hover{border-color:var(--cc-gold);}
-  .cc-quiz-opt.correct{background:#123a24;border-color:var(--cc-green);}
-  .cc-quiz-opt.wrong{background:#3a1414;border-color:var(--cc-red);}
-  .cc-quiz-opt.disabled{pointer-events:none;}
-  .cc-locked-msg{text-align:center;padding:50px 20px;color:var(--cc-mute);}
-  .cc-locked-msg .cc-lock-icon{font-size:40px;display:block;margin-bottom:10px;}
-  .cc-admin-panel{background:var(--cc-panel);border:1px solid var(--cc-gold);border-radius:14px;padding:20px;margin:20px 0;}
-  .cc-admin-panel h3{color:var(--cc-gold);margin-top:0;}
-  .cc-admin-user{border:1px solid var(--cc-line);border-radius:10px;padding:12px;margin-bottom:10px;}
-  .cc-admin-user summary{cursor:pointer;font-weight:600;}
-  .cc-admin-folder-row{display:flex;align-items:center;justify-content:space-between;
-    padding:8px 0;border-bottom:1px solid var(--cc-line);}
-  .cc-admin-parts{margin-left:18px;margin-top:6px;}
-  .cc-admin-part-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--cc-mute);}
-  .cc-toggle{position:relative;width:38px;height:21px;background:#333;border-radius:20px;cursor:pointer;flex-shrink:0;}
-  .cc-toggle.on{background:var(--cc-green);}
-  .cc-toggle::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;background:#fff;
-    border-radius:50%;transition:.15s;}
-  .cc-toggle.on::after{left:19px;}
-</style>
-
-
-<script>
-/* ==========================================================================
-   COURSE CENTER — DATA + ENGINE
-   ========================================================================== */
-(function(){
-
-/* ---------- Small candlestick diagram renderer ----------
-   candles: [{o,h,l,c}]  values 0-100 (100 = chart top/high price, 0 = bottom)
-   zones:   [{from,to,top,bottom,color,label}]  from/to = candle index range
-   notes:   [{at,y,text,color}] small text label pinned at a candle index/price
-*/
-function renderCandles(id, candles, zones, notes){
-  zones = zones || []; notes = notes || [];
-  var W = 60 + candles.length*70, H = 220;
-  var px = function(v){ return 200 - (v/100*170) - 10; };
-  var cx = function(i){ return 50 + i*70; };
-  var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="cc-diagram" xmlns="http://www.w3.org/2000/svg">';
-  zones.forEach(function(z){
-    var x1=cx(z.from)-25, x2=cx(z.to)+25, y1=px(z.top), y2=px(z.bottom);
-    svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.18" stroke="'+z.color+'" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>';
-    if(z.label) svg += '<text x="'+(x1+4)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'">'+z.label+'</text>';
-  });
-  candles.forEach(function(c,i){
-    var up = c.c>=c.o;
-    var color = up? 'var(--cc-green)':'var(--cc-red)';
-    var x = cx(i);
-    svg += '<line x1="'+x+'" y1="'+px(c.h)+'" x2="'+x+'" y2="'+px(c.l)+'" stroke="'+color+'" stroke-width="2"/>';
-    var bodyTop = px(Math.max(c.o,c.c));
-    var bodyH = Math.max(2, Math.abs(px(c.o)-px(c.c)));
-    svg += '<rect x="'+(x-11)+'" y="'+bodyTop+'" width="22" height="'+bodyH+'" fill="'+color+'"/>';
-  });
-  notes.forEach(function(n){
-    svg += '<text x="'+cx(n.at)+'" y="'+px(n.y)+'" class="cc-note" text-anchor="middle" fill="'+(n.color||'#e8c46a')+'">'+n.text+'</text>';
-  });
-  svg += '</svg>';
-  var el = document.getElementById(id);
-  if(el) el.innerHTML = svg;
-}
-
-/* ---------- Line/pattern diagram renderer (for price-action chart patterns, sessions, structure) ----------
-   points: [{x,y}]  x = 0..100 (time), y = 0..100 (price)
-   zones/notes similar to above but in x/y 0-100 space
-*/
-function renderLinePattern(id, points, zones, notes){
-  zones = zones || []; notes = notes || [];
-  var W = 560, H = 220;
-  var px = function(v){ return 200 - (v/100*170) - 10; };
-  var pxx = function(v){ return 30 + (v/100*500); };
-  var path = points.map(function(p,i){ return (i===0?'M':'L')+pxx(p.x)+' '+px(p.y); }).join(' ');
-  var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="cc-diagram" xmlns="http://www.w3.org/2000/svg">';
-  zones.forEach(function(z){
-    var x1=pxx(z.x1), x2=pxx(z.x2), y1=px(z.top), y2=px(z.bottom);
-    svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.15" stroke="'+z.color+'" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>';
-    if(z.label) svg += '<text x="'+(x1+4)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'">'+z.label+'</text>';
-  });
-  svg += '<path d="'+path+'" fill="none" stroke="var(--cc-gold)" stroke-width="2.5"/>';
-  points.forEach(function(p){ svg += '<circle cx="'+pxx(p.x)+'" cy="'+px(p.y)+'" r="3" fill="var(--cc-gold)"/>'; });
-  notes.forEach(function(n){
-    svg += '<text x="'+pxx(n.x)+'" y="'+px(n.y)+'" class="cc-note" text-anchor="middle" fill="'+(n.color||'#e8c46a')+'">'+n.text+'</text>';
-  });
-  svg += '</svg>';
-  var el = document.getElementById(id);
-  if(el) el.innerHTML = svg;
-}
-
-
-/* ==========================================================================
-   COURSES DATA — SMC (Order Block ki tamam iqsam + FVG ki tamam iqsam)
-   ========================================================================== */
-var COURSES = {
-  smc: {
-    title: "SMC — Smart Money Concepts",
-    icon: "🏦",
-    desc: "Order Block aur Fair Value Gap ki tamam iqsam, institutional entries ke sath.",
-    parts: [
-      {
-        id:"smc-ob-bullish", tag:"Order Block", title:"Bullish Order Block",
-        explain:"Bullish OB wo aakhri bearish (red) candle hoti hai jiske baad price ne strong bullish impulsive move di ho, aksar ek liquidity sweep ya BOS ke sath. Ye zone institutional buying ka nishan hoti hai — jab price wapis is zone par aati hai (retest), buyers dobara enter karte hain.",
-        candles:[{o:55,h:58,l:50,c:52},{o:52,h:53,l:44,c:46},{o:46,h:47,l:38,c:40},{o:40,h:60,l:39,c:58},{o:58,h:70,l:57,c:68},{o:68,h:80,l:66,c:78}],
-        zones:[{from:2,to:2,top:47,bottom:38,color:"#3ecf8e",label:"Bullish OB"}],
-        notes:[{at:5,y:85,text:"Impulsive Move ↑",color:"#3ecf8e"}],
-        practice:{scenario:"XAUUSD 15min: Price down-move ke baad ek chhoti bearish candle bani (2015-2018), phir 2018 se seedha 2040 tak strong bullish rally. Ab price wapis 2015-2018 zone ki taraf aa rahi hai.",
-          entry:"2016 – 2018 (OB zone mein limit buy)", sl:"2013 (OB ke thoda neeche)", tp:"2045 – 2050 (pichli high ke qareeb)"},
-        quiz:[
-          {q:"Bullish Order Block kya hoti hai?",opts:["Aakhri bearish candle jiske baad strong bullish move aaye","Koi bhi green candle","Sab se choti candle","Session ka pehla candle"],correct:0},
-          {q:"Entry kab li jati hai?",opts:["Jab price pehli dafa OB banaye","Jab price OB zone ko retest kare","Random kabhi bhi","Sirf news ke waqt"],correct:1},
-          {q:"Stop Loss kahan lagta hai?",opts:["OB ke thoda upar","OB ke thoda neeche","TP ke barabar","Kahin bhi"],correct:1}
-        ]
-      },
-      {
-        id:"smc-ob-bearish", tag:"Order Block", title:"Bearish Order Block",
-        explain:"Bearish OB wo aakhri bullish (green) candle hoti hai jiske baad price ne strong bearish impulsive move di ho. Ye institutional selling ka nishan hai. Jab price is zone tak wapis aati hai to sellers dobara market mein utarte hain.",
-        candles:[{o:45,h:50,l:44,c:48},{o:48,h:56,l:47,c:54},{o:54,h:62,l:53,c:60},{o:60,h:61,l:40,c:42},{o:42,h:43,l:30,c:32},{o:32,h:33,l:20,c:22}],
-        zones:[{from:2,to:2,top:62,bottom:53,color:"#ef5b5b",label:"Bearish OB"}],
-        notes:[{at:5,y:15,text:"Impulsive Move ↓",color:"#ef5b5b"}],
-        practice:{scenario:"EURUSD 1H: Price up-move ke baad ek green candle bani (1.0850-1.0870), phir seedha 1.0790 tak sharp gira. Price ab wapis 1.0850-1.0870 zone ki taraf aa rahi hai.",
-          entry:"1.0850 – 1.0870 (OB zone mein sell)", sl:"1.0885 (OB ke thoda upar)", tp:"1.0800 – 1.0790"},
-        quiz:[
-          {q:"Bearish OB kis candle se banti hai?",opts:["Aakhri green candle jiske baad sharp gira","Aakhri red candle","Sab se lambi candle","Doji candle"],correct:0},
-          {q:"Bearish OB par trade ka direction kya hoga?",opts:["Buy","Sell","Dono","Koi nahi"],correct:1},
-          {q:"SL kahan set karte hain?",opts:["OB high ke thoda upar","OB low ke thoda neeche","Entry point par","Kabhi SL nahi lagate"],correct:0}
-        ]
-      },
-      {
-        id:"smc-ob-breaker", tag:"Order Block", title:"Breaker Block",
-        explain:"Breaker Block wo Order Block hai jo fail ho jaye — yani price us OB ko todh kar aage nikal jaye. Jo pehle support (bullish OB) tha wo ab resistance ban jata hai, aur jo pehle resistance tha wo ab support ban jata hai. Ye role-reversal wala zone strong reaction deta hai.",
-        candles:[{o:60,h:62,l:58,c:59},{o:59,h:60,l:52,c:54},{o:54,h:55,l:46,c:48},{o:48,h:50,l:35,c:37},{o:37,h:38,l:28,c:30},{o:30,h:48,l:29,c:46}],
-        zones:[{from:1,to:2,top:60,bottom:52,color:"#e8c46a",label:"Broken Bullish OB → Breaker"}],
-        notes:[{at:5,y:52,text:"Retest → Sell",color:"#ef5b5b"}],
-        practice:{scenario:"GBPUSD 4H: Ek bullish OB tha 1.2650-1.2680 par, lekin price ne isay strongly tod diya aur 1.2550 tak gira. Ab price wapis 1.2650-1.2680 ki taraf upar aa rahi hai.",
-          entry:"1.2650 – 1.2680 (Breaker se sell)", sl:"1.2695", tp:"1.2560 – 1.2550"},
-        quiz:[
-          {q:"Breaker Block kab banta hai?",opts:["Jab OB successfully respect ho","Jab OB fail ho kar toot jaye","Jab market close ho","Har candle ke baad"],correct:1},
-          {q:"Bullish OB toot jaye to woh kya ban jata hai?",opts:["Support hi rehta hai","Resistance (bearish breaker)","Neutral zone","FVG"],correct:1},
-          {q:"Breaker Block trading mein entry kahan li jati hai?",opts:["Breaker zone ke retest par","Sirf news par","Random level par","Sirf daily open par"],correct:0}
-        ]
-      },
-      {
-        id:"smc-ob-mitigation", tag:"Order Block", title:"Mitigation Block",
-        explain:"Mitigation Block wo last up/down-close candle hoti hai us move se pehle jo price ko sirf equal high/low tak le jaye (naya strong impulsive BOS nahi banati, halki si move hoti hai). Ye OB se thora weak hota hai lekin institutional order-fill zone hi hota hai — price aksar isay 'mitigate' (halka retest) karne aati hai.",
-        candles:[{o:50,h:52,l:44,c:46},{o:46,h:47,l:38,c:40},{o:40,h:58,l:39,c:55},{o:55,h:60,l:54,c:57}],
-        zones:[{from:1,to:1,top:47,bottom:38,color:"#e8c46a",label:"Mitigation Block"}],
-        notes:[{at:3,y:63,text:"Sirf equal-high tak move",color:"#8492ab"}],
-        practice:{scenario:"USDJPY 30min: Chhoti move ke baad price sirf pichli high tak wapis aayi (naya strong high nahi bana), phir mitigation zone se dobara upar gayi.",
-          entry:"Mitigation zone retest par buy", sl:"Zone ke neeche", tp:"Pichli minor high"},
-        quiz:[
-          {q:"Mitigation Block, Order Block se kaise mukhtalif hai?",opts:["Bilkul same hai","Move weak hoti hai, sirf equal high/low banti hai","Sirf daily chart par hota hai","Kabhi kaam nahi karta"],correct:1},
-          {q:"Mitigation Block ka use kya hai?",opts:["Order fill zone ke tor par entry","Sirf SL ke liye","Sirf news trade ke liye","Kisi kaam ka nahi"],correct:0},
-          {q:"Mitigation Block ka strength OB ke muqable mein kaisa hota hai?",opts:["Zyada strong","Thora kam strong","Bilkul barabar","Napa nahi ja sakta"],correct:1}
-        ]
-      },
-      {
-        id:"smc-ob-rejection", tag:"Order Block", title:"Rejection Block",
-        explain:"Rejection Block wo candle hoti hai jiski wick (upper ya lower shadow) bohat lambi ho — is se pata chalta hai ke us price par strong rejection hua aur bade orders fill hue. Wick ka extreme point hi Rejection Block ki zone hoti hai, body nahi.",
-        candles:[{o:50,h:52,l:48,c:51},{o:51,h:53,l:20,c:50},{o:50,h:62,l:49,c:60},{o:60,h:70,l:58,c:68}],
-        zones:[{from:1,to:1,top:53,bottom:20,color:"#3ecf8e",label:"Rejection Wick"}],
-        notes:[{at:3,y:75,text:"Strong Move Up",color:"#3ecf8e"}],
-        practice:{scenario:"BTCUSD 1H: Ek candle ki lambi lower wick (58000 tak) bani, body 61000 ke qareeb band hui, phir price 64000 tak gaya. Price wapis wick zone (58500-59500) ki taraf aa rahi hai.",
-          entry:"58500 – 59500 (wick zone se buy)", sl:"57800", tp:"63000+"},
-        quiz:[
-          {q:"Rejection Block kis se pehchana jata hai?",opts:["Choti body","Lambi wick/shadow","Doji pattern","Volume se"],correct:1},
-          {q:"Rejection Block ki zone kahan hoti hai?",opts:["Candle body par","Wick ke extreme point par","Candle ke open par","Kahin bhi"],correct:1},
-          {q:"Lambi lower wick ka kya matlab hai?",opts:["Sellers ne push kiya lekin buyers ne reject kar diya","Kuch nahi","Sirf random noise","Market band ho gaya"],correct:0}
-        ]
-      },
-      {
-        id:"smc-fvg-bullish", tag:"FVG", title:"Bullish Fair Value Gap (FVG)",
-        explain:"Bullish FVG 3-candle pattern hai: pehli candle ki high aur teesri candle ki low ke darmiyan gap (imbalance) reh jata hai jab beech wali candle bohat strong impulsive ho. Ye 'inefficiency' price ko wapis khinchti hai — price aksar us gap ke 50% (CE — Consequent Encroachment) tak retest karti hai.",
-        candles:[{o:40,h:42,l:36,c:38},{o:38,h:60,l:37,c:58},{o:58,h:64,l:52,c:62}],
-        zones:[{from:0,to:2,top:52,bottom:42,color:"#3ecf8e",label:"Bullish FVG"}],
-        notes:[{at:2,y:47,text:"CE 50%",color:"#e8c46a"}],
-        practice:{scenario:"XAUUSD 1H: Bullish FVG bana 2040-2046 ke darmiyan (strong up candle ki wajah se). Price ab CE (2043) ki taraf retest karne aa rahi hai.",
-          entry:"2043 (CE level par buy)", sl:"2038 (FVG ke neeche)", tp:"2058 – 2060"},
-        quiz:[
-          {q:"FVG kitni candles ka pattern hai?",opts:["1","2","3","5"],correct:2},
-          {q:"CE (Consequent Encroachment) kya hai?",opts:["FVG ka 50% level","FVG ka top","FVG ka bottom","Random level"],correct:0},
-          {q:"Bullish FVG kis wajah se banta hai?",opts:["Weak sideways move","Strong impulsive bullish candle","News cancel hone se","Kabhi nahi banta"],correct:1}
-        ]
-      },
-      {
-        id:"smc-fvg-bearish", tag:"FVG", title:"Bearish Fair Value Gap (FVG)",
-        explain:"Bearish FVG bhi 3-candle pattern hai, lekin ulta — pehli candle ki low aur teesri candle ki high ke darmiyan gap reh jata hai jab beech wali candle strong bearish impulsive ho. Price is gap ko bhi CE (50%) tak retest karne ki koshish karti hai, phir aksar wahin se aage neeche jati hai.",
-        candles:[{o:60,h:64,l:58,c:62},{o:62,h:63,l:40,c:42},{o:42,h:48,l:36,c:38}],
-        zones:[{from:0,to:2,top:58,bottom:48,color:"#ef5b5b",label:"Bearish FVG"}],
-        notes:[{at:2,y:53,text:"CE 50%",color:"#e8c46a"}],
-        practice:{scenario:"GBPUSD 30min: Bearish FVG bana 1.2620-1.2640 ke darmiyan. Price ab CE (1.2630) ki taraf upar retest karne aa rahi hai.",
-          entry:"1.2630 (CE level par sell)", sl:"1.2648", tp:"1.2590 – 1.2580"},
-        quiz:[
-          {q:"Bearish FVG kaise pehchana jata hai?",opts:["Strong bearish impulsive candle ke gird 3-candle gap","Green candle se","Doji se","Volume spike se"],correct:0},
-          {q:"Bearish FVG mein entry ka direction?",opts:["Buy","Sell","Dono","Wait only"],correct:1},
-          {q:"Agar price CE se aage upar chali jaye (FVG mitigate ho jaye) to kya hota hai?",opts:["Setup invalid ho sakta hai","Kuch nahi","FVG aur strong ho jata hai","Automatically TP hit"],correct:0}
-        ]
-      },
-      {
-        id:"smc-fvg-inverse", tag:"FVG", title:"Inverse Fair Value Gap (IFVG)",
-        explain:"Jab ek valid FVG (chahe bullish ho ya bearish) price se completely toot jaye — yani price us gap ke through pura nikal jaye — to woh gap apna role ulta kar leta hai. Bullish FVG toot jaye to woh resistance (bearish IFVG) ban jata hai, aur bearish FVG toot jaye to support (bullish IFVG) ban jata hai.",
-        candles:[{o:45,h:47,l:41,c:43},{o:43,h:60,l:42,c:58},{o:58,h:62,l:54,c:56},{o:56,h:57,l:38,c:40},{o:40,h:57,l:39,c:55}],
-        zones:[{from:0,to:2,top:54,bottom:47,color:"#8492ab",label:"Old Bullish FVG (broken)"},{from:3,to:4,top:54,bottom:47,color:"#ef5b5b",label:"IFVG (now resistance)"}],
-        notes:[{at:4,y:58,text:"Retest → Sell",color:"#ef5b5b"}],
-        practice:{scenario:"XAUUSD 1H: Pehle 2050-2056 par bullish FVG (support) tha, lekin price strongly gir kar is se neeche 2035 tak chali gayi — gap 'invert' ho gaya. Ab price wapis 2050-2056 ki taraf upar aa rahi hai.",
-          entry:"2050 – 2056 (IFVG resistance se sell)", sl:"2060", tp:"2035 – 2030"},
-        quiz:[
-          {q:"IFVG kab banta hai?",opts:["Jab FVG ko price fully break kar de","Jab FVG pehli dafa bane","Har candle ke baad","Kabhi nahi"],correct:0},
-          {q:"Broken bullish FVG ka naya role kya hota hai?",opts:["Support hi rehta hai","Resistance (bearish IFVG)","Neutral zone","OB ban jata hai"],correct:1},
-          {q:"IFVG par entry ka trigger kya hai?",opts:["IFVG zone ka retest","Sirf news","Random breakout","Daily open"],correct:0}
-        ]
-      },
-      {
-        id:"smc-fvg-bpr", tag:"FVG", title:"Balanced Price Range (BPR)",
-        explain:"BPR tab banta hai jab ek bullish FVG aur ek bearish FVG (opposite directions mein) aapas mein overlap karte hain. Ye overlap wali zone bohat strong reaction deti hai kyunke do alag-alag imbalances ek hi jagah 'balance' ho rahi hoti hain — price aksar is zone se sharp reverse karti hai.",
-        candles:[{o:40,h:60,l:39,c:58},{o:58,h:62,l:52,c:54},{o:54,h:56,l:44,c:46},{o:46,h:48,l:30,c:32}],
-        zones:[{from:0,to:1,top:52,bottom:44,color:"#3ecf8e",label:"Bull FVG"},{from:2,to:3,top:52,bottom:44,color:"#ef5b5b",label:"Bear FVG"}],
-        notes:[{at:2,y:41,text:"Overlap = BPR",color:"#e8c46a"}],
-        practice:{scenario:"XAUUSD 4H: Bullish FVG (2058-2063) aur bearish FVG (2058-2063) dono overlap ho rahe hain wahi zone mein — ek strong BPR ban gaya. Price is zone ka retest karne aa rahi hai.",
-          entry:"2058 – 2063 (BPR se sell, downtrend continuation ka context dekh kar)", sl:"2068", tp:"2040 – 2035"},
-        quiz:[
-          {q:"BPR kaise banta hai?",opts:["Ek hi FVG do dafa bane","Bullish aur bearish FVG overlap karein","Sirf OB se","Sirf candlestick pattern se"],correct:1},
-          {q:"BPR zone itni strong kyun hoti hai?",opts:["Do opposite imbalances ek jagah balance hoti hain","Random wajah se","Sirf naam ki wajah se","Ye strong nahi hoti"],correct:0},
-          {q:"BPR ka use trading mein kya hai?",opts:["High-probability reversal/reaction zone ke tor par","Sirf indicator ke tor par","Time filter ke tor par","Kisi kaam ka nahi"],correct:0}
-        ]
-      }
-    ]
-  },
-
-  /* ==========================================================================
-     COURSES DATA — ICT (tamam core concepts)
-     ========================================================================== */
-  ict: {
-    title: "ICT — Inner Circle Trader Concepts",
-    icon: "🧠",
-    desc: "Liquidity, market structure, timing aur institutional order-flow ke tamam concepts.",
-    parts: [
-      {
-        id:"ict-liquidity", tag:"Liquidity", title:"Buyside & Sellside Liquidity",
-        explain:"Liquidity un jagahon par hoti hai jahan retail traders apne stop-losses/pending orders rakhte hain — jaise equal highs/lows, trendline breaks, obvious swing points. Buyside liquidity highs ke upar hoti hai, sellside liquidity lows ke neeche. Smart money price ko is liquidity tak le jati hai (sweep) taake apne bade orders fill kar sake, phir asal direction mein move karti hai.",
-        candles:[{o:40,h:52,l:38,c:50},{o:50,h:53,l:47,c:49},{o:49,h:54,l:48,c:52},{o:52,h:58,l:44,c:46},{o:46,h:48,l:30,c:32}],
-        zones:[{from:0,to:2,top:54,bottom:52,color:"#e8c46a",label:"Equal Highs = Liquidity"}],
-        notes:[{at:3,y:60,text:"Sweep → Reverse",color:"#ef5b5b"}],
-        practice:{scenario:"EURUSD 1H: Teen dafa price 1.0870 ke qareeb high bana chuki hai (equal highs) — bohat sara buy-stop liquidity wahan jama hai. Price ek dafa 1.0875 tak spike kar ke wapis gir gayi.",
-          entry:"Sweep ke baad, 1.0850 ke qareeb sell", sl:"1.0880 (sweep high ke upar)", tp:"1.0800"},
-        quiz:[
-          {q:"Buyside liquidity kahan hoti hai?",opts:["Swing highs ke upar","Swing lows ke neeche","Candle ke beech mein","Sirf daily open par"],correct:0},
-          {q:"Liquidity sweep ka maqsad kya hai?",opts:["Retail stops hit kar ke bade orders fill karna","Sirf volatility dikhana","Market band karna","Kuch nahi"],correct:0},
-          {q:"Equal highs/lows trading mein kis cheez ka signal dete hain?",opts:["Liquidity pool ka","Trend khatam hone ka","Buy signal ka seedha","Kuch nahi"],correct:0}
-        ]
-      },
-      {
-        id:"ict-structure", tag:"Market Structure", title:"Market Structure — BOS & CHoCH",
-        explain:"Break of Structure (BOS) tab hota hai jab price current trend ki direction mein pichli swing high/low ko todh de — ye trend continuation confirm karta hai. Change of Character (CHoCH) tab hota hai jab price opposite direction mein structure todh de — ye potential trend reversal ka pehla signal hota hai.",
-        candles:[{o:30,h:40,l:28,c:38},{o:38,h:45,l:36,c:43},{o:43,h:44,l:32,c:34},{o:34,h:52,l:33,c:50},{o:50,h:51,l:40,c:42},{o:42,h:60,l:41,c:58}],
-        zones:[],
-        notes:[{at:2,y:47,text:"Swing High",color:"#8492ab"},{at:3,y:55,text:"BOS ↑",color:"#3ecf8e"},{at:5,y:63,text:"BOS ↑ Continuation",color:"#3ecf8e"}],
-        practice:{scenario:"XAUUSD 4H: Downtrend chal raha tha, lekin price ne ek pichli lower-high ko upar se todh diya (CHoCH). Uske baad price ne aik naya higher-high bhi bana diya (BOS) — trend bullish confirm ho gaya.",
-          entry:"CHoCH ke baad pullback par buy", sl:"CHoCH se pehle wale low ke neeche", tp:"Agla major resistance"},
-        quiz:[
-          {q:"BOS kis cheez ko confirm karta hai?",opts:["Trend continuation","Trend reversal hamesha","Sirf news","Kuch nahi"],correct:0},
-          {q:"CHoCH ka signal kya deta hai?",opts:["Trend continuation","Possible trend reversal","Range market","Liquidity sweep sirf"],correct:1},
-          {q:"CHoCH pehchanne ke liye kya dekha jata hai?",opts:["Structure ka opposite direction mein break hona","Sirf candle ka color","Volume indicator","RSI level"],correct:0}
-        ]
-      },
-      {
-        id:"ict-premium-discount", tag:"Premium/Discount", title:"Premium & Discount Zones (OTE)",
-        explain:"Har swing (low se high tak) ko Fibonacci se 3 hisson mein taqseem kiya jata hai: Discount zone (0-50%, sasta price — buy zone), Equilibrium (50%), aur Premium zone (50-100%, mehnga price — sell zone). OTE (Optimal Trade Entry) usually 62%-79% retracement ka area hota hai jahan best entries milti hain.",
-        candles:[{o:30,h:35,l:28,c:33},{o:33,h:55,l:32,c:53},{o:53,h:54,l:44,c:46},{o:46,h:48,l:42,c:47}],
-        zones:[{from:0,to:3,top:53,bottom:41,color:"#e8c46a",label:"OTE 62-79%"},{from:0,to:3,top:41,bottom:28,color:"#3ecf8e",label:"Discount"}],
-        notes:[{at:1,y:57,text:"Premium (Sell zone)",color:"#ef5b5b"}],
-        practice:{scenario:"GBPUSD 1H: Bullish leg 1.2500 se 1.2650 tak gayi. OTE zone (62%-79% retracement) 1.2557-1.2543 par aati hai. Price ab is zone ki taraf wapis aa rahi hai.",
-          entry:"1.2557 – 1.2543 (OTE se buy)", sl:"1.2500 se neeche", tp:"1.2650 aur us se aage"},
-        quiz:[
-          {q:"Discount zone kis liye use hoti hai?",opts:["Buy entries ke liye","Sell entries ke liye","Sirf SL ke liye","Kisi kaam ki nahi"],correct:0},
-          {q:"OTE ka full form kya hai?",opts:["Optimal Trade Entry","Overall Trend Estimate","Order Type Entry","Open Trade Exit"],correct:0},
-          {q:"OTE zone approx kitne % retracement par hoti hai?",opts:["10-20%","30-40%","62-79%","90-100%"],correct:2}
-        ]
-      },
-      {
-        id:"ict-killzones", tag:"Timing", title:"Killzones (Session Timing)",
-        explain:"Killzones wo specific time windows hain jab institutional volume sab se zyada hota hai aur best setups banti hain: London Killzone, New York Killzone, aur London Close. In sessions ke overlap (jaise London-NY overlap) mein sab se zyada movement aur reliable setups milte hain — Asian session mein aksar sirf range banti hai jo liquidity provide karta hai.",
-        candles:[],
-        points:[{x:5,y:50},{x:20,y:48},{x:35,y:52},{x:50,y:70},{x:65,y:40},{x:80,y:65},{x:95,y:60}],
-        lineZones:[{x1:5,x2:35,top:55,bottom:45,color:"#8492ab",label:"Asian Range"},{x1:35,x2:65,top:75,bottom:38,color:"#3ecf8e",label:"London Killzone"},{x1:65,x2:95,top:70,bottom:38,color:"#e8c46a",label:"NY Killzone"}],
-        practice:{scenario:"Aapko pata hai Asian session mein XAUUSD 2040-2045 ki range mein tight raha. London open (ap. 12:00 PM PKT) par price ne range ke neeche liquidity sweep ki aur phir strong bullish move di.",
-          entry:"London Killzone mein sweep ke baad buy", sl:"Sweep low ke neeche", tp:"Asian range ke upar se target"},
-        quiz:[
-          {q:"Asian session ka role zyada tar kya hota hai?",opts:["Range/liquidity build karna","Sab se bada trend dena","Market band rehta hai","Sirf news ka waqt"],correct:0},
-          {q:"Sab se zyada volume kis session/overlap mein hota hai?",opts:["Sirf Asian session","London-NY overlap","Weekend","Sirf Friday"],correct:1},
-          {q:"Killzone concept kis cheez ke liye use hota hai?",opts:["Best time window pehchanne ke liye","Sirf currency choose karne ke liye","Lot size decide karne ke liye","SL set karne ke liye"],correct:0}
-        ]
-      },
-      {
-        id:"ict-judas", tag:"Manipulation", title:"Judas Swing",
-        explain:"Judas Swing ek fake/manipulative move hai jo session open ke foran baad hoti hai — price pehle ek direction mein jhoothi move deta hai (retail ko trap karne ke liye), phir sharp reverse ho kar asal direction mein chal deta hai. Ye naam Bible ke 'Judas' (dhoka dene wale) se liya gaya hai.",
-        candles:[{o:50,h:52,l:48,c:51},{o:51,h:58,l:50,c:56},{o:56,h:57,l:44,c:46},{o:46,h:47,l:32,c:34},{o:34,h:36,l:22,c:24}],
-        zones:[],
-        notes:[{at:1,y:61,text:"Fake move up (Judas)",color:"#ef5b5b"},{at:4,y:20,text:"Real move down",color:"#3ecf8e"}],
-        practice:{scenario:"XAUUSD: London open par price pehle 15 minute upar bhaga (2050 se 2058), retail ne buy kiya, phir price sharp reverse ho kar 2020 tak gir gaya — asal direction downside thi.",
-          entry:"Reversal confirm hote hi (structure break) sell", sl:"Judas swing ki high ke upar", tp:"Pichla range low"},
-        quiz:[
-          {q:"Judas Swing kab hota hai?",opts:["Session open ke foran baad","Session ke bilkul aakhir mein","Sirf weekend","Randomly kabhi bhi"],correct:0},
-          {q:"Judas Swing ka maqsad kya hai?",opts:["Retail traders ko trap karna","Market band karna","News release","Kuch nahi"],correct:0},
-          {q:"Judas Swing ke baad usually kya hota hai?",opts:["Sharp reversal asal direction mein","Market flat reh jata hai","Trend khatam ho jata hai","Kuch predictable nahi"],correct:0}
-        ]
-      },
-      {
-        id:"ict-amd", tag:"Framework", title:"Power of Three (AMD)",
-        explain:"AMD framework har trading session/day ke price-action ko 3 phases mein todhta hai: Accumulation (range banana, smart money position build karna), Manipulation (fake move / liquidity grab, jaisa Judas Swing), aur Distribution (asal directional move jahan smart money apna profit target complete karti hai).",
-        candles:[],
-        points:[{x:5,y:50},{x:20,y:52},{x:35,y:48},{x:50,y:62},{x:65,y:38},{x:80,y:55},{x:95,y:78}],
-        lineZones:[{x1:5,x2:35,top:56,bottom:44,color:"#8492ab",label:"Accumulation"},{x1:35,x2:65,top:66,bottom:34,color:"#ef5b5b",label:"Manipulation"},{x1:65,x2:95,top:82,bottom:36,color:"#3ecf8e",label:"Distribution"}],
-        practice:{scenario:"Din ki shuruwat range mein hui (Accumulation), phir Asian high ke upar ek sweep hui (Manipulation), phir London/NY session mein price ne poori din ki asal directional move di (Distribution).",
-          entry:"Manipulation phase ke reversal par entry, Distribution phase mein ride karein", sl:"Manipulation swing ke opposite side", tp:"Distribution phase ka extension target"},
-        quiz:[
-          {q:"AMD ka full form kya hai?",opts:["Accumulation, Manipulation, Distribution","Average, Median, Deviation","Asian, Mid, Day","Ask, Market, Demand"],correct:0},
-          {q:"Manipulation phase mein kya hota hai?",opts:["Fake move / liquidity grab","Asal trend shuru hota hai","Market band ho jata hai","Sirf news release"],correct:0},
-          {q:"Distribution phase mein kya hota hai?",opts:["Asal directional move","Range banti hai","Fake move hota hai","Kuch nahi hota"],correct:0}
-        ]
-      },
-      {
-        id:"ict-silverbullet", tag:"Setup", title:"Silver Bullet Setup",
-        explain:"Silver Bullet ek specific 1-hour time-window setup hai (typically 10-11 AM NY ya 2-3 AM / 3-4 PM NY windows) jahan price aksar ek FVG banati hai jo entry ke liye use hoti hai. Ye high-probability, time-based ICT setup hai jo confluence (liquidity + FVG + timing) par based hai.",
-        candles:[{o:40,h:48,l:38,c:46},{o:46,h:47,l:32,c:34},{o:34,h:36,l:22,c:24}],
-        zones:[{from:0,to:2,top:32,bottom:22,color:"#3ecf8e",label:"Silver Bullet FVG (fictional example)"}],
-        notes:[{at:0,y:52,text:"10-11 AM NY Window",color:"#e8c46a"}],
-        practice:{scenario:"NY session ke 10-11 AM window mein, liquidity sweep ke foran baad ek chhota bullish FVG bana. Ye specific window aur FVG dono confluence de rahe hain.",
-          entry:"Window ke FVG par entry", sl:"FVG ke opposite side, sweep ke thoda pichay", tp:"Session high/low ya next liquidity"},
-        quiz:[
-          {q:"Silver Bullet setup ka core idea kya hai?",opts:["Specific time-window mein FVG entry","Random time par entry","Sirf daily chart pattern","News trading"],correct:0},
-          {q:"Ye setup kis cheezon ka confluence use karta hai?",opts:["Timing + Liquidity + FVG","Sirf indicator","Sirf volume","Sirf moving average"],correct:0},
-          {q:"Silver Bullet ka time-window kitna hota hai?",opts:["1 hour ka specific window","24 ghante","Poora hafta","5 minute"],correct:0}
-        ]
-      },
-      {
-        id:"ict-smt", tag:"Divergence", title:"SMT Divergence",
-        explain:"SMT (Smart Money Technique) Divergence tab hota hai jab do correlated instruments (jaise EURUSD aur GBPUSD, ya Nasdaq aur S&P500) apas mein divergence dikhayein — ek naya high/low banaye lekin dusra na banaye. Ye divergence smart money ki 'asal' direction ka clue deta hai, kyunke weakness sirf ek instrument mein hi dikhti hai.",
-        candles:[],
-        points:[{x:10,y:40},{x:30,y:60},{x:50,y:45},{x:70,y:65},{x:90,y:50}],
-        lineZones:[],
-        notes2:[{x:30,y:65,text:"Pair A: New High",color:"#3ecf8e"},{x:70,y:70,text:"Pair B: Higher High Bhi",color:"#3ecf8e"}],
-        practice:{scenario:"EURUSD ne ek naya high banaya, lekin GBPUSD (jo usually EURUSD ke sath correlated hota hai) ne naya high nahi banaya (lower high) — ye SMT divergence weakness dikhata hai, possible reversal ka signal.",
-          entry:"Divergence confirm hote hi weaker/stronger pair mein reversal trade", sl:"Divergence high/low ke opposite", tp:"Pichli support/resistance"},
-        quiz:[
-          {q:"SMT Divergence ke liye kitne instruments chahiye?",opts:["Sirf 1","2 ya zyada correlated instruments","10","Koi zaroorat nahi"],correct:1},
-          {q:"SMT Divergence kya signal deta hai?",opts:["Possible reversal/weakness","Guaranteed continuation","Kuch bhi nahi","Sirf volume change"],correct:0},
-          {q:"Kaunse pairs SMT ke liye common hain?",opts:["EURUSD/GBPUSD ya index pairs","Sirf gold/silver","Sirf crypto","Sirf commodities"],correct:0}
-        ]
-      }
-    ]
-  },
-
-  /* ==========================================================================
-     COURSES DATA — PRICE ACTION (mukammal course)
-     ========================================================================== */
-  pa: {
-    title: "Price Action — Full Course",
-    icon: "📈",
-    desc: "Support/Resistance se le kar risk management tak — price action ka poora course.",
-    parts: [
-      {
-        id:"pa-sr", tag:"Foundations", title:"Support & Resistance",
-        explain:"Support wo level hai jahan price baar baar girna rok kar upar jati hai (buying pressure), Resistance wo level hai jahan price baar baar upar jana rok kar neeche aati hai (selling pressure). Jitni baar level respect ho, utni strong hoti hai. Jab support toot jaye to woh resistance ban jata hai aur vice versa (role reversal).",
-        candles:[{o:40,h:44,l:38,c:42},{o:42,h:46,l:35,c:40},{o:40,h:44,l:34,c:41},{o:41,h:50,l:39,c:48}],
-        zones:[{from:0,to:2,top:36,bottom:33,color:"#3ecf8e",label:"Support"}],
-        notes:[{at:3,y:54,text:"Bounce ↑",color:"#3ecf8e"}],
-        practice:{scenario:"XAUUSD Daily: Price 3 dafa 2010-2015 zone se bounce kar chuki hai. Chauthi dafa price wapis is zone ki taraf aa rahi hai.",
-          entry:"2010 – 2015 (support se buy)", sl:"2000", tp:"Pichli resistance / 2060"},
-        quiz:[
-          {q:"Support kya hota hai?",opts:["Jahan buying pressure price ko upar dhakelta hai","Jahan sirf sell hota hai","Random level","Sirf news level"],correct:0},
-          {q:"Support toot jaye to woh kya ban jata hai?",opts:["Resistance","Kuch nahi hota","Naya support","Trend line"],correct:0},
-          {q:"Level ki strength kis se pata chalti hai?",opts:["Kitni baar respect hui","Sirf color se","Sirf lambai se","Time se"],correct:0}
-        ]
-      },
-      {
-        id:"pa-trendlines", tag:"Foundations", title:"Trendlines & Channels",
-        explain:"Trendline kam se kam 2 swing points ko jodh kar banti hai aur trend ki direction dikhati hai — uptrend mein higher-lows ko jodhte hain, downtrend mein lower-highs ko. Channel do parallel trendlines se banta hai (upper aur lower boundary), jisme price oscillate karti hai — breakout ya bounce dono trade kiye ja sakte hain.",
-        candles:[],
-        points:[{x:5,y:30},{x:25,y:38},{x:45,y:35},{x:65,y:48},{x:85,y:45},{x:95,y:60}],
-        lineZones:[],
-        practice:{scenario:"EURUSD 4H: Price ek clean ascending trendline follow kar rahi hai, har higher-low par bounce ho rahi hai. Price ab teesri dafa trendline ke qareeb aa rahi hai.",
-          entry:"Trendline touch par buy", sl:"Trendline ke thoda neeche", tp:"Channel ki upper boundary"},
-        quiz:[
-          {q:"Trendline banane ke liye kam se kam kitne points chahiye?",opts:["1","2","10","Koi zaroorat nahi"],correct:1},
-          {q:"Channel kis se banta hai?",opts:["2 parallel trendlines","Sirf 1 line","3 candles","Volume se"],correct:0},
-          {q:"Uptrend mein trendline kis points ko jodhti hai?",opts:["Higher lows","Higher highs","Random points","Sirf open prices"],correct:0}
-        ]
-      },
-      {
-        id:"pa-candlestick", tag:"Patterns", title:"Candlestick Patterns (Pin Bar, Engulfing, Doji)",
-        explain:"Pin Bar: choti body, lambi wick — rejection dikhata hai. Engulfing: ek candle pichli candle ki body ko pura 'engulf' (cover) kar le — strong reversal signal. Doji: open aur close bilkul barabar/qareeb — indecision dikhata hai, aksar reversal se pehle aata hai. Ye teeno patterns support/resistance ke sath mil kar zyada reliable hote hain.",
-        candles:[{o:50,h:52,l:48,c:51},{o:51,h:53,l:30,c:50},{o:50,h:52,l:49,c:50},{o:50,h:64,l:49,c:62}],
-        zones:[],
-        notes:[{at:1,y:26,text:"Pin Bar (rejection)",color:"#3ecf8e"},{at:2,y:47,text:"Doji",color:"#e8c46a"},{at:3,y:68,text:"Bullish Engulfing",color:"#3ecf8e"}],
-        practice:{scenario:"USDJPY 1H: Support zone par ek pin bar bani (lambi lower wick), uske foran baad ek strong bullish engulfing candle bhi bani.",
-          entry:"Engulfing candle close par buy", sl:"Pin bar ki low ke neeche", tp:"Pichli resistance"},
-        quiz:[
-          {q:"Pin Bar ki pehchan kya hai?",opts:["Choti body, lambi wick","Bari body, choti wick","Do candles ka pattern","Sirf color"],correct:0},
-          {q:"Bullish Engulfing kaise banta hai?",opts:["Bari green candle pichli red candle ko pura cover kare","Do red candles","Sirf doji se","Volume se"],correct:0},
-          {q:"Doji kya dikhata hai?",opts:["Market indecision","Strong trend","Guaranteed reversal","Kuch nahi"],correct:0}
-        ]
-      },
-      {
-        id:"pa-reversal", tag:"Chart Patterns", title:"Reversal Patterns (Head & Shoulders, Double Top/Bottom)",
-        explain:"Head & Shoulders 3 peaks se banta hai — beech wala (head) sab se ooncha, dono sides (shoulders) barabar height ke — neckline todhne par bearish reversal confirm hoti hai. Double Top/Bottom do barabar highs/lows se banta hai — beech ka low/high (neckline) todhne par reversal confirm hota hai. Dono patterns trend ke end par aksar dikhte hain.",
-        candles:[],
-        points:[{x:5,y:35},{x:20,y:60},{x:35,y:45},{x:50,y:75},{x:65,y:45},{x:80,y:58},{x:92,y:30}],
-        lineZones:[{x1:15,x2:85,top:47,bottom:44,color:"#e8c46a",label:"Neckline"}],
-        practice:{scenario:"XAUUSD Daily: Ek clear Head & Shoulders ban chuka hai — left shoulder 2050, head 2070, right shoulder 2048. Neckline 2020 par hai, price ab neckline ke qareeb hai.",
-          entry:"Neckline break aur retest par sell", sl:"Right shoulder ke upar", tp:"Head se neckline tak ki distance, neckline se neeche project"},
-        quiz:[
-          {q:"Head & Shoulders mein 'head' kya hota hai?",opts:["Sab se ooncha/neecha peak beech mein","Sab se pehla peak","Sab se aakhri peak","Neckline"],correct:0},
-          {q:"Pattern confirm kab hota hai?",opts:["Neckline break hone par","Head banne par hi","Pehle shoulder par","Kabhi nahi"],correct:0},
-          {q:"Double Top kis trend ke end par banta hai?",opts:["Uptrend ke end par","Downtrend ke end par","Sideways mein hi","Kabhi nahi banta"],correct:0}
-        ]
-      },
-      {
-        id:"pa-continuation", tag:"Chart Patterns", title:"Continuation Patterns (Triangles, Flags, Wedges)",
-        explain:"Ye patterns trend ke beech mein ek 'pause' dikhate hain, phir usi direction mein continuation dete hain. Triangle: converging trendlines (ascending/descending/symmetrical). Flag: sharp move ke baad chhoti parallel-channel consolidation. Wedge: converging trendlines lekin dono same direction slope karte hain — breakout usually trend ki opposite ya same direction ho sakta hai context par depend karta hai.",
-        candles:[],
-        points:[{x:5,y:30},{x:20,y:55},{x:35,y:45},{x:50,y:52},{x:65,y:47},{x:80,y:50},{x:95,y:75}],
-        lineZones:[{x1:20,x2:80,top:58,bottom:44,color:"#e8c46a",label:"Flag/Triangle Consolidation"}],
-        practice:{scenario:"BTCUSD 4H: Strong bullish move ke baad price ek tight descending flag mein consolidate ho rahi hai. Volume bhi is consolidation mein kam ho gaya hai.",
-          entry:"Flag breakout (upar) par buy", sl:"Flag ke neeche", tp:"Pehli move ki height ko breakout point se project karein"},
-        quiz:[
-          {q:"Continuation pattern ka kaam kya hai?",opts:["Trend ke beech pause dikhana, phir continuation","Trend hamesha reverse karna","Sirf range dikhana","Kuch nahi"],correct:0},
-          {q:"Flag pattern kis ke baad banta hai?",opts:["Sharp impulsive move ke baad","Range ke baad","News se pehle","Kabhi bhi random"],correct:0},
-          {q:"Triangle pattern ki pehchan kya hai?",opts:["Converging trendlines","2 parallel horizontal lines","Sirf ek candle","Volume spike"],correct:0}
-        ]
-      },
-      {
-        id:"pa-breakout", tag:"Strategy", title:"Breakout & Retest",
-        explain:"Breakout tab hota hai jab price kisi important level (support/resistance/trendline/pattern boundary) ko strongly todh de. Best practice ye hai ke seedha breakout par entry na lein — pehle retest ka wait karein (price wapis usi level par aaye aur usay respect kare) taake false breakout se bacha ja sake, phir wahan entry lein.",
-        candles:[{o:40,h:44,l:38,c:42},{o:42,h:46,l:41,c:44},{o:44,h:58,l:43,c:56},{o:56,h:57,l:44,c:46},{o:46,h:60,l:45,c:58}],
-        zones:[{from:1,to:1,top:46,bottom:44,color:"#e8c46a",label:"Resistance"}],
-        notes:[{at:3,y:42,text:"Retest",color:"#3ecf8e"}],
-        practice:{scenario:"EURUSD 1H: Price ne 1.0850 resistance ko strongly todh diya, phir wapis 1.0850 ki taraf aayi aur bullish rejection di (ab support ban gaya).",
-          entry:"Retest par rejection confirm hote hi buy", sl:"1.0838 (retest low ke neeche)", tp:"Agla resistance"},
-        quiz:[
-          {q:"Breakout ke baad best entry approach kya hai?",opts:["Retest ka wait karna","Seedha breakout candle par jump karna","Kabhi entry na lena","Random time par lena"],correct:0},
-          {q:"Retest kya hota hai?",opts:["Price wapis broken level par aa kar usay respect kare","Naya pattern banna","Sirf indicator signal","News release"],correct:0},
-          {q:"Retest strategy ka faida kya hai?",opts:["False breakout se bachna, behtar R:R milna","Kuch faida nahi","Sirf time waste","Loss zyada hota hai"],correct:0}
-        ]
-      },
-      {
-        id:"pa-mtf", tag:"Strategy", title:"Multiple Timeframe Analysis (MTF)",
-        explain:"MTF analysis mein trader higher timeframe (jaise Daily/4H) se overall trend/bias set karta hai, phir lower timeframe (jaise 15min/5min) par precise entry dhoondta hai. Ye approach 'top-down' kehlata hai — higher TF direction deta hai, lower TF timing deta hai. Isse trades higher-probability aur better R:R ke sath milti hain.",
-        candles:[],
-        points:[{x:5,y:35},{x:30,y:50},{x:55,y:45},{x:80,y:70},{x:95,y:65}],
-        lineZones:[{x1:0,x2:100,top:80,bottom:30,color:"#8492ab",label:"Daily = Bullish Bias"}],
-        practice:{scenario:"Daily chart XAUUSD ka clear uptrend dikha raha hai. 15min chart par price ek chhoti pullback zone mein aa gayi hai jahan se entry li ja sakti hai.",
-          entry:"15min pullback zone se buy (Daily bias ke sath)", sl:"15min swing low ke neeche", tp:"Daily timeframe ka agla target"},
-        quiz:[
-          {q:"MTF analysis ka top-down approach kya hai?",opts:["Higher TF se bias, lower TF se entry","Sirf 1 timeframe use karna","Random timeframe switch karna","Sirf tick chart"],correct:0},
-          {q:"Higher timeframe kis cheez ke liye use hoti hai?",opts:["Overall trend/bias set karne ke liye","Sirf entry ke liye","SL set karne ke liye","Kuch nahi"],correct:0},
-          {q:"MTF approach ka faida kya hai?",opts:["Behtar probability aur R:R","Zyada losses","Kam information","Kuch faida nahi"],correct:0}
-        ]
-      },
-      {
-        id:"pa-trendrange", tag:"Foundations", title:"Trend vs Range Market Identification",
-        explain:"Trending market mein price consistently higher-highs/higher-lows (uptrend) ya lower-highs/lower-lows (downtrend) banati hai. Range market mein price ek horizontal zone (support-resistance) ke darmiyan oscillate karti hai bagair kisi clear direction ke. Dono market types ke liye alag strategies chahiye — trending mein pullback-buy/sell, range mein boundary bounce-trading.",
-        candles:[],
-        points:[{x:5,y:45},{x:20,y:52},{x:35,y:44},{x:50,y:53},{x:65,y:45},{x:80,y:52},{x:95,y:44}],
-        lineZones:[{x1:0,x2:100,top:53,bottom:44,color:"#e8c46a",label:"Range-bound"}],
-        practice:{scenario:"USDJPY Daily: Pichle 3 hafton se price 148.50-150.50 ke darmiyan hi oscillate kar rahi hai, koi clear directional trend nahi ban raha.",
-          entry:"Range top se sell, range bottom se buy", sl:"Range boundary se thoda bahar", tp:"Range ki opposite boundary"},
-        quiz:[
-          {q:"Trending market ki pehchan kya hai?",opts:["Consistent higher-highs/lows ya lower-highs/lows","Horizontal movement","Sirf ek candle","Random moves"],correct:0},
-          {q:"Range market mein best strategy kya hai?",opts:["Boundary se bounce trade karna","Hamesha breakout trade karna","Kabhi trade na karna","Sirf news trade"],correct:0},
-          {q:"Range aur Trend mein farq kaise karte hain?",opts:["Higher-highs/lows bante hain ya nahi, ye dekh kar","Sirf color se","Sirf volume se","Random guess se"],correct:0}
-        ]
-      },
-      {
-        id:"pa-risk", tag:"Risk Management", title:"Risk Management & Position Sizing",
-        explain:"Risk management trading ka sab se zaroori hissa hai. Golden rule: har trade par apne account ka 1-2% se zyada risk na karein. Position size (lot size) SL distance aur risk amount se calculate hoti hai, na ke feeling se. Risk:Reward ratio kam az kam 1:2 rakhna chahiye taake sirf 40% win-rate par bhi account profitable rahe.",
-        candles:[],
-        points:[],
-        practice:{scenario:"Aapka account $1000 hai aur aap 1% ($10) risk lena chahte hain. Entry 2040, SL 2030 (10 pips/points ka farq). Is hisaab se position size calculate karni hai.",
-          entry:"Formula: Risk Amount ÷ SL Distance = Lot Size", sl:"Hamesha pehle se fix karein, trade ke baad na badlein", tp:"Kam az kam 1:2 R:R rakhein"},
-        quiz:[
-          {q:"Ek trade par kitna risk lena chahiye (general rule)?",opts:["1-2% account ka","50% account ka","Poora account","Risk ki zaroorat nahi"],correct:0},
-          {q:"Position size kis cheez se calculate hoti hai?",opts:["Risk amount aur SL distance se","Sirf feeling se","Random number se","Sirf balance se"],correct:0},
-          {q:"Minimum recommended Risk:Reward ratio kya hai?",opts:["1:2","1:0.5","2:1 risk zyada","Koi zaroorat nahi"],correct:0}
-        ]
-      },
-      {
-        id:"pa-journal", tag:"Discipline", title:"Confluence & Trade Journal Discipline",
-        explain:"Confluence ka matlab hai multiple reasons ek hi trade ko support karein (jaise OB + FVG + trendline + liquidity sweep sab ek hi zone par) — jitna zyada confluence, utni high-probability trade. Trade Journal maintain karna (entry, reason, result, emotions note karna) trader ko apni mistakes se seekhne aur consistency banane mein madad deta hai — ye professional trading ka sab se underrated skill hai.",
-        candles:[],
-        points:[],
-        practice:{scenario:"Ek trade setup mein 4 confluences mil rahi hain: Bullish OB, us par bullish FVG, ascending trendline, aur pichli liquidity sweep — sab ek hi zone (2040-2045) par.",
-          entry:"High-confluence zone se buy", sl:"Zone ke neeche", tp:"Agla structural high"},
-        quiz:[
-          {q:"Confluence ka matlab kya hai?",opts:["Multiple reasons ek trade ko support karein","Sirf ek indicator","Random entry","Sirf news"],correct:0},
-          {q:"Trade Journal kis kaam aata hai?",opts:["Mistakes se seekhna aur consistency","Sirf record ke liye, koi faida nahi","Time waste karna","Broker ke liye"],correct:0},
-          {q:"Zyada confluence wali trade kaisi hoti hai?",opts:["High-probability","Kam probability","Koi farak nahi padta","Hamesha loss"],correct:0}
-        ]
-      }
-    ]
-  }
-};
-
-/* ==========================================================================
-   ACCESS STATE
-   --------------------------------------------------------------------------
-   ccAccess format (per logged-in user, loaded from Firestore):
-   {
-     smc: { unlocked:true/false, parts:{ "smc-ob-bullish": true, ... } },
-     ict: { unlocked:true/false, parts:{...} },
-     pa:  { unlocked:true/false, parts:{...} }
-   }
-   A part is viewable only if folder.unlocked === true AND parts[partId] === true.
-   Admin can flip either the whole-folder switch or any single part switch.
-   ========================================================================== */
-var ccAccess = null;      // current logged-in user's access object
-var ccIsAdmin = false;    // set true if current user is admin (site's existing admin check)
-var ccCurrentFolder = null;
-
-function ccHasAccess(folderKey, partId){
-  if(ccIsAdmin) return true; // admin khud hamesha dekh sakta hai
-  if(!ccAccess || !ccAccess[folderKey]) return false;
-  var f = ccAccess[folderKey];
-  if(!f.unlocked) return false;
-  return !!(f.parts && f.parts[partId]);
-}
-
-/* ---------------- Folder View ---------------- */
-function ccRenderFolders(){
-  var html = '';
-  Object.keys(COURSES).forEach(function(key){
-    var c = COURSES[key];
-    var folderUnlocked = ccIsAdmin || (ccAccess && ccAccess[key] && ccAccess[key].unlocked);
-    var unlockedPartsCount = 0;
-    if(ccIsAdmin){ unlockedPartsCount = c.parts.length; }
-    else if(ccAccess && ccAccess[key] && ccAccess[key].parts){
-      c.parts.forEach(function(p){ if(ccAccess[key].parts[p.id]) unlockedPartsCount++; });
-    }
-    html += '<div class="cc-folder'+(folderUnlocked?'':' cc-locked')+'" onclick="ccOpenFolder(\''+key+'\')">'+
-      '<span class="cc-count">'+unlockedPartsCount+'/'+c.parts.length+'</span>'+
-      '<div style="font-size:30px">'+c.icon+'</div>'+
-      '<h3>'+c.title+'</h3><p>'+c.desc+'</p>'+
-      (folderUnlocked ? '' : '<span class="cc-lock-badge">🔒 Admin access required</span>')+
-      '</div>';
-  });
-  document.getElementById('ccFolderView').innerHTML = html;
-}
-
-function ccOpenFolder(key){
-  var folderUnlocked = ccIsAdmin || (ccAccess && ccAccess[key] && ccAccess[key].unlocked);
-  if(!folderUnlocked){ alert('Ye course abhi aapke liye locked hai. Admin se access ki request karein.'); return; }
-  ccCurrentFolder = key;
-  var c = COURSES[key];
-  var html = '<button class="cc-back-btn" onclick="ccShowFolders()">← Courses</button>'+
-    '<h2>'+c.icon+' '+c.title+'</h2><div class="cc-parts-grid">';
-  c.parts.forEach(function(p){
-    var unlocked = ccHasAccess(key, p.id);
-    html += '<div class="cc-part-card'+(unlocked?'':' cc-locked')+'" onclick="ccOpenPart(\''+key+'\',\''+p.id+'\')">'+
-      '<span class="cc-tag">'+p.tag+'</span><h4>'+p.title+'</h4>'+
-      (unlocked ? '<span style="color:var(--cc-green);font-size:12px">✓ Unlocked</span>' : '<span style="color:var(--cc-red);font-size:12px">🔒 Locked</span>')+
-      '</div>';
-  });
-  html += '</div>';
-  document.getElementById('ccFolderView').style.display='none';
-  document.getElementById('ccDetailView').style.display='none';
-  var pv = document.getElementById('ccPartsView');
-  pv.style.display='block'; pv.innerHTML = html;
-}
-
-function ccShowFolders(){
-  document.getElementById('ccFolderView').style.display='grid';
-  document.getElementById('ccPartsView').style.display='none';
-  document.getElementById('ccDetailView').style.display='none';
-  ccRenderFolders();
-}
-
-function ccOpenPart(folderKey, partId){
-  if(!ccHasAccess(folderKey, partId)){ alert('Ye part abhi locked hai. Admin se access ki request karein.'); return; }
-  var c = COURSES[folderKey];
-  var p = c.parts.filter(function(x){ return x.id===partId; })[0];
-  if(!p) return;
-  var diagId = 'ccDiag_'+p.id;
-  var html = '<button class="cc-back-btn" onclick="ccOpenFolder(\''+folderKey+'\')">← '+c.title+'</button>'+
-    '<div class="cc-part-detail"><span class="cc-tag">'+p.tag+'</span><h2>'+p.title+'</h2>'+
-    '<div class="cc-explain">'+p.explain+'</div>'+
-    '<div class="cc-diagram-box"><div id="'+diagId+'"></div></div>';
-  if(p.practice){
-    html += '<div class="cc-practice"><h4>🧪 Practice Scenario</h4><p>'+p.practice.scenario+'</p>'+
-      '<button class="cc-show-answer" onclick="this.nextElementSibling.classList.toggle(\'show\')">Show Answer</button>'+
-      '<div class="cc-answer-box"><b>Entry:</b> '+p.practice.entry+'<br><b>Stop Loss:</b> '+p.practice.sl+'<br><b>Take Profit:</b> '+p.practice.tp+'</div></div>';
-  }
-  if(p.quiz){
-    html += '<div class="cc-quiz"><h4>❓ Quiz</h4>';
-    p.quiz.forEach(function(q,qi){
-      html += '<div class="cc-quiz-q"><p>'+(qi+1)+'. '+q.q+'</p>';
-      q.opts.forEach(function(opt,oi){
-        html += '<button class="cc-quiz-opt" onclick="ccAnswerQuiz(this,'+oi+','+q.correct+')">'+opt+'</button>';
-      });
-      html += '</div>';
-    });
-    html += '</div>';
-  }
-  html += '</div>';
-  document.getElementById('ccPartsView').style.display='none';
-  var dv = document.getElementById('ccDetailView');
-  dv.style.display='block'; dv.innerHTML = html;
-
-  // draw diagram after DOM insert
-  setTimeout(function(){
-    if(p.candles && p.candles.length){
-      renderCandles(diagId, p.candles, p.zones, p.notes);
-    } else if(p.points && p.points.length){
-      renderLinePattern(diagId, p.points, p.zones || p.lineZones, p.notes || p.notes2);
-    }
-  }, 0);
-}
-
-function ccAnswerQuiz(btn, chosenIdx, correctIdx){
-  var group = btn.parentElement.querySelectorAll('.cc-quiz-opt');
-  group.forEach(function(b,i){
-    b.classList.add('disabled');
-    if(i===correctIdx) b.classList.add('correct');
-    else if(i===chosenIdx) b.classList.add('wrong');
-  });
-}
-
-/* ==========================================================================
-   ADMIN ACCESS-CONTROL PANEL
-   --------------------------------------------------------------------------
-   ccRenderAdminPanel(usersList) — call this with an array of
-   { uid, name/email, access: {...ccAccess shape...} } once you've fetched
-   users from Firestore. It renders a toggle for every folder AND every part.
-   ccToggleFolder / ccTogglePart write the change back to Firestore
-   (functions ccSaveAccessToFirestore is where you plug in your update call).
-   ========================================================================== */
-function ccRenderAdminPanel(usersList){
-  var html = '';
-  usersList.forEach(function(u){
-    html += '<details class="cc-admin-user"><summary>'+(u.name||u.email||u.uid)+'</summary>';
-    Object.keys(COURSES).forEach(function(key){
-      var c = COURSES[key];
-      var f = (u.access && u.access[key]) || {unlocked:false, parts:{}};
-      html += '<div class="cc-admin-folder-row"><span>'+c.icon+' '+c.title+' (poora folder)</span>'+
-        '<div class="cc-toggle'+(f.unlocked?' on':'')+'" onclick="ccToggleFolder(\''+u.uid+'\',\''+key+'\',this)"></div></div>';
-      html += '<div class="cc-admin-parts">';
-      c.parts.forEach(function(p){
-        var on = !!(f.parts && f.parts[p.id]);
-        html += '<div class="cc-admin-part-row"><span>'+p.title+'</span>'+
-          '<div class="cc-toggle'+(on?' on':'')+'" onclick="ccTogglePart(\''+u.uid+'\',\''+key+'\',\''+p.id+'\',this)"></div></div>';
-      });
-      html += '</div>';
-    });
-    html += '</details>';
-  });
-  document.getElementById('ccAdminUsersList').innerHTML = html;
-  document.getElementById('ccAdminPanel').style.display = 'block';
-}
-
-function ccToggleFolder(uid, folderKey, el){
-  var turnOn = !el.classList.contains('on');
-  el.classList.toggle('on', turnOn);
-  ccSaveAccessToFirestore(uid, folderKey, null, turnOn);
-}
-function ccTogglePart(uid, folderKey, partId, el){
-  var turnOn = !el.classList.contains('on');
-  el.classList.toggle('on', turnOn);
-  ccSaveAccessToFirestore(uid, folderKey, partId, turnOn);
-}
-
-/* ==========================================================================
-   FIREBASE / FIRESTORE HOOKS — YAHAN APNI SITE KE VARIABLES SE JODEIN
-   --------------------------------------------------------------------------
-   Neeche jo functions hain unke andar aapki site mein pehle se maujood
-   Firebase `db` (Firestore) aur `auth` (current logged-in user) objects
-   use karne hain. Variable names apni site ke actual naamon se badal dein
-   (mostly sites mein ye `db`, `auth`, `firebase.auth().currentUser` hote hain).
-   ========================================================================== */
-
-// 1) Jab user login ho / page load ho, uska access object load karo:
-function ccLoadUserAccess(){
-  var user = firebase.auth().currentUser;
-  if(!user){ ccAccess = null; ccIsAdmin = false; ccRenderFolders(); return; }
-  db.collection('users').doc(user.uid).get().then(function(doc){
-    var data = doc.data() || {};
-    ccAccess = data.courseAccess || {};
-    ccIsAdmin = (typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes(user.email)) || data.role === 'admin';
-    ccRenderFolders();
-    if(ccIsAdmin) ccLoadAllUsersForAdmin();
-  });
-}
-
-function ccLoadAllUsersForAdmin(){
-  db.collection('users').get().then(function(snap){
-    var list = [];
-    snap.forEach(function(doc){
-      var d = doc.data();
-      if (typeof ADMIN_EMAILS !== 'undefined' && ADMIN_EMAILS.includes(d.email)) return;
-      list.push({ uid:doc.id, name:d.name || d.email, email:d.email, access:d.courseAccess || {} });
-    });
-    ccRenderAdminPanel(list);
-  });
-}
-
-function ccSaveAccessToFirestore(uid, folderKey, partId, turnOn){
-  var ref = db.collection('users').doc(uid);
-  var field = partId ? ('courseAccess.'+folderKey+'.parts.'+partId) : ('courseAccess.'+folderKey+'.unlocked');
-  ref.update(field, turnOn).catch(function(err){
-    console.error('Course access save error:', err);
-  });
-}
-
-// Firebase login/logout hote hi Course Center ka access dobara load ho:
-firebase.auth().onAuthStateChanged(function(){
-  ccLoadUserAccess();
-});
-
-// Global scope mein expose karo taake onclick="" attributes kaam karein
-window.ccOpenFolder = ccOpenFolder;
-window.ccShowFolders = ccShowFolders;
-window.ccOpenPart = ccOpenPart;
-window.ccAnswerQuiz = ccAnswerQuiz;
-window.ccToggleFolder = ccToggleFolder;
-window.ccTogglePart = ccTogglePart;
-
-})();
-</script>
+.cc-wrap{--cc-green:#3ecf8e;--cc-red:#ef5b5b;--cc-gold:#e8c46a;--cc-bg:#0e1420;
+  --cc-panel:#151d2e;--cc-line:#26314a;--cc-text:#dbe3f0;--cc-mute:#8492ab;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--cc-text);}
+.cc-folders{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin:18px 0 28px;}
+.cc-folder{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:14px;
+  padding:20px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
+.cc-folder:hover{border-color:var(--cc-gold);transform:translateY(-2px);}
+.cc-folder h3{margin:8px 0 4px;font-size:19px;}
+.cc-folder p{margin:0;color:var(--cc-mute);font-size:13px;}
+.cc-folder .cc-count{position:absolute;top:14px;right:16px;background:#000a;padding:3px 9px;
+  border-radius:20px;font-size:11px;color:var(--cc-gold);}
+.cc-folder.cc-locked{opacity:.55;cursor:not-allowed;}
+.cc-folder .cc-lock-badge{font-size:12px;color:var(--cc-red);margin-top:8px;display:block;}
+.cc-parts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0;}
+.cc-part-card{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;}
+.cc-part-card:hover{border-color:var(--cc-gold);}
+.cc-part-card .cc-tag{font-size:11px;color:var(--cc-gold);text-transform:uppercase;letter-spacing:.5px;}
+.cc-part-card h4{margin:6px 0;font-size:15px;}
+.cc-part-card.cc-locked{opacity:.5;cursor:not-allowed;}
+.cc-back-btn{background:none;border:1px solid var(--cc-line);color:var(--cc-text);padding:7px 16px;
+  border-radius:8px;cursor:pointer;margin-bottom:14px;font-size:13px;}
+.cc-back-btn:hover{border-color:var(--cc-gold);}
+.cc-part-detail{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:14px;padding:24px;}
+.cc-part-detail h2{margin-top:0;color:var(--cc-gold);}
+.cc-diagram-box{background:var(--cc-bg);border:1px solid var(--cc-line);border-radius:10px;
+  padding:14px;margin:16px 0;overflow-x:auto;}
+.cc-diagram{width:100%;min-width:420px;height:auto;display:block;}
+.cc-zone-label{font-size:10px;font-weight:600;}
+.cc-note{font-size:11px;font-weight:600;}
+.cc-explain{background:#0e1420;border-left:3px solid var(--cc-gold);padding:12px 16px;
+  border-radius:6px;line-height:1.7;font-size:14.5px;}
+.cc-practice{background:#0e1420;border:1px dashed var(--cc-line);border-radius:10px;padding:16px;margin-top:18px;}
+.cc-practice h4{margin-top:0;color:var(--cc-green);}
+.cc-show-answer{background:var(--cc-gold);color:#1a1408;border:none;padding:8px 18px;
+  border-radius:8px;cursor:pointer;font-weight:600;margin-top:10px;}
+.cc-answer-box{display:none;margin-top:12px;padding:12px;background:#0a1f16;border-radius:8px;
+  border:1px solid var(--cc-green);font-size:14px;}
+.cc-answer-box.show{display:block;}
+.cc-quiz{margin-top:22px;}
+.cc-quiz-q{background:#0e1420;border:1px solid var(--cc-line);border-radius:10px;padding:14px;margin-bottom:12px;}
+.cc-quiz-q p{margin:0 0 10px;font-weight:600;}
+.cc-quiz-opt{display:block;width:100%;text-align:left;background:var(--cc-panel);
+  border:1px solid var(--cc-line);color:var(--cc-text);padding:9px 12px;border-radius:8px;
+  margin-bottom:7px;cursor:pointer;font-size:13.5px;}
+.cc-quiz-opt:hover{border-color:var(--cc-gold);}
+.cc-quiz-opt.correct{background:#123a24;border-color:var(--cc-green);}
+.cc-quiz-opt.wrong{background:#3a1414;border-color:var(--cc-red);}
+.cc-quiz-opt.disabled{pointer-events:none;}
+.cc-locked-msg{text-align:center;padding:50px 20px;color:var(--cc-mute);}
+.cc-locked-msg .cc-lock-icon{font-size:40px;display:block;margin-bottom:10px;}
+.cc-admin-panel{background:var(--cc-panel);border:1px solid var(--cc-gold);border-radius:14px;padding:20px;margin:20px 0;}
+.cc-admin-panel h3{color:var(--cc-gold);margin-top:0;}
+.cc-admin-user{border:1px solid var(--cc-line);border-radius:10px;padding:12px;margin-bottom:10px;}
+.cc-admin-user summary{cursor:pointer;font-weight:600;}
+.cc-admin-folder-row{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid var(--cc-line);}
+.cc-admin-parts{margin-left:18px;margin-top:6px;}
+.cc-admin-part-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:13px;color:var(--cc-mute);}
+.cc-toggle{position:relative;width:38px;height:21px;background:#333;border-radius:20px;cursor:pointer;flex-shrink:0;}
+.cc-toggle.on{background:var(--cc-green);}
+.cc-toggle::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;background:#fff;
+  border-radius:50%;transition:.15s;}
+.cc-toggle.on::after{left:19px;}
 
 </style>
 </head>
 <body>
+ <!--
+  Ye HTML file "course-center.css" aur "course-center.js" ke sath use karein.
+  Apni site mein <head> mein CSS link karein aur is section ke baad
+  <script src="course-center.js"></script> add karein.
+-->
+<section id="courseCenterSection" class="cc-wrap">
+  <h2>📚 Course Center</h2>
+  <p style="color:var(--cc-mute)">SMC, ICT aur Price Action — har strategy alag part mein, diagram + practice + quiz ke sath.</p>
+
+  <div id="ccFolderView" class="cc-folders"></div>
+  <div id="ccPartsView" style="display:none"></div>
+  <div id="ccDetailView" style="display:none"></div>
+
+  <!-- Ye panel sirf admin ko dikhega (JS mein isAdmin check hota hai) -->
+  <div id="ccAdminPanel" class="cc-admin-panel" style="display:none">
+    <h3>🔐 Admin — Course Access Control</h3>
+    <p style="color:var(--cc-mute);font-size:13px">Har user ke liye folder ya individual part ka access on/off karein. Tabdeeli turant (real-time) user ki screen par lag jayegi.</p>
+    <div id="ccAdminUsersList"></div>
+  </div>
+</section>
 <div id="ffAlertBanner" class="ff-alert-banner" style="display:none;">
   <div class="ff-alert-left">
     <div class="ff-alert-icon">⛔</div>
@@ -1115,7 +396,6 @@ window.ccTogglePart = ccTogglePart;
    <a href="#sessions">Market Sessions</a>
     <a href="#tradingview">Live Chart</a>
   <a href="#ictsmc">ICT/SMC Guide</a>
-   <a href="#courseCenterSection">📚 Course Center</a>
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
    <a href="#ictsignals">ICT Signals</a>
@@ -4615,6 +3895,14 @@ function kycEnableAddressNext(){
       addressDocUrl: addressUrl, addressDocType: addrExt,
       status: 'pending', submittedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    // ===== APNI JAGA PAR BACHA HUA CODE PASTE KAREIN =====
+    msgEl.className = 'kyc-quality-msg ok';
+    logActivity('KYC Documents Submitted');
+    
+    // Core custom database update module
+    await db.collection('users').doc(user.uid).update({
+      kycStatus: 'pending'
+    });
 
     msgEl.style.color = '#22c55e';
     msgEl.textContent = 'Submit ho gaya! Admin review karega.';
@@ -4835,6 +4123,50 @@ function switchView(viewName) {
   }
 }
 
+/* ==========================================================================
+   FOREX WITH WAQAR — FULL COURSE CENTER MODULE (PURE JAVASCRIPT)
+   ========================================================================== */
+(function() {
+  
+  // 1. COURSES DATABASE (27 Parts Data Structure)
+  var COURSES_DATA = {
+    smc: {
+      title: "SMC (Smart Money Concepts)",
+      parts: [
+        { id: "smc_bull_ob", title: "Bullish Order Block", tag: "SMC", explain: "Bullish Order Block wo aakhri bearish candle hoti hai jo ek tez uptrend (impulsive move) se pehle banti hai, jahan institutions ke buy orders pending hote hain.", practice: "Chart par check karein: Kiya market ne break of structure ke baad is block ko retest kiya?", quiz: { q: "Bullish OB par trade kab active hoti hai?", opts: ["Jab price high break kare", "Jab price dobara down aakar OB zone ko touch kare", "Jab trend change ho jaye"], ans: 1 } },
+        { id: "smc_bear_ob", title: "Bearish Order Block", tag: "SMC", explain: "Bearish Order Block wo aakhri bullish candle hoti hai jo bade downtrend se pehle banti hai.", practice: "Premium zone mein mojood Bearish OB ko select karein.", quiz: { q: "Bearish OB kahan banta hai?", opts: ["Market ke bilkul bottom par", "Impulsive downward move se pehle swing high par", "Sideways market mein"], ans: 1 } },
+        { id: "smc_breaker", title: "Breaker Block", tag: "SMC", explain: "Jab ek valid Order Block fail ho jata hai aur price use break kar deti hai, toh wo Breaker Block ban jata hai.", practice: "Failed OB ka validation check karein.", quiz: { q: "Breaker Block kab banta hai?", opts: ["Jab OB price ko hold kare", "Jab OB break ho jaye aur retest ho", "Trend line break hone par"], ans: 1 } },
+        { id: "smc_mitigation", title: "Mitigation Block", tag: "SMC", explain: "Ye failed order block hota hai lekin isme market naya high ya low (liquidity sweep) nahi banati.", practice: "Breaker aur Mitigation ka farq note karein.", quiz: { q: "Mitigation block mein kiya nahi hota?", opts: ["Retest nahi hota", "Liquidity sweep nahi hoti", "Candle body nahi hoti"], ans: 1 } },
+        { id: "smc_rejection", title: "Rejection Block", tag: "SMC", explain: "Candle ki wo lambi wick jahan se price bohot tezi se reject hui ho, use Rejection Block kehte hain.", practice: "Wicks ke liquidity pools mark karein.", quiz: { q: "Rejection block mein focus kis par hota hai?", opts: ["Candle Body par", "Lambi Wick (Shadow) par", "Volume par"], ans: 1 } },
+        { id: "smc_bull_fvg", title: "Bullish FVG", tag: "SMC", explain: "3 candles ke darmiyan ka wo gap jahan 1st candle ka high aur 3rd candle ka low aapas mein touch nahi karte.", practice: "Imbalance zone ko draw karein.", quiz: { q: "FVG kitni candles se banta hai?", opts: ["2 Candles", "3 Candles", "5 Candles"], ans: 1 } },
+        { id: "smc_bear_fvg", title: "Bearish FVG", tag: "SMC", explain: "Downtrend mein 3 candles ke darmiyan ka gap jo market ki inefficiency ko zahir karta hai.", practice: "Bearish imbalance fill hone ka wait karein.", quiz: { q: "Bearish FVG market ko kis taraf khinchta hai?", opts: ["Upar retest ke liye", "Niche breakout ke liye", "Sideways move ke liye"], ans: 0 } },
+        { id: "smc_ifvg", title: "Inverse FVG (IFVG)", tag: "SMC", explain: "Jab market kisi FVG ko respect karne ke bajaye use body ke sath break kar de, toh wo opposite direction ke liye support/resistance ban jata hai.", practice: "Broken FVG par entry trigger check karein.", quiz: { q: "IFVG kab banta hai?", opts: ["Jab FVG respect ho", "Jab FVG clean break ho jaye", "Jab market stop ho jaye"], ans: 1 } },
+        { id: "smc_bpr", title: "Balanced Price Range (BPR)", tag: "SMC", explain: "Jahan Bullish aur Bearish FVG ek hi jagah aapas mein overlap ho jayein, use aggressive balanced area kehte hain.", practice: "Double imbalance lines pull karein.", quiz: { q: "BPR kis se banta hai?", opts: ["Sirf ek candle se", "Bullish aur Bearish FVG ke overlap se", "Support line se"], ans: 1 } }
+      ]
+    },
+    ict: {
+      title: "ICT (Inner Circle Trader)",
+      parts: [
+        { id: "ict_liq", title: "Liquidity (Buyside/Sellside)", tag: "ICT", explain: "Market highs ke upar Buyside Liquidity (Stop losses) hoti hai aur lows ke niche Sellside Liquidity hoti hai.", practice: "Equal Highs (EQH) ke upar BSL mark karein.", quiz: { q: "Sellside liquidity kahan hoti hai?", opts: ["Old Highs ke upar", "Old Lows ke niche", "Consolidation ke andar"], ans: 1 } },
+        { id: "ict_bos", title: "Market Structure (BOS/CHoCH)", tag: "ICT", explain: "Trend ke sath price break ho toh BOS (Break of Structure) aur agar trend change ho raha ho toh CHoCH (Change of Character) kehte hain.", practice: "Major structural shift verify karein.", quiz: { q: "Trend reversal ka pehla ishara kiya hota hai?", opts: ["BOS", "CHoCH", "Liquidity Sweep"], ans: 1 } },
+        { id: "ict_ote", title: "Premium & Discount (OTE)", tag: "ICT", explain: "Fibonacci level 0.62 se 0.79 ke darmiyan ka area Optimal Trade Entry (OTE) zone hota hai.", practice: "Discount zone mein entry talash karein.", quiz: { q: "OTE ki behtareen range kiya hai?", opts: ["0.23 - 0.38", "0.50", "0.62 - 0.79"], ans: 2 } },
+        { id: "ict_killzones", title: "Killzones", tag: "ICT", explain: "London, New York aur Asian sessions ke specific timing jahan high volatility aur algorithm active hota hai.", practice: "Time macro levels set karein.", quiz: { q: "ICT Trading mein sab se volatile session kon sa hai?", opts: ["Asian", "London & NY", "Sydney"], ans: 1 } },
+        { id: "ict_judas", title: "Judas Swing", tag: "ICT", explain: "Session ke shuru mein jo jhoota swing (fake breakout) hota hai liquidity sweep karne ke liye, use Judas Swing kehte hain.", practice: "London open ka fake move spot karein.", quiz: { q: "Judas Swing asal mein kiya hota hai?", opts: ["Real Trend", "Fake out / Liquidity Hunt", "End of Day move"], ans: 1 } },
+        { id: "ict_amd", title: "Power of Three (AMD)", tag: "ICT", explain: "Accumulation (Sideways), Manipulation (Fake move), aur Distribution (Real Trend Expansion).", practice: "Daily candle ka AMD phase note karein.", quiz: { q: "AMD ka doosra phase kiya hai?", opts: ["Accumulation", "Distribution", "Manipulation"], ans: 2 } },
+        { id: "ict_bullet", title: "Silver Bullet", tag: "ICT", explain: "Specific time window (jaise NY 10 AM to 11 AM) jahan algorithm lazmi 10-15 pips ka move deta hai.", practice: "1-minute chart par clear FVG entry nikalein.", quiz: { q: "Silver Bullet kis par base karta hai?", opts: ["Time & FVG Framework", "Indicator Cross", "News events"], ans: 0 } },
+        { id: "ict_smt", title: "SMT Divergence", tag: "ICT", explain: "Correlated assets (jaise EURUSD aur GBPUSD) jab aapas mein swing highs/lows match na karein (Crack in correlation).", practice: "Divergence spot karke institutional footprint dekhien.", quiz: { q: "SMT kiya zahir karta hai?", opts: ["Trend continuity", "Institutional accumulation/crack", "Normal market condition"], ans: 1 } }
+      ]
+    },
+    price_action: {
+      title: "Price Action Trading",
+      parts: [
+        { id: "pa_sr", title: "Support & Resistance", tag: "PA", explain: "Support wo zone hai jahan buyers active hote hain aur Resistance wo zone hai jahan sellers heavy hote hain.", practice: "Swings ke touchpoints connect karein.", quiz: { q: "Resistance line par traders aksar kiya dekhte hain?", opts: ["Buy Signals", "Sell Signals", "Breakout directly"], ans: 1 } },
+        { id: "pa_trends", title: "Trendlines & Channels", tag: "PA", explain: "Market ke highs aur lows ko mila kar banayi janay wali slopes jo trend ki simt batati hain.", practice: "3-touch verification check karein.", quiz: { q: "Valid trendline ke liye kam az kam kitne touchpoints chahiye?", opts: ["1", "2", "3"], ans: 2 } },
+        { id: "pa_candles", title: "Candlestick Patterns", tag: "PA", explain: "Pinbar, Engulfing aur Doji jese ahem patterns jo short-term market momentum aur psychology batate hain.", practice: "Reversal zones par check karein.", quiz: { q: "Pinbar candle kiya show karti hai?", opts: ["Strong Rejection", "Trend Continues", "No Volatility"], ans: 0 } },
+        { id: "pa_rev_chart", title: "Reversal Chart Patterns", tag: "PA", explain: "Double Top, Double Bottom aur Head & Shoulders jo chalte hue trend ke khatme ka ishara hote hain.", practice: "Neckline breakout confirm karein.", quiz: { q: "Double Bottom pattern kis cheez ka ishara hai?", opts: ["Bearish Reversal", "Bullish Reversal", "Trend continuation"], ans: 1 } },
+        { id: "pa_cont_chart", title: "Continuation Chart Patterns", tag: "PA", explain: "Flags, Pennants aur Triangles jo batate hain ke market thoda rest karne ke baad purane trend ko jari rakhegi.", practice: "Breakout ki candle close ka wait karein.", quiz: { q: "Flag pattern asal mein kiya hai?", opts: ["Trend reversal", "Trend continuation correction", "Sideways market forever"], ans: 1 } },
+        { id: "pa_breakout", title: "Breakout & Retest", tag: "PA", explain: "Kisi ahem zone ke tootne ke baad safe entry hamesha us ke retest pool par banti hai.", practice: "Retest volume aur rejection trace karein.", quiz: { q: "Safe entry kab hoti hai?", opts: ["Breakout ke foran baad", "Retest aur rejection validation par", "Kabi bhi nahi"], ans: 1 } },
+        { id: "pa_mtf", title: "Multiple Timeframe Analysis", tag: "PA", explain: "H4/D1 par trend dekhna aur M15/M5 par perfect risk-to-reward ratio ke sath entry execute karna.", practice: "Top-Down analysis workflow design karein.", quiz: { q: "Entry hamesha kis TF par honi chahiye?", opts: ["Higher Timeframe (HTF)", "Lower Timeframe (LTF)", "Kahin bhi"], ans: 1 } },
 
 
 </body>
