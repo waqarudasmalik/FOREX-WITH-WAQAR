@@ -2180,7 +2180,13 @@
       if (data.status === 'approved') {
         document.getElementById('pendingOverlay').style.display = 'none';
         document.getElementById('rejectedOverlay').style.display = 'none';
-        document.getElementById('adminFab').style.display = (data.role === 'admin') ? 'block' : 'none';
+        document.getElementById('adminFab').style.display = (isAdmin || data.role === 'admin') ? 'block' : 'none';
+        // Self-heal: agar ye email ADMIN_EMAILS mein hai lekin Firestore ka
+        // purana record 'role: admin' nahi bata raha, to record theek kar do
+        // taake ye bug dobara na ho.
+        if (isAdmin && data.role !== 'admin') {
+          userRef.update({ role: 'admin', status: 'approved' });
+        }
         logActivity('Session active');
       } else if (data.status === 'rejected') {
         document.getElementById('pendingOverlay').style.display = 'none';
@@ -4105,27 +4111,61 @@ const messages = [{ role: 'system', content: aichatBuildSystemPrompt() }, ...aic
 */
 function renderCandles(id, candles, zones, notes){
   zones = zones || []; notes = notes || [];
-  var W = 60 + candles.length*70, H = 220;
-  var px = function(v){ return 200 - (v/100*170) - 10; };
-  var cx = function(i){ return 50 + i*70; };
+  var n = candles.length;
+  var W = 90 + n*72, H = 260;
+  var topPad = 20, botPad = 20, leftPad = 16, rightPad = 16;
+  var px = function(v){ return topPad + (100 - v) / 100 * (H - topPad - botPad); };
+  var cx = function(i){ return leftPad + 40 + i*72; };
   var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="cc-diagram" xmlns="http://www.w3.org/2000/svg">';
-  zones.forEach(function(z){
-    var x1=cx(z.from)-25, x2=cx(z.to)+25, y1=px(z.top), y2=px(z.bottom);
-    svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.18" stroke="'+z.color+'" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>';
-    if(z.label) svg += '<text x="'+(x1+4)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'">'+z.label+'</text>';
+
+  // dark chart panel background
+  svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="10" fill="#0a0f1a"/>';
+
+  // horizontal gridlines (like a real chart's price grid)
+  for (var g = 0; g <= 4; g++){
+    var gy = topPad + g*(H-topPad-botPad)/4;
+    svg += '<line x1="10" y1="'+gy+'" x2="'+(W-10)+'" y2="'+gy+'" stroke="rgba(148,163,184,0.09)" stroke-width="1"/>';
+  }
+  // vertical gridlines per candle
+  candles.forEach(function(c,i){
+    svg += '<line x1="'+cx(i)+'" y1="'+topPad+'" x2="'+cx(i)+'" y2="'+(H-botPad)+'" stroke="rgba(148,163,184,0.05)" stroke-width="1"/>';
   });
+
+  // zones drawn first so candles sit on top, like OB/FVG boxes on a real chart
+  zones.forEach(function(z){
+    var x1=cx(z.from)-27, x2=cx(z.to)+27, y1=px(z.top), y2=px(z.bottom);
+    svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.15" stroke="'+z.color+'" stroke-width="1.3" stroke-dasharray="5 3" rx="4"/>';
+  });
+
+  // candlesticks — thin wicks + narrow bodies, like a real candlestick chart
   candles.forEach(function(c,i){
     var up = c.c>=c.o;
     var color = up? 'var(--cc-green)':'var(--cc-red)';
     var x = cx(i);
-    svg += '<line x1="'+x+'" y1="'+px(c.h)+'" x2="'+x+'" y2="'+px(c.l)+'" stroke="'+color+'" stroke-width="2"/>';
+    var wickTop = px(c.h), wickBot = px(c.l);
     var bodyTop = px(Math.max(c.o,c.c));
-    var bodyH = Math.max(2, Math.abs(px(c.o)-px(c.c)));
-    svg += '<rect x="'+(x-11)+'" y="'+bodyTop+'" width="22" height="'+bodyH+'" fill="'+color+'"/>';
+    var bodyBot = px(Math.min(c.o,c.c));
+    var bodyH = Math.max(3, bodyBot-bodyTop);
+    svg += '<line x1="'+x+'" y1="'+wickTop+'" x2="'+x+'" y2="'+wickBot+'" stroke="'+color+'" stroke-width="1.4" opacity="0.95"/>';
+    svg += '<rect x="'+(x-8)+'" y="'+bodyTop+'" width="16" height="'+bodyH+'" rx="2" fill="'+color+'"/>';
   });
+
+  // zone labels as small chips (like real chart annotation tags)
+  zones.forEach(function(z){
+    if(!z.label) return;
+    var x1=cx(z.from)-27, y1=px(z.top);
+    var labelW = 14 + z.label.length*5.6;
+    svg += '<rect x="'+(x1+2)+'" y="'+(y1+4)+'" width="'+labelW+'" height="14" rx="4" fill="#000000b3"/>';
+    svg += '<text x="'+(x1+2+labelW/2)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'" text-anchor="middle">'+z.label+'</text>';
+  });
+
   notes.forEach(function(n){
     svg += '<text x="'+cx(n.at)+'" y="'+px(n.y)+'" class="cc-note" text-anchor="middle" fill="'+(n.color||'#e8c46a')+'">'+n.text+'</text>';
   });
+
+  // chart border
+  svg += '<rect x="0.5" y="0.5" width="'+(W-1)+'" height="'+(H-1)+'" rx="10" fill="none" stroke="rgba(148,163,184,0.18)" stroke-width="1"/>';
+
   svg += '</svg>';
   var el = document.getElementById(id);
   if(el) el.innerHTML = svg;
@@ -4137,21 +4177,46 @@ function renderCandles(id, candles, zones, notes){
 */
 function renderLinePattern(id, points, zones, notes){
   zones = zones || []; notes = notes || [];
-  var W = 560, H = 220;
-  var px = function(v){ return 200 - (v/100*170) - 10; };
-  var pxx = function(v){ return 30 + (v/100*500); };
-  var path = points.map(function(p,i){ return (i===0?'M':'L')+pxx(p.x)+' '+px(p.y); }).join(' ');
+  var W = 620, H = 260;
+  var topPad = 20, botPad = 20, leftPad = 20, rightPad = 20;
+  var px = function(v){ return topPad + (100-v)/100*(H-topPad-botPad); };
+  var pxx = function(v){ return leftPad + (v/100)*(W-leftPad-rightPad); };
+
   var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="cc-diagram" xmlns="http://www.w3.org/2000/svg">';
+
+  // dark chart panel background + price gridlines
+  svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="10" fill="#0a0f1a"/>';
+  for (var g=0; g<=4; g++){
+    var gy = topPad + g*(H-topPad-botPad)/4;
+    svg += '<line x1="10" y1="'+gy+'" x2="'+(W-10)+'" y2="'+gy+'" stroke="rgba(148,163,184,0.09)" stroke-width="1"/>';
+  }
+
   zones.forEach(function(z){
     var x1=pxx(z.x1), x2=pxx(z.x2), y1=px(z.top), y2=px(z.bottom);
-    svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.15" stroke="'+z.color+'" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>';
-    if(z.label) svg += '<text x="'+(x1+4)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'">'+z.label+'</text>';
+    svg += '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1)+'" height="'+(y2-y1)+'" fill="'+z.color+'" opacity="0.13" stroke="'+z.color+'" stroke-width="1.3" stroke-dasharray="5 3" rx="4"/>';
   });
-  svg += '<path d="'+path+'" fill="none" stroke="var(--cc-gold)" stroke-width="2.5"/>';
-  points.forEach(function(p){ svg += '<circle cx="'+pxx(p.x)+'" cy="'+px(p.y)+'" r="3" fill="var(--cc-gold)"/>'; });
+
+  // smooth price line with rounded joins, like a real chart's price path
+  var path = points.map(function(p,i){ return (i===0?'M':'L')+pxx(p.x)+' '+px(p.y); }).join(' ');
+  svg += '<path d="'+path+'" fill="none" stroke="var(--cc-gold)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+  points.forEach(function(p){
+    svg += '<circle cx="'+pxx(p.x)+'" cy="'+px(p.y)+'" r="3.2" fill="#0a0f1a" stroke="var(--cc-gold)" stroke-width="2"/>';
+  });
+
+  zones.forEach(function(z){
+    if(!z.label) return;
+    var x1=pxx(z.x1), y1=px(z.top);
+    var labelW = 14 + z.label.length*5.6;
+    svg += '<rect x="'+(x1+2)+'" y="'+(y1+4)+'" width="'+labelW+'" height="14" rx="4" fill="#000000b3"/>';
+    svg += '<text x="'+(x1+2+labelW/2)+'" y="'+(y1+14)+'" class="cc-zone-label" fill="'+z.color+'" text-anchor="middle">'+z.label+'</text>';
+  });
+
   notes.forEach(function(n){
     svg += '<text x="'+pxx(n.x)+'" y="'+px(n.y)+'" class="cc-note" text-anchor="middle" fill="'+(n.color||'#e8c46a')+'">'+n.text+'</text>';
   });
+
+  svg += '<rect x="0.5" y="0.5" width="'+(W-1)+'" height="'+(H-1)+'" rx="10" fill="none" stroke="rgba(148,163,184,0.18)" stroke-width="1"/>';
+
   svg += '</svg>';
   var el = document.getElementById(id);
   if(el) el.innerHTML = svg;
