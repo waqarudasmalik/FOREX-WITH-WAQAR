@@ -118,6 +118,23 @@
 
   .tradingview-widget-container { border-radius:16px; overflow:hidden; border:1px solid rgba(148,163,184,0.2); }
 
+  .osc-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .osc-tf-group { display:flex; gap:8px; }
+  .osc-tf-btn { padding:8px 16px; border-radius:10px; border:1px solid rgba(148,163,184,0.25); background:rgba(15,23,42,0.7); color:#cbd5e1; font-weight:600; font-size:13px; cursor:pointer; transition:all .15s; }
+  .osc-tf-btn:hover { border-color:rgba(56,189,248,0.5); color:#fff; }
+  .osc-tf-btn.active { background:linear-gradient(135deg,#22c55e,#16a34a); color:#0f172a; border-color:transparent; }
+  .osc-status { font-size:12.5px; color:#94a3b8; }
+  .osc-status.live { color:#4ade80; }
+  .osc-status.err { color:#f87171; }
+  .osc-stats { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .osc-stats .osc-stat-box { background:rgba(17,24,39,0.7); border:1px solid rgba(148,163,184,0.15); border-radius:12px; padding:10px 16px; font-size:13px; color:#94a3b8; }
+  .osc-stats .osc-stat-box b { display:block; font-size:15px; margin-top:2px; color:#fff; }
+  .osc-chart-wrap { background:rgba(8,12,22,0.85); border:1px solid rgba(148,163,184,0.2); border-radius:16px; padding:10px; overflow:hidden; }
+  #oscCanvas { width:100%; display:block; }
+  .osc-legend { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; font-size:12.5px; color:#cbd5e1; }
+  .osc-legend span { display:flex; align-items:center; gap:6px; }
+  .osc-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+
   .faq-folder { background: rgba(17,24,39,0.7); border: 1px solid rgba(148,163,184,0.15); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
   .faq-folder-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; cursor: pointer; user-select: none; }
   .faq-folder-header h4 { color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px; }
@@ -1028,6 +1045,45 @@
     </div>
     <div class="tradingview-widget-container">
       <div id="tradingview_xauusd"></div>
+    </div>
+  </div>
+</section>
+
+<section id="ownstructurechart">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Apna Live Structure Chart (XAUUSD) — Auto HH / HL / LH / LL + Valid BOS &amp; CHoCH</h3>
+    <p style="color:#94a3b8; font-size:13.5px; margin-bottom:18px; line-height:1.7;">
+      Ye chart is site ka <strong>khud ka apna banaya hua</strong> live <strong>XAUUSD</strong> chart hai — upar wale
+      TradingView chart jaisa hi symbol, koi third-party indicator manually add karne ki zaroorat nahi. Live Gold
+      (XAU/USD) spot price har ~20 second mein fetch hoti hai aur khud apni candles banata hai (1m / 5m / 15m / 1H),
+      jo is browser mein save hoti rehti hain — yani jitni dair aap chart khula rakhein ya baar baar site par aayein,
+      utni hi zyada candle history ban jaati hai. Har naye data par market structure — swing highs/lows — khud-badh
+      calculate hoti hai, aur sirf <strong>valid</strong> breaks hi BOS ya CHoCH ki tarah mark hote hain: jab tak koi
+      confirmed swing level actual candle close se break na ho, tab tak koi signal nahi lagta.
+    </p>
+
+    <div class="osc-toolbar">
+      <div class="osc-tf-group" id="oscTfGroup">
+        <button class="osc-tf-btn" data-tf="1m">1m</button>
+        <button class="osc-tf-btn active" data-tf="5m">5m</button>
+        <button class="osc-tf-btn" data-tf="15m">15m</button>
+        <button class="osc-tf-btn" data-tf="1h">1H</button>
+      </div>
+      <div class="osc-status" id="oscStatus">Loading...</div>
+    </div>
+
+    <div class="osc-stats" id="oscStats"></div>
+
+    <div class="osc-chart-wrap">
+      <canvas id="oscCanvas"></canvas>
+    </div>
+
+    <div class="osc-legend">
+      <span><i class="osc-dot" style="background:#4ade80;"></i> HH / HL (Bullish structure)</span>
+      <span><i class="osc-dot" style="background:#f87171;"></i> LH / LL (Bearish structure)</span>
+      <span><i class="osc-dot" style="background:#38bdf8;"></i> BOS (Break of Structure — trend continuation)</span>
+      <span><i class="osc-dot" style="background:#facc15;"></i> CHoCH (Change of Character — trend reversal)</span>
     </div>
   </div>
 </section>
@@ -2687,9 +2743,284 @@
     "container_id": "tradingview_xauusd"
   });
 </script>
+
 <!--
 ==============================================================================
- ICT SIGNALS — Forex With Waqar (Add-on Module) — v2
+ OWN STRUCTURE CHART — self-built live XAUUSD chart with HH/HL/LH/LL + valid
+ BOS/CHoCH.
+ Data source: gold-api.com's free, keyless, CORS-enabled real-time XAU (gold
+ spot / XAUUSD) price endpoint. Since real intraday OHLC history needs a paid
+ key, this chart builds its OWN candles live by sampling the real spot price
+ every ~20s and bucketing it into 1m/5m/15m/1H candles in the browser. Candle
+ history is kept in this browser's localStorage so it keeps growing the more
+ this page is open/visited. Structure (swing highs/lows) and BOS/CHoCH are
+ recomputed on every update using a 5-bar fractal swing method + close-based
+ break confirmation, so only "valid" (confirmed) signals are ever shown.
+==============================================================================
+-->
+<script>
+(function(){
+  var OSC_PRICE_URL = 'https://api.gold-api.com/price/XAU';
+  var OSC_TFS = ['1m','5m','15m','1h'];
+  var OSC_TF_MS = { '1m':60000, '5m':300000, '15m':900000, '1h':3600000 };
+  var OSC_MAX_CANDLES = 500;
+  var oscTf = '5m';
+  var oscData = {};              // { '1m': [candles...], '5m': [...], ... }
+  var oscTimer = null;
+  var canvas = document.getElementById('oscCanvas');
+  var ctx = canvas ? canvas.getContext('2d') : null;
+  var statusEl = document.getElementById('oscStatus');
+  var statsEl = document.getElementById('oscStats');
+
+  function fmtPrice(p){ return p.toFixed(2); }
+  function lsKey(tf){ return 'fww_osc_xauusd_'+tf; }
+
+  function loadFromStorage(){
+    OSC_TFS.forEach(function(tf){
+      try{
+        var raw = window.localStorage.getItem(lsKey(tf));
+        oscData[tf] = raw ? JSON.parse(raw) : [];
+      }catch(e){ oscData[tf] = []; }
+    });
+  }
+
+  function saveToStorage(tf){
+    try{ window.localStorage.setItem(lsKey(tf), JSON.stringify(oscData[tf])); }catch(e){}
+  }
+
+  // fold one fresh price tick into every timeframe's candle series
+  function ingestTick(price, ts){
+    OSC_TFS.forEach(function(tf){
+      var binMs = OSC_TF_MS[tf];
+      var binStart = Math.floor(ts/binMs)*binMs;
+      var arr = oscData[tf];
+      var last = arr[arr.length-1];
+      if(!last || last.t!==binStart){
+        arr.push({ t:binStart, open:price, high:price, low:price, close:price });
+        if(arr.length>OSC_MAX_CANDLES) arr.shift();
+      } else {
+        if(price>last.high) last.high=price;
+        if(price<last.low) last.low=price;
+        last.close=price;
+      }
+      saveToStorage(tf);
+    });
+  }
+
+  function pollPrice(){
+    if(statusEl){ statusEl.textContent='Fetching live XAUUSD price...'; statusEl.className='osc-status'; }
+    fetch(OSC_PRICE_URL).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(d){
+        var price = +d.price;
+        if(!isFinite(price)) throw new Error('bad price');
+        ingestTick(price, Date.now());
+        if(statusEl){ statusEl.textContent='Live • updated '+new Date().toLocaleTimeString(); statusEl.className='osc-status live'; }
+        renderOsc();
+      })
+      .catch(function(err){
+        if(statusEl){ statusEl.textContent='XAUUSD data load nahi ho saka. Dobara koshish ho rahi hai...'; statusEl.className='osc-status err'; }
+        console.error('OSC price fetch error', err);
+      });
+  }
+
+  // 5-bar fractal swing detection -> alternating zigzag of pivot highs/lows
+  function getPivots(candles, k){
+    var raw = [];
+    for(var i=k;i<candles.length-k;i++){
+      var isHigh=true, isLow=true;
+      for(var j=i-k;j<=i+k;j++){
+        if(j===i) continue;
+        if(candles[j].high >= candles[i].high) isHigh=false;
+        if(candles[j].low <= candles[i].low) isLow=false;
+      }
+      if(isHigh) raw.push({i:i, price:candles[i].high, type:'high'});
+      if(isLow) raw.push({i:i, price:candles[i].low, type:'low'});
+    }
+    raw.sort(function(a,b){ return a.i-b.i; });
+    var zz=[];
+    raw.forEach(function(p){
+      if(zz.length===0){ zz.push(p); return; }
+      var last = zz[zz.length-1];
+      if(last.type===p.type){
+        if(p.type==='high' && p.price>=last.price) zz[zz.length-1]=p;
+        else if(p.type==='low' && p.price<=last.price) zz[zz.length-1]=p;
+      } else {
+        zz.push(p);
+      }
+    });
+    return zz;
+  }
+
+  // label each pivot as HH / HL / LH / LL relative to the previous pivot of the same kind
+  function labelPivots(zz){
+    var lastHigh=null, lastLow=null;
+    return zz.map(function(p){
+      var label;
+      if(p.type==='high'){
+        label = lastHigh===null ? 'H' : (p.price>lastHigh?'HH':'LH');
+        lastHigh=p.price;
+      } else {
+        label = lastLow===null ? 'L' : (p.price>lastLow?'HL':'LL');
+        lastLow=p.price;
+      }
+      return Object.assign({label:label}, p);
+    });
+  }
+
+  // valid BOS/CHoCH = a confirmed swing level actually broken by a candle CLOSE
+  function detectEvents(candles, pivots){
+    var events=[];
+    var trend=null;
+    var activeHigh=null, activeHighIdx=-1, highBroken=false;
+    var activeLow=null, activeLowIdx=-1, lowBroken=false;
+    var pivotPtr=0;
+    for(var i=0;i<candles.length;i++){
+      while(pivotPtr<pivots.length && pivots[pivotPtr].i<=i){
+        var p=pivots[pivotPtr];
+        if(p.type==='high'){ activeHigh=p.price; activeHighIdx=p.i; highBroken=false; }
+        else { activeLow=p.price; activeLowIdx=p.i; lowBroken=false; }
+        pivotPtr++;
+      }
+      var c=candles[i];
+      if(activeHigh!==null && !highBroken && i>activeHighIdx && c.close>activeHigh){
+        var isChoch1 = (trend==='bear');
+        events.push({i:i, price:activeHigh, fromIdx:activeHighIdx, type:isChoch1?'CHoCH':'BOS', dir:'up'});
+        trend='bull'; highBroken=true;
+      }
+      if(activeLow!==null && !lowBroken && i>activeLowIdx && c.close<activeLow){
+        var isChoch2 = (trend==='bull');
+        events.push({i:i, price:activeLow, fromIdx:activeLowIdx, type:isChoch2?'CHoCH':'BOS', dir:'down'});
+        trend='bear'; lowBroken=true;
+      }
+    }
+    return {events:events, trend:trend};
+  }
+
+  function renderOsc(){
+    var candles = oscData[oscTf] || [];
+    if(!ctx) return;
+    var wrap = canvas.parentElement;
+    var cssW = Math.max(320, wrap.clientWidth - 20);
+    var cssH = 520;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = cssW*dpr; canvas.height = cssH*dpr;
+    canvas.style.width = cssW+'px'; canvas.style.height = cssH+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+
+    if(candles.length<2){
+      ctx.fillStyle='#94a3b8'; ctx.font='13px Segoe UI'; ctx.textAlign='center';
+      ctx.fillText('Live XAUUSD candles ban rahi hain — thodi dair mein chart yahan nazar aayega...', cssW/2, cssH/2);
+      if(statsEl) statsEl.innerHTML='';
+      return;
+    }
+
+    var n = candles.length;
+    var padL=10, padR=68, padT=20, padB=24;
+    var chartW = cssW-padL-padR, chartH = cssH-padT-padB;
+    var candleW = chartW/n;
+
+    var hi=-Infinity, lo=Infinity;
+    candles.forEach(function(c){ if(c.high>hi) hi=c.high; if(c.low<lo) lo=c.low; });
+    var pad=(hi-lo)*0.08 || 1; hi+=pad; lo-=pad;
+
+    function xAt(i){ return padL + i*candleW + candleW/2; }
+    function yAt(p){ return padT + (hi-p)/(hi-lo)*chartH; }
+
+    ctx.strokeStyle='rgba(148,163,184,0.08)'; ctx.fillStyle='#64748b'; ctx.font='11px Segoe UI';
+    for(var g=0; g<=4; g++){
+      var gp = lo + (hi-lo)*g/4;
+      var gy = yAt(gp);
+      ctx.beginPath(); ctx.moveTo(padL,gy); ctx.lineTo(cssW-padR,gy); ctx.stroke();
+      ctx.fillText(fmtPrice(gp), cssW-padR+6, gy+4);
+    }
+
+    candles.forEach(function(c,i){
+      var x=xAt(i);
+      var up = c.close>=c.open;
+      ctx.strokeStyle = up ? '#22c55e' : '#ef4444';
+      ctx.fillStyle = up ? '#22c55e' : '#ef4444';
+      var wickX = candleW<2 ? x : x;
+      ctx.beginPath(); ctx.moveTo(wickX,yAt(c.high)); ctx.lineTo(wickX,yAt(c.low)); ctx.stroke();
+      var bodyTop = yAt(Math.max(c.open,c.close));
+      var bodyH = Math.max(1, Math.abs(yAt(c.open)-yAt(c.close)));
+      var bw = Math.max(1, candleW*0.7);
+      ctx.fillRect(x-bw/2, bodyTop, bw, bodyH);
+    });
+
+    var pivots = labelPivots(getPivots(candles,2));
+    var evRes = detectEvents(candles, pivots);
+
+    ctx.font='bold 11px Segoe UI'; ctx.textAlign='center';
+    pivots.forEach(function(p){
+      var x=xAt(p.i), y=yAt(p.price);
+      var bullish = (p.label==='HH'||p.label==='HL');
+      var color = bullish ? '#4ade80' : '#f87171';
+      ctx.fillStyle=color;
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+      ctx.fillText(p.label, x, p.type==='high' ? y-10 : y+18);
+    });
+
+    ctx.font='bold 11px Segoe UI'; ctx.textAlign='left';
+    evRes.events.forEach(function(ev){
+      var x1=xAt(ev.fromIdx), x2=xAt(ev.i), y=yAt(ev.price);
+      var color = ev.type==='CHoCH' ? '#facc15' : '#38bdf8';
+      ctx.strokeStyle=color; ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle=color;
+      ctx.fillText(ev.type, x2+4, y-4);
+    });
+
+    if(statsEl){
+      var lastEv = evRes.events.length ? evRes.events[evRes.events.length-1] : null;
+      var lastPrice = candles[candles.length-1].close;
+      var trendLabel = evRes.trend==='bull' ? 'Bullish' : (evRes.trend==='bear' ? 'Bearish' : 'Undetermined');
+      var trendColor = evRes.trend==='bull' ? '#4ade80' : (evRes.trend==='bear' ? '#f87171' : '#94a3b8');
+      statsEl.innerHTML =
+        '<div class="osc-stat-box">Price (XAUUSD)<b>'+fmtPrice(lastPrice)+'</b></div>'+
+        '<div class="osc-stat-box">Current Trend<b style="color:'+trendColor+'">'+trendLabel+'</b></div>'+
+        '<div class="osc-stat-box">Last Signal<b style="color:'+(lastEv&&lastEv.type==='CHoCH'?'#facc15':'#38bdf8')+'">'+(lastEv?lastEv.type+' ('+lastEv.dir+')':'—')+'</b></div>'+
+        '<div class="osc-stat-box">Candles ('+oscTf+')<b>'+candles.length+'</b></div>';
+    }
+  }
+
+  function startAuto(){
+    if(oscTimer) clearInterval(oscTimer);
+    oscTimer = setInterval(pollPrice, 20000);
+  }
+
+  var tfGroup = document.getElementById('oscTfGroup');
+  if(tfGroup){
+    tfGroup.addEventListener('click', function(e){
+      var btn = e.target.closest('.osc-tf-btn');
+      if(!btn) return;
+      var all = tfGroup.querySelectorAll('.osc-tf-btn');
+      for(var idx=0; idx<all.length; idx++){ all[idx].classList.remove('active'); }
+      btn.classList.add('active');
+      oscTf = btn.getAttribute('data-tf');
+      renderOsc();
+    });
+  }
+
+  window.addEventListener('resize', function(){
+    clearTimeout(window._oscResizeT);
+    window._oscResizeT = setTimeout(renderOsc, 200);
+  });
+
+  if(canvas){
+    loadFromStorage();
+    renderOsc();
+    pollPrice();
+    startAuto();
+  }
+})();
+</script>
+
+<!--
+==============================================================================
+ ICT SIGNALS
+ — Forex With Waqar (Add-on Module) — v2
 ==============================================================================
 -->
 
