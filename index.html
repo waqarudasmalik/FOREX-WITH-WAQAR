@@ -2909,8 +2909,8 @@
   const ALLOW_MULTIPLE_OPEN = false;
   const MAX_SIGNALS_PER_DAY = 3;          // day-trading cadence, not scalping
   const ATR_SL_MULTIPLIER = 1.5;          // SL = structure buffer, at least this many ATRs
-  const ATR_MIN_MOVE = 0.35;              // skip if 15min ATR too small (dead/choppy market)
-  const ATR_MAX_MOVE = 6.0;               // skip if ATR absurdly large (news spike distortion)
+  const ATR_MIN_PCT = 0.0004;             // skip if 15min ATR < 0.04% of price (dead/choppy market)
+  const ATR_MAX_PCT = 0.0045;             // skip if 15min ATR > 0.45% of price (news-jaisi spike)
 
   // 15min removed from scalp role, now used for both structure + entry timing.
   // 1min removed entirely -> big reduction in API calls (fixes rate-limit failures).
@@ -3204,8 +3204,10 @@
     }
 
     const atr15 = atr(c15, 14);
-    if (atr15 < ATR_MIN_MOVE){ logFeed('Market bohot quiet/choppy hai (low ATR) — skip.'); return; }
-    if (atr15 > ATR_MAX_MOVE){ logFeed('Volatility abnormally high (news-jaisi spike) — skip.'); return; }
+    const lastPriceForATR = c15[c15.length-1] ? c15[c15.length-1].close : 0;
+    const atrPct = lastPriceForATR > 0 ? atr15 / lastPriceForATR : 0;
+    if (atrPct < ATR_MIN_PCT){ logFeed('Market bohot quiet/choppy hai (low ATR) — skip.'); return; }
+    if (atrPct > ATR_MAX_PCT){ logFeed('Volatility abnormally high (news-jaisi spike) — skip.'); return; }
 
     // Triple-timeframe bias confluence: H4, H1 aur 15min teeno align hone chahiye (fake-signal filter)
     const biasH4 = getHTFBias(c4h);
