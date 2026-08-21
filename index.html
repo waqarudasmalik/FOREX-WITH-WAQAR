@@ -992,6 +992,7 @@
           <th>Account</th>
           <th>Status</th>
           <th>Balance ($)</th>
+          <th>24H P/L (2AM PKT)</th>
           <th>Current Price</th>
           <th>Action</th>
         </tr>
@@ -1662,6 +1663,35 @@
     localStorage.setItem('waqarAccountIdCounter', accountIdCounter.toString());
     renderAccounts();
   }
+
+  // ===== 24H P/L (Pakistan Time, resets every day at 2:00 AM PKT) =====
+  // Pakistan Standard Time is fixed at UTC+5 (no daylight saving), so we
+  // compute "now in PKT" from UTC directly instead of relying on the
+  // device's local timezone.
+  function nowInPKT() {
+    const utcMs = Date.now() + (new Date().getTimezoneOffset() * 60000);
+    return new Date(utcMs + (5 * 60 * 60000));
+  }
+  // The "day key" for the current 24h profit/loss window. The window
+  // starts at 2:00 AM PKT, so any time before 2:00 AM still belongs to
+  // the previous day's window.
+  function pktWindowKey(pktDate) {
+    const d = new Date(pktDate.getTime());
+    if (d.getHours() < 2) d.setDate(d.getDate() - 1);
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  }
+  // Whenever an account's balance is touched (add / update / any render),
+  // make sure its 2AM-PKT baseline is for the *current* window. If the
+  // window has rolled over since we last checked, the baseline resets to
+  // the account's balance at that moment (best available snapshot of the
+  // "balance at 2AM"), and 24H P/L starts counting fresh from there.
+  function syncDailyBaseline(acc) {
+    const key = pktWindowKey(nowInPKT());
+    if (acc.dayBaselineKey !== key) {
+      acc.dayBaseline = acc.balance;
+      acc.dayBaselineKey = key;
+    }
+  }
   function addAccount() {
     const name = document.getElementById('accName').value.trim();
     const status = document.getElementById('accStatus').value;
@@ -1725,11 +1755,17 @@
     const tbody = document.getElementById('accountTable');
     tbody.innerHTML = '';
     accounts.forEach((acc, i) => {
+      syncDailyBaseline(acc);
       const row = document.createElement('tr');
       const isChecked = selectedForHedge.includes(acc.id) ? 'checked' : '';
       if (isChecked) row.classList.add('selected-row');
       const isEditing = editingAccountIds.includes(acc.id);
       const hedgeTickCell = `<td style="text-align:center; font-size:18px;" title="${accountHasHedge(acc.id) ? 'Is account ka hedge pehle se ban chuka hai' : 'Abhi tak koi hedge nahi bana'}">${accountHasHedge(acc.id) ? '✅' : '—'}</td>`;
+      const dayPL = acc.balance - acc.dayBaseline;
+      const plClass = dayPL > 0 ? 'positive' : (dayPL < 0 ? 'negative' : '');
+      const plSign = dayPL > 0 ? '+' : '';
+      const plWord = dayPL > 0 ? 'Profit' : (dayPL < 0 ? 'Loss' : 'Flat');
+      const plCell = `<td class="${plClass}" style="font-weight:bold; white-space:nowrap;" title="2AM PKT se ab tak ka balance farq">${plSign}$${Math.abs(dayPL).toFixed(2)} <span style="font-weight:normal; font-size:11px; opacity:0.8;">(${plWord}, 2AM se)</span></td>`;
       if (isEditing) {
         row.innerHTML = `
           <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
@@ -1743,6 +1779,7 @@
             </select>
           </td>
           <td><input type="number" id="editBalance_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.balance}"></td>
+          ${plCell}
           <td><input type="number" id="editPrice_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.price}"></td>
           <td>
             <div class="action-group">
@@ -1758,6 +1795,7 @@
           <td>${acc.name}</td>
           <td>${acc.status}</td>
           <td>$${acc.balance.toFixed(2)}</td>
+          ${plCell}
           <td>${acc.price.toFixed(2)}</td>
           <td>
             <div class="action-group">
@@ -1977,6 +2015,7 @@
 
   renderAccounts();
   renderHedges();
+  setInterval(renderAccounts, 5 * 60000); // keep 24H P/L window fresh across the 2AM PKT rollover
 
   // ===== Live XAUUSD Price Fetching =====
   async function fetchLivePrice() {
