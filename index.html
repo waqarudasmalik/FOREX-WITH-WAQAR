@@ -2335,27 +2335,6 @@
   let currentUserDocUnsub = null;
   let currentUID = null;
 
-  // SECURITY: any user-controlled string (display name, email, KYC fields,
-  // uploaded-file URLs, etc.) MUST go through this before being placed into
-  // innerHTML anywhere on the site. Without this, a malicious user can set
-  // their Google display name (or KYC "name" field) to an HTML/script
-  // payload; when an admin later opens the Admin Panel / Access Panel /
-  // KYC Panel (all of which render other users' data via innerHTML), that
-  // payload would execute inside the ADMIN's authenticated session — giving
-  // the attacker's script the same Firestore read/write power as the admin
-  // (self-approve, grant themselves admin role, unlock all courses, etc.).
-  // This one function closes that hole everywhere it's used.
-  function escapeHtml(str){
-    if (str === null || str === undefined) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-  window.escapeHtml = escapeHtml;
-
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(err => alert("Login error: " + err.message));
@@ -2457,14 +2436,14 @@
         const card = document.createElement('div');
         card.className = 'admin-user-card';
         card.innerHTML = `
-          <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email)}</p>
-          <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email)}</p>
-          <p style="color:#facc15;font-size:12px;">Status: ${escapeHtml(d.status)}</p>
+          <p style="color:#fff;font-weight:bold;">${d.name || d.email}</p>
+          <p style="color:#94a3b8;font-size:12px;">${d.email}</p>
+          <p style="color:#facc15;font-size:12px;">Status: ${d.status}</p>
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
             <button onclick="approveUser('${doc.id}')">Approve</button>
             <button onclick="rejectUser('${doc.id}')">Reject</button>
             <button onclick="forceLogoutUser('${doc.id}')">Logout</button>
-            <button onclick="viewActivity('${doc.id}', '${escapeHtml((d.name||d.email||'').replace(/'/g,""))}')">Activity</button>
+            <button onclick="viewActivity('${doc.id}', '${(d.name||d.email).replace(/'/g,"")}')">Activity</button>
           </div>
         `;
         container.appendChild(card);
@@ -2759,11 +2738,11 @@
         const card = document.createElement('div');
         card.className = 'admin-user-card';
         card.innerHTML = `
-          <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email || 'Unknown User')}</p>
-          <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email || '')}</p>
-          <p style="color:#facc15;font-size:12px;">${escapeHtml(d.questionsCompleted)}/${escapeHtml(d.totalQuestions)} sawalat — ${escapeHtml(t)}</p>
+          <p style="color:#fff;font-weight:bold;">${d.name || d.email || 'Unknown User'}</p>
+          <p style="color:#94a3b8;font-size:12px;">${d.email || ''}</p>
+          <p style="color:#facc15;font-size:12px;">${d.questionsCompleted}/${d.totalQuestions} sawalat — ${t}</p>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
-            <a href="${escapeHtml(d.videoUrl)}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Watch on YouTube</a>
+            <a href="${d.videoUrl}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Watch on YouTube</a>
             <button onclick="deleteInterview('${doc.id}')">Delete Link</button>
           </div>`;
         container.appendChild(card);
@@ -3511,8 +3490,8 @@
       const row = document.createElement('div');
       row.className = 'ictsig-history-item';
       const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
-      row.innerHTML = `<span>${escapeHtml(time)} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${escapeHtml(d.direction)}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${escapeHtml(d.strategy||'')})</em></span>
-        <span class="ictsig-badge-status ${escapeHtml(d.status)}">${escapeHtml((d.status||'').replace('_',' ').toUpperCase())}</span>`;
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${d.strategy||''})</em></span>
+        <span class="ictsig-badge-status ${d.status}">${d.status.replace('_',' ').toUpperCase()}</span>`;
       container.appendChild(row);
     });
   }
@@ -4237,9 +4216,9 @@ function kycEnableAddressNext(){
       const d = doc.data();
       const time = d.submittedAt ? d.submittedAt.toDate().toLocaleString() : '';
       box.innerHTML = `
-        <p style="margin-bottom:10px;">Status: <span class="kyc-status-badge ${escapeHtml(d.status)}">${escapeHtml((d.status||'').toUpperCase())}</span></p>
-        <p style="color:#94a3b8; font-size:12px;">Submitted: ${escapeHtml(time)}</p>
-        ${d.adminNote ? `<p style="color:#fda4af; font-size:13px; margin-top:8px;">Admin note: ${escapeHtml(d.adminNote)}</p>` : ''}
+        <p style="margin-bottom:10px;">Status: <span class="kyc-status-badge ${d.status}">${d.status.toUpperCase()}</span></p>
+        <p style="color:#94a3b8; font-size:12px;">Submitted: ${time}</p>
+        ${d.adminNote ? `<p style="color:#fda4af; font-size:13px; margin-top:8px;">Admin note: ${d.adminNote}</p>` : ''}
       `;
     });
   }
@@ -4262,12 +4241,12 @@ function kycEnableAddressNext(){
         const card = document.createElement('div');
         card.className = 'kyc-admin-card';
        card.innerHTML = `
-  <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email)}</p>
-  <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email)} — <span class="kyc-status-badge ${escapeHtml(d.status)}">${escapeHtml((d.status||'').toUpperCase())}</span></p>
+  <p style="color:#fff;font-weight:bold;">${d.name || d.email}</p>
+  <p style="color:#94a3b8;font-size:12px;">${d.email} — <span class="kyc-status-badge ${d.status}">${d.status.toUpperCase()}</span></p>
   <div class="kyc-admin-imgs">
-    <img src="${escapeHtml(d.idDocUrl)}" onclick="window.open('${escapeHtml(d.idDocUrl)}','_blank')" title="ID Document">
-    ${(d.faceUrls||[]).map(u => `<img src="${escapeHtml(u)}" onclick="window.open('${escapeHtml(u)}','_blank')" title="Face">`).join('')}
-    ${d.addressDocUrl ? `<img src="${escapeHtml(d.addressDocUrl)}" onclick="window.open('${escapeHtml(d.addressDocUrl)}','_blank')" title="Address Proof">` : ''}
+    <img src="${d.idDocUrl}" onclick="window.open('${d.idDocUrl}','_blank')" title="ID Document">
+    ${d.faceUrls.map(u => `<img src="${u}" onclick="window.open('${u}','_blank')" title="Face">`).join('')}
+    ${d.addressDocUrl ? `<img src="${d.addressDocUrl}" onclick="window.open('${d.addressDocUrl}','_blank')" title="Address Proof">` : ''}
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;">
     <button onclick="kycAdminSetStatus('${doc.id}','approved')">Approve</button>
@@ -5178,7 +5157,7 @@ function ccAnswerQuiz(btn, chosenIdx, correctIdx){
 function ccRenderAdminPanel(usersList){
   var html = '';
   usersList.forEach(function(u){
-    html += '<details class="cc-admin-user"><summary>'+escapeHtml(u.name||u.email||u.uid)+'</summary>';
+    html += '<details class="cc-admin-user"><summary>'+(u.name||u.email||u.uid)+'</summary>';
     Object.keys(COURSES).forEach(function(key){
       var c = COURSES[key];
       var f = (u.access && u.access[key]) || {unlocked:false, parts:{}};
