@@ -97,6 +97,16 @@
 
   .hedge-card { background: rgba(15,23,42,0.65); border: 1px solid rgba(148,163,184,0.2); border-radius: 16px; padding: 20px; margin-bottom: 18px; }
   .hedge-card.nearest { border-color: #facc15; box-shadow: 0 0 22px rgba(250,204,21,0.4); }
+  .hedge-card.alarm-active { border-color: #ef4444; animation: hedgeAlarmPulse 1s ease-in-out infinite; }
+  @keyframes hedgeAlarmPulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(239,68,68,0.35); }
+    50% { box-shadow: 0 0 34px rgba(239,68,68,0.95); }
+  }
+  .alert-badge { font-size:12px; font-weight:bold; color:#fecaca; background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.6); padding:4px 10px; border-radius:999px; }
+  .alarm-btn { border:none; padding:8px 16px; border-radius:10px; font-weight:800; cursor:pointer; font-size:13px; }
+  .alarm-btn.ringing { background: linear-gradient(135deg, #ef4444, #b91c1c); color:#fff; animation: alarmBtnBlink 0.6s ease-in-out infinite; }
+  .alarm-btn.muted { background: rgba(100,116,139,0.3); color:#cbd5e1; border:1px solid rgba(148,163,184,0.4); }
+  @keyframes alarmBtnBlink { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.75; transform:scale(1.05); } }
   .hedge-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
   .hedge-header h4 { color:#38bdf8; font-size:18px; }
   .hedge-distance { font-size:12px; color:#facc15; font-weight:bold; }
@@ -1849,12 +1859,70 @@
   function deleteHedge(id) {
     hedges = hedges.filter(h => h.id !== id);
     openEditIds = openEditIds.filter(x => x !== id);
+    stopHedgeAlarmSound(id);
+    delete hedgeAlarms[id];
     saveHedges();
     renderHedges();
     renderAccounts();
   }
   function accountHasHedge(accId){
     return hedges.some(h => h.account1.id === accId || h.account2.id === accId);
+  }
+
+  // ===== Proximity Alarm (TP/SL ke $5 andar aane par loud alarm) =====
+  const HEDGE_ALARM_THRESHOLD = 5; // dollars
+  let hedgeAudioCtx = null;
+  const hedgeAlarms = {}; // hedgeId -> { muted: bool, timerId: intervalId|null }
+
+  function getHedgeAudioCtx() {
+    if (!hedgeAudioCtx) hedgeAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (hedgeAudioCtx.state === 'suspended') hedgeAudioCtx.resume();
+    return hedgeAudioCtx;
+  }
+  // Ek user-gesture (kahin bhi click) par audio unlock karo — browsers
+  // pehli awaaz bina interaction ke block karte hain.
+  document.addEventListener('click', function unlockHedgeAudio() {
+    try { getHedgeAudioCtx(); } catch (e) {}
+  });
+
+  function playHedgeBeep() {
+    try {
+      const ctx = getHedgeAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(1, ctx.currentTime + 0.02);   // high volume
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.4);
+    } catch (e) { /* audio blocked until user interacts once */ }
+  }
+  function getHedgeAlarmState(id) {
+    if (!hedgeAlarms[id]) hedgeAlarms[id] = { muted: false, timerId: null };
+    return hedgeAlarms[id];
+  }
+  function startHedgeAlarmSound(id) {
+    const st = getHedgeAlarmState(id);
+    if (st.timerId) return; // already ringing
+    playHedgeBeep();
+    st.timerId = setInterval(playHedgeBeep, 550);
+  }
+  function stopHedgeAlarmSound(id) {
+    const st = getHedgeAlarmState(id);
+    if (st.timerId) { clearInterval(st.timerId); st.timerId = null; }
+  }
+  function muteHedgeAlarm(id) {
+    getHedgeAlarmState(id).muted = true;
+    stopHedgeAlarmSound(id);
+    renderHedges();
+  }
+  function unmuteHedgeAlarm(id) {
+    getHedgeAlarmState(id).muted = false;
+    renderHedges(); // agar ab bhi range mein hai to alarm khud restart ho jayega
   }
   function toggleEdit(id) {
     if (openEditIds.includes(id)) openEditIds = openEditIds.filter(x => x !== id);
@@ -1943,7 +2011,21 @@
     list.forEach((h, i) => {
       const card = document.createElement('div');
       const isNearest = i === 0 && hedgeSortMode === 'nearest' && currentPrice > 0 && h.configured;
-      card.className = 'hedge-card' + (isNearest ? ' nearest' : '');
+
+      // Proximity alarm: TP/SL ke $5 (HEDGE_ALARM_THRESHOLD) andar aane par bajta hai.
+      const inAlarmRange = h.configured && currentPrice > 0 && h.minDistance <= HEDGE_ALARM_THRESHOLD;
+      const alarmState = getHedgeAlarmState(h.id);
+      if (!inAlarmRange) {
+        stopHedgeAlarmSound(h.id);
+        alarmState.muted = false; // range se bahar jaate hi reset, taake agli baar phir alert bajay
+      } else if (!alarmState.muted) {
+        startHedgeAlarmSound(h.id);
+      } else {
+        stopHedgeAlarmSound(h.id);
+      }
+      const isRinging = inAlarmRange && !alarmState.muted;
+
+      card.className = 'hedge-card' + (isNearest ? ' nearest' : '') + (isRinging ? ' alarm-active' : '');
       const isEditing = openEditIds.includes(h.id);
       const bufferValue = h.buffer != null ? h.buffer : 0.50;
 
@@ -1998,11 +2080,20 @@
       else if (hedgeSortMode === 'tp' && h.configured) badge = `<span class="hedge-distance">Max TP: ${h.maxTP.toFixed(2)}</span>`;
       else if (hedgeSortMode === 'sl' && h.configured) badge = `<span class="hedge-distance">Max SL: ${h.maxSL.toFixed(2)}</span>`;
 
+      let alarmHtml = '';
+      if (inAlarmRange) {
+        alarmHtml += `<span class="alert-badge">⚠️ TP/SL se sirf $${h.minDistance.toFixed(2)} door</span>`;
+        alarmHtml += alarmState.muted
+          ? `<button class="alarm-btn muted" onclick="unmuteHedgeAlarm(${h.id})">🔕 Alarm Band Hai (Chalu Karein)</button>`
+          : `<button class="alarm-btn ringing" onclick="muteHedgeAlarm(${h.id})">🔔 ALARM! (Band Karein)</button>`;
+      }
+
       card.innerHTML = `
         <div class="hedge-header">
           <h4>${h.name}</h4>
           <div class="hedge-actions">
             ${badge}
+            ${alarmHtml}
             <button class="edit-btn" onclick="toggleEdit(${h.id})">${isEditing ? 'Close' : 'Edit'}</button>
             <button class="delete-btn" onclick="deleteHedge(${h.id})">Delete</button>
           </div>
