@@ -4181,28 +4181,31 @@
 
     <div class="fos-live-card" style="margin-bottom:20px;">
       <div class="hedge-header" style="margin-bottom:10px;">
-        <h4 style="color:#facc15; font-size:15px;">📊 Fed Stance &amp; COT Positioning</h4>
-        <span style="font-size:11px; color:#94a3b8;">Manual input — live price-feed se automate nahi ho sakta</span>
+        <h4 style="color:#facc15; font-size:15px;">📊 Fed Stance &amp; COT Positioning — <span style="color:#22c55e;">AUTO</span></h4>
+        <span style="font-size:11px; color:#94a3b8;">Default: auto-detected, no manual input needed</span>
       </div>
       <p style="color:#94a3b8; font-size:13px; margin-bottom:12px;">
-        Fed ka current stance (FOMC statement/minutes/Powell ke bayanaat se) aur CFTC COT report ki
-        extreme positioning — dono weekly/qualitative data hain, is liye bot in ko live fetch nahi kar sakta.
-        Admin yahan se set karta hai, bot inhe apne fundamental score mein factor karta hai.
+        Fed stance ab US10Y real-yield ke trend se market-implied proxy ke taur par khud detect hoti hai
+        (yields up → hawkish-leaning, yields down → dovish-leaning) — yeh literal FOMC statement padhna
+        nahi, balke ek market-based proxy hai. COT positioning CFTC ke free public Commitments-of-Traders
+        data se (Gold, COMEX) khud fetch ho kar, 3-year percentile ke through "extreme" flag hoti hai.
+        Kuch bhi paste karne ki zaroorat nahi — bot khud calculate karta hai har cycle par.
       </p>
-      <div class="form-row" style="margin-bottom:0;">
-        <select id="fosFedStanceSelect">
-          <option value="neutral">Fed Stance: Neutral</option>
-          <option value="hawkish">Fed Stance: Hawkish (gold-negative)</option>
-          <option value="dovish">Fed Stance: Dovish (gold-positive)</option>
-        </select>
-        <select id="fosCotSelect">
-          <option value="neutral">COT: Neutral</option>
-          <option value="extreme_long">COT: Extreme Long (reversal risk)</option>
-          <option value="extreme_short">COT: Extreme Short (bullish contrarian)</option>
-        </select>
-        <button id="fosSaveBiasBtn" onclick="fosSaveManualBias()">Save</button>
+      <div class="outcome-summary" style="margin-bottom:14px;">
+        <div class="outcome-box"><div class="label">Fed Stance (auto)</div><div class="value" id="fosAutoFedValue">—</div></div>
+        <div class="outcome-box"><div class="label">COT (auto)</div><div class="value" id="fosAutoCotValue">—</div></div>
       </div>
-      <p id="fosBiasSavedNote" style="font-size:12px; color:#64748b; margin-top:8px;"></p>
+      <details>
+        <summary style="cursor:pointer; color:#94a3b8; font-size:12px;">Admin: manual override (optional)</summary>
+        <div class="form-row" style="margin-top:10px; margin-bottom:0;">
+          <select id="fosFedModeSelect"><option value="auto">Fed: Auto</option><option value="manual">Fed: Manual</option></select>
+          <select id="fosFedStanceSelect"><option value="neutral">Neutral</option><option value="hawkish">Hawkish</option><option value="dovish">Dovish</option></select>
+          <select id="fosCotModeSelect"><option value="auto">COT: Auto</option><option value="manual">COT: Manual</option></select>
+          <select id="fosCotSelect"><option value="neutral">Neutral</option><option value="extreme_long">Extreme Long</option><option value="extreme_short">Extreme Short</option></select>
+          <button id="fosSaveBiasBtn" onclick="fosSaveManualBias()">Save</button>
+        </div>
+        <p id="fosBiasSavedNote" style="font-size:12px; color:#64748b; margin-top:8px;"></p>
+      </details>
     </div>
 
     <div class="fos-wrap">
@@ -4286,7 +4289,9 @@
   // Rule 3 & 6: Fed stance aur COT positioning automate nahi ho saktay (yeh judgment/weekly-report
   // wali cheezein hain, live price-feed se nahi milti) — is liye admin manually set karta hai,
   // aur bot un values ko apne score mein factor karta hai. Defaults = neutral/no-bias.
-  let fosManualBias = { fedStance: 'neutral', cot: 'neutral' };
+  let fosManualBias = { fedStance: 'neutral', cot: 'neutral', fedMode: 'auto', cotMode: 'auto' };
+  let fosAutoFed = { stance: 'neutral', trend: 'unknown' };
+  let fosAutoCot = { label: 'neutral', percentile: null, netNonComm: null };
 
   function fosLogFeed(msg){
     const feed = document.getElementById('fosFeed');
@@ -4324,6 +4329,44 @@
     if (changePct > 0.0008) return 'up';
     if (changePct < -0.0008) return 'down';
     return 'flat';
+  }
+
+  // ========================= AUTO Fed Stance proxy (Rule 3) =========================
+  // Koi free live API FOMC statements ko "hawkish/dovish" text-analyze nahi karta, is liye
+  // hum market-implied proxy use karte hain: US10Y real-yield ka LONGER-term trend (rising
+  // yields = market Fed ko hawkish price kar raha hai; falling yields = dovish). Yeh ek proxy
+  // hai, literal statement-reading nahi — is liye admin chahe to Manual override kar sakta hai.
+  function fosComputeAutoFedStance(yieldCandles){
+    const longTrend = fosSimpleTrend(yieldCandles, Math.min(20, Math.max(4, yieldCandles.length - 1)));
+    let stance = 'neutral';
+    if (longTrend === 'up') stance = 'hawkish';
+    else if (longTrend === 'down') stance = 'dovish';
+    return { stance, trend: longTrend };
+  }
+
+  // ========================= AUTO COT positioning (Rule 6, CFTC public API) =========================
+  // CFTC Legacy Futures-Only COT report, Gold (COMEX, contract code 088691), free/no-key
+  // Socrata endpoint. Best-effort: agar fetch fail ho ya data na aaye, COT 'neutral' treat
+  // hota hai (signal is wajah se block nahi hota, sirf COT adjustment 0 rehta hai).
+  const FOS_COT_GOLD_CODE = '088691';
+  async function fosFetchCotAuto(){
+    try {
+      const url = `https://publicreporting.cftc.gov/resource/6dca-aqww.json?$where=cftc_contract_market_code='${FOS_COT_GOLD_CODE}'&$order=report_date_as_yyyy_mm_dd DESC&$limit=156`;
+      const res = await fetch(url);
+      const rows = await res.json();
+      if (!Array.isArray(rows) || !rows.length) return;
+      const nets = rows.map(r => (parseFloat(r.noncomm_positions_long_all) || 0) - (parseFloat(r.noncomm_positions_short_all) || 0))
+        .filter(n => !isNaN(n));
+      if (nets.length < 8) return; // itni kam history mein percentile meaningful nahi
+      const latest = nets[0];
+      const sorted = [...nets].sort((a,b) => a-b);
+      const rank = sorted.filter(n => n <= latest).length;
+      const percentile = (rank / sorted.length) * 100;
+      let label = 'neutral';
+      if (percentile >= 90) label = 'extreme_long';
+      else if (percentile <= 10) label = 'extreme_short';
+      fosAutoCot = { label, percentile: Math.round(percentile), netNonComm: Math.round(latest) };
+    } catch(err){ /* best-effort — fail silently, COT stays neutral */ }
   }
   async function fosFetchCandles(){
     try {
@@ -4415,15 +4458,30 @@
       return;
     }
 
-    // Rule 3 & 6: Fed stance aur COT positioning ko manual bias ke through score mein jorna
+    // Rule 3, 4, 5 & 6: DXY / US10Y trend (confluence + Fed-stance proxy) aur CFTC COT — ek hi
+    // baar fetch kar ke reuse karte hain.
+    const [dxyCandles, yieldCandles] = await Promise.all([
+      fosFetchAuxCandles(FOS_DXY_SYMBOL), fosFetchAuxCandles(FOS_YIELD_SYMBOL)
+    ]);
+    fosDxyCandles1h = dxyCandles; fosYieldCandles1h = yieldCandles;
+    const dxyTrend = fosSimpleTrend(dxyCandles, FOS_DXY_TREND_LOOKBACK);
+    const yieldTrend = fosSimpleTrend(yieldCandles, FOS_YIELD_TREND_LOOKBACK);
+
+    // Rule 3 & 6: Fed stance aur COT positioning — AUTO by default (market-implied yield proxy +
+    // CFTC public COT data), admin chahe to Manual mode mein switch kar ke apni value de sakta hai.
     const fb = fosComputeFundamentalBias();
-    const fedAdj = fosManualBias.fedStance === 'hawkish' ? -1 : (fosManualBias.fedStance === 'dovish' ? 1 : 0);
+    fosAutoFed = fosComputeAutoFedStance(yieldCandles);
+    await fosFetchCotAuto();
+    fosRenderAutoBiasValues();
+    const effectiveFedStance = fosManualBias.fedMode === 'manual' ? fosManualBias.fedStance : fosAutoFed.stance;
+    const effectiveCot = fosManualBias.cotMode === 'manual' ? fosManualBias.cot : fosAutoCot.label;
+    const fedAdj = effectiveFedStance === 'hawkish' ? -1 : (effectiveFedStance === 'dovish' ? 1 : 0);
     // COT: extreme-long positioning = reversal risk (gold ke liye bearish contrarian), extreme-short = bullish contrarian
-    const cotAdj = fosManualBias.cot === 'extreme_long' ? -1 : (fosManualBias.cot === 'extreme_short' ? 1 : 0);
+    const cotAdj = effectiveCot === 'extreme_long' ? -1 : (effectiveCot === 'extreme_short' ? 1 : 0);
     const adjScore = fb.score + fedAdj + cotAdj;
     const adjLabel = adjScore >= FOS_FIRE_THRESHOLD ? 'bullish' : (adjScore <= -FOS_FIRE_THRESHOLD ? 'bearish' : 'neutral');
     if (adjLabel === 'neutral'){
-      fosSetStatus(`Live — fundamental bias NEUTRAL/MIXED hai (news score ${fb.score.toFixed(1)}, Fed/COT adj ${(fedAdj+cotAdj)}) — koi naya signal nahi.`);
+      fosSetStatus(`Live — fundamental bias NEUTRAL/MIXED hai (news score ${fb.score.toFixed(1)}, Fed[${effectiveFedStance}]/COT[${effectiveCot}] adj ${(fedAdj+cotAdj)}) — koi naya signal nahi.`);
       return;
     }
 
@@ -4442,11 +4500,6 @@
     if (atrPct < FOS_MIN_ATR_PCT){ fosLogFeed('Market bohot quiet hai (low ATR) — fundamental signal skip.'); return; }
 
     // Rule 4 & 5: DXY aur US10Y real-yield trend se confluence check (gold ka inverse relationship)
-    const [fosDxyCandles1h, fosYieldCandles1h] = await Promise.all([
-      fosFetchAuxCandles(FOS_DXY_SYMBOL), fosFetchAuxCandles(FOS_YIELD_SYMBOL)
-    ]);
-    const dxyTrend = fosSimpleTrend(fosDxyCandles1h, FOS_DXY_TREND_LOOKBACK);
-    const yieldTrend = fosSimpleTrend(fosYieldCandles1h, FOS_YIELD_TREND_LOOKBACK);
     const direction = adjLabel === 'bullish' ? 'BUY' : 'SELL';
     // Gold BUY expects DXY/yields neeche jaana; gold SELL expects DXY/yields upar jaana
     const dxyConfirms = dxyTrend === 'unknown' || (direction === 'BUY' ? dxyTrend !== 'up' : dxyTrend !== 'down');
@@ -4471,7 +4524,7 @@
       : `Advisory — ICT technical structure ke sath cross-check kar ke hi entry lein (yeh signal khud koi chart/technical confluence use nahi karta).`;
     const reason = [
       `Basis: Fundamental Analysis rules — Actual-vs-Forecast surprise (magnitude-weighted), DXY & US10Y confluence, Fed stance/COT positioning.`,
-      `News Score: ${fb.score.toFixed(1)} | Fed Stance: ${fosManualBias.fedStance} (${fedAdj>=0?'+':''}${fedAdj}) | COT: ${fosManualBias.cot} (${cotAdj>=0?'+':''}${cotAdj}) | Combined: ${adjScore.toFixed(1)} → ${adjLabel.toUpperCase()}`,
+      `News Score: ${fb.score.toFixed(1)} | Fed Stance: ${effectiveFedStance} (${fosManualBias.fedMode}, ${fedAdj>=0?'+':''}${fedAdj}) | COT: ${effectiveCot} (${fosManualBias.cotMode}${fosAutoCot.percentile!==null && fosManualBias.cotMode==='auto' ? ', ' + fosAutoCot.percentile + 'p' : ''}, ${cotAdj>=0?'+':''}${cotAdj}) | Combined: ${adjScore.toFixed(1)} → ${adjLabel.toUpperCase()}`,
       newsLines,
       `DXY Trend: ${dxyTrend.toUpperCase()} (confirms) | US10Y Trend: ${yieldTrend.toUpperCase()} (confirms)`,
       `SL/TP basis: 1H ATR (${atr1h.toFixed(2)}) — SL: ${(FOS_ATR_SL_MULT)}x ATR, TP: ${(FOS_ATR_TP_MULT)}x ATR (RR ~1:${rr.toFixed(2)}).`,
@@ -4481,7 +4534,7 @@
 
     await db.collection('fundOnlySignals').add({
       direction, entry, sl, tp, rr, reason, confidence: conf.score, confidenceTier: conf.tier,
-      newsUsed: fb.items, dxyTrend, yieldTrend, fedStance: fosManualBias.fedStance, cot: fosManualBias.cot,
+      newsUsed: fb.items, dxyTrend, yieldTrend, fedStance: effectiveFedStance, cot: effectiveCot,
       status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     fosLogFeed(`✅ Naya ${direction} fundamental-only signal — Confidence ${conf.score}% (${conf.tier})`);
@@ -4563,30 +4616,53 @@
 
   // ========================= MANUAL BIAS (Rule 3 & 6: Fed stance / COT) =========================
   function fosApplyManualBiasToUI(){
+    const fedModeSel = document.getElementById('fosFedModeSelect');
+    const cotModeSel = document.getElementById('fosCotModeSelect');
     const fedSel = document.getElementById('fosFedStanceSelect');
     const cotSel = document.getElementById('fosCotSelect');
+    if (fedModeSel) fedModeSel.value = fosManualBias.fedMode;
+    if (cotModeSel) cotModeSel.value = fosManualBias.cotMode;
     if (fedSel) fedSel.value = fosManualBias.fedStance;
     if (cotSel) cotSel.value = fosManualBias.cot;
     const saveBtn = document.getElementById('fosSaveBiasBtn');
     const isAdmin = typeof ADMIN_EMAILS !== 'undefined' && firebase.auth().currentUser &&
       ADMIN_EMAILS.includes(firebase.auth().currentUser.email);
-    if (fedSel) fedSel.disabled = !isAdmin;
-    if (cotSel) cotSel.disabled = !isAdmin;
+    [fedModeSel, cotModeSel, fedSel, cotSel].forEach(el => { if (el) el.disabled = !isAdmin; });
     if (saveBtn) saveBtn.style.display = isAdmin ? '' : 'none';
+    fosRenderAutoBiasValues();
+  }
+  function fosRenderAutoBiasValues(){
+    const fedEl = document.getElementById('fosAutoFedValue');
+    const cotEl = document.getElementById('fosAutoCotValue');
+    if (fedEl){
+      const shown = fosManualBias.fedMode === 'manual' ? fosManualBias.fedStance + ' (manual)' : (fosAutoFed.stance + (fosAutoFed.trend !== 'unknown' ? ' (US10Y trend: ' + fosAutoFed.trend + ')' : ''));
+      fedEl.textContent = shown;
+    }
+    if (cotEl){
+      const shown = fosManualBias.cotMode === 'manual' ? fosManualBias.cot + ' (manual)' : (fosAutoCot.label + (fosAutoCot.percentile !== null ? ' (' + fosAutoCot.percentile + 'th pct net-long)' : ''));
+      cotEl.textContent = shown;
+    }
   }
   function fosListenManualBias(){
     db.collection('siteConfig').doc('fundamentalBias').onSnapshot(function(doc){
       const d = doc.data();
-      if (d){ fosManualBias = { fedStance: d.fedStance || 'neutral', cot: d.cot || 'neutral' }; }
+      if (d){
+        fosManualBias = {
+          fedStance: d.fedStance || 'neutral', cot: d.cot || 'neutral',
+          fedMode: d.fedMode || 'auto', cotMode: d.cotMode || 'auto'
+        };
+      }
       fosApplyManualBiasToUI();
     }, function(){ fosApplyManualBiasToUI(); });
   }
   window.fosSaveManualBias = async function(){
+    const fedMode = document.getElementById('fosFedModeSelect').value;
+    const cotMode = document.getElementById('fosCotModeSelect').value;
     const fedStance = document.getElementById('fosFedStanceSelect').value;
     const cot = document.getElementById('fosCotSelect').value;
     try {
       await db.collection('siteConfig').doc('fundamentalBias').set({
-        fedStance, cot, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        fedMode, cotMode, fedStance, cot, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
       const note = document.getElementById('fosBiasSavedNote');
       if (note) note.textContent = 'Saved ✓ (' + new Date().toLocaleTimeString() + ')';
