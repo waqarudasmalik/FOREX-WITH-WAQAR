@@ -4179,6 +4179,32 @@
       <span id="fosEngineStatusText">Bot initialize ho raha hai...</span>
     </div>
 
+    <div class="fos-live-card" style="margin-bottom:20px;">
+      <div class="hedge-header" style="margin-bottom:10px;">
+        <h4 style="color:#facc15; font-size:15px;">📊 Fed Stance &amp; COT Positioning</h4>
+        <span style="font-size:11px; color:#94a3b8;">Manual input — live price-feed se automate nahi ho sakta</span>
+      </div>
+      <p style="color:#94a3b8; font-size:13px; margin-bottom:12px;">
+        Fed ka current stance (FOMC statement/minutes/Powell ke bayanaat se) aur CFTC COT report ki
+        extreme positioning — dono weekly/qualitative data hain, is liye bot in ko live fetch nahi kar sakta.
+        Admin yahan se set karta hai, bot inhe apne fundamental score mein factor karta hai.
+      </p>
+      <div class="form-row" style="margin-bottom:0;">
+        <select id="fosFedStanceSelect">
+          <option value="neutral">Fed Stance: Neutral</option>
+          <option value="hawkish">Fed Stance: Hawkish (gold-negative)</option>
+          <option value="dovish">Fed Stance: Dovish (gold-positive)</option>
+        </select>
+        <select id="fosCotSelect">
+          <option value="neutral">COT: Neutral</option>
+          <option value="extreme_long">COT: Extreme Long (reversal risk)</option>
+          <option value="extreme_short">COT: Extreme Short (bullish contrarian)</option>
+        </select>
+        <button id="fosSaveBiasBtn" onclick="fosSaveManualBias()">Save</button>
+      </div>
+      <p id="fosBiasSavedNote" style="font-size:12px; color:#64748b; margin-top:8px;"></p>
+    </div>
+
     <div class="fos-wrap">
       <div class="fos-toprow">
         <div class="fos-stat"><div class="label">Total Signals</div><div class="value" id="fosTotal" style="color:#facc15;">0</div></div>
@@ -4213,11 +4239,19 @@
     </div>
 
     <div class="fa-note" style="margin-top:18px;">
-      💡 <b>Yeh bot kaisay decide karta hai:</b> Sirf pichlay 24 ghanton ki high-impact USD news (NFP, CPI, PCE, GDP, PMI,
-      Retail Sales, Jobless Claims, Unemployment Rate) ka Actual-vs-Forecast dekh kar ek fundamental score banata hai.
-      Score kaafi strong ho (ek taraf) to us direction mein signal deta hai; kamzor/mixed ho to koi signal nahi deta.
-      Entry current market price hoti hai, SL/TP 1-hour ATR (volatility) se calculate hote hain — is mein koi chart
-      pattern ya technical structure shamil nahi. Yeh sirf ek <b>rule-based fundamental estimate</b> hai, guarantee nahi.
+      💡 <b>Yeh bot kaisay decide karta hai (economic-calendar rules apply):</b>
+      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
+        <li>Sirf <b>High Impact, USD</b> news count hoti hain (NFP, CPI, PCE, GDP, PMI, Retail Sales, Jobless Claims, Unemployment Rate).</li>
+        <li><b>Actual vs Forecast</b> ka farq (surprise) dekha jata hai — jitna bara surprise, utna zyada weight (sirf direction nahi, size bhi matter karta hai).</li>
+        <li><b>Fed Stance</b> (hawkish/dovish, upar admin panel se manually set) score mein add/subtract hota hai.</li>
+        <li><b>DXY Trend</b> check hoti hai — gold signal tabhi fire hota hai jab DXY us se ulta (inverse) trend confirm kare.</li>
+        <li><b>US 10Y Real Yields</b> trend bhi isi tarah confluence ke liye check hoti hai.</li>
+        <li><b>COT Positioning</b> (extreme long/short, admin panel se) contrarian adjustment ke taur par score mein shamil hota hai.</li>
+        <li>News release ke <b>pehle 15 minute</b> ka sharp spike/retracement ignore kiya jata hai (cooldown) — spike settle hone ka wait hota hai.</li>
+        <li>Score kaafi strong ho (ek taraf) to us direction mein signal deta hai; kamzor/mixed ho ya DXY/yield confirm na karein to koi signal nahi deta.</li>
+        <li>Entry current market price hoti hai, SL/TP 1-hour ATR (volatility) se calculate hote hain — chart pattern/technical structure is decision mein shamil nahi (sirf advisory note mein ICT bias dikha diya jata hai).</li>
+      </ol>
+      <p style="margin-top:10px;">Yeh sirf ek <b>rule-based fundamental estimate</b> hai, guarantee nahi — hamesha apna risk management khud follow karein.</p>
     </div>
   </div>
 </section>
@@ -4226,6 +4260,8 @@
   // ========================= CONFIG (fully independent from ICT engine) =========================
   const FOS_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
   const FOS_SYMBOL = "XAU/USD";
+  const FOS_DXY_SYMBOL = "DXY";                // Rule 4: DXY trend confluence
+  const FOS_YIELD_SYMBOL = "US10Y";            // Rule 5: US 10Y real-yield proxy trend
   const FOS_CYCLE_MS = 15 * 60 * 1000;         // har 15 minute check
   const FOS_LOOKBACK_HOURS = 24;               // pichlay kitne ghanton ki released news ginni hain
   const FOS_RECENT_HOURS = 6;                  // itni recent news ko double weight
@@ -4233,6 +4269,9 @@
   const FOS_ATR_SL_MULT = 1.5;
   const FOS_ATR_TP_MULT = 2.5;
   const FOS_MIN_ATR_PCT = 0.0003;              // bilkul dead market mein signal na de
+  const FOS_RELEASE_COOLDOWN_HOURS = 0.25;     // Rule 7/8: news ke pehle 15 min ka sharp spike/retracement ignore karo
+  const FOS_DXY_TREND_LOOKBACK = 8;            // DXY 1h candles jitne peeche dekh kar trend nikalna hai
+  const FOS_YIELD_TREND_LOOKBACK = 8;
 
   const FOS_DIRECT_KEYWORDS = ['non-farm', 'nonfarm', 'employment change', 'cpi', 'pce', 'gdp',
     'retail sales', 'ism manufacturing', 'ism services', 'ism pmi', 'consumer confidence',
@@ -4240,8 +4279,14 @@
   const FOS_INVERSE_KEYWORDS = ['unemployment rate', 'unemployment claims', 'jobless claims', 'continuing claims'];
 
   let fosCandles1h = [];
+  let fosDxyCandles1h = [];
+  let fosYieldCandles1h = [];
   let fosTimer = null;
   let fosSignalsCache = [];
+  // Rule 3 & 6: Fed stance aur COT positioning automate nahi ho saktay (yeh judgment/weekly-report
+  // wali cheezein hain, live price-feed se nahi milti) — is liye admin manually set karta hai,
+  // aur bot un values ko apne score mein factor karta hai. Defaults = neutral/no-bias.
+  let fosManualBias = { fedStance: 'neutral', cot: 'neutral' };
 
   function fosLogFeed(msg){
     const feed = document.getElementById('fosFeed');
@@ -4255,6 +4300,31 @@
   function fosSetStatus(text){ const el = document.getElementById('fosEngineStatusText'); if (el) el.textContent = text; }
 
   // ========================= OWN DATA FETCH (independent of ICT engine's candles) =========================
+  // Rule 4 (DXY trend) aur Rule 5 (US10Y real-yield trend) ke liye auxiliary candles — dono
+  // best-effort hain: agar symbol is API plan par available na ho to sirf log hoga, poora
+  // cycle fail nahi hoga (fundamental-only bot sirf news data par hi chal sakta hai).
+  async function fosFetchAuxCandles(symbol, interval='1h', outputsize=30){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=${outputsize}&apikey=${FOS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) return [];
+      return data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+    } catch(err){ return []; }
+  }
+  // Simple trend: last close vs N candles pehle ka close — 'up' / 'down' / 'flat'
+  function fosSimpleTrend(candles, lookback){
+    if (!candles || candles.length < lookback + 1) return 'unknown';
+    const last = candles[candles.length-1].close;
+    const prior = candles[candles.length-1-lookback].close;
+    const changePct = (last - prior) / prior;
+    if (changePct > 0.0008) return 'up';
+    if (changePct < -0.0008) return 'down';
+    return 'flat';
+  }
   async function fosFetchCandles(){
     try {
       const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(FOS_SYMBOL)}&interval=1h&outputsize=60&apikey=${FOS_API_KEY}`;
@@ -4303,9 +4373,17 @@
       let dir = 0;
       if (isDirect) dir = beatForecast ? -1 : 1;
       if (isInverse) dir = beatForecast ? 1 : -1;
-      const weight = ageHours <= FOS_RECENT_HOURS ? 2 : 1;
+      const recencyWeight = ageHours <= FOS_RECENT_HOURS ? 2 : 1;
+      // Rule 2: sirf direction nahi, "surprise" ka SIZE bhi matter karta hai — jitna bara farq
+      // forecast se utna zyada weight (0.5x se 2x tak clamp).
+      const surpriseMag = forecast !== 0 ? Math.abs((actual - forecast) / forecast) : Math.abs(actual - forecast);
+      const magnitudeWeight = Math.min(Math.max(surpriseMag * 20, 0.5), 2);
+      const weight = recencyWeight * magnitudeWeight;
       out.score += dir * weight;
-      out.items.push({ title: e.title, actual: e.actual, forecast: e.forecast, ageHours: ageHours.toFixed(1), direction: dir });
+      out.items.push({
+        title: e.title, actual: e.actual, forecast: e.forecast, previous: e.previous,
+        ageHours: ageHours.toFixed(1), ageHoursNum: ageHours, direction: dir, weight: weight.toFixed(2)
+      });
     });
     if (out.score >= FOS_FIRE_THRESHOLD) out.label = 'bullish';
     else if (out.score <= -FOS_FIRE_THRESHOLD) out.label = 'bearish';
@@ -4337,9 +4415,24 @@
       return;
     }
 
+    // Rule 3 & 6: Fed stance aur COT positioning ko manual bias ke through score mein jorna
     const fb = fosComputeFundamentalBias();
-    if (fb.label === 'neutral'){
-      fosSetStatus(`Live — fundamental bias NEUTRAL/MIXED hai (score ${fb.score}) — koi naya signal nahi.`);
+    const fedAdj = fosManualBias.fedStance === 'hawkish' ? -1 : (fosManualBias.fedStance === 'dovish' ? 1 : 0);
+    // COT: extreme-long positioning = reversal risk (gold ke liye bearish contrarian), extreme-short = bullish contrarian
+    const cotAdj = fosManualBias.cot === 'extreme_long' ? -1 : (fosManualBias.cot === 'extreme_short' ? 1 : 0);
+    const adjScore = fb.score + fedAdj + cotAdj;
+    const adjLabel = adjScore >= FOS_FIRE_THRESHOLD ? 'bullish' : (adjScore <= -FOS_FIRE_THRESHOLD ? 'bearish' : 'neutral');
+    if (adjLabel === 'neutral'){
+      fosSetStatus(`Live — fundamental bias NEUTRAL/MIXED hai (news score ${fb.score.toFixed(1)}, Fed/COT adj ${(fedAdj+cotAdj)}) — koi naya signal nahi.`);
+      return;
+    }
+
+    // Rule 7 & 8: news release ke bilkul turant baad (pehla 15 min) ka sharp spike/retracement
+    // avoid karo — us waqt tak wait karo jab tak initial spike settle na ho jaye.
+    const freshestAgeHours = fb.items.length ? Math.min(...fb.items.map(i => i.ageHoursNum)) : 999;
+    if (freshestAgeHours < FOS_RELEASE_COOLDOWN_HOURS){
+      fosLogFeed(`⏳ News abhi ${Math.round(freshestAgeHours*60)} min pehle release hui — initial spike/retracement settle hone ka wait (cooldown ${Math.round(FOS_RELEASE_COOLDOWN_HOURS*60)} min).`);
+      fosSetStatus('Live — release cooldown active, spike settle hone ka intezar.');
       return;
     }
 
@@ -4348,25 +4441,48 @@
     const atrPct = price > 0 ? atr1h / price : 0;
     if (atrPct < FOS_MIN_ATR_PCT){ fosLogFeed('Market bohot quiet hai (low ATR) — fundamental signal skip.'); return; }
 
-    const direction = fb.label === 'bullish' ? 'BUY' : 'SELL';
+    // Rule 4 & 5: DXY aur US10Y real-yield trend se confluence check (gold ka inverse relationship)
+    const [fosDxyCandles1h, fosYieldCandles1h] = await Promise.all([
+      fosFetchAuxCandles(FOS_DXY_SYMBOL), fosFetchAuxCandles(FOS_YIELD_SYMBOL)
+    ]);
+    const dxyTrend = fosSimpleTrend(fosDxyCandles1h, FOS_DXY_TREND_LOOKBACK);
+    const yieldTrend = fosSimpleTrend(fosYieldCandles1h, FOS_YIELD_TREND_LOOKBACK);
+    const direction = adjLabel === 'bullish' ? 'BUY' : 'SELL';
+    // Gold BUY expects DXY/yields neeche jaana; gold SELL expects DXY/yields upar jaana
+    const dxyConfirms = dxyTrend === 'unknown' || (direction === 'BUY' ? dxyTrend !== 'up' : dxyTrend !== 'down');
+    const yieldConfirms = yieldTrend === 'unknown' || (direction === 'BUY' ? yieldTrend !== 'up' : yieldTrend !== 'down');
+    if (!dxyConfirms || !yieldConfirms){
+      fosLogFeed(`⚠️ DXY (${dxyTrend}) / US10Y (${yieldTrend}) trend fundamental bias (${direction}) se contradict kar raha hai — signal skip (safety filter).`);
+      fosSetStatus('Live — DXY/yield confluence fail, signal skip hua.');
+      return;
+    }
+
     const entry = price;
     const sl = direction === 'BUY' ? entry - atr1h*FOS_ATR_SL_MULT : entry + atr1h*FOS_ATR_SL_MULT;
     const tp = direction === 'BUY' ? entry + atr1h*FOS_ATR_TP_MULT : entry - atr1h*FOS_ATR_TP_MULT;
     const rr = (Math.abs(tp-entry) / Math.abs(entry-sl));
 
     const conf = fosComputeConfidence(fb);
-    const newsLines = fb.items.map(it => `• ${it.title}: Actual ${it.actual} vs Forecast ${it.forecast} (${it.ageHours}h pehle) → ${it.direction>0?'Gold-bullish':'Gold-bearish'} surprise`).join('\n');
+    const newsLines = fb.items.map(it => `• ${it.title}: Actual ${it.actual} vs Forecast ${it.forecast}${it.previous !== undefined ? ' (Previous ' + it.previous + ')' : ''} (${it.ageHours}h pehle, weight ${it.weight}) → ${it.direction>0?'Gold-bullish':'Gold-bearish'} surprise`).join('\n');
+    // Rule 9: yeh bot khud technical confluence use nahi karta, lekin ICT engine ka live technical
+    // bias (agar available ho) sirf reference/advisory ke taur par reason mein dikha dete hain.
+    const techNote = (typeof lastTechBias !== 'undefined' && lastTechBias)
+      ? `Advisory — ICT Technical Bias abhi: ${String(lastTechBias).toUpperCase()} (${lastTechBias === direction.toLowerCase() ? 'is fundamental signal ke sath aligned' : 'is fundamental signal se mismatch — manual confirmation recommended'}).`
+      : `Advisory — ICT technical structure ke sath cross-check kar ke hi entry lein (yeh signal khud koi chart/technical confluence use nahi karta).`;
     const reason = [
-      `Basis: SIRF Fundamental Analysis (koi ICT/technical confluence shamil nahi)`,
-      `Fundamental Bias: ${fb.label.toUpperCase()} (score ${fb.score}, pichlay ${FOS_LOOKBACK_HOURS}h ki ${fb.items.length} high-impact USD news par based)`,
+      `Basis: Fundamental Analysis rules — Actual-vs-Forecast surprise (magnitude-weighted), DXY & US10Y confluence, Fed stance/COT positioning.`,
+      `News Score: ${fb.score.toFixed(1)} | Fed Stance: ${fosManualBias.fedStance} (${fedAdj>=0?'+':''}${fedAdj}) | COT: ${fosManualBias.cot} (${cotAdj>=0?'+':''}${cotAdj}) | Combined: ${adjScore.toFixed(1)} → ${adjLabel.toUpperCase()}`,
       newsLines,
+      `DXY Trend: ${dxyTrend.toUpperCase()} (confirms) | US10Y Trend: ${yieldTrend.toUpperCase()} (confirms)`,
       `SL/TP basis: 1H ATR (${atr1h.toFixed(2)}) — SL: ${(FOS_ATR_SL_MULT)}x ATR, TP: ${(FOS_ATR_TP_MULT)}x ATR (RR ~1:${rr.toFixed(2)}).`,
-      `Confidence Score: ${conf.score}% (${conf.tier}) — yeh sirf news-surprise ki strength/count/recency par based hai.`
+      `Confidence Score: ${conf.score}% (${conf.tier}) — news-surprise strength/count/recency par based hai.`,
+      techNote
     ].join('\n');
 
     await db.collection('fundOnlySignals').add({
       direction, entry, sl, tp, rr, reason, confidence: conf.score, confidenceTier: conf.tier,
-      newsUsed: fb.items, status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      newsUsed: fb.items, dxyTrend, yieldTrend, fedStance: fosManualBias.fedStance, cot: fosManualBias.cot,
+      status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     fosLogFeed(`✅ Naya ${direction} fundamental-only signal — Confidence ${conf.score}% (${conf.tier})`);
     fosSetStatus(`Live — naya ${direction} fundamental signal fire hua.`);
@@ -4445,9 +4561,44 @@
     });
   }
 
+  // ========================= MANUAL BIAS (Rule 3 & 6: Fed stance / COT) =========================
+  function fosApplyManualBiasToUI(){
+    const fedSel = document.getElementById('fosFedStanceSelect');
+    const cotSel = document.getElementById('fosCotSelect');
+    if (fedSel) fedSel.value = fosManualBias.fedStance;
+    if (cotSel) cotSel.value = fosManualBias.cot;
+    const saveBtn = document.getElementById('fosSaveBiasBtn');
+    const isAdmin = typeof ADMIN_EMAILS !== 'undefined' && firebase.auth().currentUser &&
+      ADMIN_EMAILS.includes(firebase.auth().currentUser.email);
+    if (fedSel) fedSel.disabled = !isAdmin;
+    if (cotSel) cotSel.disabled = !isAdmin;
+    if (saveBtn) saveBtn.style.display = isAdmin ? '' : 'none';
+  }
+  function fosListenManualBias(){
+    db.collection('siteConfig').doc('fundamentalBias').onSnapshot(function(doc){
+      const d = doc.data();
+      if (d){ fosManualBias = { fedStance: d.fedStance || 'neutral', cot: d.cot || 'neutral' }; }
+      fosApplyManualBiasToUI();
+    }, function(){ fosApplyManualBiasToUI(); });
+  }
+  window.fosSaveManualBias = async function(){
+    const fedStance = document.getElementById('fosFedStanceSelect').value;
+    const cot = document.getElementById('fosCotSelect').value;
+    try {
+      await db.collection('siteConfig').doc('fundamentalBias').set({
+        fedStance, cot, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      const note = document.getElementById('fosBiasSavedNote');
+      if (note) note.textContent = 'Saved ✓ (' + new Date().toLocaleTimeString() + ')';
+    } catch(err){
+      alert('Fed/COT bias save karte waqt error: ' + err.message);
+    }
+  };
+
   // ========================= INIT =========================
   function fosStartEngine(){
     fosListen();
+    fosListenManualBias();
     fosLogFeed('Fundamental-Only bot start ho gaya — sirf Red Flag News data monitor ho raha hai (ICT se independent).');
     fosRunCycle();
     fosTimer = setInterval(fosRunCycle, FOS_CYCLE_MS);
