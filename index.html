@@ -344,6 +344,7 @@
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
    <a href="#ictsignals">ICT Signals</a>
+   <a href="#signalconfidence">🎯 Signal Confidence</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -390,6 +391,7 @@
       <a class="sd-folder" href="#interview"><div class="sd-icon">🎤</div><h4>Live Interview Practice</h4><p>150 practice questions ke sath interview prep.</p></a>
       <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🤖</div><h4>ICT Signals — AI Gold Bot</h4><p>XAUUSD ke liye AI-generated ICT signals.</p></a>
+      <a class="sd-folder" href="#signalconfidence"><div class="sd-icon">🎯</div><h4>Signal Confidence Score</h4><p>Har signal ka Entry/SL/TP sath mein "kitna percent confident/perfect" hai uska breakdown.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -3216,6 +3218,7 @@
           <div class="ictsig-level-box"><div class="label">Stop Loss</div><div class="value" id="ictsigSL" style="color:#fda4af;">—</div></div>
           <div class="ictsig-level-box"><div class="label">Take Profit</div><div class="value" id="ictsigTP" style="color:#67e8f9;">—</div></div>
           <div class="ictsig-level-box"><div class="label">Risk:Reward</div><div class="value" id="ictsigRR" style="color:#facc15;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Confidence Score</div><div class="value" id="ictsigConfidence" style="color:#a78bfa;">—</div></div>
         </div>
         <div class="ictsig-reason" id="ictsigReason">Abhi koi active signal nahi hai. Bot market analyze kar raha hai — neeche "Live Commentary" mein updates dekhein.</div>
       </div>
@@ -3607,7 +3610,61 @@
       }
     }
   }
-  // Session detector — Asian session ab BLOCK nahi hota, sirf confluence requirement badh jati hai.
+
+  // ========================= SIGNAL CONFIDENCE SCORE =========================
+  // Yeh score sirf ek CONFLUENCE-BASED estimate hai — kitne technical + fundamental
+  // factors is waqt is signal ke haq mein align ho rahe hain. Yeh koi statistically
+  // proven "win probability" nahi hai aur na hi guarantee hai — sirf yeh dikhata hai
+  // ke setup "kitna mazboot/complete" hai is engine ke apne criteria ke mutabiq.
+  function computeSignalConfidence(strategyName, rr1, hasVolume, fundBias, technicalBias, sessionName){
+    const breakdown = [];
+    let score = 0;
+
+    // 1) Triple-timeframe (H4/H1/15min) alignment — is stage tak pohanchne ke liye yeh already zaroori tha
+    breakdown.push({ label: 'H4/H1/15min Bias Alignment', points: 10, max: 10 });
+    score += 10;
+
+    // 2) Strategy quality
+    let stratPts = 15, stratMax = 25;
+    if (/Zone|FVG|Order Block|OB|BPR|IFVG/i.test(strategyName)) stratPts = 25;
+    else if (/Support\/Resistance|Rejection/i.test(strategyName)) stratPts = 20;
+    else if (/Breakout/i.test(strategyName)) stratPts = 15;
+    breakdown.push({ label: 'Strategy Quality (' + strategyName + ')', points: stratPts, max: stratMax });
+    score += stratPts;
+
+    // 3) Participation (real volume vs range-proxy)
+    const volPts = hasVolume ? 15 : 10;
+    breakdown.push({ label: 'Participation Confirmation (' + (hasVolume ? 'Volume' : 'Range-Proxy') + ')', points: volPts, max: 15 });
+    score += volPts;
+
+    // 4) Risk:Reward achieved (capped at 1:3 for scoring)
+    const rrPts = Math.round((Math.min(rr1, 3) / 3) * 15);
+    breakdown.push({ label: 'Risk:Reward (1:' + rr1.toFixed(2) + ')', points: rrPts, max: 15 });
+    score += rrPts;
+
+    // 5) Fundamental alignment
+    let fundPts = 8, fundLabelTxt = 'Neutral / No Recent News';
+    if (fundBias.label !== 'neutral'){ fundPts = 15; fundLabelTxt = 'Aligned with Technical Bias'; }
+    breakdown.push({ label: 'Fundamental Confluence (' + fundLabelTxt + ')', points: fundPts, max: 15 });
+    score += fundPts;
+
+    // 6) Session quality
+    const sessPts = sessionName === 'London/NY' ? 10 : 6;
+    breakdown.push({ label: 'Session Quality (' + sessionName + ')', points: sessPts, max: 10 });
+    score += sessPts;
+
+    // 7) Volatility sweet-spot (ATR already filtered into acceptable range to reach here)
+    breakdown.push({ label: 'Volatility (ATR) Sweet-Spot', points: 10, max: 10 });
+    score += 10;
+
+    let tier = 'Low';
+    if (score >= 80) tier = 'High';
+    else if (score >= 65) tier = 'Medium-High';
+    else if (score >= 50) tier = 'Medium';
+
+    return { score: Math.round(score), tier, breakdown };
+  }
+
   function getSessionInfo(){
     const nyHour = parseInt(new Intl.DateTimeFormat('en-US', { hour:'2-digit', hour12:false, timeZone:'America/New_York' }).format(new Date()));
     if (nyHour >= 3 && nyHour < 17) return { name: 'London/NY', minTouches: 3 };
@@ -3738,7 +3795,9 @@
       `SL: structure + ATR buffer. TP1: ${Math.abs(lv.tp1-entry).toFixed(2)}$ (1:${lv.rr1.toFixed(2)}) — 50% partial. TP2: ${Math.abs(lv.tp2-entry).toFixed(2)}$ (1:${lv.rr2.toFixed(2)}) — trail baaki. Expected hold: kai ghante se 1-2 din.`
     ].join('\n');
 
-    await createSignal({ direction, entry, sl: lv.sl, tp1: lv.tp1, tp2: lv.tp2, rr1: lv.rr1, rr2: lv.rr2, reason, strategy: strategyName });
+    const confidence = computeSignalConfidence(strategyName, lv.rr1, hasVolumeData(c15), fundBias, bias, session.name);
+
+    await createSignal({ direction, entry, sl: lv.sl, tp1: lv.tp1, tp2: lv.tp2, rr1: lv.rr1, rr2: lv.rr2, reason, strategy: strategyName, confidence: confidence.score, confidenceTier: confidence.tier, confidenceBreakdown: confidence.breakdown });
   }
 
   // ========================= FIRESTORE =========================
@@ -3750,11 +3809,12 @@
     await db.collection('ictSignals').add({
       direction: sig.direction, entry: sig.entry, sl: sig.sl, tp1: sig.tp1, tp2: sig.tp2,
       rr1: sig.rr1, rr2: sig.rr2, reason: sig.reason, strategy: sig.strategy, status: 'open',
+      confidence: sig.confidence, confidenceTier: sig.confidenceTier, confidenceBreakdown: sig.confidenceBreakdown || [],
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     signalsToday++;
-    logFeed(`✅ Naya ${sig.direction} day-trade signal — ${sig.strategy} (Aaj ${signalsToday}/${MAX_SIGNALS_PER_DAY})`);
-    ictChatBotSay(`🔔 Naya ${sig.direction} signal (${sig.strategy}) — Entry ${sig.entry.toFixed(2)}, SL ${sig.sl.toFixed(2)}, TP1 ${sig.tp1.toFixed(2)}, TP2 ${sig.tp2.toFixed(2)}.`);
+    logFeed(`✅ Naya ${sig.direction} day-trade signal — ${sig.strategy} (Aaj ${signalsToday}/${MAX_SIGNALS_PER_DAY}) — Confidence: ${sig.confidence}% (${sig.confidenceTier})`);
+    ictChatBotSay(`🔔 Naya ${sig.direction} signal (${sig.strategy}) — Entry ${sig.entry.toFixed(2)}, SL ${sig.sl.toFixed(2)}, TP1 ${sig.tp1.toFixed(2)}, TP2 ${sig.tp2.toFixed(2)}. Confidence Score: ${sig.confidence}% (${sig.confidenceTier}).`);
   }
 
   async function monitorOpenSignal(){
@@ -3800,6 +3860,7 @@
       document.getElementById('ictsigSL').textContent = '—';
       document.getElementById('ictsigTP').textContent = '—';
       document.getElementById('ictsigRR').textContent = '—';
+      document.getElementById('ictsigConfidence').textContent = '—';
       document.getElementById('ictsigReason').textContent = 'Abhi koi active signal nahi hai.';
       document.getElementById('ictsigLiveTime').textContent = '—';
       return;
@@ -3811,6 +3872,7 @@
     document.getElementById('ictsigSL').textContent = sig.sl.toFixed(2);
     document.getElementById('ictsigTP').textContent = `TP1: ${sig.tp1.toFixed(2)} | TP2: ${sig.tp2.toFixed(2)}`;
     document.getElementById('ictsigRR').textContent = `1:${sig.rr1.toFixed(2)} / 1:${sig.rr2.toFixed(2)}`;
+    document.getElementById('ictsigConfidence').textContent = (sig.confidence !== undefined) ? `${sig.confidence}% (${sig.confidenceTier || ''})` : '—';
     document.getElementById('ictsigReason').textContent = sig.reason;
     document.getElementById('ictsigLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
   }
@@ -3851,6 +3913,8 @@
       document.getElementById('ictsigTodayCount').textContent = todayCount;
       window.ictOpenSignal = active || null;
       window.ictSignalStats = { total: docs.length, fullWin, partialWin, fullLoss, winRate, todayCount };
+      window.ictAllSignals = docs;
+      if (typeof window.ictConfSectionRefresh === 'function') window.ictConfSectionRefresh();
     });
   }
 
@@ -3936,6 +4000,130 @@
   }
 })();
 </script>
+
+<!-- ==========================================
+     SIGNAL CONFIDENCE SCORE — Entry/SL/TP + "kitna percent perfect" breakdown
+     ========================================== -->
+<style>
+  .scs-top{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+  .scs-score-ring{flex:0 0 160px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(17,24,39,0.75);border-radius:18px;padding:20px;border:1px solid rgba(148,163,184,0.15);}
+  .scs-score-num{font-size:40px;font-weight:900;background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .scs-score-tier{font-size:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;margin-top:6px;padding:3px 12px;border-radius:999px;background:rgba(167,139,250,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.4);}
+  .scs-levels{flex:1;min-width:260px;display:flex;flex-wrap:wrap;gap:12px;}
+  .scs-level-box{flex:1;min-width:110px;background:rgba(17,24,39,0.7);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;text-align:center;}
+  .scs-level-box .label{font-size:11px;color:#94a3b8;text-transform:uppercase;}
+  .scs-level-box .value{font-size:17px;font-weight:800;margin-top:6px;}
+  .scs-dir-badge{display:inline-block;font-weight:900;font-size:16px;padding:4px 16px;border-radius:999px;margin-bottom:10px;}
+  .scs-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .scs-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .scs-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .scs-breakdown{margin-top:10px;}
+  .scs-bar-row{margin-bottom:12px;}
+  .scs-bar-label{display:flex;justify-content:space-between;font-size:12.5px;color:#cbd5e1;margin-bottom:4px;}
+  .scs-bar-track{height:9px;border-radius:6px;background:rgba(148,163,184,0.12);overflow:hidden;}
+  .scs-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#a78bfa,#38bdf8);}
+  .scs-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;gap:6px;}
+  .scs-history-score{font-weight:800;color:#c4b5fd;}
+</style>
+<section id="signalconfidence">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🎯 Signal Confidence Score (Entry / SL / TP + Kitna % Perfect)</h3>
+    <p style="color:#94a3b8; margin-bottom:22px; font-size:14px; line-height:1.6;">
+      Yeh section <a href="#ictsignals" style="color:#38bdf8;">ICT Signals — AI Gold Bot</a> ke currently active
+      (ya aakhri) signal ka Entry, Stop Loss aur Take Profit dobara saaf tarah dikhata hai, sath mein ek
+      <strong>Confidence Score (%)</strong> deta hai jo yeh batata hai ke is waqt kitne technical aur fundamental
+      factors is signal ke haq mein align ho rahe hain.
+    </p>
+
+    <div class="scs-top">
+      <div class="scs-score-ring">
+        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">Confidence</div>
+        <div class="scs-score-num" id="scsScoreNum">—</div>
+        <div class="scs-score-tier" id="scsScoreTier">NO SIGNAL</div>
+      </div>
+      <div class="scs-levels">
+        <div style="flex-basis:100%;"><span class="scs-dir-badge NONE" id="scsDirBadge">NO ACTIVE SIGNAL</span></div>
+        <div class="scs-level-box"><div class="label">Entry Price</div><div class="value" id="scsEntry" style="color:#e2e8f0;">—</div></div>
+        <div class="scs-level-box"><div class="label">Stop Loss</div><div class="value" id="scsSL" style="color:#fda4af;">—</div></div>
+        <div class="scs-level-box"><div class="label">Take Profit</div><div class="value" id="scsTP" style="color:#67e8f9;">—</div></div>
+        <div class="scs-level-box"><div class="label">Risk:Reward</div><div class="value" id="scsRR" style="color:#facc15;">—</div></div>
+      </div>
+    </div>
+
+    <h4 style="color:#a78bfa; font-size:15px; margin-bottom:10px;">Confidence Breakdown — Kis Cheez Se Bana</h4>
+    <div class="scs-breakdown" id="scsBreakdown">
+      <p style="color:#64748b; font-size:13px;">Abhi koi active signal nahi hai — jab bot koi signal de ga, uska poora breakdown yahan nazar aayega.</p>
+    </div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>Yeh score kya hai, kya nahi:</b> Confidence Score sirf ek <b>confluence-based estimate</b> hai — yeh count karta hai ke us waqt kitne factors (timeframe alignment, strategy quality, volume, risk:reward, fundamental news bias, session, volatility) is signal ke sath the. Yeh <u>koi statistically-proven "win probability" ya guarantee nahi</u> — sirf yeh dikhata hai ke setup engine ke apne criteria ke mutabiq "kitna complete/mazboot" hai. Zyada score bhi loss se immune nahi karta — hamesha apna risk management khud follow karein.
+    </div>
+
+    <h4 style="color:#a78bfa; font-size:15px; margin:26px 0 10px;">Pichlay Signals Ka Confidence History</h4>
+    <div id="scsHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+  </div>
+</section>
+<script>
+(function(){
+  function renderConfidenceSection(){
+    const sig = window.ictOpenSignal;
+    const dirBadge = document.getElementById('scsDirBadge');
+    const scoreNum = document.getElementById('scsScoreNum');
+    const scoreTier = document.getElementById('scsScoreTier');
+    const breakdown = document.getElementById('scsBreakdown');
+    if (!dirBadge || !scoreNum) return;
+
+    if (!sig || sig.confidence === undefined){
+      dirBadge.className = 'scs-dir-badge NONE'; dirBadge.textContent = 'NO ACTIVE SIGNAL';
+      scoreNum.textContent = '—'; scoreTier.textContent = 'NO SIGNAL';
+      document.getElementById('scsEntry').textContent = '—';
+      document.getElementById('scsSL').textContent = '—';
+      document.getElementById('scsTP').textContent = '—';
+      document.getElementById('scsRR').textContent = '—';
+      breakdown.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi active signal nahi hai — jab bot koi signal de ga, uska poora breakdown yahan nazar aayega.</p>';
+    } else {
+      dirBadge.className = 'scs-dir-badge ' + sig.direction;
+      dirBadge.textContent = sig.direction + ' — ' + sig.strategy;
+      scoreNum.textContent = sig.confidence + '%';
+      scoreTier.textContent = (sig.confidenceTier || '') + ' Confidence';
+      document.getElementById('scsEntry').textContent = sig.entry.toFixed(2);
+      document.getElementById('scsSL').textContent = sig.sl.toFixed(2);
+      document.getElementById('scsTP').textContent = `TP1: ${sig.tp1.toFixed(2)} | TP2: ${sig.tp2.toFixed(2)}`;
+      document.getElementById('scsRR').textContent = `1:${sig.rr1.toFixed(2)} / 1:${sig.rr2.toFixed(2)}`;
+
+      const items = sig.confidenceBreakdown || [];
+      breakdown.innerHTML = items.map(it => {
+        const pct = Math.round((it.points / it.max) * 100);
+        return `<div class="scs-bar-row">
+          <div class="scs-bar-label"><span>${it.label}</span><span>${it.points}/${it.max} pts</span></div>
+          <div class="scs-bar-track"><div class="scs-bar-fill" style="width:${pct}%;"></div></div>
+        </div>`;
+      }).join('') || '<p style="color:#64748b; font-size:13px;">Breakdown data available nahi (purana signal ho sakta hai).</p>';
+    }
+
+    // History table
+    const histEl = document.getElementById('scsHistory');
+    const all = (window.ictAllSignals || []).filter(d => d.confidence !== undefined).slice(0, 12);
+    if (!all.length){
+      histEl.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>';
+    } else {
+      histEl.innerHTML = all.map(d => {
+        const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+        const dirColor = d.direction === 'BUY' ? '#22c55e' : '#ef4444';
+        return `<div class="scs-history-item">
+          <span>${time} — <strong style="color:${dirColor};">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${d.strategy || ''})</em></span>
+          <span class="scs-history-score">${d.confidence}% (${d.confidenceTier || ''})</span>
+        </div>`;
+      }).join('');
+    }
+  }
+  window.ictConfSectionRefresh = renderConfidenceSection;
+  renderConfidenceSection();
+  setInterval(renderConfidenceSection, 5000); // fallback poll in case Firestore listener fires before this section loads
+})();
+</script>
+
  <script>
 (function(){
   const FF_JSON_URL = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
