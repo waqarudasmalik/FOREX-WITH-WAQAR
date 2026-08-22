@@ -328,6 +328,7 @@
   <nav>
    <a href="#siteDashboard">🗂️ Dashboard</a>
    <a href="#redflagnews">🔴 Red Flag News</a>
+   <a href="#fundamentalanalysis">📰 Fundamental Analysis</a>
     <a href="#record">Trade Record</a>
     <a href="#hedgecalc">Calculator</a>
     <a href="#calclog">Calculated Hedges Log</a>
@@ -373,6 +374,7 @@
     <p style="color:#94a3b8;margin-bottom:10px;">Site ke tamam tools aur guides ek jagah — kisi bhi folder par click karke seedha us section mein pahunch jayein.</p>
     <div class="sd-grid">
       <a class="sd-folder" href="#redflagnews"><div class="sd-icon">🔴</div><h4>Red Flag News</h4><p>High-impact news alerts jo trading ko affect kar sakti hain.</p></a>
+      <a class="sd-folder" href="#fundamentalanalysis"><div class="sd-icon">📰</div><h4>Fundamental Analysis</h4><p>XAUUSD ko move karne wali high-impact news, unka schedule, aur analysis karne ka step-by-step tareeqa.</p></a>
       <a class="sd-folder" href="#record"><div class="sd-icon">📒</div><h4>Apna Trade Record (Auto-Update)</h4><p>Apni trades track karein, khud-badh (auto-update) hone wale record ke sath.</p></a>
       <a class="sd-folder" href="#hedgecalc"><div class="sd-icon">🧮</div><h4>XAUUSD Hedging Calculator</h4><p>Standalone calculator — hedge positions plan karne ke liye.</p></a>
       <a class="sd-folder" href="#calclog"><div class="sd-icon">📊</div><h4>Calculated Hedges Log</h4><p>Pehle calculate ki gayi hedges ka history/log.</p></a>
@@ -403,6 +405,170 @@
     </div>
   </div>
 </section>
+
+<!-- ==========================================
+     FUNDAMENTAL ANALYSIS — XAUUSD high-impact news guide
+     ========================================== -->
+<style>
+  .fa-tag{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-right:6px;letter-spacing:.5px;}
+  .fa-tag.high{background:rgba(239,68,68,0.18);color:#fca5a5;border:1px solid rgba(239,68,68,0.5);}
+  .fa-tag.med{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.45);}
+  .fa-move{font-weight:800;color:#facc15;}
+  .fa-news-card{background:rgba(17,24,39,0.7);border:1px solid rgba(148,163,184,0.14);border-left:4px solid #ef4444;border-radius:12px;padding:20px 22px;margin-bottom:18px;}
+  .fa-news-card h4{color:#38bdf8;font-size:17px;margin-bottom:6px;}
+  .fa-news-card .fa-meta{font-size:12.5px;color:#94a3b8;margin-bottom:10px;}
+  .fa-news-card .fa-row{margin-bottom:6px;font-size:14px;color:#cbd5e1;}
+  .fa-news-card .fa-row b{color:#e2e8f0;}
+  .fa-up{color:#22c55e;font-weight:700;}
+  .fa-down{color:#ef4444;font-weight:700;}
+  .fa-steps{counter-reset: fa-step;}
+  .fa-step-card{position:relative;background:rgba(17,24,39,0.7);border:1px solid rgba(148,163,184,0.14);border-radius:12px;padding:18px 22px 18px 60px;margin-bottom:14px;}
+  .fa-step-card::before{counter-increment: fa-step;content:counter(fa-step);position:absolute;left:16px;top:16px;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .fa-step-card h4{color:#fff;font-size:15.5px;margin-bottom:6px;}
+  .fa-step-card p{color:#94a3b8;font-size:13.5px;}
+  .fa-note{background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:14px 18px;font-size:13.5px;color:#bae6fd;margin-top:10px;}
+  .fa-warn{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.35);border-radius:12px;padding:14px 18px;font-size:13.5px;color:#fecaca;margin-top:16px;}
+</style>
+<section id="fundamentalanalysis">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>📰 Fundamental Analysis — XAUUSD High Alert News</h3>
+    <p style="color:#94a3b8; margin-bottom:22px; font-size:14px; line-height:1.6;">
+      Neeche wo tamam high-impact (red folder) US news events hain jinke aane se seedha aur foran gold (XAUUSD) ki price par asar parta hai — kab aati hain, in mein kia hota hai, aur inke aane par gold kitna move kar sakta hai. Sab timings Pakistan Standard Time (PKT) mein hain — US mein daylight saving ki wajah se ±1 hour ka farq aa sakta hai, isliye hamesha ForexFactory calendar se exact time cross-check karein.
+    </p>
+
+    <div class="fa-news-card">
+      <h4>1. Non-Farm Payrolls (NFP)</h4>
+      <div class="fa-meta"><span class="fa-tag high">HIGH IMPACT</span> Har month ka pehla Friday • ~6:30-7:30 PM PKT (winter mein 7:30, summer mein 6:30)</div>
+      <div class="fa-row"><b>Kia hota hai:</b> US mein pichlay month kitni nayi jobs (farm sector ke ilawa) create hui — sath mein Unemployment Rate aur Average Hourly Earnings bhi release hoti hain.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Forecast se <span class="fa-up">zyada jobs (strong data)</span> → USD strong → Gold <span class="fa-down">neeche</span>. Forecast se <span class="fa-down">kam jobs (weak data)</span> → USD weak → Gold <span class="fa-up">upar</span>.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$15 – $40</span> (150–400 pips) pehle 5-15 minute ke andar hi, aur agar number expectation se bohat door ho to $50+ tak ka spike bhi aam hai.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>2. CPI — Consumer Price Index (Inflation Data)</h4>
+      <div class="fa-meta"><span class="fa-tag high">HIGH IMPACT</span> Har month ki 10-15 tareekh ke qareeb • ~6:30-7:30 PM PKT</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Aam awam ki cheezon (goods/services) ki qeemat mein monthly aur yearly kitna izafa hua — Core CPI (food & energy nikal ke) sab se zyada dekha jata hai.</div>
+      <div class="fa-row"><b>Gold par asar:</b> CPI <span class="fa-up">forecast se zyada</span> → Fed rate cuts delay honay ka khadsha → Gold <span class="fa-down">neeche</span>. CPI <span class="fa-down">forecast se kam</span> → rate cuts jald honay ki ummeed → Gold <span class="fa-up">upar</span>.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$10 – $30</span> — kabhi kabhi agar Fed ka decision qareeb ho to $40+ tak.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>3. FOMC Interest Rate Decision (Fed Meeting)</h4>
+      <div class="fa-meta"><span class="fa-tag high">HIGHEST IMPACT</span> Saal mein 8 baar (har ~6 hafte baad) • Decision ~11:00 PM PKT, Powell press conference ~11:30 PM PKT</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Federal Reserve US interest rate ka faisla karta hai (hike / cut / hold), sath mein "dot plot" (future rate projections) aur Chair Powell ki press conference hoti hai jahan wo aage ka guidance detay hain.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Rate cut ya <span class="fa-up">dovish guidance</span> (aage rates kam honay ke signals) → Gold <span class="fa-up">upar</span> (kyunke gold rakhne ki opportunity cost kam ho jati hai). Hawkish guidance ya rates high rakhne ka isharra → Gold <span class="fa-down">neeche</span>.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$30 – $80</span>, press conference ke dauran dono taraf whipsaw (up-down) bhi ho sakta hai — is din sab se zyada volatility hoti hai.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>4. PCE — Fed ka Favourite Inflation Gauge</h4>
+      <div class="fa-meta"><span class="fa-tag high">HIGH IMPACT</span> Har month ke aakhri hafte • ~6:00-7:00 PM PKT</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Personal Consumption Expenditures Index — Fed khud isko CPI se bhi zyada ahmiyat deta hai policy decisions ke liye.</div>
+      <div class="fa-row"><b>Gold par asar:</b> CPI jaisa hi logic — zyada PCE = Gold neeche, kam PCE = Gold upar.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$10 – $25</span>.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>5. Fed Chair Speeches &amp; FOMC Minutes</h4>
+      <div class="fa-meta"><span class="fa-tag med">MEDIUM-HIGH IMPACT</span> Koi fix schedule nahi — Minutes FOMC meeting ke 3 hafte baad aati hain, speeches kabhi bhi ho sakti hain</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Powell ya doosre Fed officials market ko apni soch (hawkish/dovish tone) ke bare mein bataty hain, ya pichli meeting ki detailed minutes release hoti hain.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Ek hi lafz ("patient", "data-dependent", "cuts ahead") bhi market ko turant move kar sakta hai — direction unke tone par depend karti hai.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$10 – $35</span>, tone ki shiddat par depend karta hai.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>6. ISM Manufacturing / Services PMI</h4>
+      <div class="fa-meta"><span class="fa-tag med">MEDIUM IMPACT</span> Har month ka 1st business day (Manufacturing), 3rd business day (Services) • ~7:00 PM PKT</div>
+      <div class="fa-row"><b>Kia hota hai:</b> US business activity ka health-check — 50 se upar = expansion, 50 se neeche = contraction.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Strong PMI = economy mazboot = USD upar = Gold neeche. Weak PMI = ulta.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$8 – $20</span>.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>7. Initial Jobless Claims</h4>
+      <div class="fa-meta"><span class="fa-tag med">MEDIUM IMPACT</span> Har Thursday • ~5:30-6:30 PM PKT (weekly)</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Pichlay hafte kitne log naye unemployment benefits ke liye apply hue — job market ki weekly health.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Claims zyada (job market weak) → Gold upar. Claims kam (job market strong) → Gold neeche. Chhota move but consistent.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$5 – $15</span>.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>8. GDP (Quarterly Growth Rate)</h4>
+      <div class="fa-meta"><span class="fa-tag med">MEDIUM IMPACT</span> Quarterly — Advance, Preliminary, aur Final release • ~6:30 PM PKT</div>
+      <div class="fa-row"><b>Kia hota hai:</b> US economy ki overall growth rate — expected se zyada growth = economy garam.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Strong GDP = Gold neeche (risk-on, USD strong). Weak GDP = Gold upar (safe-haven demand).</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$10 – $25</span>.</div>
+    </div>
+
+    <div class="fa-news-card">
+      <h4>9. Retail Sales &amp; Consumer Confidence</h4>
+      <div class="fa-meta"><span class="fa-tag med">MEDIUM IMPACT</span> Retail Sales: mid-month • Consumer Confidence: last Tuesday of month • ~6:30 PM PKT</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Amreeki consumer kitna kharch kar raha hai aur economy par uska confidence kaisa hai.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Strong data = USD upar = Gold neeche, weak data ulta.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$8 – $18</span>.</div>
+    </div>
+
+    <div class="fa-news-card" style="border-left-color:#facc15;">
+      <h4>10. Geopolitical / Safe-Haven Events (Unscheduled)</h4>
+      <div class="fa-meta"><span class="fa-tag high">EXTREME IMPACT</span> Koi fix time nahi — jang, election shocks, banking crisis, central bank surprise moves</div>
+      <div class="fa-row"><b>Kia hota hai:</b> Jab duniya mein koi bohran (war, sanctions, bank collapse, surprise policy) ho to log apna paisa "safe" gold mein daal detay hain.</div>
+      <div class="fa-row"><b>Gold par asar:</b> Uncertainty/fear zyada → Gold ka safe-haven demand upar → Gold <span class="fa-up">tez upar</span>. Tension khatam hone par sharp pullback bhi aata hai.</div>
+      <div class="fa-row"><b>Kitna move ho sakta hai:</b> <span class="fa-move">$50 – $150+</span>, bilkul bhi predictable nahi — isliye is waqt stop-loss zaroor tight rakhein.</div>
+    </div>
+
+    <div class="fa-note">
+      💡 <b>Yaad rahe:</b> Yeh dollar figures approximate/typical ranges hain jo past behaviour par based hain — har news ka actual move current market volatility, positioning aur "surprise factor" (actual vs forecast ka farq) par depend karta hai. Kabhi bhi guarantee nahi hoti.
+    </div>
+
+    <h3 style="margin-top:38px;">🧭 Fundamental Analysis Kaise Karein — Step-by-Step Guide</h3>
+    <p style="color:#94a3b8;margin-bottom:20px;font-size:14px;">Yeh steps follow karke aap news aane se pehle hi XAUUSD ka possible next move (bias) samajh saktay hain.</p>
+
+    <div class="fa-steps">
+      <div class="fa-step-card">
+        <h4>Economic Calendar Roz Check Karein</h4>
+        <p>Har din/hafte ForexFactory (ya Investing.com) ka calendar dekhein — sirf "High Impact" (red folder) USD events par focus karein jo XAUUSD ko affect karte hain. Time, forecast aur previous value note kar lein.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>Forecast (Consensus) vs Previous Compare Karein</h4>
+        <p>Market forecast ke mutabiq already price mein "priced in" hoti hai. Asli move tab aata hai jab <b>actual number forecast se hat kar aaye</b> — is farq (surprise) ko dekhna sab se zaroori hai, sirf number ko nahi.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>Fed ka Current Stance Samjhein (Hawkish ya Dovish)</h4>
+        <p>Pichli FOMC statement, minutes aur Powell ke recent bayanaat se pata karein Fed rates ko upar rakhna chahta hai (hawkish = gold ke liye negative) ya cut karne ka soch raha hai (dovish = gold ke liye positive).</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>DXY (US Dollar Index) ka Trend Dekhein</h4>
+        <p>Gold aur DXY mein aksar ulti (inverse) relationship hoti hai. Agar DXY neeche gir raha hai to gold ko upar jane ka support milta hai, aur agar DXY upar chal raha hai to gold par pressure aata hai.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>US 10-Year Treasury Real Yields Check Karein</h4>
+        <p>Real yields (inflation-adjusted) gold ke sab se strong fundamental drivers mein se hain — yields neeche jayen to gold attractive ho jata hai (kyunke gold khud interest nahi deta), yields upar jayen to gold par dabao aata hai.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>Market Sentiment aur Positioning Dekhein (COT Report)</h4>
+        <p>CFTC ka weekly Commitment of Traders (COT) report large speculators ka net long/short position dikhata hai — extreme positioning se pata chalta hai market kitna "one-sided" ho chuka hai, jo reversal ka signal bhi ho sakta hai.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>News Se Pehle Price Action Observe Karein</h4>
+        <p>Bade news se pehle price aksar consolidate (tight range mein) ho jati hai — yeh "calm before the storm" hoti hai. Is waqt naya trade open karne se bachein, sirf existing positions ka risk manage karein.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>News Release Ke Waqt Actual vs Forecast Compare Karein</h4>
+        <p>News aate hi seedha "Actual" number ko "Forecast" aur "Previous" se compare karein — farq jitna bara hoga, gold ka move utna hi tez aur bara hoga. Pehli 1-5 minute ka spike aksar sharp hota hai, phir retracement (wapas aana) bhi common hai.</p>
+      </div>
+      <div class="fa-step-card">
+        <h4>Fundamental Bias Ko Technical Structure Ke Sath Combine Karein</h4>
+        <p>Sirf fundamentals par trade na karein — fundamental bias (upar/neeche ka rujhan) ko apne technical structure (support/resistance, trend, ICT/SMC zones) ke sath milayein taake entry aur stop-loss sahi jagah lagayein.</p>
+      </div>
+    </div>
+
+    <div class="fa-warn">
+      ⚠️ <b>Risk Warning:</b> High-impact news ke waqt spread bohat bar jata hai aur slippage ka khatra hota hai. Yeh guide sirf taleemi (educational) maqsad ke liye hai — koi bhi trade lene se pehle apna risk management aur position sizing zaroor follow karein. Fundamental analysis se "next move" ka andaza lagaya ja sakta hai, guarantee nahi.
+    </div>
+  </div>
+</section>
+
 <section id="trade-entry-rules">
   <div class="glass-panel" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 16px; font-family: sans-serif; color: #fff; max-width: 800px; margin: 0 auto;">
     <div class="brand-watermark" style="font-size: 12px; color: rgba(255,255,255,0.2); letter-spacing: 2px; text-transform: uppercase; text-align: right; margin-bottom: 10px;">Forex With Waqar</div>
