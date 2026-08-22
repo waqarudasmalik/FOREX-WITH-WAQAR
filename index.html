@@ -4265,7 +4265,7 @@
   const FOS_SYMBOL = "XAU/USD";
   const FOS_DXY_SYMBOL = "DXY";                // Rule 4: DXY trend confluence
   const FOS_YIELD_SYMBOL = "US10Y";            // Rule 5: US 10Y real-yield proxy trend
-  const FOS_CYCLE_MS = 15 * 60 * 1000;         // har 15 minute check
+  const FOS_CYCLE_MS = 5 * 60 * 1000;          // pehle 15 min tha — ab 5 min (fallback poll; asal trigger news-event-driven hai, neeche dekhein)
   const FOS_LOOKBACK_HOURS = 24;               // pichlay kitne ghanton ki released news ginni hain
   const FOS_RECENT_HOURS = 6;                  // itni recent news ko double weight
   const FOS_FIRE_THRESHOLD = 2;                // is se zyada (ya kam, negative mein) score par hi signal fire hoga
@@ -4368,6 +4368,26 @@
       fosAutoCot = { label, percentile: Math.round(percentile), netNonComm: Math.round(latest) };
     } catch(err){ /* best-effort — fail silently, COT stays neutral */ }
   }
+  // Rule "exact/fresh signal": ek lightweight /price endpoint call — jab bhi entry price chahiye,
+  // is se live-most price milti hai (candle close ka wait nahi karna padta, jo 1h stale ho sakta tha).
+  async function fosFetchLatestPrice(symbol){
+    try {
+      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbol)}&apikey=${FOS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const p = parseFloat(data.price);
+      return isNaN(p) ? null : p;
+    } catch(err){ return null; }
+  }
+  let fosLastRunAt = 0;
+  const FOS_MIN_TRIGGER_GAP_MS = 45 * 1000; // event-trigger ko bhi thora throttle taake API spam na ho
+  // News calendar refresh hote hi (har 3 min, ya jab bhi naya data aaye) turant ek cycle chala do —
+  // 5-minute fallback timer ka wait nahi karna, taake market move ho jaane ke BAAD signal na mile.
+  window.fosOnCalendarUpdate = function(){
+    if (Date.now() - fosLastRunAt < FOS_MIN_TRIGGER_GAP_MS) return;
+    if (typeof fosRunCycle === 'function') fosRunCycle();
+  };
+
   async function fosFetchCandles(){
     try {
       const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(FOS_SYMBOL)}&interval=1h&outputsize=60&apikey=${FOS_API_KEY}`;
@@ -4447,6 +4467,7 @@
 
   // ========================= MAIN CYCLE =========================
   async function fosRunCycle(){
+    fosLastRunAt = Date.now();
     await fosFetchCandles();
     if (fosCandles1h.length < 20){ fosSetStatus('Price history jama ho rahi hai...'); return; }
 
@@ -4495,7 +4516,8 @@
     }
 
     const atr1h = fosAtr(fosCandles1h, 14);
-    const price = fosCandles1h[fosCandles1h.length-1].close;
+    const livePrice = await fosFetchLatestPrice(FOS_SYMBOL);
+    const price = livePrice !== null ? livePrice : fosCandles1h[fosCandles1h.length-1].close; // live quote > stale 1h candle close
     const atrPct = price > 0 ? atr1h / price : 0;
     if (atrPct < FOS_MIN_ATR_PCT){ fosLogFeed('Market bohot quiet hai (low ATR) — fundamental signal skip.'); return; }
 
@@ -4542,8 +4564,9 @@
   }
 
   async function fosMonitor(doc){
-    if (!fosCandles1h.length) return;
-    const price = fosCandles1h[fosCandles1h.length-1].close;
+    const livePrice = await fosFetchLatestPrice(FOS_SYMBOL);
+    const price = livePrice !== null ? livePrice : (fosCandles1h.length ? fosCandles1h[fosCandles1h.length-1].close : null); // live quote > stale 1h candle close, taake TP/SL turant pakre jayein
+    if (price === null) return;
     const d = doc.data();
     const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
     const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
@@ -4672,17 +4695,27 @@
   };
 
   // ========================= INIT =========================
+  let fosMonitorTimer = null;
+  const FOS_MONITOR_MS = 60 * 1000; // open signal ko har 1 min mein fresh price se check karo (TP/SL turant pakrein, 5-min cycle ka wait nahi)
+  async function fosMonitorTick(){
+    try {
+      const openSnap = await db.collection('fundOnlySignals').where('status','in',['open']).limit(1).get();
+      if (!openSnap.empty) await fosMonitor(openSnap.docs[0]);
+    } catch(err){ /* best-effort */ }
+  }
   function fosStartEngine(){
     fosListen();
     fosListenManualBias();
     fosLogFeed('Fundamental-Only bot start ho gaya — sirf Red Flag News data monitor ho raha hai (ICT se independent).');
     fosRunCycle();
     fosTimer = setInterval(fosRunCycle, FOS_CYCLE_MS);
+    fosMonitorTimer = setInterval(fosMonitorTick, FOS_MONITOR_MS);
   }
   if (typeof firebase !== 'undefined'){
     firebase.auth().onAuthStateChanged(user => {
       if (user) fosStartEngine();
       else if (fosTimer) { clearInterval(fosTimer); fosTimer = null; }
+      if (!user && fosMonitorTimer) { clearInterval(fosMonitorTimer); fosMonitorTimer = null; }
     });
   }
 })();
@@ -4693,7 +4726,7 @@
   const FF_JSON_URL = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
   const FF_CACHE_KEY = 'waqarFFCalendarCache';
   const FF_CACHE_TIME_KEY = 'waqarFFCalendarCacheTime';
-  const FF_REFRESH_MS = 30 * 60 * 1000;
+  const FF_REFRESH_MS = 3 * 60 * 1000;         // pehle 30 min tha — ab 3 min (jitni jaldi ho sake naya news event pakadne ke liye)
 
   let ffEvents = [];
 
@@ -4769,6 +4802,7 @@
       renderFFAlert(); renderFFTodayList();
       window.ffEvents = ffEvents;
       if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
+      if (typeof window.fosOnCalendarUpdate === 'function') window.fosOnCalendarUpdate();
       return;
     }
     try {
@@ -4783,6 +4817,7 @@
     renderFFAlert(); renderFFTodayList();
     window.ffEvents = ffEvents; // ICT Signals engine (separate script scope) reads calendar data from here
     if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
+    if (typeof window.fosOnCalendarUpdate === 'function') window.fosOnCalendarUpdate();
   }
 
   fetchFFCalendar();
