@@ -979,6 +979,11 @@
         <option value="Phase 2">Phase 2</option>
         <option value="Master Account">Master Account</option>
       </select>
+      <select id="accDirection">
+        <option value="Buy">Buy</option>
+        <option value="Sell">Sell</option>
+      </select>
+      <input type="number" id="accLot" placeholder="Lot Size" step="0.01" value="0.01">
       <input type="number" id="accBalance" placeholder="Balance ($)" step="0.01">
       <input type="number" id="accPrice" placeholder="Current Price" step="0.01">
       <button onclick="addAccount()">Add Account</button>
@@ -1001,6 +1006,8 @@
           <th>Hedge</th>
           <th>Account</th>
           <th>Status</th>
+          <th>Direction</th>
+          <th>Lot Size</th>
           <th>Balance ($)</th>
           <th>24H P/L (2AM PKT)</th>
           <th>Current Price</th>
@@ -1675,6 +1682,9 @@
   }
 
   // ===== 24H P/L (Pakistan Time, resets every day at 2:00 AM PKT) =====
+  // Real trading P/L: (current price - price at 2AM PKT) * lot size * 100
+  // (XAUUSD convention already used elsewhere on this site: 1.00 lot = $100
+  // per $1 of price movement), sign-flipped for Sell accounts.
   // Pakistan Standard Time is fixed at UTC+5 (no daylight saving), so we
   // compute "now in PKT" from UTC directly instead of relying on the
   // device's local timezone.
@@ -1682,34 +1692,45 @@
     const utcMs = Date.now() + (new Date().getTimezoneOffset() * 60000);
     return new Date(utcMs + (5 * 60 * 60000));
   }
-  // The "day key" for the current 24h profit/loss window. The window
-  // starts at 2:00 AM PKT, so any time before 2:00 AM still belongs to
-  // the previous day's window.
+  // The "day key" for the current 24h P/L window. The window starts at
+  // 2:00 AM PKT, so any time before 2:00 AM still belongs to the previous
+  // day's window.
   function pktWindowKey(pktDate) {
     const d = new Date(pktDate.getTime());
     if (d.getHours() < 2) d.setDate(d.getDate() - 1);
     return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   }
-  // Whenever an account's balance is touched (add / update / any render),
-  // make sure its 2AM-PKT baseline is for the *current* window. If the
-  // window has rolled over since we last checked, the baseline resets to
-  // the account's balance at that moment (best available snapshot of the
-  // "balance at 2AM"), and 24H P/L starts counting fresh from there.
+  // Whenever an account is touched (add / update / any render), make sure
+  // its 2AM-PKT price baseline is for the *current* window. If the window
+  // has rolled over since we last checked, the baseline resets to the
+  // account's CURRENT price at that moment (best available snapshot of
+  // "price at 2AM"), and 24H P/L starts counting fresh from there.
+  // Also backfills direction/lot for accounts saved before this feature
+  // existed, so old data doesn't break.
   function syncDailyBaseline(acc) {
+    if (acc.direction !== 'Buy' && acc.direction !== 'Sell') acc.direction = 'Buy';
+    if (typeof acc.lot !== 'number' || isNaN(acc.lot) || acc.lot <= 0) acc.lot = 0.01;
     const key = pktWindowKey(nowInPKT());
-    if (acc.dayBaselineKey !== key) {
-      acc.dayBaseline = acc.balance;
-      acc.dayBaselineKey = key;
+    if (acc.priceBaselineKey !== key) {
+      acc.priceBaseline = acc.price;
+      acc.priceBaselineKey = key;
     }
+  }
+  function accountDayPL(acc) {
+    const priceDiff = acc.price - acc.priceBaseline;
+    const dirMult = acc.direction === 'Sell' ? -1 : 1;
+    return priceDiff * acc.lot * 100 * dirMult;
   }
   function addAccount() {
     const name = document.getElementById('accName').value.trim();
     const status = document.getElementById('accStatus').value;
+    const direction = document.getElementById('accDirection').value;
+    const lot = parseFloat(document.getElementById('accLot').value);
     const balance = parseFloat(document.getElementById('accBalance').value);
     const price = parseFloat(document.getElementById('accPrice').value);
-    if (!name || isNaN(balance) || isNaN(price)) { alert('Account Name, Balance aur Current Price zaroor darj karein.'); return; }
+    if (!name || isNaN(balance) || isNaN(price) || isNaN(lot) || lot <= 0) { alert('Account Name, Lot Size, Balance aur Current Price zaroor sahi darj karein.'); return; }
     accountIdCounter += 1;
-    accounts.push({ id: accountIdCounter, name, status, balance, price });
+    accounts.push({ id: accountIdCounter, name, status, direction, lot, balance, price });
     document.getElementById('accName').value = '';
     document.getElementById('accBalance').value = '';
     document.getElementById('accPrice').value = '';
@@ -1752,12 +1773,17 @@
     const balanceEl = document.getElementById('editBalance_' + id);
     const priceEl = document.getElementById('editPrice_' + id);
     const statusEl = document.getElementById('editStatus_' + id);
+    const directionEl = document.getElementById('editDirection_' + id);
+    const lotEl = document.getElementById('editLot_' + id);
     const newBalance = parseFloat(balanceEl.value);
     const newPrice = parseFloat(priceEl.value);
-    if (isNaN(newBalance) || isNaN(newPrice)) { alert('Balance aur Current Price sahi darj karein.'); return; }
+    const newLot = parseFloat(lotEl.value);
+    if (isNaN(newBalance) || isNaN(newPrice) || isNaN(newLot) || newLot <= 0) { alert('Balance, Lot Size aur Current Price sahi darj karein.'); return; }
     acc.balance = newBalance;
     acc.price = newPrice;
     acc.status = statusEl.value;
+    acc.direction = directionEl.value;
+    acc.lot = newLot;
     editingAccountIds = editingAccountIds.filter(x => x !== id);
     saveAccounts();
   }
@@ -1771,11 +1797,11 @@
       if (isChecked) row.classList.add('selected-row');
       const isEditing = editingAccountIds.includes(acc.id);
       const hedgeTickCell = `<td style="text-align:center; font-size:18px;" title="${accountHasHedge(acc.id) ? 'Is account ka hedge pehle se ban chuka hai' : 'Abhi tak koi hedge nahi bana'}">${accountHasHedge(acc.id) ? '✅' : '—'}</td>`;
-      const dayPL = acc.balance - acc.dayBaseline;
+      const dayPL = accountDayPL(acc);
       const plClass = dayPL > 0 ? 'positive' : (dayPL < 0 ? 'negative' : '');
       const plSign = dayPL > 0 ? '+' : '';
       const plWord = dayPL > 0 ? 'Profit' : (dayPL < 0 ? 'Loss' : 'Flat');
-      const plCell = `<td class="${plClass}" style="font-weight:bold; white-space:nowrap;" title="2AM PKT se ab tak ka balance farq">${plSign}$${Math.abs(dayPL).toFixed(2)} <span style="font-weight:normal; font-size:11px; opacity:0.8;">(${plWord}, 2AM se)</span></td>`;
+      const plCell = `<td class="${plClass}" style="font-weight:bold; white-space:nowrap;" title="2AM PKT price se ab tak: (${acc.price.toFixed(2)} - ${acc.priceBaseline.toFixed(2)}) x ${acc.lot} lot x 100, ${acc.direction}">${plSign}$${Math.abs(dayPL).toFixed(2)} <span style="font-weight:normal; font-size:11px; opacity:0.8;">(${plWord}, 2AM se)</span></td>`;
       if (isEditing) {
         row.innerHTML = `
           <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
@@ -1788,6 +1814,13 @@
               <option value="Master Account" ${acc.status === 'Master Account' ? 'selected' : ''}>Master Account</option>
             </select>
           </td>
+          <td>
+            <select id="editDirection_${acc.id}" class="inline-edit-input">
+              <option value="Buy" ${acc.direction === 'Buy' ? 'selected' : ''}>Buy</option>
+              <option value="Sell" ${acc.direction === 'Sell' ? 'selected' : ''}>Sell</option>
+            </select>
+          </td>
+          <td><input type="number" id="editLot_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.lot}"></td>
           <td><input type="number" id="editBalance_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.balance}"></td>
           ${plCell}
           <td><input type="number" id="editPrice_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.price}"></td>
@@ -1804,6 +1837,8 @@
           ${hedgeTickCell}
           <td>${acc.name}</td>
           <td>${acc.status}</td>
+          <td>${acc.direction}</td>
+          <td>${acc.lot}</td>
           <td>$${acc.balance.toFixed(2)}</td>
           ${plCell}
           <td>${acc.price.toFixed(2)}</td>
@@ -2335,6 +2370,27 @@
   let currentUserDocUnsub = null;
   let currentUID = null;
 
+  // SECURITY: any user-controlled string (display name, email, KYC fields,
+  // uploaded-file URLs, etc.) MUST go through this before being placed into
+  // innerHTML anywhere on the site. Without this, a malicious user can set
+  // their Google display name (or KYC "name" field) to an HTML/script
+  // payload; when an admin later opens the Admin Panel / Access Panel /
+  // KYC Panel (all of which render other users' data via innerHTML), that
+  // payload would execute inside the ADMIN's authenticated session — giving
+  // the attacker's script the same Firestore read/write power as the admin
+  // (self-approve, grant themselves admin role, unlock all courses, etc.).
+  // This one function closes that hole everywhere it's used.
+  function escapeHtml(str){
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  window.escapeHtml = escapeHtml;
+
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(err => alert("Login error: " + err.message));
@@ -2436,14 +2492,14 @@
         const card = document.createElement('div');
         card.className = 'admin-user-card';
         card.innerHTML = `
-          <p style="color:#fff;font-weight:bold;">${d.name || d.email}</p>
-          <p style="color:#94a3b8;font-size:12px;">${d.email}</p>
-          <p style="color:#facc15;font-size:12px;">Status: ${d.status}</p>
+          <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email)}</p>
+          <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email)}</p>
+          <p style="color:#facc15;font-size:12px;">Status: ${escapeHtml(d.status)}</p>
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
             <button onclick="approveUser('${doc.id}')">Approve</button>
             <button onclick="rejectUser('${doc.id}')">Reject</button>
             <button onclick="forceLogoutUser('${doc.id}')">Logout</button>
-            <button onclick="viewActivity('${doc.id}', '${(d.name||d.email).replace(/'/g,"")}')">Activity</button>
+            <button onclick="viewActivity('${doc.id}', '${escapeHtml((d.name||d.email||'').replace(/'/g,""))}')">Activity</button>
           </div>
         `;
         container.appendChild(card);
@@ -2738,11 +2794,11 @@
         const card = document.createElement('div');
         card.className = 'admin-user-card';
         card.innerHTML = `
-          <p style="color:#fff;font-weight:bold;">${d.name || d.email || 'Unknown User'}</p>
-          <p style="color:#94a3b8;font-size:12px;">${d.email || ''}</p>
-          <p style="color:#facc15;font-size:12px;">${d.questionsCompleted}/${d.totalQuestions} sawalat — ${t}</p>
+          <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email || 'Unknown User')}</p>
+          <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email || '')}</p>
+          <p style="color:#facc15;font-size:12px;">${escapeHtml(d.questionsCompleted)}/${escapeHtml(d.totalQuestions)} sawalat — ${escapeHtml(t)}</p>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
-            <a href="${d.videoUrl}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Watch on YouTube</a>
+            <a href="${escapeHtml(d.videoUrl)}" target="_blank" style="padding:6px 10px;font-size:12px;border-radius:6px;background:#38bdf8;color:#0f172a;font-weight:600;text-decoration:none;">Watch on YouTube</a>
             <button onclick="deleteInterview('${doc.id}')">Delete Link</button>
           </div>`;
         container.appendChild(card);
@@ -3490,8 +3546,8 @@
       const row = document.createElement('div');
       row.className = 'ictsig-history-item';
       const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
-      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${d.strategy||''})</em></span>
-        <span class="ictsig-badge-status ${d.status}">${d.status.replace('_',' ').toUpperCase()}</span>`;
+      row.innerHTML = `<span>${escapeHtml(time)} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${escapeHtml(d.direction)}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${escapeHtml(d.strategy||'')})</em></span>
+        <span class="ictsig-badge-status ${escapeHtml(d.status)}">${escapeHtml((d.status||'').replace('_',' ').toUpperCase())}</span>`;
       container.appendChild(row);
     });
   }
@@ -4216,9 +4272,9 @@ function kycEnableAddressNext(){
       const d = doc.data();
       const time = d.submittedAt ? d.submittedAt.toDate().toLocaleString() : '';
       box.innerHTML = `
-        <p style="margin-bottom:10px;">Status: <span class="kyc-status-badge ${d.status}">${d.status.toUpperCase()}</span></p>
-        <p style="color:#94a3b8; font-size:12px;">Submitted: ${time}</p>
-        ${d.adminNote ? `<p style="color:#fda4af; font-size:13px; margin-top:8px;">Admin note: ${d.adminNote}</p>` : ''}
+        <p style="margin-bottom:10px;">Status: <span class="kyc-status-badge ${escapeHtml(d.status)}">${escapeHtml((d.status||'').toUpperCase())}</span></p>
+        <p style="color:#94a3b8; font-size:12px;">Submitted: ${escapeHtml(time)}</p>
+        ${d.adminNote ? `<p style="color:#fda4af; font-size:13px; margin-top:8px;">Admin note: ${escapeHtml(d.adminNote)}</p>` : ''}
       `;
     });
   }
@@ -4241,12 +4297,12 @@ function kycEnableAddressNext(){
         const card = document.createElement('div');
         card.className = 'kyc-admin-card';
        card.innerHTML = `
-  <p style="color:#fff;font-weight:bold;">${d.name || d.email}</p>
-  <p style="color:#94a3b8;font-size:12px;">${d.email} — <span class="kyc-status-badge ${d.status}">${d.status.toUpperCase()}</span></p>
+  <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email)}</p>
+  <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email)} — <span class="kyc-status-badge ${escapeHtml(d.status)}">${escapeHtml((d.status||'').toUpperCase())}</span></p>
   <div class="kyc-admin-imgs">
-    <img src="${d.idDocUrl}" onclick="window.open('${d.idDocUrl}','_blank')" title="ID Document">
-    ${d.faceUrls.map(u => `<img src="${u}" onclick="window.open('${u}','_blank')" title="Face">`).join('')}
-    ${d.addressDocUrl ? `<img src="${d.addressDocUrl}" onclick="window.open('${d.addressDocUrl}','_blank')" title="Address Proof">` : ''}
+    <img src="${escapeHtml(d.idDocUrl)}" onclick="window.open('${escapeHtml(d.idDocUrl)}','_blank')" title="ID Document">
+    ${(d.faceUrls||[]).map(u => `<img src="${escapeHtml(u)}" onclick="window.open('${escapeHtml(u)}','_blank')" title="Face">`).join('')}
+    ${d.addressDocUrl ? `<img src="${escapeHtml(d.addressDocUrl)}" onclick="window.open('${escapeHtml(d.addressDocUrl)}','_blank')" title="Address Proof">` : ''}
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;">
     <button onclick="kycAdminSetStatus('${doc.id}','approved')">Approve</button>
@@ -5157,7 +5213,7 @@ function ccAnswerQuiz(btn, chosenIdx, correctIdx){
 function ccRenderAdminPanel(usersList){
   var html = '';
   usersList.forEach(function(u){
-    html += '<details class="cc-admin-user"><summary>'+(u.name||u.email||u.uid)+'</summary>';
+    html += '<details class="cc-admin-user"><summary>'+escapeHtml(u.name||u.email||u.uid)+'</summary>';
     Object.keys(COURSES).forEach(function(key){
       var c = COURSES[key];
       var f = (u.access && u.access[key]) || {unlocked:false, parts:{}};
