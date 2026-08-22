@@ -4721,6 +4721,416 @@
 })();
 </script>
 
+<!-- ==========================================
+     FRACTAL ICT SIGNALS — Bias + Structure + Liquidity, fractal (multi-timeframe) alignment
+     Based on the "FRACTAL + BIAS + STRUCTURE + LIQUIDITY = TRUE ICT" framework (Guardeer Lecture 11):
+     HTF se directional Bias, MTF se Structure (BOS) confirmation, LTF se Liquidity-sweep entry trigger —
+     teeno timeframes par wohi fractal logic repeat hoti hai. Yeh bot khud independent hai (FOS/ICT-old se alag)
+     aur sath sath ek live "guide" panel bhi deta hai jo har pillar ko real-time explain karta hai.
+     ========================================== -->
+<style>
+  .fic-wrap{display:flex;flex-direction:column;gap:20px;}
+  .fic-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .fic-dot{width:8px;height:8px;border-radius:50%;background:#38bdf8;animation:recPulse 1.2s infinite;}
+  .fic-pillar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
+  .fic-pillar{background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;}
+  .fic-pillar .fic-pillar-title{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .fic-pillar .fic-pillar-val{font-size:16px;font-weight:800;margin-bottom:6px;}
+  .fic-pillar .fic-pillar-val.bullish{color:#22c55e;}
+  .fic-pillar .fic-pillar-val.bearish{color:#ef4444;}
+  .fic-pillar .fic-pillar-val.neutral,.fic-pillar .fic-pillar-val.none,.fic-pillar .fic-pillar-val.waiting{color:#94a3b8;}
+  .fic-pillar .fic-pillar-desc{font-size:12px;color:#64748b;line-height:1.5;}
+  .fic-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(56,189,248,0.35);border-radius:18px;padding:22px;}
+  .fic-dir-badge{display:inline-block;font-weight:900;font-size:16px;padding:4px 16px;border-radius:999px;margin-bottom:14px;}
+  .fic-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .fic-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .fic-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .fic-reason{background:rgba(15,23,42,0.5);border-left:3px solid #38bdf8;border-radius:8px;padding:14px 16px;color:#cbd5e1;font-size:13.5px;line-height:1.7;white-space:pre-line;}
+</style>
+<section id="fractalictsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🔮 Fractal ICT Signals — Bias + Structure + Liquidity (True ICT)</h3>
+    <p style="color:#94a3b8; margin-bottom:22px; font-size:14px; line-height:1.6;">
+      Yeh bot ICT ke <b>"FRACTAL + BIAS + STRUCTURE + LIQUIDITY = TRUE ICT"</b> framework par based hai
+      (Guardeer, Lecture 11). Market ka structure har timeframe par <b>fractal</b> tarah repeat hota hai — is liye
+      yeh bot teen alag timeframes par wohi logic lagata hai: <b>4H se Bias</b> (bara direction), <b>1H se
+      Structure confirmation</b> (Break of Structure), aur <b>15M se Liquidity-sweep entry trigger</b>. Jab teeno
+      align ho jayein, tabhi signal fire hota hai. Yeh section sirf signal nahi deta — neeche live "guide" panel
+      bhi hai jo har pillar ko real-time samjhata hai.
+    </p>
+
+    <div class="fic-engine-status">
+      <span class="fic-dot"></span>
+      <span id="ficEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">📖 Live Guide — 4 Pillars Abhi Kya Keh Rahe Hain</h4>
+    <div class="fic-pillar-grid">
+      <div class="fic-pillar">
+        <div class="fic-pillar-title">1. Bias (4H)</div>
+        <div class="fic-pillar-val neutral" id="ficPillarBias">—</div>
+        <div class="fic-pillar-desc" id="ficPillarBiasDesc">HTF swing highs/lows se directional bias nikal rahe hain...</div>
+      </div>
+      <div class="fic-pillar">
+        <div class="fic-pillar-title">2. Structure (1H)</div>
+        <div class="fic-pillar-val neutral" id="ficPillarStructure">—</div>
+        <div class="fic-pillar-desc" id="ficPillarStructureDesc">MTF par Break of Structure (BOS) confirm ho raha hai ya nahi, dekh rahe hain...</div>
+      </div>
+      <div class="fic-pillar">
+        <div class="fic-pillar-title">3. Liquidity (15M)</div>
+        <div class="fic-pillar-val neutral" id="ficPillarLiquidity">—</div>
+        <div class="fic-pillar-desc" id="ficPillarLiquidityDesc">LTF par kisi liquidity pool ka sweep dhoond rahe hain (stop-hunt trigger)...</div>
+      </div>
+      <div class="fic-pillar">
+        <div class="fic-pillar-title">4. Fractal Alignment</div>
+        <div class="fic-pillar-val neutral" id="ficPillarFractal">—</div>
+        <div class="fic-pillar-desc" id="ficPillarFractalDesc">Jab upar wale teeno pillars ek hi direction mein align ho jayein, "True ICT" signal fire hota hai.</div>
+      </div>
+    </div>
+
+    <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Current Signal</h4>
+    <div class="fic-live-card" id="ficLiveCard">
+      <span class="fic-dir-badge NONE" id="ficDirBadge">NO ACTIVE SIGNAL</span>
+      <div class="outcome-summary">
+        <div class="outcome-box"><div class="label">Entry</div><div class="value" id="ficEntry" style="color:#e2e8f0;">—</div></div>
+        <div class="outcome-box"><div class="label">Stop Loss</div><div class="value" id="ficSL" style="color:#fda4af;">—</div></div>
+        <div class="outcome-box"><div class="label">Take Profit</div><div class="value" id="ficTP" style="color:#67e8f9;">—</div></div>
+        <div class="outcome-box"><div class="label">Risk:Reward</div><div class="value" id="ficRR" style="color:#facc15;">—</div></div>
+      </div>
+      <div class="fic-reason" id="ficReason" style="margin-top:14px;">Abhi koi active Fractal ICT signal nahi hai. Bot 4H/1H/15M ko monitor kar raha hai.</div>
+    </div>
+
+    <h4 style="color:#38bdf8; font-size:15px; margin:26px 0 10px;">Live Commentary</h4>
+    <div id="ficFeed" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:6px;">
+      <p style="color:#64748b; font-size:13px;">Feed load ho raha hai...</p>
+    </div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>"True ICT" ka matlab (is bot ke rules):</b>
+      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
+        <li><b>Fractal Nature:</b> Market structure har timeframe par khud ko repeat karta hai — chota
+          structure bare structure ke andar hota hai. Is liye bot 3 nested timeframes use karta hai: 4H (bara
+          picture), 1H (confirmation), 15M (entry timing).</li>
+        <li><b>Bias:</b> 4H candles ke swing highs/lows se nikalta hai — Higher-High + Higher-Low = Bullish
+          bias, Lower-High + Lower-Low = Bearish bias. Bias na ho (mixed swings) to bot wait karta hai.</li>
+        <li><b>Structure (BOS):</b> 1H par jab price apne pichlay relevant swing point ko bias ki direction
+          mein todta hai (Break of Structure), tab structure "confirm" mana jata hai — sirf bias kaafi nahi,
+          structure ne bhi usay support karna chahiye.</li>
+        <li><b>Liquidity:</b> 15M par bot ek liquidity pool dhoondta hai (recent swing high/low jahan
+          stop-losses/pending orders rest karte hain) — jab price us pool ko "sweep" kare (wick se cross kare
+          phir wapas andar close ho) to yeh institutional stop-hunt ka signal hai, jo aksar asli move se pehle
+          hota hai.</li>
+        <li>Jab <b>Bias + Structure + Liquidity-sweep</b> teeno ek hi direction confirm karein, tabhi bot signal
+          deta hai — SL sweep wick ke thora peeche, TP agle opposite-side liquidity pool par.</li>
+      </ol>
+      <p style="margin-top:10px;">Yeh bhi ek <b>rule-based technical framework</b> hai, guarantee nahi — hamesha apna risk management khud follow karein.</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // ========================= CONFIG (independent — apna alag Firestore collection) =========================
+  const FIC_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
+  const FIC_SYMBOL = "XAU/USD";
+  const FIC_HTF_INTERVAL = '4h', FIC_MTF_INTERVAL = '1h', FIC_LTF_INTERVAL = '15min';
+  const FIC_SWING_STRENGTH = 2;      // fractal swing: N candles har taraf se kam/zyada honi chahiye
+  const FIC_LIQUIDITY_LOOKBACK = 24; // LTF par kitni recent candles mein liquidity pool dhoondna hai
+  const FIC_SWEEP_RECENCY = 8;       // sweep kitni recent candles ke andar hua ho (warna stale)
+  const FIC_ATR_SL_BUFFER_MULT = 0.3;// SL, sweep wick se thora peeche (LTF ATR ka fraction)
+  const FIC_CYCLE_MS = 5 * 60 * 1000;
+  const FIC_MONITOR_MS = 60 * 1000;
+
+  let ficHtf = [], ficMtf = [], ficLtf = [];
+  let ficTimer = null, ficMonitorTimer = null;
+
+  function ficLogFeed(msg){
+    const el = document.getElementById('ficFeed');
+    if (!el) return;
+    const line = document.createElement('div');
+    line.style.cssText = 'font-size:12.5px;color:#94a3b8;padding:6px 10px;background:rgba(15,23,42,0.5);border-radius:8px;';
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.prepend(line);
+    while (el.childElementCount > 40) el.removeChild(el.lastChild);
+  }
+  function ficSetStatus(msg){
+    const el = document.getElementById('ficEngineStatusText');
+    if (el) el.textContent = msg;
+  }
+
+  async function ficFetchCandles(interval, outputsize){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(FIC_SYMBOL)}&interval=${interval}&outputsize=${outputsize}&apikey=${FIC_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) return [];
+      return data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+    } catch(err){ return []; }
+  }
+  async function ficFetchLatestPrice(){
+    try {
+      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(FIC_SYMBOL)}&apikey=${FIC_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const p = parseFloat(data.price);
+      return isNaN(p) ? null : p;
+    } catch(err){ return null; }
+  }
+  function ficAtr(candles, period){
+    if (candles.length < period + 1) return 0;
+    let trs = [];
+    for (let i = candles.length - period; i < candles.length; i++){
+      const c = candles[i], p = candles[i-1];
+      trs.push(Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close)));
+    }
+    return trs.reduce((a,b) => a+b, 0) / trs.length;
+  }
+
+  // ========================= PILLAR 1: fractal swing detector (reused across all timeframes) =========================
+  function ficFindSwings(candles, strength){
+    const highs = [], lows = [];
+    for (let i = strength; i < candles.length - strength; i++){
+      const c = candles[i];
+      let isHigh = true, isLow = true;
+      for (let k = 1; k <= strength; k++){
+        if (candles[i-k].high >= c.high || candles[i+k].high >= c.high) isHigh = false;
+        if (candles[i-k].low <= c.low || candles[i+k].low <= c.low) isLow = false;
+      }
+      if (isHigh) highs.push({ index:i, price:c.high, time:c.time });
+      if (isLow) lows.push({ index:i, price:c.low, time:c.time });
+    }
+    return { highs, lows };
+  }
+
+  // ========================= PILLAR 1: Bias (HTF) =========================
+  function ficComputeBias(htfCandles){
+    const { highs, lows } = ficFindSwings(htfCandles, FIC_SWING_STRENGTH);
+    if (highs.length < 2 || lows.length < 2) return { bias:'neutral', reason:'HTF par abhi tak kaafi swing points nahi bane.' };
+    const h1 = highs[highs.length-1], h0 = highs[highs.length-2];
+    const l1 = lows[lows.length-1], l0 = lows[lows.length-2];
+    let bias = 'neutral', reason = '';
+    if (h1.price > h0.price && l1.price > l0.price){
+      bias = 'bullish';
+      reason = `4H par Higher-High (${h0.price.toFixed(2)} → ${h1.price.toFixed(2)}) aur Higher-Low (${l0.price.toFixed(2)} → ${l1.price.toFixed(2)}) — bullish structure.`;
+    } else if (h1.price < h0.price && l1.price < l0.price){
+      bias = 'bearish';
+      reason = `4H par Lower-High (${h0.price.toFixed(2)} → ${h1.price.toFixed(2)}) aur Lower-Low (${l0.price.toFixed(2)} → ${l1.price.toFixed(2)}) — bearish structure.`;
+    } else {
+      reason = '4H swings mixed hain (na clean HH+HL, na LH+LL) — bias abhi neutral/ranging.';
+    }
+    return { bias, reason, lastHigh:h1, prevHigh:h0, lastLow:l1, prevLow:l0 };
+  }
+
+  // ========================= PILLAR 2: Structure / BOS (MTF) =========================
+  function ficDetectStructure(mtfCandles, biasDirection){
+    const { highs, lows } = ficFindSwings(mtfCandles, FIC_SWING_STRENGTH);
+    const lastClose = mtfCandles[mtfCandles.length-1].close;
+    if (biasDirection === 'bullish' && highs.length){
+      const refHigh = highs[highs.length-1];
+      if (lastClose > refHigh.price){
+        return { type:'BOS', direction:'bullish', level:refHigh.price, reason:`1H price ne pichla swing high ${refHigh.price.toFixed(2)} todh diya (bullish BOS) — bias confirm.` };
+      }
+      return { type:'none', level:refHigh.price, reason:`1H abhi tak swing high ${refHigh.price.toFixed(2)} ke neeche hai — bullish BOS ka wait.` };
+    }
+    if (biasDirection === 'bearish' && lows.length){
+      const refLow = lows[lows.length-1];
+      if (lastClose < refLow.price){
+        return { type:'BOS', direction:'bearish', level:refLow.price, reason:`1H price ne pichla swing low ${refLow.price.toFixed(2)} todh diya (bearish BOS) — bias confirm.` };
+      }
+      return { type:'none', level:refLow.price, reason:`1H abhi tak swing low ${refLow.price.toFixed(2)} ke upar hai — bearish BOS ka wait.` };
+    }
+    return { type:'none', reason:'HTF bias neutral hai, is liye structure check nahi ho rahi.' };
+  }
+
+  // ========================= PILLAR 3: Liquidity sweep (LTF) =========================
+  function ficDetectLiquiditySweep(ltfCandles, biasDirection){
+    const recent = ltfCandles.slice(-FIC_LIQUIDITY_LOOKBACK);
+    const { highs, lows } = ficFindSwings(recent, FIC_SWING_STRENGTH);
+    // Bullish bias → sell-side liquidity (recent swing LOW) sweep dhoondte hain (stop-hunt neeche, phir reversal up)
+    // Bearish bias → buy-side liquidity (recent swing HIGH) sweep dhoondte hain
+    const pool = biasDirection === 'bullish'
+      ? (lows.length ? lows[lows.length-1] : null)
+      : (highs.length ? highs[highs.length-1] : null);
+    if (!pool) return { swept:false, reason:'Recent liquidity pool (swing point) LTF par abhi nahi bana.' };
+    const startIdx = Math.max(pool.index + 1, recent.length - FIC_SWEEP_RECENCY);
+    for (let i = startIdx; i < recent.length; i++){
+      const c = recent[i];
+      if (biasDirection === 'bullish' && c.low < pool.price && c.close > pool.price){
+        return { swept:true, level:pool.price, wickLow:c.low, reason:`15M par ${pool.price.toFixed(2)} (sell-side liquidity) sweep hui, phir price wapas upar close hua — stop-hunt confirm.` };
+      }
+      if (biasDirection === 'bearish' && c.high > pool.price && c.close < pool.price){
+        return { swept:true, level:pool.price, wickHigh:c.high, reason:`15M par ${pool.price.toFixed(2)} (buy-side liquidity) sweep hui, phir price wapas neeche close hua — stop-hunt confirm.` };
+      }
+    }
+    return { swept:false, level:pool.price, reason:`Liquidity pool ${pool.price.toFixed(2)} par nazar hai, lekin abhi sweep nahi hui.` };
+  }
+
+  function ficUpdatePillarUI(bias, structure, liquidity, aligned){
+    const setPillar = (valId, descId, label, cls, desc) => {
+      const v = document.getElementById(valId), d = document.getElementById(descId);
+      if (v){ v.textContent = label; v.className = 'fic-pillar-val ' + cls; }
+      if (d) d.textContent = desc;
+    };
+    setPillar('ficPillarBias','ficPillarBiasDesc',
+      bias.bias === 'bullish' ? 'Bullish' : bias.bias === 'bearish' ? 'Bearish' : 'Neutral',
+      bias.bias, bias.reason);
+    setPillar('ficPillarStructure','ficPillarStructureDesc',
+      structure.type === 'BOS' ? 'BOS Confirmed' : 'Waiting',
+      structure.type === 'BOS' ? bias.bias : 'waiting', structure.reason || '');
+    setPillar('ficPillarLiquidity','ficPillarLiquidityDesc',
+      liquidity.swept ? 'Swept' : 'Waiting',
+      liquidity.swept ? bias.bias : 'waiting', liquidity.reason || '');
+    setPillar('ficPillarFractal','ficPillarFractalDesc',
+      aligned ? 'ALIGNED ✓' : 'Not Yet',
+      aligned ? bias.bias : 'waiting',
+      aligned ? 'Bias + Structure + Liquidity teeno ek hi direction mein align — "True ICT" condition poori.' : 'Abhi teeno pillars align nahi hue.');
+  }
+
+  // ========================= MAIN CYCLE =========================
+  async function ficRunCycle(){
+    const openSnap = await db.collection('fractalIctSignals').where('status','in',['open']).limit(1).get();
+    if (!openSnap.empty){
+      await ficMonitor(openSnap.docs[0]);
+      ficSetStatus('Live — ek Fractal ICT signal already open hai, monitor ho raha hai.');
+      return;
+    }
+
+    const [htf, mtf, ltf] = await Promise.all([
+      ficFetchCandles(FIC_HTF_INTERVAL, 60), ficFetchCandles(FIC_MTF_INTERVAL, 100), ficFetchCandles(FIC_LTF_INTERVAL, 100)
+    ]);
+    ficHtf = htf; ficMtf = mtf; ficLtf = ltf;
+    if (htf.length < 10 || mtf.length < 10 || ltf.length < 10){ ficSetStatus('Price history jama ho rahi hai...'); return; }
+
+    const bias = ficComputeBias(htf);
+    if (bias.bias === 'neutral'){
+      ficUpdatePillarUI(bias, {type:'none',reason:'Bias neutral hai.'}, {swept:false,reason:'Bias neutral hai.'}, false);
+      ficSetStatus('Live — HTF bias abhi neutral/ranging hai, wait kar rahe hain.');
+      return;
+    }
+
+    const structure = ficDetectStructure(mtf, bias.bias);
+    if (structure.type !== 'BOS'){
+      ficUpdatePillarUI(bias, structure, {swept:false,reason:'Structure confirm nahi hui, liquidity check skip.'}, false);
+      ficSetStatus(`Live — Bias ${bias.bias} hai, MTF structure ka wait ho raha hai.`);
+      return;
+    }
+
+    const liquidity = ficDetectLiquiditySweep(ltf, bias.bias);
+    if (!liquidity.swept){
+      ficUpdatePillarUI(bias, structure, liquidity, false);
+      ficSetStatus(`Live — Bias + Structure confirm, LTF liquidity-sweep trigger ka wait.`);
+      return;
+    }
+
+    // Teeno pillars align — Fractal alignment achieved
+    ficUpdatePillarUI(bias, structure, liquidity, true);
+    const direction = bias.bias === 'bullish' ? 'BUY' : 'SELL';
+    const livePrice = await ficFetchLatestPrice();
+    const entry = livePrice !== null ? livePrice : ltf[ltf.length-1].close;
+    const ltfAtr = ficAtr(ltf, 14);
+    const sl = direction === 'BUY'
+      ? liquidity.wickLow - ltfAtr * FIC_ATR_SL_BUFFER_MULT
+      : liquidity.wickHigh + ltfAtr * FIC_ATR_SL_BUFFER_MULT;
+    // TP: agla opposite-side HTF/MTF liquidity pool — warna ATR fallback
+    let tp;
+    if (direction === 'BUY') tp = bias.lastHigh ? bias.lastHigh.price : entry + Math.abs(entry - sl) * 2;
+    else tp = bias.lastLow ? bias.lastLow.price : entry - Math.abs(entry - sl) * 2;
+    const rr = Math.abs(tp - entry) / Math.abs(entry - sl);
+    if (!isFinite(rr) || rr < 1){
+      ficLogFeed('⚠️ Risk:Reward 1:1 se kam ban raha hai (TP zyada dur nahi) — signal skip, behtar setup ka wait.');
+      ficSetStatus('Live — RR insufficient tha, signal skip hua.');
+      return;
+    }
+
+    const reason = [
+      `Basis: FRACTAL + BIAS + STRUCTURE + LIQUIDITY = TRUE ICT (multi-timeframe: 4H/1H/15M).`,
+      `1) Bias (4H): ${bias.reason}`,
+      `2) Structure (1H): ${structure.reason}`,
+      `3) Liquidity (15M): ${liquidity.reason}`,
+      `4) Fractal Alignment: teeno pillars ${bias.bias} direction mein align — signal fire.`,
+      `SL: sweep wick ke thora peeche (LTF ATR buffer). TP: agla opposite-side HTF liquidity pool. RR ~1:${rr.toFixed(2)}.`
+    ].join('\n');
+
+    await db.collection('fractalIctSignals').add({
+      direction, entry, sl, tp, rr, reason,
+      bias: bias.bias, structureLevel: structure.level, liquidityLevel: liquidity.level,
+      status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ficLogFeed(`✅ Naya ${direction} Fractal ICT signal — Bias+Structure+Liquidity align ho gaye.`);
+    ficSetStatus(`Live — naya ${direction} Fractal ICT signal fire hua.`);
+  }
+
+  async function ficMonitor(doc){
+    const livePrice = await ficFetchLatestPrice();
+    const price = livePrice !== null ? livePrice : (ficLtf.length ? ficLtf[ficLtf.length-1].close : null);
+    if (price === null) return;
+    const d = doc.data();
+    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
+    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
+    if (hitTP){
+      await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      ficLogFeed('🎯 Fractal ICT signal TP hit!');
+    } else if (hitSL){
+      await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      ficLogFeed('🛑 Fractal ICT signal SL hit.');
+    }
+  }
+
+  function ficRenderCard(d){
+    const dirBadge = document.getElementById('ficDirBadge');
+    if (!dirBadge) return;
+    if (!d){
+      dirBadge.className = 'fic-dir-badge NONE'; dirBadge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('ficEntry').textContent = '—';
+      document.getElementById('ficSL').textContent = '—';
+      document.getElementById('ficTP').textContent = '—';
+      document.getElementById('ficRR').textContent = '—';
+      document.getElementById('ficReason').textContent = 'Abhi koi active Fractal ICT signal nahi hai. Bot 4H/1H/15M ko monitor kar raha hai.';
+      return;
+    }
+    dirBadge.className = 'fic-dir-badge ' + d.direction;
+    dirBadge.textContent = d.direction + (d.status !== 'open' ? ' — ' + d.status.toUpperCase() : '');
+    document.getElementById('ficEntry').textContent = d.entry.toFixed(2);
+    document.getElementById('ficSL').textContent = d.sl.toFixed(2);
+    document.getElementById('ficTP').textContent = d.tp.toFixed(2);
+    document.getElementById('ficRR').textContent = '1:' + d.rr.toFixed(2);
+    document.getElementById('ficReason').textContent = d.reason;
+  }
+
+  function ficListen(){
+    db.collection('fractalIctSignals').orderBy('createdAt','desc').limit(1)
+      .onSnapshot(snap => { ficRenderCard(snap.empty ? null : snap.docs[0].data()); },
+                  () => { ficRenderCard(null); });
+  }
+
+  // ========================= INIT =========================
+  function ficStartEngine(){
+    ficListen();
+    ficLogFeed('Fractal ICT bot start ho gaya — Bias(4H) + Structure(1H) + Liquidity(15M) monitor ho raha hai.');
+    ficRunCycle();
+    ficTimer = setInterval(ficRunCycle, FIC_CYCLE_MS);
+    ficMonitorTimer = setInterval(async () => {
+      try {
+        const openSnap = await db.collection('fractalIctSignals').where('status','in',['open']).limit(1).get();
+        if (!openSnap.empty) await ficMonitor(openSnap.docs[0]);
+      } catch(err){ /* best-effort */ }
+    }, FIC_MONITOR_MS);
+  }
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) ficStartEngine();
+      else {
+        if (ficTimer) { clearInterval(ficTimer); ficTimer = null; }
+        if (ficMonitorTimer) { clearInterval(ficMonitorTimer); ficMonitorTimer = null; }
+      }
+    });
+  }
+})();
+</script>
+
  <script>
 (function(){
   const FF_JSON_URL = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
