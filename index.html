@@ -345,6 +345,7 @@
     <a href="#faq">FAQs</a>
    <a href="#ictsignals">ICT Signals</a>
    <a href="#signalconfidence">🎯 Signal Confidence</a>
+   <a href="#fundamentalsignals">📰🤖 Fundamental-Only Signals</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -392,6 +393,7 @@
       <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🤖</div><h4>ICT Signals — AI Gold Bot</h4><p>XAUUSD ke liye AI-generated ICT signals.</p></a>
       <a class="sd-folder" href="#signalconfidence"><div class="sd-icon">🎯</div><h4>Signal Confidence Score</h4><p>Har signal ka Entry/SL/TP sath mein "kitna percent confident/perfect" hai uska breakdown.</p></a>
+      <a class="sd-folder" href="#fundamentalsignals"><div class="sd-icon">📰🤖</div><h4>Fundamental-Only Signals</h4><p>Sirf news/fundamental data ki bina par (koi ICT/technical nahi) mustaqil signal — Entry/SL/TP ke sath.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -4121,6 +4123,341 @@
   window.ictConfSectionRefresh = renderConfidenceSection;
   renderConfidenceSection();
   setInterval(renderConfidenceSection, 5000); // fallback poll in case Firestore listener fires before this section loads
+})();
+</script>
+
+<!-- ==========================================
+     FUNDAMENTAL-ONLY SIGNALS — pure news/fundamental-based bot
+     (ICT Signals engine se BILKUL ALAG/independent — koi technical/ICT confluence
+      is mein shamil nahi, sirf Red Flag News actual-vs-forecast data par based)
+     ========================================== -->
+<style>
+  .fos-wrap{display:flex;flex-direction:column;gap:20px;}
+  .fos-toprow{display:flex;gap:15px;flex-wrap:wrap;}
+  .fos-stat{flex:1;min-width:140px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:16px;text-align:center;}
+  .fos-stat .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
+  .fos-stat .value{font-size:22px;font-weight:800;margin-top:6px;}
+  .fos-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(250,204,21,0.35);border-radius:18px;padding:22px;}
+  .fos-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
+  .fos-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
+  .fos-live-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .fos-dir-badge{font-weight:900;font-size:20px;padding:4px 16px;border-radius:999px;}
+  .fos-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .fos-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .fos-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .fos-time{color:#64748b;font-size:12px;}
+  .fos-levels{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .fos-level-box{flex:1;min-width:110px;background:rgba(15,23,42,0.6);border-radius:12px;padding:12px;text-align:center;}
+  .fos-level-box .label{font-size:11px;color:#94a3b8;}
+  .fos-level-box .value{font-size:18px;font-weight:800;margin-top:4px;}
+  .fos-reason{background:rgba(15,23,42,0.5);border-left:3px solid #facc15;border-radius:8px;padding:14px 16px;color:#cbd5e1;font-size:13.5px;line-height:1.7;white-space:pre-line;}
+  .fos-feed{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .fos-feed-item{font-size:12.5px;color:#94a3b8;padding:8px 12px;background:rgba(15,23,42,0.45);border-radius:8px;border-left:2px solid rgba(148,163,184,0.3);}
+  .fos-feed-item .t{color:#facc15;margin-right:6px;}
+  .fos-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;gap:6px;}
+  .fos-badge-status{font-weight:800;font-size:11px;padding:3px 10px;border-radius:999px;}
+  .fos-badge-status.tp_hit{background:rgba(34,197,94,0.15);color:#22c55e;}
+  .fos-badge-status.sl_hit{background:rgba(239,68,68,0.15);color:#ef4444;}
+  .fos-badge-status.open{background:rgba(250,204,21,0.15);color:#facc15;}
+  .fos-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;}
+  .fos-dot{width:8px;height:8px;border-radius:50%;background:#facc15;animation:recPulse 1.2s infinite;}
+</style>
+<section id="fundamentalsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>📰🤖 Fundamental-Only Signals (XAUUSD)</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px; line-height:1.6;">
+      Yeh ek <strong>bilkul alag, independent bot</strong> hai — <a href="#ictsignals" style="color:#38bdf8;">ICT Signals</a>
+      engine se is ka koi taluq nahi. Yeh sirf <a href="#fundamentalanalysis" style="color:#facc15;">Fundamental Analysis</a>
+      / <a href="#redflagnews" style="color:#facc15;">Red Flag News</a> ke live calendar data (actual-vs-forecast) ko dekh
+      kar, sirf news/fundamentals ki bina par XAUUSD ka BUY/SELL signal deta hai — koi ICT concept, koi chart-structure,
+      koi technical confluence is decision mein shamil nahi hota.
+    </p>
+
+    <div class="fos-engine-status" style="margin-bottom:16px;">
+      <span class="fos-dot"></span>
+      <span id="fosEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <div class="fos-wrap">
+      <div class="fos-toprow">
+        <div class="fos-stat"><div class="label">Total Signals</div><div class="value" id="fosTotal" style="color:#facc15;">0</div></div>
+        <div class="fos-stat"><div class="label">TP Hits</div><div class="value" id="fosTpCount" style="color:#22c55e;">0</div></div>
+        <div class="fos-stat"><div class="label">SL Hits</div><div class="value" id="fosSlCount" style="color:#ef4444;">0</div></div>
+        <div class="fos-stat"><div class="label">Win Rate</div><div class="value" id="fosWinRate" style="color:#a78bfa;">0%</div></div>
+      </div>
+
+      <div class="fos-live-card" id="fosLiveCard">
+        <div class="fos-live-head">
+          <span class="fos-dir-badge NONE" id="fosDirBadge">NO ACTIVE SIGNAL</span>
+          <span class="fos-time" id="fosLiveTime">—</span>
+        </div>
+        <div class="fos-levels">
+          <div class="fos-level-box"><div class="label">Entry</div><div class="value" id="fosEntry" style="color:#e2e8f0;">—</div></div>
+          <div class="fos-level-box"><div class="label">Stop Loss</div><div class="value" id="fosSL" style="color:#fda4af;">—</div></div>
+          <div class="fos-level-box"><div class="label">Take Profit</div><div class="value" id="fosTP" style="color:#67e8f9;">—</div></div>
+          <div class="fos-level-box"><div class="label">Confidence</div><div class="value" id="fosConfidence" style="color:#a78bfa;">—</div></div>
+        </div>
+        <div class="fos-reason" id="fosReason">Abhi koi active fundamental signal nahi hai. Bot recent high-impact USD news ko monitor kar raha hai.</div>
+      </div>
+
+      <div>
+        <h4 style="color:#facc15; font-size:15px; margin-bottom:10px;">Live Commentary</h4>
+        <div class="fos-feed" id="fosFeed"></div>
+      </div>
+
+      <div>
+        <h4 style="color:#facc15; font-size:15px; margin-bottom:10px;">Signal History</h4>
+        <div id="fosHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+      </div>
+    </div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>Yeh bot kaisay decide karta hai:</b> Sirf pichlay 24 ghanton ki high-impact USD news (NFP, CPI, PCE, GDP, PMI,
+      Retail Sales, Jobless Claims, Unemployment Rate) ka Actual-vs-Forecast dekh kar ek fundamental score banata hai.
+      Score kaafi strong ho (ek taraf) to us direction mein signal deta hai; kamzor/mixed ho to koi signal nahi deta.
+      Entry current market price hoti hai, SL/TP 1-hour ATR (volatility) se calculate hote hain — is mein koi chart
+      pattern ya technical structure shamil nahi. Yeh sirf ek <b>rule-based fundamental estimate</b> hai, guarantee nahi.
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // ========================= CONFIG (fully independent from ICT engine) =========================
+  const FOS_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
+  const FOS_SYMBOL = "XAU/USD";
+  const FOS_CYCLE_MS = 15 * 60 * 1000;         // har 15 minute check
+  const FOS_LOOKBACK_HOURS = 24;               // pichlay kitne ghanton ki released news ginni hain
+  const FOS_RECENT_HOURS = 6;                  // itni recent news ko double weight
+  const FOS_FIRE_THRESHOLD = 2;                // is se zyada (ya kam, negative mein) score par hi signal fire hoga
+  const FOS_ATR_SL_MULT = 1.5;
+  const FOS_ATR_TP_MULT = 2.5;
+  const FOS_MIN_ATR_PCT = 0.0003;              // bilkul dead market mein signal na de
+
+  const FOS_DIRECT_KEYWORDS = ['non-farm', 'nonfarm', 'employment change', 'cpi', 'pce', 'gdp',
+    'retail sales', 'ism manufacturing', 'ism services', 'ism pmi', 'consumer confidence',
+    'ppi', 'producer price', 'durable goods', 'housing starts', 'industrial production'];
+  const FOS_INVERSE_KEYWORDS = ['unemployment rate', 'unemployment claims', 'jobless claims', 'continuing claims'];
+
+  let fosCandles1h = [];
+  let fosTimer = null;
+  let fosSignalsCache = [];
+
+  function fosLogFeed(msg){
+    const feed = document.getElementById('fosFeed');
+    if (!feed) return;
+    const item = document.createElement('div');
+    item.className = 'fos-feed-item';
+    item.innerHTML = `<span class="t">${new Date().toLocaleTimeString()}</span>${msg}`;
+    feed.insertBefore(item, feed.firstChild);
+    while (feed.children.length > 30) feed.removeChild(feed.lastChild);
+  }
+  function fosSetStatus(text){ const el = document.getElementById('fosEngineStatusText'); if (el) el.textContent = text; }
+
+  // ========================= OWN DATA FETCH (independent of ICT engine's candles) =========================
+  async function fosFetchCandles(){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(FOS_SYMBOL)}&interval=1h&outputsize=60&apikey=${FOS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values){ fosLogFeed('⚠️ Price data fetch fail: ' + (data.message || data.code || 'unknown')); return; }
+      fosCandles1h = data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+    } catch(err){ fosLogFeed('Price fetch error: ' + err.message); }
+  }
+  function fosAtr(c, period=14){
+    if (c.length < period+1) return 0;
+    let sum = 0;
+    for (let i = c.length-period; i < c.length; i++){
+      const tr = Math.max(c[i].high-c[i].low, Math.abs(c[i].high-c[i-1].close), Math.abs(c[i].low-c[i-1].close));
+      sum += tr;
+    }
+    return sum / period;
+  }
+  function fosParseNum(v){
+    if (v === undefined || v === null || v === '') return null;
+    const n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
+    return isNaN(n) ? null : n;
+  }
+
+  // ========================= FUNDAMENTAL BIAS (apni khud ki, independent copy) =========================
+  function fosComputeFundamentalBias(){
+    const events = window.ffEvents; // #redflagnews / #fundamentalanalysis section ka live calendar data
+    const out = { score: 0, label: 'neutral', items: [] };
+    if (!events || !events.length) return out;
+    const now = Date.now();
+    events.forEach(e => {
+      if (e.impact !== 'High' || e.country !== 'USD') return;
+      const t = new Date(e.date).getTime();
+      const ageHours = (now - t) / (60*60*1000);
+      if (ageHours < 0 || ageHours > FOS_LOOKBACK_HOURS) return;
+      const actual = fosParseNum(e.actual), forecast = fosParseNum(e.forecast);
+      if (actual === null || forecast === null || actual === forecast) return;
+      const titleLower = (e.title || '').toLowerCase();
+      const isDirect = FOS_DIRECT_KEYWORDS.some(k => titleLower.includes(k));
+      const isInverse = FOS_INVERSE_KEYWORDS.some(k => titleLower.includes(k));
+      if (!isDirect && !isInverse) return;
+      const beatForecast = actual > forecast;
+      let dir = 0;
+      if (isDirect) dir = beatForecast ? -1 : 1;
+      if (isInverse) dir = beatForecast ? 1 : -1;
+      const weight = ageHours <= FOS_RECENT_HOURS ? 2 : 1;
+      out.score += dir * weight;
+      out.items.push({ title: e.title, actual: e.actual, forecast: e.forecast, ageHours: ageHours.toFixed(1), direction: dir });
+    });
+    if (out.score >= FOS_FIRE_THRESHOLD) out.label = 'bullish';
+    else if (out.score <= -FOS_FIRE_THRESHOLD) out.label = 'bearish';
+    else out.label = 'neutral';
+    return out;
+  }
+
+  function fosComputeConfidence(fb){
+    const strength = Math.min(Math.abs(fb.score) / 6, 1) * 50;
+    const countFactor = Math.min(fb.items.length, 5) / 5 * 30;
+    const mostRecentAge = fb.items.length ? Math.min(...fb.items.map(i => parseFloat(i.ageHours))) : 999;
+    const recencyFactor = mostRecentAge <= FOS_RECENT_HOURS ? 20 : 10;
+    const score = Math.round(strength + countFactor + recencyFactor);
+    let tier = 'Low';
+    if (score >= 80) tier = 'High'; else if (score >= 65) tier = 'Medium-High'; else if (score >= 50) tier = 'Medium';
+    return { score: Math.min(score, 100), tier };
+  }
+
+  // ========================= MAIN CYCLE =========================
+  async function fosRunCycle(){
+    await fosFetchCandles();
+    if (fosCandles1h.length < 20){ fosSetStatus('Price history jama ho rahi hai...'); return; }
+
+    // Already-open signal ho to naya na banao, sirf monitor karo
+    const openSnap = await db.collection('fundOnlySignals').where('status','in',['open']).limit(1).get();
+    if (!openSnap.empty){
+      await fosMonitor(openSnap.docs[0]);
+      fosSetStatus('Live — ek fundamental signal already open hai, monitor ho raha hai.');
+      return;
+    }
+
+    const fb = fosComputeFundamentalBias();
+    if (fb.label === 'neutral'){
+      fosSetStatus(`Live — fundamental bias NEUTRAL/MIXED hai (score ${fb.score}) — koi naya signal nahi.`);
+      return;
+    }
+
+    const atr1h = fosAtr(fosCandles1h, 14);
+    const price = fosCandles1h[fosCandles1h.length-1].close;
+    const atrPct = price > 0 ? atr1h / price : 0;
+    if (atrPct < FOS_MIN_ATR_PCT){ fosLogFeed('Market bohot quiet hai (low ATR) — fundamental signal skip.'); return; }
+
+    const direction = fb.label === 'bullish' ? 'BUY' : 'SELL';
+    const entry = price;
+    const sl = direction === 'BUY' ? entry - atr1h*FOS_ATR_SL_MULT : entry + atr1h*FOS_ATR_SL_MULT;
+    const tp = direction === 'BUY' ? entry + atr1h*FOS_ATR_TP_MULT : entry - atr1h*FOS_ATR_TP_MULT;
+    const rr = (Math.abs(tp-entry) / Math.abs(entry-sl));
+
+    const conf = fosComputeConfidence(fb);
+    const newsLines = fb.items.map(it => `• ${it.title}: Actual ${it.actual} vs Forecast ${it.forecast} (${it.ageHours}h pehle) → ${it.direction>0?'Gold-bullish':'Gold-bearish'} surprise`).join('\n');
+    const reason = [
+      `Basis: SIRF Fundamental Analysis (koi ICT/technical confluence shamil nahi)`,
+      `Fundamental Bias: ${fb.label.toUpperCase()} (score ${fb.score}, pichlay ${FOS_LOOKBACK_HOURS}h ki ${fb.items.length} high-impact USD news par based)`,
+      newsLines,
+      `SL/TP basis: 1H ATR (${atr1h.toFixed(2)}) — SL: ${(FOS_ATR_SL_MULT)}x ATR, TP: ${(FOS_ATR_TP_MULT)}x ATR (RR ~1:${rr.toFixed(2)}).`,
+      `Confidence Score: ${conf.score}% (${conf.tier}) — yeh sirf news-surprise ki strength/count/recency par based hai.`
+    ].join('\n');
+
+    await db.collection('fundOnlySignals').add({
+      direction, entry, sl, tp, rr, reason, confidence: conf.score, confidenceTier: conf.tier,
+      newsUsed: fb.items, status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    fosLogFeed(`✅ Naya ${direction} fundamental-only signal — Confidence ${conf.score}% (${conf.tier})`);
+    fosSetStatus(`Live — naya ${direction} fundamental signal fire hua.`);
+  }
+
+  async function fosMonitor(doc){
+    if (!fosCandles1h.length) return;
+    const price = fosCandles1h[fosCandles1h.length-1].close;
+    const d = doc.data();
+    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
+    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
+    if (hitTP){
+      await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      fosLogFeed('🎯 Fundamental signal TP hit!');
+    } else if (hitSL){
+      await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      fosLogFeed('🛑 Fundamental signal SL hit.');
+    }
+  }
+
+  // ========================= UI RENDER =========================
+  function fosRenderLive(sig){
+    const card = document.getElementById('fosLiveCard');
+    const badge = document.getElementById('fosDirBadge');
+    if (!card || !badge) return;
+    if (!sig){
+      card.className = 'fos-live-card';
+      badge.className = 'fos-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('fosEntry').textContent = '—';
+      document.getElementById('fosSL').textContent = '—';
+      document.getElementById('fosTP').textContent = '—';
+      document.getElementById('fosConfidence').textContent = '—';
+      document.getElementById('fosReason').textContent = 'Abhi koi active fundamental signal nahi hai. Bot recent high-impact USD news ko monitor kar raha hai.';
+      document.getElementById('fosLiveTime').textContent = '—';
+      return;
+    }
+    card.className = 'fos-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
+    badge.className = 'fos-dir-badge ' + sig.direction;
+    badge.textContent = sig.direction + ' — Fundamental-Only';
+    document.getElementById('fosEntry').textContent = sig.entry.toFixed(2);
+    document.getElementById('fosSL').textContent = sig.sl.toFixed(2);
+    document.getElementById('fosTP').textContent = sig.tp.toFixed(2);
+    document.getElementById('fosConfidence').textContent = `${sig.confidence}% (${sig.confidenceTier})`;
+    document.getElementById('fosReason').textContent = sig.reason;
+    document.getElementById('fosLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
+  }
+  function fosRenderHistory(docs){
+    const container = document.getElementById('fosHistory');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!docs.length){ container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'fos-history-item';
+      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(Conf: ${d.confidence}%)</em></span>
+        <span class="fos-badge-status ${d.status}">${(d.status||'').replace('_',' ').toUpperCase()}</span>`;
+      container.appendChild(row);
+    });
+  }
+  function fosListen(){
+    db.collection('fundOnlySignals').orderBy('createdAt','desc').limit(50).onSnapshot(snap => {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      fosSignalsCache = docs;
+      const active = docs.find(d => d.status === 'open');
+      fosRenderLive(active || null);
+      fosRenderHistory(docs.slice(0, 15));
+      const tpHits = docs.filter(d => d.status === 'tp_hit').length;
+      const slHits = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = tpHits + slHits;
+      const winRate = closed > 0 ? ((tpHits/closed)*100).toFixed(1) : '0';
+      document.getElementById('fosTotal').textContent = docs.length;
+      document.getElementById('fosTpCount').textContent = tpHits;
+      document.getElementById('fosSlCount').textContent = slHits;
+      document.getElementById('fosWinRate').textContent = winRate + '%';
+    });
+  }
+
+  // ========================= INIT =========================
+  function fosStartEngine(){
+    fosListen();
+    fosLogFeed('Fundamental-Only bot start ho gaya — sirf Red Flag News data monitor ho raha hai (ICT se independent).');
+    fosRunCycle();
+    fosTimer = setInterval(fosRunCycle, FOS_CYCLE_MS);
+  }
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) fosStartEngine();
+      else if (fosTimer) { clearInterval(fosTimer); fosTimer = null; }
+    });
+  }
 })();
 </script>
 
