@@ -3138,6 +3138,20 @@
   .ictsig-badge-status.open { background:rgba(250,204,21,0.15); color:#facc15; }
   .ictsig-engine-status { font-size:12px; color:#64748b; display:flex; align-items:center; gap:8px; }
   .ictsig-dot { width:8px; height:8px; border-radius:50%; background:#22c55e; animation: recPulse 1.2s infinite; }
+  .ictsig-fund-card { background: rgba(17,24,39,0.75); border:1px solid rgba(250,204,21,0.3); border-radius:18px; padding:20px 22px; }
+  .ictsig-fund-head { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+  .ictsig-fund-head h4 { color:#facc15; font-size:15px; margin:0; }
+  .ictsig-fund-badge { font-weight:900; font-size:13px; padding:4px 14px; border-radius:999px; }
+  .ictsig-fund-badge.bullish { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.5); }
+  .ictsig-fund-badge.bearish { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.5); }
+  .ictsig-fund-badge.neutral { background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.35); }
+  .ictsig-fund-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+  .ictsig-fund-item { font-size:12.5px; color:#cbd5e1; background: rgba(15,23,42,0.5); border-radius:8px; padding:8px 12px; border-left:2px solid rgba(250,204,21,0.4); }
+  .ictsig-fund-item b { color:#e2e8f0; }
+  .ictsig-fund-align { font-size:12.5px; margin-top:10px; padding:8px 12px; border-radius:8px; }
+  .ictsig-fund-align.match { background:rgba(34,197,94,0.08); color:#86efac; border:1px solid rgba(34,197,94,0.3); }
+  .ictsig-fund-align.conflict { background:rgba(239,68,68,0.08); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+  .ictsig-fund-align.none { background:rgba(148,163,184,0.08); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); }
 
   .ictchat-box { background: rgba(17,24,39,0.75); border:1px solid rgba(148,163,184,0.2); border-radius:18px; padding:18px; display:flex; flex-direction:column; height:420px; }
   .ictchat-messages { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px; }
@@ -3161,6 +3175,11 @@
       concepts ke confluence par sirf XAUUSD (Gold) ke liye <strong>sirf valid setups</strong> par signal deta hai —
       koi forced daily quota nahi. Har entry se pehle reason text mein diya jata hai. Chart yahan nahi dikhaya
       jata, live chart ke liye <a href="#tradingview" style="color:#38bdf8;">Live Chart section</a> dekhein.
+      Ab yeh engine <a href="#fundamentalanalysis" style="color:#facc15;">Fundamental Analysis</a> section ke
+      <a href="#redflagnews" style="color:#facc15;">Red Flag News</a> data ko bhi live check karta hai — recently
+      release hui high-impact USD news (actual vs forecast) se ek fundamental bias nikalta hai aur usay technical
+      bias ke sath milata hai. Agar dono contradict karein to signal skip ho jata hai (safety filter), agar align
+      ya neutral hon to signal fire hota hai aur reason mein fundamental confirmation bhi likha jata hai.
     </p>
 
     <div class="ictsig-engine-status" style="margin-bottom:16px;">
@@ -3175,6 +3194,16 @@
         <div class="ictsig-stat"><div class="label">SL Hits</div><div class="value" id="ictsigSlCount" style="color:#ef4444;">0</div></div>
         <div class="ictsig-stat"><div class="label">Win Rate</div><div class="value" id="ictsigWinRate" style="color:#facc15;">0%</div></div>
         <div class="ictsig-stat"><div class="label">Aaj Ke Signals</div><div class="value" id="ictsigTodayCount" style="color:#a5b4fc;">0</div></div>
+      </div>
+
+      <div class="ictsig-fund-card" id="ictsigFundCard">
+        <div class="ictsig-fund-head">
+          <h4>📰 Fundamental Bias (Live, Red Flag News se)</h4>
+          <span class="ictsig-fund-badge neutral" id="ictsigFundBadge">CHECKING...</span>
+        </div>
+        <div style="color:#94a3b8; font-size:12.5px;" id="ictsigFundSummary">Recent high-impact USD news ka data load ho raha hai...</div>
+        <div class="ictsig-fund-list" id="ictsigFundList"></div>
+        <div class="ictsig-fund-align none" id="ictsigFundAlign" style="display:none;"></div>
       </div>
 
       <div class="ictsig-live-card" id="ictsigLiveCard">
@@ -3205,6 +3234,7 @@
             <span class="ictchat-suggestion" onclick="ictChatAsk('Win rate kitna hai?')">Win rate kitna hai?</span>
             <span class="ictchat-suggestion" onclick="ictChatAsk('FVG kya hota hai?')">FVG kya hota hai?</span>
             <span class="ictchat-suggestion" onclick="ictChatAsk('Aaj kitne signals aaye?')">Aaj kitne signals aaye?</span>
+            <span class="ictchat-suggestion" onclick="ictChatAsk('Fundamental bias kya hai?')">Fundamental bias kya hai?</span>
           </div>
           <div class="ictchat-inputrow">
             <input type="text" id="ictchatInput" placeholder="Bot se sawal poochein... (e.g. 'SL kitni door hai?')" onkeydown="if(event.key==='Enter') ictChatSend();">
@@ -3244,6 +3274,7 @@
   let htfZones = { h1: [], m15: [] };
   let signalsToday = 0;
   let signalsTodayDateKey = null;
+  let lastTechBias = null;
 
   function loadCache(){
     ["15min","1h","4h"].forEach(tf => {
@@ -3468,15 +3499,113 @@
   const NEWS_LEAD_HOURS = 8;   // day trader ki request: high-impact news ka pata kam se kam 8 ghante pehle chal jaye
   const NEWS_LAG_HOURS = 1;    // news release ke baad bhi 1 ghanta cool-down
   function isNewsBlackout(){
-    if (typeof ffEvents === 'undefined' || !ffEvents.length) return false;
+    const events = window.ffEvents;
+    if (!events || !events.length) return false;
     const now = Date.now();
-    return ffEvents.some(e => {
+    return events.some(e => {
       if (e.impact !== 'High') return false;
       const t = new Date(e.date).getTime();
       const diff = t - now; // positive = news is upcoming, negative = news already released
       return (diff >= 0 && diff < NEWS_LEAD_HOURS * 60 * 60 * 1000) ||
              (diff < 0 && Math.abs(diff) < NEWS_LAG_HOURS * 60 * 60 * 1000);
     });
+  }
+
+  // ========================= FUNDAMENTAL ANALYSIS ENGINE =========================
+  // Red Flag News (#redflagnews / #fundamentalanalysis) ka live calendar data (window.ffEvents)
+  // use kar ke, recently RELEASE hui high-impact USD news ka actual-vs-forecast dekh kar ek
+  // fundamental (gold) bias nikalta hai. Yeh technical bias ke sath confluence check ke liye
+  // istemal hota hai — koi qeemat ki guarantee nahi, sirf ek extra confluence filter hai.
+  const FUND_LOOKBACK_HOURS = 24;      // kitni purani released news ko count karna hai
+  const FUND_RECENT_HOURS = 6;         // is se zyada recent event ko double weight milta hai
+  const FUND_CONTRADICTION_THRESHOLD = 1.5; // score is se zyada strong ulta ho to signal skip
+
+  // Higher actual-than-forecast = US economy/inflation garam = USD bullish = Gold bearish (-1 ka direction)
+  const FUND_DIRECT_KEYWORDS = ['non-farm', 'nonfarm', 'employment change', 'cpi', 'pce', 'gdp',
+    'retail sales', 'ism manufacturing', 'ism services', 'ism pmi', 'consumer confidence',
+    'ppi', 'producer price', 'durable goods', 'housing starts', 'industrial production'];
+  // Higher actual-than-forecast = job market/economy weak = USD bearish = Gold bullish (+1 ka direction)
+  const FUND_INVERSE_KEYWORDS = ['unemployment rate', 'unemployment claims', 'jobless claims', 'continuing claims'];
+
+  function parseFFNumber(v){
+    if (v === undefined || v === null || v === '') return null;
+    const n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
+    return isNaN(n) ? null : n;
+  }
+
+  function computeFundamentalBias(){
+    const events = window.ffEvents;
+    const out = { score: 0, label: 'neutral', items: [] };
+    if (!events || !events.length) return out;
+    const now = Date.now();
+
+    events.forEach(e => {
+      if (e.impact !== 'High' || e.country !== 'USD') return;
+      const t = new Date(e.date).getTime();
+      const ageHours = (now - t) / (60 * 60 * 1000);
+      if (ageHours < 0 || ageHours > FUND_LOOKBACK_HOURS) return; // sirf already-released, lookback ke andar
+
+      const actual = parseFFNumber(e.actual);
+      const forecast = parseFFNumber(e.forecast);
+      if (actual === null || forecast === null || actual === forecast) return;
+
+      const titleLower = (e.title || '').toLowerCase();
+      const isDirect = FUND_DIRECT_KEYWORDS.some(k => titleLower.includes(k));
+      const isInverse = FUND_INVERSE_KEYWORDS.some(k => titleLower.includes(k));
+      if (!isDirect && !isInverse) return;
+
+      const beatForecast = actual > forecast; // "beat" numerically, direction interpret niche hoti hai
+      let goldDirection = 0; // +1 = gold-bullish surprise, -1 = gold-bearish surprise
+      if (isDirect) goldDirection = beatForecast ? -1 : 1;
+      if (isInverse) goldDirection = beatForecast ? 1 : -1;
+
+      const weight = ageHours <= FUND_RECENT_HOURS ? 2 : 1;
+      out.score += goldDirection * weight;
+      out.items.push({
+        title: e.title, actual: e.actual, forecast: e.forecast,
+        ageHours: ageHours.toFixed(1), direction: goldDirection
+      });
+    });
+
+    if (out.score >= FUND_CONTRADICTION_THRESHOLD) out.label = 'bullish';
+    else if (out.score <= -FUND_CONTRADICTION_THRESHOLD) out.label = 'bearish';
+    else out.label = 'neutral';
+    return out;
+  }
+
+  function renderFundamentalBias(fb, technicalBias){
+    const badge = document.getElementById('ictsigFundBadge');
+    const summary = document.getElementById('ictsigFundSummary');
+    const list = document.getElementById('ictsigFundList');
+    const alignBox = document.getElementById('ictsigFundAlign');
+    if (!badge || !summary || !list) return;
+
+    badge.className = 'ictsig-fund-badge ' + fb.label;
+    badge.textContent = fb.label === 'bullish' ? 'GOLD-SUPPORTIVE' : fb.label === 'bearish' ? 'GOLD-NEGATIVE' : 'NEUTRAL / MIXED';
+
+    if (!fb.items.length){
+      summary.textContent = `Pichlay ${FUND_LOOKBACK_HOURS} ghanton mein koi released high-impact USD news nahi mili jiska actual-vs-forecast compare ho sake.`;
+      list.innerHTML = '';
+    } else {
+      summary.textContent = `Pichlay ${FUND_LOOKBACK_HOURS} ghanton ki ${fb.items.length} high-impact USD news par based (fundamental score: ${fb.score > 0 ? '+' : ''}${fb.score}).`;
+      list.innerHTML = fb.items.map(it =>
+        `<div class="ictsig-fund-item"><b>${it.title}</b> — Actual: ${it.actual} vs Forecast: ${it.forecast} (${it.ageHours}h pehle) → ${it.direction > 0 ? '<span style="color:#22c55e;">Gold-bullish surprise</span>' : '<span style="color:#ef4444;">Gold-bearish surprise</span>'}</div>`
+      ).join('');
+    }
+
+    if (alignBox){
+      if (!technicalBias || fb.label === 'neutral'){
+        alignBox.style.display = 'none';
+      } else {
+        const fbDir = fb.label === 'bullish' ? 'bullish' : 'bearish';
+        const matches = fbDir === technicalBias;
+        alignBox.style.display = 'block';
+        alignBox.className = 'ictsig-fund-align ' + (matches ? 'match' : 'conflict');
+        alignBox.textContent = matches
+          ? `✅ Fundamental bias technical (${technicalBias.toUpperCase()}) bias ke sath align hai.`
+          : `⚠️ Fundamental bias technical (${technicalBias.toUpperCase()}) bias se contradict kar raha hai — extra ehtiyat.`;
+      }
+    }
   }
   // Session detector — Asian session ab BLOCK nahi hota, sirf confluence requirement badh jati hai.
   function getSessionInfo(){
@@ -3537,7 +3666,17 @@
     const bias15 = getHTFBias(c15);
     if (!biasH4 || biasH4 !== biasH1 || biasH1 !== bias15){ logFeed('H4/H1/15min bias align nahi (triple-confluence fail) — wait.'); return; }
     const bias = biasH4;
+    lastTechBias = bias;
     setEngineStatus(`Live — HTF bias ${bias.toUpperCase()} (${session.name} session), day-trade strategies scan ho rahi hain`);
+
+    // --- Fundamental confluence check (Red Flag News actual-vs-forecast) ---
+    const fundBias = computeFundamentalBias();
+    renderFundamentalBias(fundBias, bias);
+    const fundContradicts = (fundBias.label === 'bullish' && bias === 'bearish') || (fundBias.label === 'bearish' && bias === 'bullish');
+    if (fundContradicts){
+      logFeed(`⛔ Fundamental bias (${fundBias.label.toUpperCase()}, score ${fundBias.score}) technical bias (${bias.toUpperCase()}) se contradict kar raha hai — signal skip (safety filter).`);
+      return;
+    }
 
     htfZones.h1  = updateZoneMitigation(detectAllZones(c1h.slice(-ZONE_LOOKBACK), 'H1'), c1h);
     htfZones.m15 = updateZoneMitigation(detectAllZones(c15.slice(-ZONE_LOOKBACK), '15M'), c15);
@@ -3594,6 +3733,7 @@
       `H4, H1 & 15min Bias aligned: ${bias.toUpperCase()}.`,
       extraReason,
       `Session: ${session.name}${session.name==='Asian' ? ' (extra-strict confluence applied)' : ''}. News blackout: nahi.`,
+      `Fundamental bias: ${fundBias.label.toUpperCase()} (score ${fundBias.score}, pichlay ${FUND_LOOKBACK_HOURS}h ki ${fundBias.items.length} high-impact USD news par based) — ${fundBias.label === 'neutral' ? 'technical setup ke sath koi contradiction nahi' : 'technical bias ke sath aligned'}.`,
       `Participation: ${hasVolumeData(c15)?'volume':'range-proxy'} confirmed. ATR(15m): ${atr15.toFixed(2)}.`,
       `SL: structure + ATR buffer. TP1: ${Math.abs(lv.tp1-entry).toFixed(2)}$ (1:${lv.rr1.toFixed(2)}) — 50% partial. TP2: ${Math.abs(lv.tp2-entry).toFixed(2)}$ (1:${lv.rr2.toFixed(2)}) — trail baaki. Expected hold: kai ghante se 1-2 din.`
     ].join('\n');
@@ -3743,6 +3883,12 @@
       if (!active) return 'Abhi koi active signal nahi hai.';
       return `Active Signal (${active.strategy}): ${active.direction} @ ${active.entry.toFixed(2)}\nSL: ${active.sl.toFixed(2)} | TP1: ${active.tp1.toFixed(2)} | TP2: ${active.tp2.toFixed(2)}\nStatus: ${active.status}\n\nReason:\n${active.reason}`;
     }
+    if (/fundamental|red flag|news bias|fund bias/.test(text)){
+      const fb = computeFundamentalBias();
+      if (!fb.items.length) return `Pichlay ${FUND_LOOKBACK_HOURS} ghanton mein koi released high-impact USD news nahi mili. Fundamental bias abhi NEUTRAL hai.`;
+      const lines = fb.items.map(it => `• ${it.title}: Actual ${it.actual} vs Forecast ${it.forecast} (${it.ageHours}h pehle) → ${it.direction > 0 ? 'Gold-bullish' : 'Gold-bearish'}`).join('\n');
+      return `Fundamental Bias: ${fb.label.toUpperCase()} (score ${fb.score})\n\n${lines}`;
+    }
     if (/win rate/.test(text)) return document.getElementById('ictsigWinRate').textContent + ' win rate hai (partial+full wins ko mila kar).';
     if (/aaj|today/.test(text) && /kitne|kitna/.test(text)) return `Aaj ab tak ${document.getElementById('ictsigTodayCount').textContent} signals aaye hain (max ${MAX_SIGNALS_PER_DAY}/din, day-trading cadence).`;
     for (const key in ictStrategyKB){ if (new RegExp(key,'i').test(text)) return ictStrategyKB[key]; }
@@ -3759,6 +3905,8 @@
     box.scrollTop = box.scrollHeight;
   }
   window.ictChatBotSay = function(text){ addChatMessage('bot', text); };
+  // Jab #redflagnews/#fundamentalanalysis wala calendar script naya data fetch kare, foran fundamental card refresh karo
+  window.ictsigOnCalendarUpdate = function(){ renderFundamentalBias(computeFundamentalBias(), lastTechBias); };
   window.ictChatAsk = function(text){ document.getElementById('ictchatInput').value = text; ictChatSend(); };
   window.ictChatSend = function(){
     const input = document.getElementById('ictchatInput');
@@ -3775,6 +3923,7 @@
     listenSignals();
     addChatMessage('bot', 'Assalam-o-Alaikum! Ab main Day-Trading mode mein hoon — 15min/1H/4H structure use karta hoon, Asian session mein bhi scan karta hoon (extra confluence ke sath), aur max ' + MAX_SIGNALS_PER_DAY + ' high-quality signals/din deta hoon.');
     logFeed('Bot start ho gaya (Day-Trading mode) — H4/H1/15min data jama ho raha hai.');
+    renderFundamentalBias(computeFundamentalBias(), null);
     runAnalysisCycle();
     // Har 5 min check — day-trade ke liye har second/minute check karna zaroorat nahi (aur API bhi bachti hai)
     engineTimer = setInterval(async () => { await runAnalysisCycle(); await monitorOpenSignal(); }, 5 * 60 * 1000);
@@ -3866,6 +4015,8 @@
     if (cached && (Date.now() - cachedTime) < FF_REFRESH_MS) {
       ffEvents = JSON.parse(cached);
       renderFFAlert(); renderFFTodayList();
+      window.ffEvents = ffEvents;
+      if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
       return;
     }
     try {
@@ -3878,6 +4029,8 @@
       if (cached) ffEvents = JSON.parse(cached);
     }
     renderFFAlert(); renderFFTodayList();
+    window.ffEvents = ffEvents; // ICT Signals engine (separate script scope) reads calendar data from here
+    if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
   }
 
   fetchFFCalendar();
