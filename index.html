@@ -979,11 +979,6 @@
         <option value="Phase 2">Phase 2</option>
         <option value="Master Account">Master Account</option>
       </select>
-      <select id="accDirection">
-        <option value="Buy">Buy</option>
-        <option value="Sell">Sell</option>
-      </select>
-      <input type="number" id="accLot" placeholder="Lot Size" step="0.01" value="0.01">
       <input type="number" id="accBalance" placeholder="Balance ($)" step="0.01">
       <input type="number" id="accPrice" placeholder="Current Price" step="0.01">
       <button onclick="addAccount()">Add Account</button>
@@ -1006,8 +1001,6 @@
           <th>Hedge</th>
           <th>Account</th>
           <th>Status</th>
-          <th>Direction</th>
-          <th>Lot Size</th>
           <th>Balance ($)</th>
           <th>24H P/L (2AM PKT)</th>
           <th>Current Price</th>
@@ -1682,9 +1675,8 @@
   }
 
   // ===== 24H P/L (Pakistan Time, resets every day at 2:00 AM PKT) =====
-  // Real trading P/L: (current price - price at 2AM PKT) * lot size * 100
-  // (XAUUSD convention already used elsewhere on this site: 1.00 lot = $100
-  // per $1 of price movement), sign-flipped for Sell accounts.
+  // P/L = current price - price at 2:00 AM PKT (plain $ movement of the
+  // Current Price field, no lot/direction multiplier).
   // Pakistan Standard Time is fixed at UTC+5 (no daylight saving), so we
   // compute "now in PKT" from UTC directly instead of relying on the
   // device's local timezone.
@@ -1705,11 +1697,7 @@
   // has rolled over since we last checked, the baseline resets to the
   // account's CURRENT price at that moment (best available snapshot of
   // "price at 2AM"), and 24H P/L starts counting fresh from there.
-  // Also backfills direction/lot for accounts saved before this feature
-  // existed, so old data doesn't break.
   function syncDailyBaseline(acc) {
-    if (acc.direction !== 'Buy' && acc.direction !== 'Sell') acc.direction = 'Buy';
-    if (typeof acc.lot !== 'number' || isNaN(acc.lot) || acc.lot <= 0) acc.lot = 0.01;
     const key = pktWindowKey(nowInPKT());
     if (acc.priceBaselineKey !== key) {
       acc.priceBaseline = acc.price;
@@ -1717,20 +1705,16 @@
     }
   }
   function accountDayPL(acc) {
-    const priceDiff = acc.price - acc.priceBaseline;
-    const dirMult = acc.direction === 'Sell' ? -1 : 1;
-    return priceDiff * acc.lot * 100 * dirMult;
+    return acc.price - acc.priceBaseline;
   }
   function addAccount() {
     const name = document.getElementById('accName').value.trim();
     const status = document.getElementById('accStatus').value;
-    const direction = document.getElementById('accDirection').value;
-    const lot = parseFloat(document.getElementById('accLot').value);
     const balance = parseFloat(document.getElementById('accBalance').value);
     const price = parseFloat(document.getElementById('accPrice').value);
-    if (!name || isNaN(balance) || isNaN(price) || isNaN(lot) || lot <= 0) { alert('Account Name, Lot Size, Balance aur Current Price zaroor sahi darj karein.'); return; }
+    if (!name || isNaN(balance) || isNaN(price)) { alert('Account Name, Balance aur Current Price zaroor darj karein.'); return; }
     accountIdCounter += 1;
-    accounts.push({ id: accountIdCounter, name, status, direction, lot, balance, price });
+    accounts.push({ id: accountIdCounter, name, status, balance, price });
     document.getElementById('accName').value = '';
     document.getElementById('accBalance').value = '';
     document.getElementById('accPrice').value = '';
@@ -1773,17 +1757,12 @@
     const balanceEl = document.getElementById('editBalance_' + id);
     const priceEl = document.getElementById('editPrice_' + id);
     const statusEl = document.getElementById('editStatus_' + id);
-    const directionEl = document.getElementById('editDirection_' + id);
-    const lotEl = document.getElementById('editLot_' + id);
     const newBalance = parseFloat(balanceEl.value);
     const newPrice = parseFloat(priceEl.value);
-    const newLot = parseFloat(lotEl.value);
-    if (isNaN(newBalance) || isNaN(newPrice) || isNaN(newLot) || newLot <= 0) { alert('Balance, Lot Size aur Current Price sahi darj karein.'); return; }
+    if (isNaN(newBalance) || isNaN(newPrice)) { alert('Balance aur Current Price sahi darj karein.'); return; }
     acc.balance = newBalance;
     acc.price = newPrice;
     acc.status = statusEl.value;
-    acc.direction = directionEl.value;
-    acc.lot = newLot;
     editingAccountIds = editingAccountIds.filter(x => x !== id);
     saveAccounts();
   }
@@ -1801,7 +1780,7 @@
       const plClass = dayPL > 0 ? 'positive' : (dayPL < 0 ? 'negative' : '');
       const plSign = dayPL > 0 ? '+' : '';
       const plWord = dayPL > 0 ? 'Profit' : (dayPL < 0 ? 'Loss' : 'Flat');
-      const plCell = `<td class="${plClass}" style="font-weight:bold; white-space:nowrap;" title="2AM PKT price se ab tak: (${acc.price.toFixed(2)} - ${acc.priceBaseline.toFixed(2)}) x ${acc.lot} lot x 100, ${acc.direction}">${plSign}$${Math.abs(dayPL).toFixed(2)} <span style="font-weight:normal; font-size:11px; opacity:0.8;">(${plWord}, 2AM se)</span></td>`;
+      const plCell = `<td class="${plClass}" style="font-weight:bold; white-space:nowrap;" title="2AM PKT price se ab tak: ${acc.price.toFixed(2)} - ${acc.priceBaseline.toFixed(2)}">${plSign}$${Math.abs(dayPL).toFixed(2)} <span style="font-weight:normal; font-size:11px; opacity:0.8;">(${plWord}, 2AM se)</span></td>`;
       if (isEditing) {
         row.innerHTML = `
           <td class="checkbox-cell"><input type="checkbox" ${isChecked} onchange="toggleSelect(${acc.id})"></td>
@@ -1814,13 +1793,6 @@
               <option value="Master Account" ${acc.status === 'Master Account' ? 'selected' : ''}>Master Account</option>
             </select>
           </td>
-          <td>
-            <select id="editDirection_${acc.id}" class="inline-edit-input">
-              <option value="Buy" ${acc.direction === 'Buy' ? 'selected' : ''}>Buy</option>
-              <option value="Sell" ${acc.direction === 'Sell' ? 'selected' : ''}>Sell</option>
-            </select>
-          </td>
-          <td><input type="number" id="editLot_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.lot}"></td>
           <td><input type="number" id="editBalance_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.balance}"></td>
           ${plCell}
           <td><input type="number" id="editPrice_${acc.id}" class="inline-edit-input" step="0.01" value="${acc.price}"></td>
@@ -1837,8 +1809,6 @@
           ${hedgeTickCell}
           <td>${acc.name}</td>
           <td>${acc.status}</td>
-          <td>${acc.direction}</td>
-          <td>${acc.lot}</td>
           <td>$${acc.balance.toFixed(2)}</td>
           ${plCell}
           <td>${acc.price.toFixed(2)}</td>
