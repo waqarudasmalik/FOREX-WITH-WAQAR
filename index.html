@@ -4286,10 +4286,10 @@
     return { highs, lows };
   }
 
-  async function paCheckLTFConfirmation(zoneKey, z){
+  async function paCheckLTFConfirmation(zoneKey, z, tf){
     if (paPendingConfirm[zoneKey]) return;
     paPendingConfirm[zoneKey] = true;
-    paLogFeed(`🔎 ${z.direction} zone (${z.type}) test hui — 1-minute confirmation check ho raha hai...`);
+    paLogFeed(`🔎 [${tf}] ${z.direction} zone (${z.type}) test hui — 1-minute confirmation check ho raha hai...`);
     const m1 = await paFetchCandles("1min", 90);
     if (!m1.length) { delete paPendingConfirm[zoneKey]; return; }
     const { highs, lows } = paFindPivots(m1, PA_PIVOT_LEN);
@@ -4318,13 +4318,13 @@
     }
 
     if (entry !== null) {
-      paLogFeed(`✅ LTF confirmation mil gayi — ${z.direction === 'demand' ? 'BUY' : 'SELL'} signal fire.`);
+      paLogFeed(`✅ [${tf}] LTF confirmation mil gayi — ${z.direction === 'demand' ? 'BUY' : 'SELL'} signal fire.`);
       await paCreateSignal({
         direction: z.direction === 'demand' ? 'BUY' : 'SELL', entry, sl, tp,
-        type: z.type, direction2: z.direction, confirmTime
+        type: z.type, direction2: z.direction, confirmTime, tf
       });
     } else {
-      paLogFeed(`⏳ 2-pivot confirmation abhi nahi bani — bot wait karega.`);
+      paLogFeed(`⏳ [${tf}] 2-pivot confirmation abhi nahi bani — bot wait karega.`);
     }
     delete paPendingConfirm[zoneKey];
   }
@@ -4335,8 +4335,8 @@
     if (!openSnap.empty){ paLogFeed('Ek signal pehle se open hai — naya signal skip (overlap avoid).'); return; }
     await db.collection('priceActionSignals').add({
       direction: sig.direction, entry: sig.entry, sl: sig.sl, tp: sig.tp,
-      zoneType: sig.type, zoneDirection: sig.direction2, status: 'open',
-      reason: `${sig.type} (${sig.direction2}) zone — H1/H4 confluence, 1-min 2-pivot confirmation ke baad entry.`,
+      zoneType: sig.type, zoneDirection: sig.direction2, zoneTimeframe: sig.tf, status: 'open',
+      reason: `${sig.type} (${sig.direction2}) zone — ${sig.tf} timeframe, 1-min 2-pivot confirmation ke baad entry.`,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }
@@ -4426,7 +4426,7 @@
       paZonesByTf[key].forEach((z, idx) => {
         if (z.status === 'tested') {
           const zoneKey = key + '_' + z.formedIndex + '_' + z.testedIndex;
-          paCheckLTFConfirmation(zoneKey, z);
+          paCheckLTFConfirmation(zoneKey, z, key);
         }
       });
     }
