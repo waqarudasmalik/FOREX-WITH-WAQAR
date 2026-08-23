@@ -4092,18 +4092,18 @@
   const PA_LEGOUT_MIN_PCT = 60;         // leg-out candle must have body >= 60% of its range (strong, small wicks)
   const PA_RR = 1;                      // risk:reward for generated signals
   const PA_PIVOT_LEN = 2;               // 1-minute pivot length for LTF confirmation
-  const PA_FETCH_INTERVAL = { "1h": 60*60*1000, "4h": 4*60*60*1000 };
+  const PA_FETCH_INTERVAL = { "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000 };
   const PA_TF_RANK = { "1min":1, "5min":2, "15min":3, "1h":4, "4h":5, "1day":6 };
 
-  let paCandles = { "1h": [], "4h": [] };
-  let paLastFetch = { "1h": 0, "4h": 0 };
-  let paZonesByTf = { "1h": [], "4h": [] };
+  let paCandles = { "15min": [], "1h": [], "4h": [] };
+  let paLastFetch = { "15min": 0, "1h": 0, "4h": 0 };
+  let paZonesByTf = { "15min": [], "1h": [], "4h": [] };
   let paEngineTimer = null;
   let paLatestSignalsCache = [];
   let paPendingConfirm = {}; // key -> true, to avoid re-triggering M1 fetch repeatedly for same zone
 
   function paLoadCache(){
-    ["1h","4h"].forEach(tf => {
+    ["15min","1h","4h"].forEach(tf => {
       try { paCandles[tf] = JSON.parse(localStorage.getItem('paCandles_'+tf)) || []; } catch(e){ paCandles[tf] = []; }
     });
   }
@@ -4134,6 +4134,9 @@
   }
   async function paRefreshIfNeeded(){
     const now = Date.now();
+    if (now - paLastFetch["15min"] > PA_FETCH_INTERVAL["15min"]) {
+      const c = await paFetchCandles("15min"); if (c.length){ paCandles["15min"] = c; paSaveCache("15min"); paLastFetch["15min"] = now; }
+    }
     if (now - paLastFetch["1h"] > PA_FETCH_INTERVAL["1h"]) {
       const c = await paFetchCandles("1h"); if (c.length){ paCandles["1h"] = c; paSaveCache("1h"); paLastFetch["1h"] = now; }
     }
@@ -4196,18 +4199,33 @@
 
   function paEvaluateLifecycle(zones, candles){
     for (const z of zones) {
+      // Reset to a clean slate every scan — otherwise a status from a previous
+      // cycle can linger and never get corrected.
+      z.status = 'fresh'; z.statusDetail = ''; z.testedTime = null; z.testedIndex = null;
       let currentlyInside = false, insideCount = 0;
       for (let k = z.formedIndex + 1; k < candles.length; k++) {
         const c = candles[k];
+        // VIOLATION CHECK ALWAYS RUNS FIRST AND ALWAYS WINS, for every candle,
+        // no matter what status the zone currently holds (fresh/tested/stale).
+        // This is applied identically for RBR, DBD, DBR and RBD zones — the
+        // direction (demand/supply) is all that decides which side counts as
+        // "broken", the pattern label itself doesn't change the rule.
+        // Previously the loop stopped scanning as soon as a zone was touched
+        // twice and got tagged "stale" — so if price later closed clean
+        // through the zone and ran far away, that real violation was never
+        // recorded and the old "stale" tag stayed forever. That was the fake
+        // status you spotted. Now we keep scanning every remaining candle so
+        // a later decisive close-through always overrides stale/tested.
         const violated = z.direction === 'demand' ? c.c < z.distal : c.c > z.distal;
-        if (violated) { z.status = 'violated'; break; }
+        if (violated) { z.status = 'violated'; z.statusDetail = 'Close ne zone cross kar diya'; break; }
         const touching = z.direction === 'demand' ? (c.l <= z.proximal && c.l >= z.distal) : (c.h >= z.proximal && c.h <= z.distal);
         if (touching && !currentlyInside) {
           insideCount++; currentlyInside = true;
           if (insideCount === 1) { z.status = 'tested'; z.testedTime = c.t; z.testedIndex = k; }
           else { z.status = 'stale'; z.statusDetail = 'Dobara test — ahmiyat khatam'; }
         } else if (!touching && currentlyInside) { currentlyInside = false; }
-        if (z.status === 'stale') break;
+        // NOTE: no break on 'stale' anymore — we keep looping through the
+        // rest of the candles so violation can still be caught later.
       }
     }
   }
@@ -4393,9 +4411,11 @@
   // ========================= ENGINE LOOP =========================
   async function paRunCycle(){
     await paRefreshIfNeeded();
-    if (!paCandles["1h"].length || !paCandles["4h"].length) { paSetStatus('H1/H4 data jama ho raha hai...'); return; }
+    if (!paCandles["15min"].length || !paCandles["1h"].length || !paCandles["4h"].length) { paSetStatus('M15/H1/H4 data jama ho raha hai...'); return; }
+    paZonesByTf["15min"] = paScanZones(paCandles["15min"]);
     paZonesByTf["1h"] = paScanZones(paCandles["1h"]);
     paZonesByTf["4h"] = paScanZones(paCandles["4h"]);
+    paEvaluateLifecycle(paZonesByTf["15min"], paCandles["15min"]);
     paEvaluateLifecycle(paZonesByTf["1h"], paCandles["1h"]);
     paEvaluateLifecycle(paZonesByTf["4h"], paCandles["4h"]);
     paMarkSuperseded();
