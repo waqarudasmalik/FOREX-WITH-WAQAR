@@ -343,6 +343,7 @@
    <a href="#courseCenterSection">📚 Course Center</a>
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
+   <a href="#priceaction">📦 Price Action Signals</a>
    <a href="#ictsignals">ICT Signals</a>
    <a href="#signalconfidence">🎯 Signal Confidence</a>
    <a href="#fundamentalsignals">📰🤖 Fundamental-Only Signals</a>
@@ -391,6 +392,7 @@
       <a class="sd-folder" href="#courseCenterSection"><div class="sd-icon">📚</div><h4>Course Center</h4><p>SMC, ICT aur Price Action — diagram, practice aur quiz ke sath.</p></a>
       <a class="sd-folder" href="#interview"><div class="sd-icon">🎤</div><h4>Live Interview Practice</h4><p>150 practice questions ke sath interview prep.</p></a>
       <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
+      <a class="sd-folder" href="#priceaction"><div class="sd-icon">📦</div><h4>Price Action Signals — Demand/Supply Bot</h4><p>RBR/DBD/DBR/RBD zones, multi-timeframe check aur LTF pivot confirmation ke sath khud-bakhud signal.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🤖</div><h4>ICT Signals — AI Gold Bot</h4><p>XAUUSD ke liye AI-generated ICT signals.</p></a>
       <a class="sd-folder" href="#signalconfidence"><div class="sd-icon">🎯</div><h4>Signal Confidence Score</h4><p>Har signal ka Entry/SL/TP sath mein "kitna percent confident/perfect" hai uska breakdown.</p></a>
       <a class="sd-folder" href="#fundamentalsignals"><div class="sd-icon">📰🤖</div><h4>Fundamental-Only Signals</h4><p>Sirf news/fundamental data ki bina par (koi ICT/technical nahi) mustaqil signal — Entry/SL/TP ke sath.</p></a>
@@ -4002,6 +4004,431 @@
   }
 })();
 </script>
+
+<!-- ==========================================
+     PRICE ACTION SIGNALS — Demand/Supply Zone Bot (auto-generates its own signals)
+     ========================================== -->
+<style>
+  .pa-tag { display:inline-block; padding:2px 9px; border-radius:999px; font-size:10.5px; font-weight:800; }
+  .pa-tag.demand { background: rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.4); }
+  .pa-tag.supply { background: rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.4); }
+  .pa-tag.fresh { background: rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.4); }
+  .pa-tag.tested { background: rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.35); }
+  .pa-tag.violated, .pa-tag.stale { background: rgba(100,116,139,0.15); color:#64748b; border:1px solid rgba(100,116,139,0.3); }
+  .pa-tag.superseded { background: rgba(100,116,139,0.1); color:#64748b; border:1px dashed rgba(100,116,139,0.3); }
+  .pa-zone-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:12.5px; }
+  .pa-zone-table th, .pa-zone-table td { padding:8px; text-align:center; border-bottom:1px solid rgba(148,163,184,0.1); }
+  .pa-zone-table th { color:#22c55e; font-size:10.5px; text-transform:uppercase; background:rgba(31,41,55,0.6); }
+</style>
+<section id="priceaction">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>📦 Price Action Signals — Demand/Supply Zone Bot (XAUUSD)</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px; line-height:1.6;">
+      Ye bot H4 aur H1 candles (live, Twelve Data API se) par khud-bakhud <strong>Rally-Base-Rally, Drop-Base-Drop,
+      Drop-Base-Rally aur Rally-Base-Drop</strong> zones dhoondta hai — base candles 1–5 tak, proximal line base
+      candles ki wick/body se, aur distal line pattern ke hisaab se (poori formation ya sirf base/leg-out, jaisa
+      strategy mein tay hai). Agar koi zone kisi timeframe par valid na bane (base &gt;5) to wo dusri timeframe par
+      khud check hoti hai — jahan valid bane wahi uski asal timeframe mani jati hai. Sirf <strong>fresh</strong> zones
+      par kaam hota hai; test ho chuki ya violate ho chuki zones ignore ho jati hain. Jab price kisi fresh zone ko
+      chhoti hai, bot 1-minute data par 2-pivot confirmation dhoondta hai — tabhi final signal (Entry/SL/TP) fire
+      hota hai.
+    </p>
+
+    <div class="ictsig-engine-status" style="margin-bottom:16px;">
+      <span class="ictsig-dot" id="paEngineDot"></span>
+      <span id="paEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <div class="ictsig-wrap">
+      <div class="ictsig-toprow">
+        <div class="ictsig-stat"><div class="label">Total Signals</div><div class="value" id="paTotal" style="color:#38bdf8;">0</div></div>
+        <div class="ictsig-stat"><div class="label">TP Hits</div><div class="value" id="paTpCount" style="color:#22c55e;">0</div></div>
+        <div class="ictsig-stat"><div class="label">SL Hits</div><div class="value" id="paSlCount" style="color:#ef4444;">0</div></div>
+        <div class="ictsig-stat"><div class="label">Win Rate</div><div class="value" id="paWinRate" style="color:#facc15;">0%</div></div>
+        <div class="ictsig-stat"><div class="label">Active Fresh Zones</div><div class="value" id="paFreshCount" style="color:#a5b4fc;">0</div></div>
+      </div>
+
+      <div class="ictsig-live-card" id="paLiveCard">
+        <div class="ictsig-live-head">
+          <span class="ictsig-dir-badge NONE" id="paDirBadge">NO ACTIVE SIGNAL</span>
+          <span class="ictsig-time" id="paLiveTime">—</span>
+        </div>
+        <div class="ictsig-levels">
+          <div class="ictsig-level-box"><div class="label">Entry</div><div class="value" id="paEntry" style="color:#e2e8f0;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Stop Loss</div><div class="value" id="paSL" style="color:#fda4af;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Take Profit</div><div class="value" id="paTP" style="color:#67e8f9;">—</div></div>
+          <div class="ictsig-level-box"><div class="label">Zone Type</div><div class="value" id="paZoneType" style="color:#facc15;">—</div></div>
+        </div>
+        <div class="ictsig-reason" id="paReason">Abhi koi active signal nahi hai. Bot H4/H1 zones analyze kar raha hai.</div>
+      </div>
+
+      <div>
+        <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Detected Zones (Live)</h4>
+        <div id="paZonesOutput"><p style="color:#64748b; font-size:13px;">Zones abhi load ho rahi hain...</p></div>
+      </div>
+
+      <div>
+        <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Live Commentary</h4>
+        <div class="ictsig-feed" id="paFeed"></div>
+      </div>
+
+      <div>
+        <h4 style="color:#38bdf8; font-size:15px; margin-bottom:10px;">Signal History</h4>
+        <div id="paHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // ========================= CONFIG =========================
+  const PA_API_KEY = "faa70dee4cd94663a55ff3bc640aa831"; // same Twelve Data key used by ICT Signals bot
+  const PA_SYMBOL = "XAU/USD";
+  const PA_LOOKBACK = 250;
+  const PA_MIN_BASE = 1, PA_MAX_BASE = 5;
+  const PA_PROXIMAL_METHOD = '1';       // '1' = base wick, '2' = base body (method 3 never used)
+  const PA_BASE_BODY_MAX_PCT = 45;      // candle counted as "base" if body <= 45% of its range
+  const PA_LEGOUT_MIN_PCT = 60;         // leg-out candle must have body >= 60% of its range (strong, small wicks)
+  const PA_RR = 1;                      // risk:reward for generated signals
+  const PA_PIVOT_LEN = 2;               // 1-minute pivot length for LTF confirmation
+  const PA_FETCH_INTERVAL = { "1h": 60*60*1000, "4h": 4*60*60*1000 };
+  const PA_TF_RANK = { "1min":1, "5min":2, "15min":3, "1h":4, "4h":5, "1day":6 };
+
+  let paCandles = { "1h": [], "4h": [] };
+  let paLastFetch = { "1h": 0, "4h": 0 };
+  let paZonesByTf = { "1h": [], "4h": [] };
+  let paEngineTimer = null;
+  let paLatestSignalsCache = [];
+  let paPendingConfirm = {}; // key -> true, to avoid re-triggering M1 fetch repeatedly for same zone
+
+  function paLoadCache(){
+    ["1h","4h"].forEach(tf => {
+      try { paCandles[tf] = JSON.parse(localStorage.getItem('paCandles_'+tf)) || []; } catch(e){ paCandles[tf] = []; }
+    });
+  }
+  function paSaveCache(tf){ localStorage.setItem('paCandles_'+tf, JSON.stringify(paCandles[tf].slice(-400))); }
+
+  function paLogFeed(msg){
+    const feed = document.getElementById('paFeed');
+    if (!feed) return;
+    const item = document.createElement('div');
+    item.className = 'ictsig-feed-item';
+    item.innerHTML = `<span class="t">${new Date().toLocaleTimeString()}</span>${msg}`;
+    feed.insertBefore(item, feed.firstChild);
+    while (feed.children.length > 40) feed.removeChild(feed.lastChild);
+  }
+  function paSetStatus(text){ const el = document.getElementById('paEngineStatusText'); if (el) el.textContent = text; }
+
+  // ========================= DATA FETCH (Twelve Data) =========================
+  async function paFetchCandles(interval, outputsize){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(PA_SYMBOL)}&interval=${interval}&outputsize=${outputsize||PA_LOOKBACK}&apikey=${PA_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) { paLogFeed(`⚠️ Data fetch (${interval}) fail: ` + (data.message || data.code || 'unknown error')); return []; }
+      return data.values.reverse().map(v => ({
+        t: v.datetime, o: parseFloat(v.open), h: parseFloat(v.high), l: parseFloat(v.low), c: parseFloat(v.close)
+      }));
+    } catch(err){ paLogFeed(`${interval} data fetch fail: ${err.message}`); return []; }
+  }
+  async function paRefreshIfNeeded(){
+    const now = Date.now();
+    if (now - paLastFetch["1h"] > PA_FETCH_INTERVAL["1h"]) {
+      const c = await paFetchCandles("1h"); if (c.length){ paCandles["1h"] = c; paSaveCache("1h"); paLastFetch["1h"] = now; }
+    }
+    if (now - paLastFetch["4h"] > PA_FETCH_INTERVAL["4h"]) {
+      const c = await paFetchCandles("4h"); if (c.length){ paCandles["4h"] = c; paSaveCache("4h"); paLastFetch["4h"] = now; }
+    }
+  }
+
+  // ========================= ZONE ENGINE (Rally/Drop-Base-Rally/Drop) =========================
+  function paBodySize(c){ return Math.abs(c.c - c.o); }
+  function paRange(c){ return Math.max(c.h - c.l, 1e-9); }
+  function paBodyPct(c){ return paBodySize(c) / paRange(c); }
+  function paIsBull(c){ return c.c > c.o; }
+  function paIsBase(c){ return paBodyPct(c) * 100 <= PA_BASE_BODY_MAX_PCT; }
+
+  function paScanZones(candles){
+    const zones = [];
+    let i = 1;
+    while (i < candles.length - 2) {
+      const legIn = candles[i];
+      if (paIsBase(legIn)) { i++; continue; }
+      let j = i + 1;
+      const baseCandles = [];
+      while (j < candles.length && baseCandles.length < PA_MAX_BASE && paIsBase(candles[j])) { baseCandles.push(candles[j]); j++; }
+      if (baseCandles.length < PA_MIN_BASE) { i++; continue; }
+      const legOutIdx = j;
+      if (legOutIdx >= candles.length) break;
+      const legOut = candles[legOutIdx];
+      if (paIsBase(legOut)) { i++; continue; }
+      if (paBodyPct(legOut) * 100 < PA_LEGOUT_MIN_PCT) { i = legOutIdx; continue; }
+
+      const legInBull = paIsBull(legIn), legOutBull = paIsBull(legOut);
+      let type, direction;
+      if (legInBull && legOutBull) { type='RBR'; direction='demand'; }
+      else if (!legInBull && !legOutBull) { type='DBD'; direction='supply'; }
+      else if (!legInBull && legOutBull) { type='DBR'; direction='demand'; }
+      else { type='RBD'; direction='supply'; }
+
+      let proximal;
+      if (direction === 'demand') {
+        proximal = PA_PROXIMAL_METHOD === '1' ? Math.max(...baseCandles.map(c=>c.h)) : Math.max(...baseCandles.map(c=>Math.max(c.o,c.c)));
+      } else {
+        proximal = PA_PROXIMAL_METHOD === '1' ? Math.min(...baseCandles.map(c=>c.l)) : Math.min(...baseCandles.map(c=>Math.min(c.o,c.c)));
+      }
+      let distal;
+      if (type === 'DBR') distal = Math.min(legIn.l, ...baseCandles.map(c=>c.l), legOut.l);
+      else if (type === 'RBD') distal = Math.max(legIn.h, ...baseCandles.map(c=>c.h), legOut.h);
+      else if (type === 'RBR') distal = Math.min(Math.min(...baseCandles.map(c=>c.l)), legOut.l);
+      else distal = Math.max(Math.max(...baseCandles.map(c=>c.h)), legOut.h);
+
+      zones.push({
+        type, direction, proximal, distal, baseCount: baseCandles.length,
+        formedIndex: legOutIdx, formedTime: baseCandles[0].t, legOutTime: legOut.t,
+        status: 'fresh', statusDetail: '', testedTime: null, testedIndex: null
+      });
+      i = legOutIdx + 1;
+    }
+    return zones;
+  }
+
+  function paEvaluateLifecycle(zones, candles){
+    for (const z of zones) {
+      let currentlyInside = false, insideCount = 0;
+      for (let k = z.formedIndex + 1; k < candles.length; k++) {
+        const c = candles[k];
+        const violated = z.direction === 'demand' ? c.c < z.distal : c.c > z.distal;
+        if (violated) { z.status = 'violated'; break; }
+        const touching = z.direction === 'demand' ? (c.l <= z.proximal && c.l >= z.distal) : (c.h >= z.proximal && c.h <= z.distal);
+        if (touching && !currentlyInside) {
+          insideCount++; currentlyInside = true;
+          if (insideCount === 1) { z.status = 'tested'; z.testedTime = c.t; z.testedIndex = k; }
+          else { z.status = 'stale'; z.statusDetail = 'Dobara test — ahmiyat khatam'; }
+        } else if (!touching && currentlyInside) { currentlyInside = false; }
+        if (z.status === 'stale') break;
+      }
+    }
+  }
+
+  function paMarkSuperseded(){
+    const keys = Object.keys(paZonesByTf);
+    for (const kLow of keys) {
+      const rankLow = PA_TF_RANK[kLow] || 0;
+      for (const zLow of paZonesByTf[kLow]) {
+        if (zLow.status === 'violated') continue;
+        for (const kHigh of keys) {
+          if (kHigh === kLow) continue;
+          if ((PA_TF_RANK[kHigh]||0) <= rankLow) continue;
+          for (const zHigh of paZonesByTf[kHigh]) {
+            if (zHigh.direction !== zLow.direction) continue;
+            const lowHi = Math.max(zLow.proximal, zLow.distal), lowLo = Math.min(zLow.proximal, zLow.distal);
+            const highHi = Math.max(zHigh.proximal, zHigh.distal), highLo = Math.min(zHigh.proximal, zHigh.distal);
+            if (lowLo <= highHi && lowHi >= highLo) { zLow.status = 'superseded'; zLow.statusDetail = 'Asal zone ' + kHigh + ' ki hai'; }
+          }
+        }
+      }
+    }
+  }
+
+  function paRenderZones(){
+    const el = document.getElementById('paZonesOutput');
+    const keys = Object.keys(paZonesByTf);
+    let html = '';
+    let freshCount = 0;
+    for (const key of keys) {
+      const zones = paZonesByTf[key];
+      freshCount += zones.filter(z => z.status === 'fresh' || z.status === 'tested').length;
+      html += `<h5 style="color:#94a3b8;font-size:12px;margin:12px 0 4px;text-transform:uppercase;">${key} (${zones.length} zones)</h5>`;
+      if (!zones.length) { html += '<p style="color:#64748b;font-size:12px;">Koi valid zone nahi mili.</p>'; continue; }
+      html += `<table class="pa-zone-table"><thead><tr><th>Type</th><th>Dir</th><th>Base</th><th>Proximal</th><th>Distal</th><th>Formed</th><th>Status</th></tr></thead><tbody>`;
+      for (const z of zones.slice(-15).reverse()) {
+        html += `<tr><td>${z.type}</td><td><span class="pa-tag ${z.direction}">${z.direction}</span></td><td>${z.baseCount}</td><td>${z.proximal.toFixed(2)}</td><td>${z.distal.toFixed(2)}</td><td>${z.formedTime}</td><td><span class="pa-tag ${z.status}">${z.status}</span></td></tr>`;
+      }
+      html += '</tbody></table>';
+    }
+    el.innerHTML = html || '<p style="color:#64748b;font-size:13px;">Koi zone nahi mili.</p>';
+    document.getElementById('paFreshCount').textContent = freshCount;
+  }
+
+  // ========================= LTF (1-MIN) PIVOT CONFIRMATION =========================
+  function paFindPivots(candles, len){
+    const highs = [], lows = [];
+    for (let i = len; i < candles.length - len; i++) {
+      let isPH = true, isPL = true;
+      for (let k = i-len; k <= i+len; k++) {
+        if (k === i) continue;
+        if (candles[k].h >= candles[i].h) isPH = false;
+        if (candles[k].l <= candles[i].l) isPL = false;
+      }
+      if (isPH) highs.push(i);
+      if (isPL) lows.push(i);
+    }
+    return { highs, lows };
+  }
+
+  async function paCheckLTFConfirmation(zoneKey, z){
+    if (paPendingConfirm[zoneKey]) return;
+    paPendingConfirm[zoneKey] = true;
+    paLogFeed(`🔎 ${z.direction} zone (${z.type}) test hui — 1-minute confirmation check ho raha hai...`);
+    const m1 = await paFetchCandles("1min", 90);
+    if (!m1.length) { delete paPendingConfirm[zoneKey]; return; }
+    const { highs, lows } = paFindPivots(m1, PA_PIVOT_LEN);
+    let startIdx = m1.findIndex(c => (z.direction === 'demand' ? (c.l <= z.proximal && c.l >= z.distal) : (c.h >= z.proximal && c.h <= z.distal)));
+    if (startIdx === -1) startIdx = 0;
+
+    let entry=null, sl=null, tp=null, confirmTime=null;
+    if (z.direction === 'demand') {
+      const pl = lows.find(idx => idx >= startIdx);
+      if (pl !== undefined) {
+        const ph = highs.find(idx => idx > pl);
+        if (ph !== undefined) {
+          const breakIdx = m1.findIndex((c, idx) => idx > ph && c.c > m1[ph].h);
+          if (breakIdx !== -1) { entry = m1[breakIdx].c; sl = z.distal; tp = entry + (entry - sl) * PA_RR; confirmTime = m1[breakIdx].t; }
+        }
+      }
+    } else {
+      const ph = highs.find(idx => idx >= startIdx);
+      if (ph !== undefined) {
+        const pl = lows.find(idx => idx > ph);
+        if (pl !== undefined) {
+          const breakIdx = m1.findIndex((c, idx) => idx > pl && c.c < m1[pl].l);
+          if (breakIdx !== -1) { entry = m1[breakIdx].c; sl = z.distal; tp = entry - (sl - entry) * PA_RR; confirmTime = m1[breakIdx].t; }
+        }
+      }
+    }
+
+    if (entry !== null) {
+      paLogFeed(`✅ LTF confirmation mil gayi — ${z.direction === 'demand' ? 'BUY' : 'SELL'} signal fire.`);
+      await paCreateSignal({
+        direction: z.direction === 'demand' ? 'BUY' : 'SELL', entry, sl, tp,
+        type: z.type, direction2: z.direction, confirmTime
+      });
+    } else {
+      paLogFeed(`⏳ 2-pivot confirmation abhi nahi bani — bot wait karega.`);
+    }
+    delete paPendingConfirm[zoneKey];
+  }
+
+  // ========================= SIGNAL STORAGE (Firestore, mirrors ICT Signals bot) =========================
+  async function paCreateSignal(sig){
+    const openSnap = await db.collection('priceActionSignals').where('status','==','open').limit(1).get();
+    if (!openSnap.empty){ paLogFeed('Ek signal pehle se open hai — naya signal skip (overlap avoid).'); return; }
+    await db.collection('priceActionSignals').add({
+      direction: sig.direction, entry: sig.entry, sl: sig.sl, tp: sig.tp,
+      zoneType: sig.type, zoneDirection: sig.direction2, status: 'open',
+      reason: `${sig.type} (${sig.direction2}) zone — H1/H4 confluence, 1-min 2-pivot confirmation ke baad entry.`,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  async function paMonitorOpenSignal(){
+    const price = paCandles["1h"].length ? paCandles["1h"][paCandles["1h"].length-1].c : null;
+    if (price === null) return;
+    const openSnap = await db.collection('priceActionSignals').where('status','==','open').limit(1).get();
+    if (openSnap.empty) return;
+    const doc = openSnap.docs[0], d = doc.data();
+    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
+    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
+    if (hitTP) { await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price }); paLogFeed('🎯 TP hit!'); }
+    else if (hitSL) { await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price }); paLogFeed('🛑 SL hit.'); }
+  }
+
+  // ========================= DASHBOARD =========================
+  function paRenderLiveCard(sig){
+    const card = document.getElementById('paLiveCard');
+    const badge = document.getElementById('paDirBadge');
+    if (!sig) {
+      card.className = 'ictsig-live-card';
+      badge.className = 'ictsig-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('paEntry').textContent = '—';
+      document.getElementById('paSL').textContent = '—';
+      document.getElementById('paTP').textContent = '—';
+      document.getElementById('paZoneType').textContent = '—';
+      document.getElementById('paReason').textContent = 'Abhi koi active signal nahi hai. Bot H4/H1 zones analyze kar raha hai.';
+      document.getElementById('paLiveTime').textContent = '—';
+      return;
+    }
+    card.className = 'ictsig-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
+    badge.className = 'ictsig-dir-badge ' + sig.direction;
+    badge.textContent = sig.direction;
+    document.getElementById('paEntry').textContent = sig.entry.toFixed(2);
+    document.getElementById('paSL').textContent = sig.sl.toFixed(2);
+    document.getElementById('paTP').textContent = sig.tp.toFixed(2);
+    document.getElementById('paZoneType').textContent = sig.zoneType + ' (' + sig.zoneDirection + ')';
+    document.getElementById('paReason').textContent = sig.reason;
+    document.getElementById('paLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
+  }
+  function paRenderHistory(docs){
+    const container = document.getElementById('paHistory');
+    container.innerHTML = '';
+    if (!docs.length) { container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'ictsig-history-item';
+      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+      row.innerHTML = `<span>${escapeHtml(time)} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${escapeHtml(d.direction)}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(${escapeHtml(d.zoneType||'')})</em></span>
+        <span class="ictsig-badge-status ${escapeHtml(d.status)}">${escapeHtml((d.status||'').replace('_',' ').toUpperCase())}</span>`;
+      container.appendChild(row);
+    });
+  }
+  function paListenSignals(){
+    db.collection('priceActionSignals').orderBy('createdAt','desc').limit(100).onSnapshot(snap => {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      paLatestSignalsCache = docs;
+      const active = docs.find(d => d.status === 'open');
+      paRenderLiveCard(active || null);
+      paRenderHistory(docs.slice(0, 15));
+      const tp = docs.filter(d => d.status === 'tp_hit').length;
+      const sl = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = tp + sl;
+      document.getElementById('paTotal').textContent = docs.length;
+      document.getElementById('paTpCount').textContent = tp;
+      document.getElementById('paSlCount').textContent = sl;
+      document.getElementById('paWinRate').textContent = (closed ? ((tp/closed)*100).toFixed(1) : '0') + '%';
+    });
+  }
+
+  // ========================= ENGINE LOOP =========================
+  async function paRunCycle(){
+    await paRefreshIfNeeded();
+    if (!paCandles["1h"].length || !paCandles["4h"].length) { paSetStatus('H1/H4 data jama ho raha hai...'); return; }
+    paZonesByTf["1h"] = paScanZones(paCandles["1h"]);
+    paZonesByTf["4h"] = paScanZones(paCandles["4h"]);
+    paEvaluateLifecycle(paZonesByTf["1h"], paCandles["1h"]);
+    paEvaluateLifecycle(paZonesByTf["4h"], paCandles["4h"]);
+    paMarkSuperseded();
+    paRenderZones();
+    paSetStatus('Live — last scan ' + new Date().toLocaleTimeString());
+
+    for (const key of Object.keys(paZonesByTf)) {
+      paZonesByTf[key].forEach((z, idx) => {
+        if (z.status === 'tested') {
+          const zoneKey = key + '_' + z.formedIndex + '_' + z.testedIndex;
+          paCheckLTFConfirmation(zoneKey, z);
+        }
+      });
+    }
+    await paMonitorOpenSignal();
+  }
+
+  function paStartEngine(){
+    paLoadCache();
+    paListenSignals();
+    paLogFeed('Bot start ho gaya — H1/H4 Demand/Supply zone scan shuru.');
+    paRunCycle();
+    paEngineTimer = setInterval(paRunCycle, 5 * 60 * 1000);
+  }
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) paStartEngine();
+      else if (paEngineTimer) { clearInterval(paEngineTimer); paEngineTimer = null; }
+    });
+  }
+})();
+</script>
+
 
 <!-- ==========================================
      SIGNAL CONFIDENCE SCORE — Entry/SL/TP + "kitna percent perfect" breakdown
