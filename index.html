@@ -43,6 +43,23 @@
   .brand-watermark { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #facc15; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 14px; opacity: 0.85; }
   .brand-watermark::before { content: "⚡"; }
 
+  /* ===== World Clock widget (injected into every folder/section) ===== */
+  .wc-widget { display:flex; gap:0; flex-wrap:wrap; margin: 0 0 22px; padding: 14px 6px; border-radius: 16px; background: linear-gradient(135deg, rgba(15,23,42,0.75), rgba(30,41,59,0.55)); border: 1px solid rgba(148,163,184,0.18); position: relative; overflow:hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
+  .wc-widget::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, #22c55e, #38bdf8, #facc15, #22c55e); background-size:300% auto; animation: shimmer 6s linear infinite; }
+  .wc-item { flex:1; min-width:130px; text-align:center; padding: 4px 10px; position:relative; }
+  .wc-item + .wc-item { border-left: 1px solid rgba(148,163,184,0.15); }
+  .wc-flag { font-size:19px; margin-bottom:2px; line-height:1; }
+  .wc-city { font-size:10.5px; color:#94a3b8; letter-spacing:0.6px; text-transform:uppercase; font-weight:700; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:5px; }
+  .wc-live-dot { width:6px; height:6px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e; animation: wcPulse 1.6s ease-in-out infinite; flex-shrink:0; }
+  @keyframes wcPulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
+  .wc-time { font-size:21px; font-weight:800; color:#fff; font-variant-numeric: tabular-nums; letter-spacing:0.5px; }
+  .wc-ampm { font-size:11px; color:#38bdf8; font-weight:700; margin-left:3px; }
+  .wc-date { font-size:10.5px; color:#64748b; margin-top:3px; letter-spacing:0.3px; }
+  @media (max-width: 560px) {
+    .wc-item + .wc-item { border-left:none; border-top:1px solid rgba(148,163,184,0.15); padding-top:10px; }
+    .wc-widget { flex-direction:column; }
+  }
+
   section h3 { color: #fff; font-size: 26px; margin-bottom: 20px; position: relative; display: inline-block; }
   section h3::after { content: ""; position: absolute; left: 0; bottom: -8px; width: 60px; height: 3px; background: linear-gradient(90deg, #22c55e, #38bdf8); border-radius: 3px; }
 
@@ -7142,6 +7159,80 @@ window.ccAnswerQuiz = ccAnswerQuiz;
 window.ccToggleFolder = ccToggleFolder;
 window.ccTogglePart = ccTogglePart;
 
+})();
+</script>
+
+<!-- ========================= WORLD CLOCK WIDGET (every folder/section) ========================= -->
+<script>
+(function(){
+  // Teen zones jo har folder ke top pe dikhengi — live, second-by-second.
+  var WC_ZONES = [
+    { flag: '🇵🇰', label: 'Pakistan · PKT', tz: 'Asia/Karachi' },
+    { flag: '🇬🇧', label: 'London', tz: 'Europe/London' },
+    { flag: '🇺🇸', label: 'New York', tz: 'America/New_York' }
+  ];
+
+  function wcBuildWidget(){
+    var html = '<div class="wc-widget">';
+    WC_ZONES.forEach(function(z){
+      html += '<div class="wc-item">' +
+        '<div class="wc-flag">' + z.flag + '</div>' +
+        '<div class="wc-city"><span class="wc-live-dot"></span>' + z.label + '</div>' +
+        '<div class="wc-time"><span class="wc-time-val" data-wc-tz="' + z.tz + '">--:--:--</span><span class="wc-ampm" data-wc-ampm="' + z.tz + '"></span></div>' +
+        '<div class="wc-date" data-wc-date="' + z.tz + '">-- --- ----</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function wcInjectAll(){
+    document.querySelectorAll('.glass-panel').forEach(function(panel){
+      if (panel.querySelector('.wc-widget')) return; // already injected — don't duplicate
+      var holder = document.createElement('div');
+      holder.innerHTML = wcBuildWidget();
+      var widgetEl = holder.firstElementChild;
+      var bw = panel.querySelector('.brand-watermark');
+      if (bw) {
+        bw.insertAdjacentElement('afterend', widgetEl);
+      } else {
+        panel.insertBefore(widgetEl, panel.firstChild);
+      }
+    });
+  }
+
+  function wcTick(){
+    var now = new Date();
+    document.querySelectorAll('[data-wc-tz]').forEach(function(el){
+      var tz = el.getAttribute('data-wc-tz');
+      var parts = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true }).formatToParts(now);
+      var h='', m='', s='', ampm='';
+      parts.forEach(function(p){
+        if (p.type==='hour') h=p.value;
+        else if (p.type==='minute') m=p.value;
+        else if (p.type==='second') s=p.value;
+        else if (p.type==='dayPeriod') ampm=p.value.toUpperCase();
+      });
+      el.textContent = h + ':' + m + ':' + s;
+      var ampmEl = document.querySelector('[data-wc-ampm="' + tz + '"]');
+      if (ampmEl) ampmEl.textContent = ampm;
+    });
+    document.querySelectorAll('[data-wc-date]').forEach(function(el){
+      var tz = el.getAttribute('data-wc-date');
+      el.textContent = new Intl.DateTimeFormat('en-GB', { timeZone: tz, day:'2-digit', month:'short', year:'numeric' }).format(now);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    wcInjectAll();
+    wcTick();
+    setInterval(wcTick, 1000);
+    // Kuch sections apna content thora der baad dynamically load karte hain
+    // (Firestore/course-center jaisi cheezein) — chhoti si delay ke baad
+    // dobara scan taake un sections mein bhi widget miss na ho.
+    setTimeout(wcInjectAll, 1500);
+    setTimeout(wcInjectAll, 4000);
+  });
 })();
 </script>
 
