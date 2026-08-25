@@ -1405,6 +1405,21 @@
     border-radius:6px;line-height:1.7;font-size:14.5px;}
   .cc-practice{background:#0e1420;border:1px dashed var(--cc-line);border-radius:10px;padding:16px;margin-top:18px;}
   .cc-practice h4{margin-top:0;color:var(--cc-green);}
+
+  /* ===== Course Center — Lecture Video (admin upload + student viewer) ===== */
+  .cc-video-box{background:var(--cc-bg);border:1px solid var(--cc-line);border-radius:10px;padding:16px;margin:18px 0;}
+  .cc-video-box h4{margin:0 0 12px;color:var(--cc-gold);font-size:14px;display:flex;align-items:center;gap:6px;}
+  .cc-video-box video{width:100%;border-radius:10px;background:#000;display:block;max-height:420px;}
+  .cc-video-empty{color:#8492ab;font-size:13px;text-align:center;padding:22px 10px;border:1px dashed var(--cc-line);border-radius:10px;}
+  .cc-video-upload{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .cc-video-upload input[type=file]{background:#0a0f1a;border:1px solid var(--cc-line);border-radius:8px;padding:10px;color:#cbd5e1;font-size:13px;width:100%;}
+  .cc-video-upload-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .cc-video-btn{background:var(--cc-green);color:#04140c;border:none;border-radius:8px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;}
+  .cc-video-btn:hover{filter:brightness(1.08);}
+  .cc-video-btn.cc-video-del{background:var(--cc-red);color:#1a0505;}
+  .cc-video-progress-wrap{background:#0a0f1a;border-radius:8px;height:10px;overflow:hidden;border:1px solid var(--cc-line);}
+  .cc-video-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--cc-green),var(--cc-gold));transition:width .2s;}
+  .cc-video-progress-text{font-size:12px;color:#8492ab;}
   .cc-show-answer{background:var(--cc-gold);color:#1a1408;border:none;padding:8px 18px;
     border-radius:8px;cursor:pointer;font-weight:600;margin-top:10px;}
   .cc-answer-box{display:none;margin-top:12px;padding:12px;background:#0a1f16;border-radius:8px;
@@ -6978,9 +6993,11 @@ function ccOpenPart(folderKey, partId){
   var p = c.parts.filter(function(x){ return x.id===partId; })[0];
   if(!p) return;
   var diagId = 'ccDiag_'+p.id;
+  var videoBoxId = 'ccVideoBox_'+p.id;
   var html = '<button class="cc-back-btn" onclick="ccOpenFolder(\''+folderKey+'\')">← '+c.title+'</button>'+
     '<div class="cc-part-detail"><span class="cc-tag">'+p.tag+'</span><h2>'+p.title+'</h2>'+
     '<div class="cc-explain">'+p.explain+'</div>'+
+    '<div class="cc-video-box" id="'+videoBoxId+'"><h4>🎬 Lecture Video</h4><div class="cc-video-empty">Video load ho rahi hai...</div></div>'+
     '<div class="cc-diagram-box"><div id="'+diagId+'"></div></div>';
   if(p.practice){
     html += '<div class="cc-practice"><h4>🧪 Practice Scenario</h4><p>'+p.practice.scenario+'</p>'+
@@ -7011,6 +7028,105 @@ function ccOpenPart(folderKey, partId){
       renderLinePattern(diagId, p.points, p.zones || p.lineZones, p.notes || p.notes2);
     }
   }, 0);
+
+  ccLoadVideo(folderKey, partId, videoBoxId);
+}
+
+/* ==========================================================================
+   COURSE LECTURE VIDEOS (admin uploads via Firebase Storage, saved in
+   Firestore collection "courseVideos", doc id = folderKey + "_" + partId)
+   ========================================================================== */
+function ccVideoDocId(folderKey, partId){ return folderKey + '_' + partId; }
+
+async function ccLoadVideo(folderKey, partId, boxId){
+  var box = document.getElementById(boxId);
+  if(!box) return;
+  try{
+    var docSnap = await db.collection('courseVideos').doc(ccVideoDocId(folderKey, partId)).get();
+    if(docSnap.exists){
+      var d = docSnap.data();
+      var html = '<h4>🎬 Lecture Video</h4><video controls preload="metadata" src="'+escapeHtml(d.videoUrl)+'"></video>';
+      if(ccIsAdmin){
+        html += '<div class="cc-video-upload-actions" style="margin-top:10px;">'+
+          '<button class="cc-video-btn cc-video-del" onclick="ccDeleteVideo(\''+folderKey+'\',\''+partId+'\',\''+boxId+'\')">🗑️ Video Delete Karein</button>'+
+          '</div>';
+      }
+      box.innerHTML = html;
+    } else {
+      var html2 = '<h4>🎬 Lecture Video</h4>';
+      if(ccIsAdmin){
+        html2 += '<div class="cc-video-empty">Is lecture ke liye abhi koi video upload nahi hui.</div>'+
+          '<div class="cc-video-upload">'+
+            '<input type="file" accept="video/*" id="ccVideoFile_'+partId+'">'+
+            '<div class="cc-video-upload-actions"><button class="cc-video-btn" onclick="ccUploadVideo(\''+folderKey+'\',\''+partId+'\',\''+boxId+'\')">⬆️ Video Upload Karein</button></div>'+
+            '<div style="display:none;" id="ccVideoProgWrap_'+partId+'">'+
+              '<div class="cc-video-progress-wrap"><div class="cc-video-progress-bar" id="ccVideoProgBar_'+partId+'"></div></div>'+
+              '<div class="cc-video-progress-text" id="ccVideoProgText_'+partId+'">Uploading... 0%</div>'+
+            '</div>'+
+          '</div>';
+      } else {
+        html2 += '<div class="cc-video-empty">Is lecture ke liye video jald add ki jayegi.</div>';
+      }
+      box.innerHTML = html2;
+    }
+  } catch(e){
+    box.innerHTML = '<h4>🎬 Lecture Video</h4><div class="cc-video-empty">Video load nahi ho saki.</div>';
+  }
+}
+
+async function ccUploadVideo(folderKey, partId, boxId){
+  if(!ccIsAdmin) return;
+  var fileInput = document.getElementById('ccVideoFile_'+partId);
+  var file = fileInput && fileInput.files && fileInput.files[0];
+  if(!file){ alert('Pehle koi video file select karein.'); return; }
+  if(!file.type.startsWith('video/')){ alert('Sirf video file upload karein.'); return; }
+
+  var progWrap = document.getElementById('ccVideoProgWrap_'+partId);
+  var progBar = document.getElementById('ccVideoProgBar_'+partId);
+  var progText = document.getElementById('ccVideoProgText_'+partId);
+  if(progWrap) progWrap.style.display='block';
+
+  var ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
+  var storagePath = 'courseVideos/'+folderKey+'/'+partId+'/lecture.'+ext;
+  var storage = firebase.storage();
+  var ref = storage.ref(storagePath);
+  var task = ref.put(file);
+
+  task.on('state_changed', function(snap){
+    var pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+    if(progBar) progBar.style.width = pct + '%';
+    if(progText) progText.textContent = 'Uploading... ' + pct + '%';
+  }, function(err){
+    if(progText) progText.textContent = 'Upload fail ho gaya: ' + err.message;
+  }, async function(){
+    var url = await task.snapshot.ref.getDownloadURL();
+    var user = firebase.auth().currentUser;
+    await db.collection('courseVideos').doc(ccVideoDocId(folderKey, partId)).set({
+      videoUrl: url,
+      storagePath: storagePath,
+      fileName: file.name,
+      uploadedBy: user ? user.email : null,
+      uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ccLoadVideo(folderKey, partId, boxId);
+  });
+}
+
+async function ccDeleteVideo(folderKey, partId, boxId){
+  if(!ccIsAdmin) return;
+  if(!confirm('Kya aap is lecture ki video delete karna chahte hain?')) return;
+  try{
+    var docRef = db.collection('courseVideos').doc(ccVideoDocId(folderKey, partId));
+    var docSnap = await docRef.get();
+    if(docSnap.exists){
+      var d = docSnap.data();
+      if(d.storagePath){
+        await firebase.storage().ref(d.storagePath).delete().catch(function(){});
+      }
+    }
+    await docRef.delete();
+  } catch(e){}
+  ccLoadVideo(folderKey, partId, boxId);
 }
 
 function ccAnswerQuiz(btn, chosenIdx, correctIdx){
@@ -7158,6 +7274,8 @@ window.ccOpenPart = ccOpenPart;
 window.ccAnswerQuiz = ccAnswerQuiz;
 window.ccToggleFolder = ccToggleFolder;
 window.ccTogglePart = ccTogglePart;
+window.ccUploadVideo = ccUploadVideo;
+window.ccDeleteVideo = ccDeleteVideo;
 
 })();
 </script>
