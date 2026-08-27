@@ -3928,7 +3928,7 @@
     <div class="brand-watermark">Forex With Waqar</div>
     <h3>📦 Price Action Signals — Demand/Supply Zone Bot (XAUUSD)</h3>
     <p style="color:#94a3b8; margin-bottom:20px; font-size:14px; line-height:1.6;">
-      Ye bot H4 aur H1 candles (live, Twelve Data API se) par khud-bakhud <strong>Rally-Base-Rally, Drop-Base-Drop,
+      Ye bot D1, H4, H1, 15min aur 5min candles (live, Twelve Data API se) par khud-bakhud <strong>Rally-Base-Rally, Drop-Base-Drop,
       Drop-Base-Rally aur Rally-Base-Drop</strong> zones dhoondta hai — base candles 1–5 tak, proximal line base
       candles ki wick/body se, aur distal line pattern ke hisaab se (poori formation ya sirf base/leg-out, jaisa
       strategy mein tay hai). Agar koi zone kisi timeframe par valid na bane (base &gt;5) to wo dusri timeframe par
@@ -3995,18 +3995,18 @@
   const PA_LEGOUT_MIN_PCT = 60;         // leg-out candle must have body >= 60% of its range (strong, small wicks)
   const PA_RR = 1;                      // risk:reward for generated signals
   const PA_PIVOT_LEN = 2;               // 1-minute pivot length for LTF confirmation
-  const PA_FETCH_INTERVAL = { "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000 };
+  const PA_FETCH_INTERVAL = { "5min": 5*60*1000, "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000, "1day": 24*60*60*1000 };
   const PA_TF_RANK = { "1min":1, "5min":2, "15min":3, "1h":4, "4h":5, "1day":6 };
 
-  let paCandles = { "15min": [], "1h": [], "4h": [] };
-  let paLastFetch = { "15min": 0, "1h": 0, "4h": 0 };
-  let paZonesByTf = { "15min": [], "1h": [], "4h": [] };
+  let paCandles = { "1day": [], "4h": [], "1h": [], "15min": [], "5min": [] };
+  let paLastFetch = { "1day": 0, "4h": 0, "1h": 0, "15min": 0, "5min": 0 };
+  let paZonesByTf = { "1day": [], "4h": [], "1h": [], "15min": [], "5min": [] };
   let paEngineTimer = null;
   let paLatestSignalsCache = [];
   let paPendingConfirm = {}; // key -> true, to avoid re-triggering M1 fetch repeatedly for same zone
 
   function paLoadCache(){
-    ["15min","1h","4h"].forEach(tf => {
+    ["1day","4h","1h","15min","5min"].forEach(tf => {
       try { paCandles[tf] = JSON.parse(localStorage.getItem('paCandles_'+tf)) || []; } catch(e){ paCandles[tf] = []; }
     });
   }
@@ -4037,6 +4037,9 @@
   }
   async function paRefreshIfNeeded(){
     const now = Date.now();
+    if (now - paLastFetch["5min"] > PA_FETCH_INTERVAL["5min"]) {
+      const c = await paFetchCandles("5min"); if (c.length){ paCandles["5min"] = c; paSaveCache("5min"); paLastFetch["5min"] = now; }
+    }
     if (now - paLastFetch["15min"] > PA_FETCH_INTERVAL["15min"]) {
       const c = await paFetchCandles("15min"); if (c.length){ paCandles["15min"] = c; paSaveCache("15min"); paLastFetch["15min"] = now; }
     }
@@ -4045,6 +4048,9 @@
     }
     if (now - paLastFetch["4h"] > PA_FETCH_INTERVAL["4h"]) {
       const c = await paFetchCandles("4h"); if (c.length){ paCandles["4h"] = c; paSaveCache("4h"); paLastFetch["4h"] = now; }
+    }
+    if (now - paLastFetch["1day"] > PA_FETCH_INTERVAL["1day"]) {
+      const c = await paFetchCandles("1day"); if (c.length){ paCandles["1day"] = c; paSaveCache("1day"); paLastFetch["1day"] = now; }
     }
   }
 
@@ -4245,7 +4251,7 @@
   }
 
   async function paMonitorOpenSignal(){
-    const price = paCandles["1h"].length ? paCandles["1h"][paCandles["1h"].length-1].c : null;
+    const price = paCandles["5min"].length ? paCandles["5min"][paCandles["5min"].length-1].c : (paCandles["1h"].length ? paCandles["1h"][paCandles["1h"].length-1].c : null);
     if (price === null) return;
     const openSnap = await db.collection('priceActionSignals').where('status','==','open').limit(1).get();
     if (openSnap.empty) return;
@@ -4267,7 +4273,7 @@
       document.getElementById('paSL').textContent = '—';
       document.getElementById('paTP').textContent = '—';
       document.getElementById('paZoneType').textContent = '—';
-      document.getElementById('paReason').textContent = 'Abhi koi active signal nahi hai. Bot H4/H1 zones analyze kar raha hai.';
+      document.getElementById('paReason').textContent = 'Abhi koi active signal nahi hai. Bot D1/H4/H1/15min/5min zones analyze kar raha hai.';
       document.getElementById('paLiveTime').textContent = '—';
       return;
     }
@@ -4314,13 +4320,17 @@
   // ========================= ENGINE LOOP =========================
   async function paRunCycle(){
     await paRefreshIfNeeded();
-    if (!paCandles["15min"].length || !paCandles["1h"].length || !paCandles["4h"].length) { paSetStatus('M15/H1/H4 data jama ho raha hai...'); return; }
+    if (!paCandles["5min"].length || !paCandles["15min"].length || !paCandles["1h"].length || !paCandles["4h"].length || !paCandles["1day"].length) { paSetStatus('M5/M15/H1/H4/D1 data jama ho raha hai...'); return; }
+    paZonesByTf["5min"] = paScanZones(paCandles["5min"]);
     paZonesByTf["15min"] = paScanZones(paCandles["15min"]);
     paZonesByTf["1h"] = paScanZones(paCandles["1h"]);
     paZonesByTf["4h"] = paScanZones(paCandles["4h"]);
+    paZonesByTf["1day"] = paScanZones(paCandles["1day"]);
+    paEvaluateLifecycle(paZonesByTf["5min"], paCandles["5min"]);
     paEvaluateLifecycle(paZonesByTf["15min"], paCandles["15min"]);
     paEvaluateLifecycle(paZonesByTf["1h"], paCandles["1h"]);
     paEvaluateLifecycle(paZonesByTf["4h"], paCandles["4h"]);
+    paEvaluateLifecycle(paZonesByTf["1day"], paCandles["1day"]);
     paMarkSuperseded();
     paRenderZones();
     paSetStatus('Live — last scan ' + new Date().toLocaleTimeString());
@@ -4339,7 +4349,7 @@
   function paStartEngine(){
     paLoadCache();
     paListenSignals();
-    paLogFeed('Bot start ho gaya — H1/H4 Demand/Supply zone scan shuru.');
+    paLogFeed('Bot start ho gaya — M5/M15/H1/H4/D1 Demand/Supply zone scan shuru.');
     paRunCycle();
     paEngineTimer = setInterval(paRunCycle, 5 * 60 * 1000);
   }
