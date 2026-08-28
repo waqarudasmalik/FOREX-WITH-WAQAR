@@ -299,6 +299,64 @@
   </div>
   <a class="ff-alert-btn" href="https://www.forexfactory.com/calendar" target="_blank">View Calendar</a>
 </div>
+<div id="subscribeOverlay" class="auth-overlay" style="z-index:10000;">
+  <div class="auth-box" style="max-width:440px;">
+    <h2 style="color:#fff;margin-bottom:10px;">Subscription Required</h2>
+    <p style="color:#94a3b8;margin-bottom:6px;">Is website ko access karne ke liye pehle subscription fee crypto wallet par bhejein.</p>
+    <div style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.35); border-radius:14px; padding:16px; margin:16px 0; text-align:left;">
+      <div style="font-size:12px; color:#4ade80; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:6px;">Subscription Fee</div>
+      <div style="font-size:26px; font-weight:800; color:#fff; margin-bottom:14px;">$135.453</div>
+      <div style="font-size:12px; color:#94a3b8; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:6px;">TRC20 Wallet Address (USDT)</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input id="subWalletAddr" type="text" readonly value="TGGmb1fnspzWprcff12JSfjVaE7XQYcVTi" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(148,163,184,0.25); background:rgba(15,23,42,0.85); color:#fff; font-size:12.5px; font-family:monospace;">
+        <button id="subCopyBtn" onclick="ffCopyWalletAddress()" style="padding:10px 14px; background:linear-gradient(135deg,#38bdf8,#0ea5e9); border:none; color:#0f172a; border-radius:10px; font-weight:700; cursor:pointer; white-space:nowrap;">Copy</button>
+      </div>
+      <p style="font-size:11.5px; color:#64748b; margin-top:10px;">Sirf TRC20 (Tron) network se USDT bhejein. Doosre network se bheji gayi payment lost ho sakti hai.</p>
+    </div>
+    <button class="google-btn" onclick="ffProceedAfterSubscribe()">Maine Payment Bhej Di — Continue</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  window.ffCopyWalletAddress = function(){
+    var input = document.getElementById('subWalletAddr');
+    var btn = document.getElementById('subCopyBtn');
+    if (!input) return;
+    var text = input.value;
+    function fallback(){
+      input.removeAttribute('disabled');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      try { document.execCommand('copy'); } catch(e){}
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(fallback);
+    } else {
+      fallback();
+    }
+    if (btn) {
+      var original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = original; }, 1800);
+    }
+  };
+
+  window.ffProceedAfterSubscribe = function(){
+    try { localStorage.setItem('ffSubscriptionAck', '1'); } catch(e){}
+    var el = document.getElementById('subscribeOverlay');
+    if (el) el.style.display = 'none';
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var seen = false;
+    try { seen = localStorage.getItem('ffSubscriptionAck') === '1'; } catch(e){}
+    var el = document.getElementById('subscribeOverlay');
+    if (el && seen) el.style.display = 'none';
+  });
+})();
+</script>
+
 <div id="authOverlay" class="auth-overlay">
   <div class="auth-box">
     <h2 style="color:#fff;margin-bottom:10px;">Forex With Waqar</h2>
