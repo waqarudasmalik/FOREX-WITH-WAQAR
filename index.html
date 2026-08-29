@@ -7771,6 +7771,310 @@ var COURSES = {
         ]
       }
     ]
+  },
+  css: {
+    title: "CSS \u2014 Beginner Se Super Advance Tak",
+    icon: "\ud83c\udfa8",
+    desc: "Selectors aur box model se le kar Grid, animations aur SASS tak \u2014 poora CSS course, misaalon aur quiz ke sath.",
+    parts: [
+      {
+        id:"css-intro", tag:"Bunyadi Baatein", title:"CSS Kya Hai Aur Syntax",
+        explain:"CSS (Cascading Style Sheets) HTML ko khoobsurat banane ke liye zaban hai \u2014 rang, font, spacing, layout waghera. CSS teen tareeqon se HTML ke sath jorhi ja sakti hai: Inline (seedha tag ke andar style='...'), Internal (<style> tag <head> mein), aur External (alag .css file jo <link> se jori jati hai \u2014 ye sab se behtar tareeqa hai). CSS syntax mein 'selector { property: value; }' hota hai, jaise p { color: red; } \u2014 is se sab paragraphs laal ho jayenge. Misaal: Ek website ka background rang, buttons ki shape, aur text ka font \u2014 sab CSS se hi control hota hai.",
+        candles:[],
+        quiz:[
+          {q:"CSS ka poora naam kya hai?",opts:["Creative Style Sheets", "Cascading Style Sheets", "Computer Style System", "Color Style Sheets"],correct:1},
+          {q:"CSS ko HTML se jorne ka sab se behtar tareeqa kaunsa hai?",opts:["Inline", "Internal", "External CSS file", "Koi bhi farak nahi"],correct:2},
+          {q:"'p { color: red; }' mein 'p' ko kya kehte hain?",opts:["Property", "Value", "Selector", "Comment"],correct:2}
+        ]
+      },
+      {
+        id:"css-colors-units", tag:"Bunyadi Baatein", title:"Colors Aur Units (px, %, em, rem)",
+        explain:"CSS mein rang kai tareeqon se diye ja sakte hain: naam se (red, blue), HEX code se (#ff0000), ya RGB se (rgb(255,0,0)). Units andaza karti hain size kitni hogi: px (fixed pixels, hamesha ek jaisi size), % (parent element ke mutabiq), em (parent element ke font-size ke mutabiq), rem (poore page ke root font-size ke mutabiq \u2014 responsive design ke liye behtar hai kyun ke consistent rehti hai). Misaal: font-size: 2rem; ka matlab hai root font-size se 2 guna bara text.",
+        candles:[],
+        quiz:[
+          {q:"HEX color code ki misaal kaunsi hai?",opts:["red", "#ff0000", "2rem", "100%"],correct:1},
+          {q:"Responsive design ke liye kaunsi unit aam tor par behtar samjhi jati hai?",opts:["px", "rem", "cm", "inch"],correct:1},
+          {q:"'%' unit kis cheez ke mutabiq size tay karti hai?",opts:["Screen resolution", "Parent element", "Browser naam", "Internet speed"],correct:1}
+        ]
+      },
+      {
+        id:"css-box-model", tag:"Bunyadi Baatein", title:"Box Model \u2014 Content, Padding, Border, Margin",
+        explain:"Box Model CSS ki buniyad hai \u2014 har HTML element ek 'box' hoti hai jis mein 4 hisse hote hain: Content (asal text/image), Padding (content ke ird-gird andar ki khaali jagah), Border (box ke gird line), aur Margin (box ke bahar ki khaali jagah, doosre elements se fasla). box-sizing: border-box; ek useful property hai jo padding aur border ko total width ke andar hi shamil rakhti hai, is se layout calculate karna asaan hota hai. Misaal: Ek card design karte waqt, padding text ko border se door rakhta hai, aur margin us card ko doosre cards se door rakhta hai.",
+        candles:[],
+        quiz:[
+          {q:"Content ke ird-gird andar ki khaali jagah ko kya kehte hain?",opts:["Margin", "Padding", "Border", "Outline"],correct:1},
+          {q:"Box ke bahar, doosre elements se fasla kis property se banta hai?",opts:["Padding", "Margin", "Border", "Content"],correct:1},
+          {q:"box-sizing: border-box; ka faida kya hai?",opts:["Padding/border ko total width mein shamil rakhta hai", "Rang badal deta hai", "Font size badalta hai", "Kuch nahi karta"],correct:0}
+        ]
+      },
+      {
+        id:"css-typography", tag:"Intermediate", title:"Typography \u2014 Fonts Aur Text Properties",
+        explain:"Typography mein font-family (font ka naam, jaise Arial, sans-serif), font-size (text ka size), font-weight (bold/normal), line-height (lines ke darmiyan fasla), aur text-align (left/center/right) jaisi properties aati hain. Web fonts (jaise Google Fonts) se hum khoobsurat, custom fonts use kar sakte hain jo har device par ek jaisay dikhein. Misaal: Ek blog ke liye line-height: 1.6; text ko parhne mein asaan banata hai, kyun ke lines ke darmiyan zyada saans lene ki jagah hoti hai.",
+        candles:[],
+        quiz:[
+          {q:"Font ka size set karne ke liye kaunsi property use hoti hai?",opts:["font-weight", "font-size", "text-align", "line-height"],correct:1},
+          {q:"Text ko bold karne ke liye kaunsi property use hoti hai?",opts:["font-weight", "font-style", "text-decoration", "color"],correct:0},
+          {q:"Lines ke darmiyan fasla kis property se control hota hai?",opts:["line-height", "font-size", "padding", "margin"],correct:0}
+        ]
+      },
+      {
+        id:"css-backgrounds-borders", tag:"Intermediate", title:"Backgrounds Aur Borders",
+        explain:"background-color se element ka background rang set hota hai, background-image se koi tasveer background banayi ja sakti hai. border property se shape ke gird line banti hai, jaise border: 2px solid black;. border-radius se corners ko gol (rounded) kiya ja sakta hai \u2014 jaise button ko pura gol banana ho to border-radius: 50%; use hoti hai. box-shadow se element ke gird halka saya (shadow) diya jata hai jo depth ka ehsaas deta hai. Misaal: Modern buttons aksar border-radius aur halke box-shadow ke sath banaye jate hain taake wo 3D jaise nazar aayein.",
+        candles:[],
+        quiz:[
+          {q:"Element ke corners ko gol karne ke liye kya use hota hai?",opts:["border-radius", "border-color", "background-size", "padding"],correct:0},
+          {q:"Element ke gird halka saya dikhane ke liye kaunsi property use hoti hai?",opts:["border", "box-shadow", "outline", "background"],correct:1},
+          {q:"border: 2px solid black; is mein '2px' kya represent karta hai?",opts:["Border ka rang", "Border ki mota'i (thickness)", "Border ka style", "Kuch nahi"],correct:1}
+        ]
+      },
+      {
+        id:"css-display", tag:"Intermediate", title:"Display Property \u2014 Block, Inline, Inline-block, None",
+        explain:"'display' property tay karti hai element browser mein kaise 'behave' karega. block elements poori line lete hain (jaise <div>, <p>). inline elements sirf apni content jitni jagah lete hain aur sath sath aa sakte hain (jaise <span>, <a>). inline-block dono ki khoobiyan milata hai \u2014 sath sath bhi aata hai aur width/height bhi set ho sakti hai. display: none; element ko poori tarah chupa deta hai (page se bilkul gayab, jaga bhi nahi leta) \u2014 ye visibility: hidden se mukhtalif hai jo jaga to rakhti hai bas dikhati nahi.",
+        candles:[],
+        quiz:[
+          {q:"'display: block' elements kaise behave karte hain?",opts:["Sath sath aate hain", "Poori line lete hain", "Hamesha chupay rehte hain", "Sirf images ke liye hota hai"],correct:1},
+          {q:"display: none; aur visibility: hidden mein kya farq hai?",opts:["Koi farak nahi", "display:none jaga bhi nahi leta, visibility:hidden jaga rakhta hai", "visibility:hidden zyada tez hai", "display:none sirf mobile ke liye hai"],correct:1},
+          {q:"inline-block ki khaasiyat kya hai?",opts:["Sath sath aata hai aur width/height set ho sakti hai", "Kabhi nazar nahi aata", "Sirf tables ke liye hota hai", "Poori page le leta hai"],correct:0}
+        ]
+      },
+      {
+        id:"css-position", tag:"Intermediate", title:"Positioning \u2014 Static, Relative, Absolute, Fixed, Sticky",
+        explain:"position property element ki jagah control karti hai. static default hai (normal flow mein). relative element ko uski normal jagah se thora hata sakti hai, lekin uski asal jagah 'reserve' rehti hai. absolute element ko uske nazdeek-tareen 'positioned' parent ke mutabiq rakhti hai, aur normal flow se bilkul nikal jati hai. fixed element ko screen ke mutabiq fix kar deti hai, scroll karne par bhi apni jagah rehta hai (jaise floating chat button). sticky element ko tab tak normal rehne deta hai jab tak scroll ek khaas point tak na pohanche, phir wo 'stick' ho jata hai (jaise sticky navbar). Misaal: Ek 'Back to Top' button aksar position: fixed; se banaya jata hai.",
+        candles:[],
+        quiz:[
+          {q:"Konsa position value element ko screen ke sath fix rakhta hai, scroll ke bawajood?",opts:["static", "relative", "fixed", "inherit"],correct:2},
+          {q:"'sticky' position kis tarah kaam karta hai?",opts:["Hamesha fix rehta hai", "Ek khaas scroll point tak normal, phir stick ho jata hai", "Kabhi nazar nahi aata", "Sirf mobile ke liye hai"],correct:1},
+          {q:"Default position value kaunsi hai?",opts:["absolute", "fixed", "static", "sticky"],correct:2}
+        ]
+      },
+      {
+        id:"css-flexbox", tag:"Advance", title:"Flexbox \u2014 Deep Dive",
+        explain:"Flexbox aik-dimension layout system hai. Parent par display: flex; lagane se uske children 'flex items' ban jate hain. flex-direction (row/column) tay karta hai items kis simt mein jayenge. justify-content items ko main-axis (jaise horizontal) par align karta hai (jaise center, space-between). align-items items ko cross-axis (jaise vertical) par align karta hai. flex-wrap items ko agli line par le jane deta hai agar jaga kam pare. Misaal: Ek navbar jisme logo left aur menu right ho, wo justify-content: space-between; se asani se ban jata hai.",
+        candles:[],
+        quiz:[
+          {q:"Flex container banane ke liye kaunsi CSS line use hoti hai?",opts:["display: block;", "display: flex;", "position: relative;", "float: left;"],correct:1},
+          {q:"justify-content kis axis par items ko align karta hai?",opts:["Main-axis", "Cross-axis", "Z-axis", "Koi nahi"],correct:0},
+          {q:"Items ko agli line par le jane ke liye kya use hota hai?",opts:["flex-direction", "flex-wrap", "align-items", "justify-content"],correct:1}
+        ]
+      },
+      {
+        id:"css-grid", tag:"Advance", title:"CSS Grid \u2014 Deep Dive",
+        explain:"CSS Grid do-dimension layout system hai (rows aur columns dono). Parent par display: grid; lagane se, grid-template-columns aur grid-template-rows se hum tay karte hain kitni rows/columns hongi aur unki size kya hogi (jaise grid-template-columns: 1fr 1fr 1fr; \u2014 teen barabar columns). gap property items ke darmiyan fasla deti hai. Grid Areas se hum named layout sections bana sakte hain (jaise 'header', 'sidebar', 'main', 'footer'). Grid bare, complex layouts (jaise poori website ka structure) ke liye Flexbox se behtar hai, jab ke Flexbox chhote, aik-dimension components (jaise ek navbar) ke liye behtar hai.",
+        candles:[],
+        quiz:[
+          {q:"Grid container banane ke liye kya use hota hai?",opts:["display: flex;", "display: grid;", "display: table;", "position: grid;"],correct:1},
+          {q:"Grid, Flexbox se kis lehaz se mukhtalif hai?",opts:["Grid sirf rows ke liye hai", "Grid do-dimension (rows+columns) hai, Flexbox aik-dimension", "Koi farak nahi", "Flexbox sirf mobile ke liye hai"],correct:1},
+          {q:"Items ke darmiyan fasla dene ke liye kaunsi property use hoti hai?",opts:["margin har item par", "gap", "padding", "border"],correct:1}
+        ]
+      },
+      {
+        id:"css-responsive", tag:"Advance", title:"Responsive Design Aur Media Queries \u2014 Deep Dive",
+        explain:"Responsive Design se website har screen size (mobile, tablet, desktop) par achi tarah dikhti hai. Media Queries se hum screen width ke mutabiq alag CSS de sakte hain: @media (max-width: 768px) { ... } \u2014 ye tablet aur us se choti screens par apply hoga. Breakpoints wo screen sizes hain jahan design badalta hai (aam tor par 480px mobile, 768px tablet, 1024px+ desktop ke liye use hote hain). Mobile-first approach mein hum pehle mobile ke liye style likhte hain (base CSS), phir min-width media queries se bare screens ke liye behtar karte hain. Ye approach aksar cleaner aur performant hoti hai.",
+        candles:[],
+        quiz:[
+          {q:"Media Query ka bunyadi kaam kya hai?",opts:["Screen size ke mutabiq alag CSS dena", "Rang change karna", "Font download karna", "Internet speed barhana"],correct:0},
+          {q:"Breakpoint kya hota hai?",opts:["Ek error", "Screen size jahan design badalta hai", "Ek font", "Ek color code"],correct:1},
+          {q:"Mobile-first approach ka matlab kya hai?",opts:["Pehle desktop, phir mobile", "Pehle mobile CSS, phir bare screens ke liye behtar karna", "Sirf mobile ke liye website banana", "Kuch bhi matlab nahi"],correct:1}
+        ]
+      },
+      {
+        id:"css-transitions-animations", tag:"Advance", title:"Transitions Aur Animations",
+        explain:"Transition se ek property ki value smoothly (waqt le kar) badalti hai, jaise button hover par rang aahista se badle: transition: background-color 0.3s ease;. Animation zyada powerful hai \u2014 @keyframes se hum multiple steps define kar sakte hain jo automatically ya loop mein chal sakte hain (jaise loading spinner). Ye dono website ko 'zinda' aur professional mehsoos karate hain, lekin zyada animation performance kharab kar sakti hai, is liye zaroorat ke mutabiq hi use karni chahiye.",
+        candles:[],
+        quiz:[
+          {q:"Transition ka bunyadi kaam kya hai?",opts:["Property ki value smoothly badalna", "Page ko delete karna", "Server se data mangwana", "Font size fix karna"],correct:0},
+          {q:"Multiple steps wali complex animation banane ke liye kya use hota hai?",opts:["transition akela", "@keyframes", "padding", "border"],correct:1},
+          {q:"Zyada animation ka kya nuqsan ho sakta hai?",opts:["Website behtar hoti hai", "Performance kharab ho sakti hai", "Koi nuqsan nahi", "SEO behtar hoti hai"],correct:1}
+        ]
+      },
+      {
+        id:"css-transform", tag:"Advance", title:"Transform \u2014 2D Aur 3D",
+        explain:"transform property se elements ko move, rotate, scale ya skew kiya ja sakta hai bina layout ko affect kiye (ye performance ke lehaz se bhi behtar hai margin/position badalne se). translate() element ko move karta hai, rotate() ghumata hai, scale() bara/chota karta hai. Misaal: transform: scale(1.1); hover par element ko thora bara kar deta hai \u2014 ye buttons aur cards par common effect hai. 3D transforms (jaise rotateY()) se depth ka ehsaas bhi diya ja sakta hai, jo modern, interactive websites mein use hota hai.",
+        candles:[],
+        quiz:[
+          {q:"transform: scale(1.1); ka kya asar hota hai?",opts:["Element chota ho jata hai", "Element thora bara ho jata hai", "Element gayab ho jata hai", "Rang badal jata hai"],correct:1},
+          {q:"Element ko ghumane ke liye kaunsa transform function use hota hai?",opts:["translate()", "rotate()", "scale()", "skew()"],correct:1},
+          {q:"transform, margin/position badalne se performance ke lehaz se kaisa hai?",opts:["Zyada behtar", "Zyada kharab", "Koi farak nahi", "Kaam hi nahi karta"],correct:0}
+        ]
+      },
+      {
+        id:"css-variables", tag:"Super Advance", title:"CSS Variables (Custom Properties)",
+        explain:"CSS Variables (Custom Properties) se hum values ko ek jagah define kar ke poore project mein reuse kar sakte hain, jaise: :root { --main-color: #22c55e; } phir kahin bhi color: var(--main-color); likh kar wahi rang use kiya ja sakta hai. Iska bara faida ye hai ke agar rang badalna ho, sirf ek jagah badalne se poori website update ho jati hai \u2014 jaise dark-mode/light-mode banane mein bhi ye bohat kaam aata hai. Ye bare projects ko maintain karna bohat asaan bana deta hai.",
+        candles:[],
+        quiz:[
+          {q:"CSS Variable define karne ka common tareeqa kya hai?",opts:["--naam: value; (aksar :root ke andar)", "naam = value;", "var naam value", "let naam = value"],correct:0},
+          {q:"CSS Variable use karne ke liye kya likhte hain?",opts:["get(--naam)", "var(--naam)", "use(--naam)", "call(--naam)"],correct:1},
+          {q:"CSS Variables ka bara faida kya hai?",opts:["Ek jagah badalne se poori site update", "Website slow ho jati hai", "Sirf ek dafa use ho sakti hain", "Koi faida nahi"],correct:0}
+        ]
+      },
+      {
+        id:"css-pseudo", tag:"Super Advance", title:"Pseudo-classes Aur Pseudo-elements",
+        explain:"Pseudo-classes element ki khaas 'state' ko target karti hain, jaise :hover (mouse upar hone par), :focus (input select hone par), :first-child (pehla element). Pseudo-elements element ke ek khaas hisse ko target karte hain jo asal HTML mein nahi hota, jaise ::before aur ::after \u2014 inse hum content property se extra design elements add kar sakte hain bina extra HTML likhe. Misaal: button:hover { background: darkgreen; } se button par mouse le jate hi rang badal jata hai \u2014 ye interactivity CSS akeli hi de sakti hai, JavaScript ki zaroorat nahi.",
+        candles:[],
+        quiz:[
+          {q:":hover kis waqt apply hoti hai?",opts:["Page load hote hi", "Mouse element ke upar aane par", "Kabhi nahi", "Sirf mobile par"],correct:1},
+          {q:"::before aur ::after kis kaam ke liye hote hain?",opts:["Naye HTML elements banane ke liye", "Extra content add karne ke liye bina HTML likhe", "Sirf JavaScript ke sath kaam karte hain", "Kuch nahi karte"],correct:1},
+          {q:"':first-child' pseudo-class kya target karti hai?",opts:["Sab se pehla element", "Sab se aakhri element", "Random element", "Hamesha poora page"],correct:0}
+        ]
+      },
+      {
+        id:"css-specificity-sass", tag:"Super Advance", title:"Specificity, Cascade Aur SASS Ka Taaruf",
+        explain:"Jab kai CSS rules ek hi element par apply hoti hain, browser 'Specificity' ke zariye tay karta hai kaunsi rule jeetegi. ID selector (#id) Class selector (.class) se zyada powerful hai, aur Class, Tag selector (jaise p) se zyada powerful hai. 'Cascade' ka matlab hai ke agar specificity barabar ho to jo rule baad mein likhi ho, wo jeetegi. SASS/SCSS ek CSS Preprocessor hai jo variables, nesting, aur functions jaisi advance features deta hai jo plain CSS mein pehle mumkin nahi thin (ab kuch features CSS mein bhi aa gayi hain) \u2014 code likhne ke baad SASS ko normal CSS mein 'compile' kiya jata hai jo browser samajh sakta hai.",
+        candles:[],
+        quiz:[
+          {q:"Specificity mein sab se zyada powerful selector kaunsa hai?",opts:["Tag selector (p)", "Class selector (.class)", "ID selector (#id)", "Comment"],correct:2},
+          {q:"Agar specificity barabar ho to kaunsi rule jeetegi?",opts:["Pehli likhi hui", "Baad mein likhi hui", "Koi bhi nahi", "Random"],correct:1},
+          {q:"SASS/SCSS kya hai?",opts:["Ek naya browser", "CSS Preprocessor jo advance features deta hai", "Ek JavaScript framework", "Ek database"],correct:1}
+        ]
+      }
+    ]
+  },
+  php: {
+    title: "PHP \u2014 Beginner Se Super Advance Tak",
+    icon: "\ud83d\udc18",
+    desc: "Server-side programming ki buniyad se le kar OOP, database aur security tak \u2014 poora PHP course, misaalon aur quiz ke sath.",
+    parts: [
+      {
+        id:"php-intro", tag:"Bunyadi Baatein", title:"PHP Kya Hai Aur Kaise Kaam Karta Hai",
+        explain:"PHP ek server-side scripting language hai, matlab ye code server par chalta hai, browser mein nahi (JavaScript ke ulat jo browser mein chalti hai). Jab user website kholta hai, server PHP code ko process karta hai aur sirf result (HTML) browser ko bhejta hai \u2014 is liye user PHP code kabhi dekh nahi sakta. PHP file '.php' extension se banti hai aur code <?php ... ?> tags ke andar likha jata hai. echo statement se hum output print karte hain, jaise: <?php echo 'Assalam o Alaikum'; ?>. Zyadatar bare websites (jaise WordPress, Facebook shuru mein) PHP par bani hain.",
+        candles:[],
+        quiz:[
+          {q:"PHP kahan chalta hai?",opts:["Browser mein", "Server par", "Sirf mobile mein", "Kahin nahi"],correct:1},
+          {q:"PHP code kis tag ke andar likha jata hai?",opts:["JavaScript ke script tag ke andar", "<?php ... ?>", "CSS ke style tag ke andar", "<php>...</php>"],correct:1},
+          {q:"Output print karne ke liye kaunsa statement use hota hai?",opts:["print_this", "echo", "display", "show"],correct:1}
+        ]
+      },
+      {
+        id:"php-variables", tag:"Bunyadi Baatein", title:"Variables Aur Data Types",
+        explain:"PHP mein variable '$' sign se shuru hota hai, jaise: $naam = 'Ali';. PHP 'loosely typed' language hai, yani variable ka type khud declare karne ki zaroorat nahi, PHP khud samajh leta hai. Bunyadi data types: String (text), Integer (poore number), Float (decimal number), Boolean (true/false), Array (list), aur NULL (khaali value). Misaal: $umar = 25; (Integer), $qeemat = 99.5; (Float), $shadi_shuda = true; (Boolean).",
+        candles:[],
+        quiz:[
+          {q:"PHP mein variable kis sign se shuru hota hai?",opts:["#", "@", "$", "&"],correct:2},
+          {q:"'PHP loosely typed hai' iska matlab kya hai?",opts:["Har variable ka type declare karna zaroori hai", "Type khud declare karne ki zaroorat nahi", "PHP mein variables hote hi nahi", "Sirf numbers store hote hain"],correct:1},
+          {q:"$umar = 25; iska data type kya hai?",opts:["String", "Integer", "Boolean", "Array"],correct:1}
+        ]
+      },
+      {
+        id:"php-operators-conditionals", tag:"Bunyadi Baatein", title:"Operators Aur Conditionals",
+        explain:"PHP mein operators calculations aur comparisons ke liye hote hain: + - * / (math), == (barabar hai \u2014 value check), === (barabar hai aur type bhi same \u2014 behtar aur safe), && || (aur/ya). if/else se program faisla leta hai: if ($umar >= 18) { echo 'Baaligh'; } else { echo 'Nabaligh'; }. elseif se hum kai conditions ek ke baad ek check kar sakte hain. Misaal: Login system mein if ($password === $sahi_password) se check hota hai ke user ka password sahi hai ya nahi.",
+        candles:[],
+        quiz:[
+          {q:"=== operator, == se kis lehaz se mukhtalif hai?",opts:["=== value aur type dono check karta hai", "Koi farak nahi", "== zyada mehfooz hai", "=== sirf strings ke liye hai"],correct:0},
+          {q:"elseif kis kaam aata hai?",opts:["Loop chalane ke liye", "Kai conditions ek ke baad ek check karne ke liye", "Variable banane ke liye", "Array banane ke liye"],correct:1},
+          {q:"PHP mein 'aur' logic ke liye kya use hota hai?",opts:["||", "&&", "==", "++"],correct:1}
+        ]
+      },
+      {
+        id:"php-loops", tag:"Bunyadi Baatein", title:"Loops \u2014 For, While Aur Foreach",
+        explain:"PHP mein loops JavaScript jaisay hi hote hain. for loop tab use hota hai jab tadaad pata ho: for ($i=0; $i<5; $i++) { echo $i; }. while loop condition sach hone tak chalta hai. foreach loop khaas tor par arrays ke liye banaya gaya hai \u2014 ye har item par khud-ba-khud chalta hai bina index track kiye: foreach ($fruits as $fruit) { echo $fruit; }. Misaal: Agar database se 50 users ki list aayi ho, to foreach loop se har user ka naam asani se print kiya ja sakta hai.",
+        candles:[],
+        quiz:[
+          {q:"Array ke har item par chalne ke liye khaas tor par kaunsa loop banaya gaya hai?",opts:["for", "while", "foreach", "do-while"],correct:2},
+          {q:"'for' loop kab zyada use hota hai?",opts:["Jab dohrane ki tadaad maloom ho", "Jab kabhi na dohrana ho", "Sirf strings ke liye", "Sirf arrays ke liye"],correct:0},
+          {q:"foreach loop mein index track karna zaroori hai?",opts:["Haan, hamesha", "Nahi, khud-ba-khud chalta hai", "Sirf kabhi kabhi", "Sirf while ke sath"],correct:1}
+        ]
+      },
+      {
+        id:"php-functions", tag:"Intermediate", title:"Functions",
+        explain:"Function ek reusable code block hai. PHP mein function banane ka tareeqa: function jama($a, $b) { return $a + $b; }. Isay call karne ke liye: echo jama(5, 3); \u2014 ye 8 print karega. Default parameters bhi diye ja sakte hain: function salam($naam = 'Dost') { echo 'Assalam o Alaikum ' . $naam; } \u2014 agar naam na diya jaye to 'Dost' use hoga. Functions code ko organize aur reuse karne mein bohat madad dete hain, khaas tor par bare projects mein.",
+        candles:[],
+        quiz:[
+          {q:"PHP mein function kis keyword se banta hai?",opts:["func", "function", "def", "method"],correct:1},
+          {q:"Function se value wapis bhejne ke liye kya use hota hai?",opts:["echo akela", "return", "print", "show"],correct:1},
+          {q:"Default parameter ka faida kya hai?",opts:["Value na dene par bhi ek default value mil jati hai", "Function kabhi chalti nahi", "Error deta hai", "Kuch nahi karta"],correct:0}
+        ]
+      },
+      {
+        id:"php-arrays", tag:"Intermediate", title:"Arrays \u2014 Indexed Aur Associative",
+        explain:"PHP mein do tarah ki arrays common hain. Indexed Array mein items ek number (index) se pehchane jate hain, jaise: $fruits = ['seb', 'kela', 'aam']; \u2014 $fruits[0] 'seb' dega. Associative Array mein items ka apna 'key' hota hai (number ke bajaye naam), jaise: $user = ['naam' => 'Ali', 'umar' => 25]; \u2014 $user['naam'] 'Ali' dega. Associative arrays real-world data (jaise database se aane wala ek user record) represent karne ke liye bohat useful hain.",
+        candles:[],
+        quiz:[
+          {q:"Indexed array mein items kis se pehchane jate hain?",opts:["Naam se", "Number (index) se", "Rang se", "Size se"],correct:1},
+          {q:"Associative array ki misaal kaunsi hai?",opts:["[1,2,3]", "['seb','kela']", "['naam'=>'Ali','umar'=>25]", "'Hello'"],correct:2},
+          {q:"$user['naam'] kya karega agar $user = ['naam'=>'Ali'];?",opts:["Error dega", "'Ali' dega", "0 dega", "Kuch nahi"],correct:1}
+        ]
+      },
+      {
+        id:"php-forms", tag:"Intermediate", title:"Forms Handling \u2014 $_GET Aur $_POST",
+        explain:"Jab HTML form submit hota hai, uska data PHP mein superglobals ke zariye milta hai. $_GET tab use hota hai jab form method='GET' ho \u2014 data URL mein nazar aata hai (jaise search ke liye behtar). $_POST tab use hota hai jab method='POST' ho \u2014 data URL mein nazar nahi aata, is liye sensitive data (jaise password) ke liye behtar hai. Misaal: $naam = $_POST['naam']; se form mein bhare gaye 'naam' field ki value mil jati hai. User input ko hamesha check/sanitize karna zaroori hai taake security masail (jaise SQL Injection) na hon.",
+        candles:[],
+        quiz:[
+          {q:"Password jaisay sensitive data ke liye kaunsa method behtar hai?",opts:["GET", "POST", "Dono barabar", "Koi farak nahi"],correct:1},
+          {q:"$_GET ka data kahan nazar aata hai?",opts:["URL mein", "Sirf database mein", "Kahin nazar nahi aata", "Sirf email mein"],correct:0},
+          {q:"Form se aaya hua user input hamesha kya karna chahiye?",opts:["Bina check kiye seedha use karna", "Check/sanitize karna", "Delete kar dena", "Ignore karna"],correct:1}
+        ]
+      },
+      {
+        id:"php-sessions-cookies", tag:"Intermediate", title:"Sessions Aur Cookies",
+        explain:"Websites 'stateless' hoti hain, yani har request alag samajhi jati hai \u2014 Sessions aur Cookies is masle ka hal hain. Session server par thora data store karta hai aur user ko sirf ek unique ID deta hai (jaise login ke baad user 'yaad' rehta hai jab tak wo site par ho) \u2014 session_start(); se session shuru hota hai aur $_SESSION['naam'] = 'Ali'; se data save hota hai. Cookie user ke browser mein hi thora data save karta hai jo agli visit tak bhi reh sakta hai (jaise 'Remember Me' feature). Sessions zyada mehfooz hain sensitive data ke liye, kyun ke data server par rehta hai.",
+        candles:[],
+        quiz:[
+          {q:"Session data kahan store hota hai?",opts:["User ke browser mein", "Server par", "Kahin nahi", "Sirf URL mein"],correct:1},
+          {q:"Cookie kahan store hoti hai?",opts:["Server par", "User ke browser mein", "Database mein hamesha", "Kahin nahi"],correct:1},
+          {q:"Sensitive data ke liye kya zyada mehfooz hai?",opts:["Cookie", "Session", "Dono barabar", "Koi farak nahi"],correct:1}
+        ]
+      },
+      {
+        id:"php-mysql", tag:"Advance", title:"Database Connection \u2014 PHP Aur MySQL",
+        explain:"PHP aksar MySQL database ke sath mil kar dynamic websites banata hai. Connection banane ke liye 'mysqli' ya 'PDO' extension use hoti hai. Bunyadi CRUD operations: Create (naya data INSERT karna), Read (SELECT se data nikalna), Update (data badalna), Delete (data hatana) \u2014 ye sab SQL queries ke zariye hote hain jo PHP se database ko bheji jati hain. Misaal: Ek blog website mein jab admin naya post likhta hai, wo data INSERT query se database mein save hota hai, aur jab visitor page kholta hai, SELECT query se wo post nikal kar dikhaya jata hai.",
+        candles:[],
+        quiz:[
+          {q:"CRUD mein 'C' kis ke liye hai?",opts:["Copy", "Create", "Change", "Cancel"],correct:1},
+          {q:"Database se data nikalne (fetch karne) ke liye kaunsi SQL query use hoti hai?",opts:["INSERT", "SELECT", "DELETE", "UPDATE"],correct:1},
+          {q:"PHP se MySQL connect karne ke liye kaunsi extension aam use hoti hai?",opts:["mysqli ya PDO", "CSS", "HTML", "JSON"],correct:0}
+        ]
+      },
+      {
+        id:"php-include-organize", tag:"Advance", title:"Include/Require Aur Code Organization",
+        explain:"Bare PHP projects mein code ko chhoti files mein baant'na behtar hota hai \u2014 jaise header.php, footer.php, config.php. include aur require in files ko doosri files ke andar 'shamil' karte hain, taake code baar baar na likhna pare. Farq ye hai: agar file nahi milti to include sirf warning deta hai aur script chalta rehta hai, jab ke require ek fatal error deta hai aur script ruk jati hai (require_once/include_once wahi kaam karte hain lekin sirf ek dafa file include karte hain, chahe kitni bhi jagah call ho). Misaal: har page par same header/footer dikhane ke liye include 'header.php'; use hota hai.",
+        candles:[],
+        quiz:[
+          {q:"include aur require mein bunyadi farq kya hai?",opts:["Koi farak nahi", "File na milne par include warning deta hai, require fatal error", "require hamesha tez hai", "include sirf images ke liye hai"],correct:1},
+          {q:"_once wale versions (include_once/require_once) ka faida kya hai?",opts:["File ko sirf ek dafa include karna, chahe kitni jagah call ho", "File ko delete karna", "Error hamesha aana", "Kuch nahi"],correct:0},
+          {q:"Header/footer ko har page par dobara likhne se bachne ke liye kya use hota hai?",opts:["Loops", "include/require", "Arrays", "Sessions"],correct:1}
+        ]
+      },
+      {
+        id:"php-oop", tag:"Super Advance", title:"Object-Oriented PHP (Classes Aur Objects)",
+        explain:"OOP (Object-Oriented Programming) code ko 'objects' ke zariye organize karne ka tareeqa hai. Class ek 'blueprint' hai (jaise 'Car' ka design), aur Object us blueprint se banaya gaya asal cheez hai (jaise ek khaas car). PHP mein class banane ka tareeqa: class User { public $naam; function salam() { echo 'Salam ' . $this->naam; } }. Object banane ke liye: $u = new User(); $u->naam = 'Ali'; $u->salam();. OOP se bare projects mein code zyada organized, reusable, aur maintain karna asaan hota hai \u2014 bare frameworks (jaise Laravel) mukammal tor par OOP par bane hote hain.",
+        candles:[],
+        quiz:[
+          {q:"Class kya hoti hai?",opts:["Ek asal object", "Ek blueprint/design", "Ek loop", "Ek variable"],correct:1},
+          {q:"Class se naya object banane ke liye kaunsa keyword use hota hai?",opts:["make", "new", "create", "build"],correct:1},
+          {q:"OOP ka bara faida kya hai?",opts:["Code disorganized ho jata hai", "Code organized aur reusable hota hai", "Website slow hoti hai", "Koi faida nahi"],correct:1}
+        ]
+      },
+      {
+        id:"php-security", tag:"Super Advance", title:"PHP Security Basics \u2014 SQL Injection Se Bachao",
+        explain:"Web security PHP developers ke liye bohat ahem hai. SQL Injection se bachne ke liye hamesha 'Prepared Statements' use karne chahiye (PDO ya mysqli ke zariye) \u2014 is mein user input ko seedha SQL query mein nahi jorha jata, balke ek 'placeholder' ki tarah treat kiya jata hai, is se hacker query ka structure nahi badal sakta. Passwords ko kabhi plain text mein save nahi karna chahiye \u2014 PHP ka built-in password_hash() function password ko hash kar deta hai, aur password_verify() login ke waqt check karta hai. User input ko hamesha htmlspecialchars() jaisay functions se saaf (sanitize) karna chahiye taake XSS jaisay attacks se bacha ja sake. (Tafseeli maloomat ke liye website ka alag Cyber Security course dekhein.)",
+        candles:[],
+        quiz:[
+          {q:"SQL Injection se bachne ka behtareen tareeqa kya hai?",opts:["Prepared Statements use karna", "Password chota rakhna", "Firewall band karna", "Kuch na karna"],correct:0},
+          {q:"Passwords save karne ka mehfooz tareeqa kya hai?",opts:["Plain text mein save karna", "password_hash() se hash kar ke save karna", "Email kar dena", "File mein likh dena"],correct:1},
+          {q:"User input ko HTML mein dikhane se pehle kya karna chahiye (XSS se bachne ke liye)?",opts:["htmlspecialchars() se sanitize karna", "Kuch na karna", "Delete kar dena", "Sirf print karna"],correct:0}
+        ]
+      },
+      {
+        id:"php-error-handling", tag:"Super Advance", title:"Error Handling \u2014 Try/Catch",
+        explain:"Jab code chalte waqt koi masla (error/exception) aaye, to poori script crash hone se bachane ke liye Error Handling zaroori hai. try block mein wo code likha jata hai jo shayad fail ho sake, catch block mein wo code jo agar error aaye to chalega: try { /* risky code */ } catch (Exception $e) { echo 'Masla aaya: ' . $e->getMessage(); }. Ye khaas tor par database connections ya file operations mein useful hai, jahan cheezein fail ho sakti hain (jaise internet band ho jana). Achi error handling se user ko samajh aane wala message milta hai, aur poori website crash nahi hoti.",
+        candles:[],
+        quiz:[
+          {q:"Risky code kahan likha jata hai?",opts:["catch block mein", "try block mein", "if block mein", "for loop mein"],correct:1},
+          {q:"Agar try block mein error aaye to kaunsa block chalta hai?",opts:["try dobara", "catch block", "Kuch nahi hota", "Poori website crash ho jati hai"],correct:1},
+          {q:"Achi error handling ka faida kya hai?",opts:["Website crash ho jati hai", "User ko samajh aane wala message milta hai, crash nahi hoti", "Koi faida nahi", "Speed kam ho jati hai"],correct:1}
+        ]
+      },
+      {
+        id:"php-composer-frameworks", tag:"Super Advance", title:"Composer Aur PHP Frameworks Ka Taaruf",
+        explain:"Composer PHP ka 'package manager' hai (JavaScript ke npm jaisa) \u2014 is se hum ready-made libraries aasani se install kar sakte hain bina khud likhe. PHP Frameworks (jaise Laravel, sab se popular) bare, professional applications banane ke liye structure, security features, aur reusable tools pehle se dete hain \u2014 jaise routing (URLs handle karna), database ORM (bina seedhi SQL likhe database se baat karna), aur templating (views banana). Ek framework seekhne se pehle plain PHP ki achi buniyad hona zaroori hai, taake pata ho ke framework asal mein peeche kya kar raha hai.",
+        candles:[],
+        quiz:[
+          {q:"Composer kis kaam aata hai?",opts:["Ready-made PHP libraries install karna", "Website design karna", "Password check karna", "Server band karna"],correct:0},
+          {q:"PHP ka sab se popular framework kaunsa hai?",opts:["React", "Laravel", "Django", "Angular"],correct:1},
+          {q:"Framework seekhne se pehle kya zaroori hai?",opts:["Kuch bhi nahi", "Plain PHP ki achi buniyad", "Sirf English", "Naya laptop"],correct:1}
+        ]
+      }
+    ]
   }
 };
 
