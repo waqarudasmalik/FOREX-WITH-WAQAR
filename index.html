@@ -7202,6 +7202,164 @@ var COURSES = {
         ]
       }
     ]
+  },
+  cybersecurity: {
+    title: "Cyber Security — Beginner se Advance Tak",
+    icon: "🛡️",
+    desc: "Cyber Security ke bunyadi concepts se le kar advance level tak, asaan alfaaz mein, misaalon aur quiz ke sath. (Sirf Admin)",
+    adminOnly: true,
+    parts: [
+      {
+        id:"cs-intro", tag:"Bunyadi Baatein", title:"Cyber Security Kya Hai?",
+        explain:"Cyber Security ka matlab hai apne computer, mobile, network aur data ko un logon se bachana jo bina ijazat unhe access, chura ya kharab karna chahte hain. Jaise ghar ko chor se bachane ke liye hum darwaze par tala lagate hain, waisay hi digital duniya mein hum passwords, firewalls aur encryption jaisi cheezon se apni maloomat ko mehfooz rakhte hain. Misaal: Agar aap online banking use karte hain, to Cyber Security hi wo cheez hai jo aapke account ko hackers se bachati hai.",
+        candles:[],
+        quiz:[
+          {q:"Cyber Security ka bunyadi maqsad kya hai?",opts:["Internet ki speed barhana","Data aur systems ko un-authorized access se bachana","Sirf games khelna","Computer ko sasta banana"],correct:1},
+          {q:"Cyber Security ki misaal kaunsi hai?",opts:["Online banking account ko password se protect karna","Phone ki battery charge karna","Wifi ka naam change karna","Screen brightness kam karna"],correct:0},
+          {q:"Agar koi bina ijazat aapka data access kare to ye kya kehlata hai?",opts:["Update","Backup","Cyber Attack / Breach","Formatting"],correct:2}
+        ]
+      },
+      {
+        id:"cs-cia", tag:"Bunyadi Baatein", title:"CIA Triad (Confidentiality, Integrity, Availability)",
+        explain:"CIA Triad Cyber Security ki buniyad hai, is mein 3 cheezein hoti hain: 1) Confidentiality — sirf authorized log hi data dekh sakein (jaise aapka WhatsApp message sirf aap aur jis ko bheja us ke ilawa koi na parhe). 2) Integrity — data sahi aur bina chhera-chhari ke rahe (jaise bank balance koi tabdeel na kar sake). 3) Availability — jab bhi zaroorat ho, system ya data available ho (jaise website down na ho jab log use karna chahein). In teenon ka balance hi ek mehfooz system banata hai.",
+        candles:[],
+        quiz:[
+          {q:"Confidentiality ka matlab kya hai?",opts:["Data sirf authorized logon ko nazar aaye","Data hamesha delete ho jaye","System hamesha slow ho","Password kabhi change na ho"],correct:0},
+          {q:"Agar hacker bank ka balance tabdeel kar de to CIA ka kaunsa hissa toota?",opts:["Confidentiality","Integrity","Availability","Koi nahi"],correct:1},
+          {q:"Website down ho jaye aur log use na kar sakein to kya prabhavit hota hai?",opts:["Confidentiality","Integrity","Availability","Encryption"],correct:2}
+        ]
+      },
+      {
+        id:"cs-threat-vuln-risk", tag:"Bunyadi Baatein", title:"Threat, Vulnerability aur Risk ka Farq",
+        explain:"Ye teen alfaaz aksar mix ho jate hain lekin in ka matlab mukhtalif hai. Vulnerability — system ki koi kamzori (jaise ek darwaza jiska tala kharab ho). Threat — wo cheez jo us kamzori ka faida utha sakti hai (jaise ek chor jo darwaze ke pass hai). Risk — is baat ka imkaan aur nuqsan ke andaza ke ke wo threat us vulnerability ko istemal karke nuqsan karay (jaise chor ka andar aa kar samaan chura lena). Misaal: Purana software (vulnerability) + hacker (threat) = risk ke barhne ka sabab.",
+        candles:[],
+        quiz:[
+          {q:"System ki kamzori ko kya kehte hain?",opts:["Threat","Vulnerability","Risk","Firewall"],correct:1},
+          {q:"Wo cheez jo kamzori ka faida uthati hai, use kya kehte hain?",opts:["Vulnerability","Patch","Threat","Backup"],correct:2},
+          {q:"Purana, un-updated software kis cheez ki misaal hai?",opts:["Threat","Vulnerability","Encryption","Firewall"],correct:1}
+        ]
+      },
+      {
+        id:"cs-hackers", tag:"Hackers & Attacks", title:"Hackers Ki Aqsam (White, Black, Grey Hat)",
+        explain:"Har hacker bura nahi hota. White Hat Hackers — ye Ethical Hackers hain, companies ki ijazat se un ke systems test karte hain taake kamzoriyan pehle se theek ki ja sakein. Black Hat Hackers — ye ghair-qanooni tareeqe se systems mein ghus kar nuqsan pohanchate ya data churate hain. Grey Hat Hackers — ye beech ke log hain, kabhi bina ijazat system check karte hain lekin nuqsan pohanchane ki niyat nahi rakhte, phir company ko bata dete hain. Misaal: Agar koi company Facebook ko ek bug dhoond kar report kare aur inaam le, to wo White Hat hacker hai (Bug Bounty).",
+        candles:[],
+        quiz:[
+          {q:"Company ki ijazat se system test karne wale hacker ko kya kehte hain?",opts:["Black Hat","White Hat","Script Kiddie","Grey Hat"],correct:1},
+          {q:"Bina ijazat, nuqsan pohanchane ki niyat se hack karne wale ko kya kehte hain?",opts:["White Hat","Black Hat","Grey Hat","Admin"],correct:1},
+          {q:"Bug Bounty program mein hackers kya karte hain?",opts:["Data churate hain","Bugs report kar ke inaam lete hain","System kharab karte hain","Kuch nahi karte"],correct:1}
+        ]
+      },
+      {
+        id:"cs-malware", tag:"Hackers & Attacks", title:"Malware Ki Aqsam (Virus, Worm, Trojan, Ransomware)",
+        explain:"Malware ek 'malicious software' hota hai jo system ko nuqsan pohanchane ke liye banaya jata hai. Virus — khud ko dusri files ke sath jorh kar phailta hai. Worm — bina kisi file ke khud hi network mein phail jata hai. Trojan — ek acchi cheez (jaise game ya app) ka bhes badal kar aata hai, andar se nuqsan-deh hota hai. Ransomware — aapki files ko lock/encrypt kar deta hai aur wapis khol'ne ke liye paisay (ransom) manga jata hai. Misaal: Ek email attachment jo 'Invoice.pdf.exe' ho, Trojan ho sakta hai — kabhi bhi anjaan attachments na kholein.",
+        candles:[],
+        quiz:[
+          {q:"Jo malware acchi app ka bhes badal kar aata hai, wo kya kehlata hai?",opts:["Worm","Trojan","Virus","Firewall"],correct:1},
+          {q:"Ransomware kya karta hai?",opts:["Files ko lock kar ke paisay manga hai","Internet speed barhata hai","Password yaad rakhta hai","Battery bachata hai"],correct:0},
+          {q:"Worm aur Virus mein bunyadi farq kya hai?",opts:["Worm bina file ke khud phail jata hai","Worm sirf mobile mein aata hai","Virus kabhi phail nahi sakta","Koi farak nahi"],correct:0}
+        ]
+      },
+      {
+        id:"cs-phishing", tag:"Hackers & Attacks", title:"Phishing Aur Social Engineering",
+        explain:"Phishing ek dhoka-dahi ka tareeqa hai jahan hacker aapko jaali email, message ya website ke zariye behlata hai taake aap apna password ya card details khud de dein. Social Engineering iska bara concept hai — is mein hacker technology ke bajaye insaan ki nafsiyaat (psychology) ka faida uthata hai, jaise jaldi ya darr paida kar ke ('Aapka account 24 ghante mein band ho jayega!'). Misaal: Ek email jo bilkul bank jaisi lagti ho aur usme link par click karne ko kaha jaye — asal mein wo jaali website hoti hai jo aapki login details chura leti hai.",
+        candles:[],
+        quiz:[
+          {q:"Phishing mein hacker aksar kya bhejta hai?",opts:["Asli bank ka call","Jaali email ya link","Software update","Nayi job offer sirf sach"],correct:1},
+          {q:"Social Engineering kis cheez ka faida uthati hai?",opts:["Computer hardware","Insaan ki nafsiyaat aur bharosa","Internet cable","Screen resolution"],correct:1},
+          {q:"Agar email mein jaldi ya darr paida kiya jaye ('abhi click karein warna account band') to ye aksar kya hota hai?",opts:["Normal update","Phishing ka nishaan","Free offer","System backup"],correct:1}
+        ]
+      },
+      {
+        id:"cs-passwords", tag:"Password & Authentication", title:"Mazboot Password Aur 2FA",
+        explain:"Mazboot password wo hota hai jo lamba ho (kam az kam 12 characters), jisme capital-small letters, numbers aur symbols shamil hon, aur jo kisi bhi jaga (naam, date of birth) se mutalliq na ho. Har account ka password alag hona chahiye taake agar ek account hack ho to baqi mehfooz rahein. 2FA (Two-Factor Authentication) ek extra security layer hai — password ke sath sath ek code bhi chahiye hota hai (jaise mobile par aane wala OTP), is se agar hacker password bhi jaan le, phir bhi wo account mein nahi ghus sakta bina us doosray code ke.",
+        candles:[],
+        quiz:[
+          {q:"Mazboot password mein kya shamil hona chahiye?",opts:["Sirf naam","Capital, small letters, numbers, symbols ka mix","Sirf 4 digit number","Birthday date"],correct:1},
+          {q:"2FA ka faida kya hai?",opts:["Password yaad rakhna asaan banata hai","Sirf password se account hack nahi ho sakta","Internet fast ho jata hai","Battery bachati hai"],correct:1},
+          {q:"Kya har account ka password same rakhna chahiye?",opts:["Haan, asaan hota hai","Nahi, har account ka alag hona chahiye","Farak nahi padta","Sirf email ka alag ho"],correct:1}
+        ]
+      },
+      {
+        id:"cs-firewall", tag:"Network Security", title:"Firewall Kya Hota Hai?",
+        explain:"Firewall ek security guard ki tarah kaam karta hai jo aapke computer/network aur internet ke darmiyan khara hota hai. Ye tay karta hai ke kaunsa data andar aa sakta hai aur kaunsa bahar ja sakta hai, pehle se bane huay rules ke mutabiq. Agar koi ghair-mehfooz ya shak-nak connection aaye, Firewall usay block kar deta hai. Misaal: Jaise building ka security guard sirf un logon ko andar jane deta hai jinke pass valid ID ho, waisay hi Firewall sirf 'trusted' traffic ko network mein aane deta hai.",
+        candles:[],
+        quiz:[
+          {q:"Firewall ka bunyadi kaam kya hai?",opts:["Internet speed barhana","Network traffic ko monitor aur control karna","Files delete karna","Password yaad rakhna"],correct:1},
+          {q:"Firewall shak-nak connection ke sath kya karta hai?",opts:["Ignore kar deta hai","Block kar deta hai","Copy kar deta hai","Share kar deta hai"],correct:1},
+          {q:"Firewall ko kis se tashbeeh (comparison) di ja sakti hai?",opts:["Building ka security guard","Ek game","Ek printer","Ek calculator"],correct:0}
+        ]
+      },
+      {
+        id:"cs-vpn", tag:"Network Security", title:"VPN Kya Hai Aur Kyun Zaroori Hai?",
+        explain:"VPN (Virtual Private Network) aapke internet connection ko ek mehfooz 'sur ang' (tunnel) ke zariye bhejta hai jo encrypted hoti hai, is se aapki online activity chupi rehti hai aur aapka asli location bhi hide ho jata hai. Ye khaas tor par public Wifi (jaise cafe ya airport) use karte waqt zaroori hai, kyun ke wahan hackers logon ka data chura sakte hain. Misaal: Bina VPN ke public Wifi par banking app use karna khatarnak ho sakta hai; VPN is data ko encrypt kar ke mehfooz banata hai.",
+        candles:[],
+        quiz:[
+          {q:"VPN ka bunyadi kaam kya hai?",opts:["Internet connection ko encrypt aur mehfooz karna","Computer ko tez karna","Files delete karna","Screen size barhana"],correct:0},
+          {q:"VPN kis situation mein khaas tor par faida-mand hai?",opts:["Ghar ke mehfooz Wifi par","Public Wifi (cafe/airport) par","Offline kaam karte waqt","Printer use karte waqt"],correct:1},
+          {q:"VPN aapki online activity ke sath kya karta hai?",opts:["Sab ko public kar deta hai","Chupa/encrypt kar deta hai","Delete kar deta hai","Kuch nahi karta"],correct:1}
+        ]
+      },
+      {
+        id:"cs-sqli", tag:"Web Security", title:"SQL Injection Kya Hai? (Advance)",
+        explain:"SQL Injection ek advance-level web security kamzori hai jo tab hoti hai jab website user ka input (jaise login form) bina theek se check kiye seedha database query mein daal deti hai. Agar developer input ko sahi tareeqe se sanitize (saaf) na kare, to hacker khaas characters daal kar database ke rules ko tor sakta hai aur bina password ke login ya data chura sakta hai. Isay rokne ka tareeqa hai 'Parameterized Queries' aur 'Input Validation' use karna — yani hamesha user ka input ek 'value' ki tarah treat karein, command ki tarah nahi. Ye topic sirf seekhne aur apne systems ko mehfooz banane (defensive) ke liye hai.",
+        candles:[],
+        quiz:[
+          {q:"SQL Injection kis wajah se mumkin hota hai?",opts:["User input theek se check na hona","Slow internet","Purani screen","Bara password"],correct:0},
+          {q:"SQL Injection se hacker aksar kya kar sakta hai?",opts:["Wifi password change","Bina authorization database access","Printer control","Screen brightness change"],correct:1},
+          {q:"SQL Injection se bachne ka best tareeqa kya hai?",opts:["Parameterized Queries aur Input Validation","Password chota rakhna","Firewall band karna","Update na karna"],correct:0}
+        ]
+      },
+      {
+        id:"cs-xss", tag:"Web Security", title:"Cross-Site Scripting (XSS) — Advance",
+        explain:"XSS ek aur advance web security masla hai jahan hacker kisi website mein malicious script inject kar deta hai jo dusre users ke browser mein chal jati hai jab wo us page ko visit karte hain. Is se cookies chori ho sakti hain, session hijack ho sakta hai, ya user ko jaali content dikhaya ja sakta hai. Ye tab hota hai jab website user ka diya hua text (jaise comment box) bina saaf kiye seedha page par dikha deti hai. Bachao ka tareeqa hai 'Output Encoding' — yani user ka input hamesha plain text ki tarah dikhana, code ki tarah execute na hone dena.",
+        candles:[],
+        quiz:[
+          {q:"XSS attack mein hacker kya inject karta hai?",opts:["Malicious script website mein","Naya password","Firewall rule","Internet cable"],correct:0},
+          {q:"XSS se kya chori ho sakta hai?",opts:["Cookies/Session","Keyboard","Mouse","Monitor"],correct:0},
+          {q:"XSS se bachne ka tareeqa kya hai?",opts:["Output Encoding, user input ko plain text rakhna","Password chota karna","Wifi band karna","Screen brightness kam karna"],correct:0}
+        ]
+      },
+      {
+        id:"cs-crypto", tag:"Cryptography", title:"Encryption: Symmetric Vs Asymmetric (Advance)",
+        explain:"Encryption data ko ek 'code' mein badal deta hai taake sirf sahi log hi usay parh sakein. Symmetric Encryption mein sirf ek hi 'key' hoti hai jo data ko lock aur unlock dono karti hai — ye tez hoti hai lekin key ko surakhshit tareeqe se share karna mushkil hota hai. Asymmetric Encryption mein do keys hoti hain: Public Key (jo sab ke sath share ki ja sakti hai, data lock karne ke liye) aur Private Key (jo sirf owner ke pass hoti hai, data unlock karne ke liye). Misaal: Jab aap kisi website par 'https' dekhte hain, us ke peeche Asymmetric Encryption hi kaam kar rahi hoti hai taake aapka data safar mein mehfooz rahe.",
+        candles:[],
+        quiz:[
+          {q:"Symmetric Encryption mein kitni keys hoti hain?",opts:["Ek","Do","Teen","Zero"],correct:0},
+          {q:"Asymmetric Encryption mein Public Key ka kaam kya hai?",opts:["Data ko lock karna","Data delete karna","Wifi connect karna","Screen dikhana"],correct:0},
+          {q:"HTTPS wali websites aksar kaunsi encryption use karti hain?",opts:["Koi encryption nahi","Asymmetric Encryption","Sirf password","Firewall"],correct:1}
+        ]
+      },
+      {
+        id:"cs-hashing", tag:"Cryptography", title:"Hashing Kya Hai? (Advance)",
+        explain:"Hashing ek tareeqa hai jisme kisi bhi data (chahe chota ho ya bara) ko ek fixed-length, unique-si 'string' mein badal diya jata hai, jise Hash kehte hain. Hashing ek-tarfa (one-way) hoti hai — yani hash se wapis asal data nikalna mumkin nahi hota (encryption ke ulat, jo do-tarfa hoti hai). Isi liye websites passwords ko seedha save nahi karti balke un ka hash save karti hain; jab aap login karte hain, aapka diya hua password hash kiya jata hai aur pehle se save hash ke sath compare hota hai. Agar dono match karein to login successful hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Hashing kis tarah ka process hai?",opts:["Do-tarfa (reversible)","Ek-tarfa (one-way)","Random","Optional"],correct:1},
+          {q:"Websites passwords ko kaise store karti hain (behtareen tareeqa)?",opts:["Plain text mein","Hash ki shakal mein","Kagaz par","Screenshot mein"],correct:1},
+          {q:"Login ke waqt system kya compare karta hai?",opts:["Diya gaya password ka hash aur save shuda hash","Username sirf","Internet speed","Screen size"],correct:0}
+        ]
+      },
+      {
+        id:"cs-pentest", tag:"Ethical Hacking & Career", title:"Penetration Testing (Ethical Hacking) Kya Hai?",
+        explain:"Penetration Testing (jise Pen Testing bhi kehte hain) ek qanooni aur ijazat-shuda tareeqa hai jisme ek Ethical Hacker company ki ijazat se un ke system ki kamzoriyan dhoondta hai — bilkul waise jaise ek asal hacker karta, magar nuqsan pohanchane ke liye nahi, balke unhe theek karwane ke liye. Is process mein aam tor par ye marahil (steps) hote hain: 1) Reconnaissance (maloomat jama karna), 2) Scanning (kamzoriyan dhoondna), 3) Exploitation (test karna ke kamzori kaam karti hai ya nahi — sirf controlled tareeqe se), 4) Reporting (company ko poori report dena taake wo theek kar sakein). Ye field seekhne ke liye ijazat aur certifications (jaise CEH, OSCP) zaroori hoti hain.",
+        candles:[],
+        quiz:[
+          {q:"Penetration Testing kis maqsad ke liye ki jati hai?",opts:["Nuqsan pohanchane ke liye","Kamzoriyan dhoond kar theek karwane ke liye","Data churane ke liye","Internet band karne ke liye"],correct:1},
+          {q:"Pen Testing ka aakhri step kya hota hai?",opts:["Reporting","Formatting","Deleting","Ignoring"],correct:0},
+          {q:"Ethical Hacker kaam shuru karne se pehle kya lena zaroori hai?",opts:["Kuch bhi nahi","Company ki ijazat (authorization)","Sirf laptop","Naya phone"],correct:1}
+        ]
+      },
+      {
+        id:"cs-incident", tag:"Ethical Hacking & Career", title:"Incident Response — Attack Hone Par Kya Karein?",
+        explain:"Incident Response wo plan hota hai jo batata hai ke agar cyber attack ho jaye to kya kadam uthaye jayein. Bunyadi marahil ye hain: 1) Identify — pehchano ke attack hua hai aur kaisa hai. 2) Contain — nuqsan ko phailne se roko (jaise infected computer ko network se hata dena). 3) Eradicate — malware ya kamzori ko poori tarah khatam karna. 4) Recover — system ko wapis normal halat mein lana (backups se). 5) Lessons Learned — seekhna ke aainda aisa dobara na ho. Misaal: Agar ransomware attack ho jaye, sab se pehle infected computer ko turant Wifi/network se disconnect karna chahiye taake ye baqi computers tak na phaile.",
+        candles:[],
+        quiz:[
+          {q:"Incident Response ka pehla step kya hota hai?",opts:["Recover","Identify (pehchano)","Eradicate","Lessons Learned"],correct:1},
+          {q:"Agar ek computer mein ransomware aa jaye, foran kya karna chahiye?",opts:["Usay network se disconnect karna","Password change karna","Kuch na karna","Naya software install karna"],correct:0},
+          {q:"Incident Response ka aakhri, lekin zaroori step kya hai?",opts:["Sab kuch delete karna","Lessons Learned — seekh kar aainda behtar hona","Sirf recovery","Sirf formatting"],correct:1}
+        ]
+      }
+    ]
   }
 };
 
@@ -7237,6 +7395,7 @@ function ccRenderFolders(){
   var html = '';
   Object.keys(COURSES).forEach(function(key){
     var c = COURSES[key];
+    if(c.adminOnly && !ccIsAdmin) return; // ye course sirf admin ko nazar aata hai — non-admin ke liye poori tarah hidden
     var folderUnlocked = ccIsAdmin || (ccAccess && ccAccess[key] && ccAccess[key].unlocked);
     var unlockedPartsCount = 0;
     if(ccIsAdmin){ unlockedPartsCount = c.parts.length; }
@@ -7254,10 +7413,11 @@ function ccRenderFolders(){
 }
 
 function ccOpenFolder(key){
+  var c = COURSES[key];
+  if(c && c.adminOnly && !ccIsAdmin){ alert('Ye course sirf admin ke liye hai.'); return; }
   var folderUnlocked = ccIsAdmin || (ccAccess && ccAccess[key] && ccAccess[key].unlocked);
   if(!folderUnlocked){ alert('Ye course abhi aapke liye locked hai. Admin se access ki request karein.'); return; }
   ccCurrentFolder = key;
-  var c = COURSES[key];
   var html = '<button class="cc-back-btn" onclick="ccShowFolders()">← Courses</button>'+
     '<h2>'+c.icon+' '+c.title+'</h2><div class="cc-parts-grid">';
   c.parts.forEach(function(p){
@@ -7282,8 +7442,9 @@ function ccShowFolders(){
 }
 
 function ccOpenPart(folderKey, partId){
-  if(!ccHasAccess(folderKey, partId)){ alert('Ye part abhi locked hai. Admin se access ki request karein.'); return; }
   var c = COURSES[folderKey];
+  if(c && c.adminOnly && !ccIsAdmin){ alert('Ye course sirf admin ke liye hai.'); return; }
+  if(!ccHasAccess(folderKey, partId)){ alert('Ye part abhi locked hai. Admin se access ki request karein.'); return; }
   var p = c.parts.filter(function(x){ return x.id===partId; })[0];
   if(!p) return;
   var diagId = 'ccDiag_'+p.id;
@@ -7447,6 +7608,7 @@ function ccRenderAdminPanel(usersList){
     html += '<details class="cc-admin-user"><summary>'+escapeHtml(u.name||u.email||u.uid)+'</summary>';
     Object.keys(COURSES).forEach(function(key){
       var c = COURSES[key];
+      if(c.adminOnly) return; // admin-only course kisi bhi normal user ko assign nahi ki ja sakti
       var f = (u.access && u.access[key]) || {unlocked:false, parts:{}};
       html += '<div class="cc-admin-folder-row"><span>'+c.icon+' '+c.title+' (poora folder)</span>'+
         '<div class="cc-toggle'+(f.unlocked?' on':'')+'" onclick="ccToggleFolder(\''+u.uid+'\',\''+key+'\',this)"></div></div>';
