@@ -317,10 +317,25 @@
   </div>
 </div>
 
+<!--
+  REGISTRATION OVERLAY — shows AFTER Google login, BEFORE the user gets any
+  site access. Submitted data + documents are saved to this user's Firestore
+  doc (users/{uid}.registration) and Firebase Storage (registrationDocs/{uid}/...).
+  The admin reviews name/ID/address/front+back photos in the Admin Panel and
+  only then Approves the account (existing users/{uid}.status flow) — until
+  Approved, the user stays stuck behind this form / the Pending overlay and
+  cannot reach the rest of the site. See the STORAGE RULES note further below
+  near the KYC module — the same "user can only write their own uid folder"
+  rule should cover the registrationDocs/{uid}/** path too, e.g.:
+     match /registrationDocs/{userId}/{allPaths=**} {
+       allow read: if request.auth != null;
+       allow write: if request.auth != null && request.auth.uid == userId;
+     }
+-->
 <div id="registerOverlay" class="auth-overlay" style="display:none; z-index:10001;">
   <div class="auth-box" style="max-width:480px; text-align:left; max-height:88vh; overflow-y:auto;">
     <h2 style="color:#fff;margin-bottom:6px; text-align:center;">Registration Form</h2>
-    <p style="color:#94a3b8;margin-bottom:16px; text-align:center; font-size:13px;">Aagay barhne se pehle neeche di gayi tamam maloomat bharen. Har field zaroori (required) hai — bina fill kiye aagay nahi ja sakte.</p>
+    <p style="color:#94a3b8;margin-bottom:16px; text-align:center; font-size:13px;">Aagay barhne se pehle neeche di gayi tamam maloomat bharen. Har field zaroori (required) hai. Submit karne ke baad yeh maloomat aur documents seedha <strong>admin ko review ke liye jaate hain</strong> — admin dekh kar approve karega, tabhi aap login/access kar sakenge.</p>
 
     <div class="field-row">
       <label>First Name *</label>
@@ -372,8 +387,9 @@
     </div>
 
     <div id="regErrorMsg" style="color:#fda4af; font-size:12.5px; margin-bottom:12px; display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:10px 12px;"></div>
+    <div id="regStatusMsg" style="color:#facc15; font-size:12.5px; margin-bottom:12px; display:none;"></div>
 
-    <button class="google-btn" style="width:100%;" onclick="ffSubmitRegistration()">Submit &amp; Continue</button>
+    <button class="google-btn" id="regSubmitBtn" style="width:100%;" onclick="ffSubmitRegistration()">Submit &amp; Send to Admin</button>
   </div>
 </div>
 
@@ -406,23 +422,26 @@
     try { localStorage.setItem('ffSubscriptionAck', '1'); } catch(e){}
     var subEl = document.getElementById('subscribeOverlay');
     if (subEl) subEl.style.display = 'none';
-
-    var regDone = false;
-    try { regDone = localStorage.getItem('ffRegistrationDone') === '1'; } catch(e){}
-    if (!regDone) {
-      var regEl = document.getElementById('registerOverlay');
-      if (regEl) regEl.style.display = 'flex';
-    }
+    // Login-with-Google overlay (authOverlay) below is shown/hidden by the
+    // Firebase auth-state logic later on the page — no action needed here.
   };
 
+  document.addEventListener('DOMContentLoaded', function(){
+    var subSeen = false;
+    try { subSeen = localStorage.getItem('ffSubscriptionAck') === '1'; } catch(e){}
+    var subEl = document.getElementById('subscribeOverlay');
+    if (subEl && subSeen) subEl.style.display = 'none';
+  });
+
+  // ===== Registration form: files + Firestore/Storage submit =====
   var ffRegFiles = { front: null, back: null };
 
   window.ffRegHandleFile = function(evt, side){
     var file = evt.target.files && evt.target.files[0];
     if (!file) return;
+    ffRegFiles[side] = file;
     var reader = new FileReader();
     reader.onload = function(e){
-      ffRegFiles[side] = e.target.result;
       var previewBox = document.getElementById(side === 'front' ? 'regIdFrontPreviewBox' : 'regIdBackPreviewBox');
       var previewImg = document.getElementById(side === 'front' ? 'regIdFrontPreview' : 'regIdBackPreview');
       if (file.type && file.type.indexOf('image') === 0) {
@@ -436,14 +455,26 @@
     reader.readAsDataURL(file);
   };
 
-  window.ffSubmitRegistration = function(){
+  window.ffSubmitRegistration = async function(){
+    var errEl = document.getElementById('regErrorMsg');
+    var statusEl = document.getElementById('regStatusMsg');
+    var btn = document.getElementById('regSubmitBtn');
+    errEl.style.display = 'none';
+    statusEl.style.display = 'none';
+
+    var user = firebase.auth().currentUser;
+    if (!user) {
+      errEl.textContent = 'Pehle Google se sign in karein.';
+      errEl.style.display = 'block';
+      return;
+    }
+
     var firstName = document.getElementById('regFirstName').value.trim();
     var lastName = document.getElementById('regLastName').value.trim();
     var nickName = document.getElementById('regNickName').value.trim();
     var gmail = document.getElementById('regGmail').value.trim();
     var idNumber = document.getElementById('regIdNumber').value.trim();
     var address = document.getElementById('regAddress').value.trim();
-    var errEl = document.getElementById('regErrorMsg');
     var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     var missing = [];
@@ -461,45 +492,52 @@
       errEl.style.display = 'block';
       return;
     }
-    errEl.style.display = 'none';
 
-    var regData = {
-      firstName: firstName,
-      lastName: lastName,
-      nickName: nickName,
-      gmail: gmail,
-      idNumber: idNumber,
-      address: address,
-      submittedAt: new Date().toISOString()
-    };
+    btn.disabled = true;
+    btn.textContent = 'Submit ho raha hai...';
+    statusEl.textContent = 'Documents upload ho rahe hain, thora intezaar karein...';
+    statusEl.style.display = 'block';
 
     try {
-      localStorage.setItem('ffRegistrationData', JSON.stringify(regData));
-      localStorage.setItem('ffRegistrationDone', '1');
-    } catch(e){}
+      var storage = firebase.storage();
+      var frontExt = (ffRegFiles.front.name.split('.').pop() || 'jpg').toLowerCase();
+      var backExt = (ffRegFiles.back.name.split('.').pop() || 'jpg').toLowerCase();
 
-    var regEl = document.getElementById('registerOverlay');
-    if (regEl) regEl.style.display = 'none';
-  };
+      var frontRef = storage.ref('registrationDocs/' + user.uid + '/id_front.' + frontExt);
+      await frontRef.put(ffRegFiles.front);
+      var frontUrl = await frontRef.getDownloadURL();
 
-  document.addEventListener('DOMContentLoaded', function(){
-    var subSeen = false, regDone = false;
-    try { subSeen = localStorage.getItem('ffSubscriptionAck') === '1'; } catch(e){}
-    try { regDone = localStorage.getItem('ffRegistrationDone') === '1'; } catch(e){}
+      var backRef = storage.ref('registrationDocs/' + user.uid + '/id_back.' + backExt);
+      await backRef.put(ffRegFiles.back);
+      var backUrl = await backRef.getDownloadURL();
 
-    var subEl = document.getElementById('subscribeOverlay');
-    var regEl = document.getElementById('registerOverlay');
+      await firebase.firestore().collection('users').doc(user.uid).set({
+        registration: {
+          firstName: firstName,
+          lastName: lastName,
+          nickName: nickName,
+          gmail: gmail,
+          idNumber: idNumber,
+          address: address,
+          idFrontUrl: frontUrl,
+          idBackUrl: backUrl,
+          submitted: true,
+          submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }
+      }, { merge: true });
 
-    if (subEl && subSeen) subEl.style.display = 'none';
-
-    if (regEl) {
-      if (regDone) {
-        regEl.style.display = 'none';
-      } else if (subSeen) {
-        regEl.style.display = 'flex';
-      }
+      statusEl.textContent = 'Submit ho gaya — ab admin aapki maloomat review karega. Approve hote hi aap login kar sakenge.';
+      // The Firestore onSnapshot listener elsewhere on the page will now see
+      // registration.submitted = true and swap this overlay for the
+      // pending/approved/rejected overlay automatically.
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Submit & Send to Admin';
+      errEl.textContent = 'Submit karte waqt error aayi: ' + err.message;
+      errEl.style.display = 'block';
+      statusEl.style.display = 'none';
     }
-  });
+  };
 })();
 </script>
 
@@ -2664,6 +2702,7 @@
     if (!user) {
       currentUID = null;
       document.getElementById('authOverlay').style.display = 'flex';
+      document.getElementById('registerOverlay').style.display = 'none';
       document.getElementById('pendingOverlay').style.display = 'none';
       document.getElementById('rejectedOverlay').style.display = 'none';
       document.getElementById('adminFab').style.display = 'none';
@@ -2712,6 +2751,20 @@
 
       document.getElementById('authOverlay').style.display = 'none';
 
+      // Registration form (name/ID/address/front+back docs) is required
+      // before the account can even be considered for approval — admins are
+      // exempt since they already bypass the whole approval flow.
+      const needsRegistration = !isAdmin && !(data.registration && data.registration.submitted);
+
+      if (needsRegistration) {
+        document.getElementById('registerOverlay').style.display = 'flex';
+        document.getElementById('pendingOverlay').style.display = 'none';
+        document.getElementById('rejectedOverlay').style.display = 'none';
+        document.getElementById('adminFab').style.display = isAdmin ? 'block' : 'none';
+        return;
+      }
+      document.getElementById('registerOverlay').style.display = 'none';
+
       if (data.status === 'approved') {
         document.getElementById('pendingOverlay').style.display = 'none';
         document.getElementById('rejectedOverlay').style.display = 'none';
@@ -2740,10 +2793,32 @@
         if (ADMIN_EMAILS.includes(d.email)) return;
         const card = document.createElement('div');
         card.className = 'admin-user-card';
+
+        const r = d.registration;
+        let regHtml;
+        if (r && r.submitted) {
+          regHtml = `
+            <div style="background:rgba(15,23,42,0.6); border:1px solid rgba(148,163,184,0.2); border-radius:10px; padding:10px; margin:8px 0;">
+              <p style="color:#4ade80; font-size:11px; font-weight:700; text-transform:uppercase; margin-bottom:6px;">Registration Form</p>
+              <p style="color:#e2e8f0; font-size:12.5px; margin-bottom:2px;"><strong>Name:</strong> ${escapeHtml(r.firstName)} ${escapeHtml(r.lastName)} (${escapeHtml(r.nickName)})</p>
+              <p style="color:#e2e8f0; font-size:12.5px; margin-bottom:2px;"><strong>Gmail:</strong> ${escapeHtml(r.gmail)}</p>
+              <p style="color:#e2e8f0; font-size:12.5px; margin-bottom:2px;"><strong>ID Card #:</strong> ${escapeHtml(r.idNumber)}</p>
+              <p style="color:#e2e8f0; font-size:12.5px; margin-bottom:8px;"><strong>Address:</strong> ${escapeHtml(r.address)}</p>
+              <div class="kyc-admin-imgs">
+                ${r.idFrontUrl ? `<a href="${escapeHtml(r.idFrontUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.idFrontUrl)}" title="ID Front"></a>` : ''}
+                ${r.idBackUrl ? `<a href="${escapeHtml(r.idBackUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.idBackUrl)}" title="ID Back"></a>` : ''}
+              </div>
+            </div>
+          `;
+        } else {
+          regHtml = `<p style="color:#ef4444; font-size:12px; margin:8px 0;">⛔ Registration form abhi submit nahi hui — user ko approve na karein jab tak yeh maloomat na aa jayein.</p>`;
+        }
+
         card.innerHTML = `
           <p style="color:#fff;font-weight:bold;">${escapeHtml(d.name || d.email)}</p>
           <p style="color:#94a3b8;font-size:12px;">${escapeHtml(d.email)}</p>
           <p style="color:#facc15;font-size:12px;">Status: ${escapeHtml(d.status)}</p>
+          ${regHtml}
           <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
             <button onclick="approveUser('${doc.id}')">Approve</button>
             <button onclick="rejectUser('${doc.id}')">Reject</button>
