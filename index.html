@@ -7360,6 +7360,417 @@ var COURSES = {
         ]
       }
     ]
+  },
+  html: {
+    title: "HTML \u2014 Beginner Se Super Advance Tak",
+    icon: "\ud83d\udcc4",
+    desc: "Web pages ki buniyadi zaban HTML, shuruaat se le kar advance semantic aur accessibility concepts tak, misaalon aur quiz ke sath.",
+    parts: [
+      {
+        id:"html-intro", tag:"Bunyadi Baatein", title:"HTML Kya Hai Aur Basic Structure",
+        explain:"HTML (HyperText Markup Language) web pages banane ki bunyadi zaban hai. Ye 'tags' se bani hoti hai jo browser ko batati hain ke content kaise dikhana hai \u2014 jaise <h1> heading ke liye, <p> paragraph ke liye. Har HTML file ka ek standard structure hota hai: <!DOCTYPE html> (browser ko batata hai ye HTML5 hai), <html> (poora page), <head> (title, meta data, jo user ko nazar nahi aata), aur <body> (asal content jo screen par dikhta hai). Misaal: Jaise ek ghar ka structure \u2014 foundation, walls, rooms \u2014 waise hi HTML web page ka 'skeleton' banati hai, jis par baad mein CSS se rang aur JavaScript se harkat (behavior) di jati hai.",
+        candles:[],
+        quiz:[
+          {q:"HTML ka poora naam kya hai?",opts:["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyper Transfer Markup Language"],correct:0},
+          {q:"Kis tag ke andar poora visible content hota hai?",opts:["<head>", "<body>", "<title>", "<meta>"],correct:1},
+          {q:"<!DOCTYPE html> ka kaam kya hai?",opts:["Browser ko batana ye HTML5 document hai", "Page ka rang set karna", "JavaScript chalana", "Image dikhana"],correct:0}
+        ]
+      },
+      {
+        id:"html-text", tag:"Bunyadi Baatein", title:"Headings, Paragraphs Aur Text Formatting",
+        explain:"HTML mein headings <h1> se <h6> tak hoti hain \u2014 <h1> sab se bara aur ahem heading hota hai, <h6> sab se chota. Paragraph ke liye <p> tag use hota hai. Text ko bold karne ke liye <strong> ya <b>, italic ke liye <em> ya <i> use hota hai. Line break ke liye <br> aur horizontal line ke liye <hr> use hoti hai. Misaal: Ek blog post mein title ke liye <h1>, sub-headings ke liye <h2>/<h3>, aur normal likhne ke liye <p> tags use hote hain \u2014 ye search engines (Google) ko bhi page samajhne mein madad deti hain.",
+        candles:[],
+        quiz:[
+          {q:"Sab se bara heading tag kaunsa hai?",opts:["<h6>", "<h1>", "<head>", "<big>"],correct:1},
+          {q:"Paragraph ke liye kaunsa tag use hota hai?",opts:["<p>", "<para>", "<text>", "<pg>"],correct:0},
+          {q:"Text ko bold karne ke liye kaunsa tag common hai?",opts:["<i>", "<u>", "<strong>", "<small>"],correct:2}
+        ]
+      },
+      {
+        id:"html-links-img", tag:"Bunyadi Baatein", title:"Links Aur Images",
+        explain:"Link banane ke liye <a href='URL'>text</a> tag use hota hai \u2014 href attribute batata hai link kahan le jayega. Image dikhane ke liye <img src='path' alt='description'> tag use hota hai \u2014 src image ka location hai aur alt wo text hai jo image load na ho to dikhta hai (ye accessibility ke liye bhi zaroori hai). Misaal: <a href='https://google.com'>Google Par Jayein</a> ek clickable link banata hai, aur <img src='cat.jpg' alt='Ek billi ki tasveer'> ek image dikhata hai.",
+        candles:[],
+        quiz:[
+          {q:"Link banane ke liye kaunsa attribute zaroori hai?",opts:["src", "href", "alt", "link"],correct:1},
+          {q:"Image tag mein 'alt' attribute ka kya faida hai?",opts:["Image ka size barhata hai", "Image load na ho to text dikhata hai", "Image ko delete karta hai", "Kuch nahi karta"],correct:1},
+          {q:"Image dikhane wala tag kaunsa hai?",opts:["<pic>", "<image>", "<img>", "<photo>"],correct:2}
+        ]
+      },
+      {
+        id:"html-lists-tables", tag:"Bunyadi Baatein", title:"Lists Aur Tables",
+        explain:"Do tarah ki lists hoti hain: Unordered List <ul> (bullets ke sath) aur Ordered List <ol> (numbers ke sath) \u2014 dono ke andar har item <li> tag mein hota hai. Table banane ke liye <table> tag, rows ke liye <tr>, header cells ke liye <th> aur normal cells ke liye <td> use hote hain. Misaal: Ek shopping list ke liye <ul><li>Doodh</li><li>Anday</li></ul> use hota hai, aur marks dikhane ke liye table use hoti hai jisme subjects aur numbers rows mein hon.",
+        candles:[],
+        quiz:[
+          {q:"Bullet points wali list ke liye kaunsa tag hai?",opts:["<ol>", "<ul>", "<li>", "<list>"],correct:1},
+          {q:"List ka har item kaunsa tag hota hai?",opts:["<item>", "<li>", "<point>", "<row>"],correct:1},
+          {q:"Table ki row ke liye kaunsa tag use hota hai?",opts:["<tr>", "<td>", "<th>", "<row>"],correct:0}
+        ]
+      },
+      {
+        id:"html-forms", tag:"Intermediate", title:"Forms Aur Input Types",
+        explain:"Forms user se maloomat lene ke liye use hote hain, jaise login ya signup page. <form> tag ke andar mukhtalif input types hote hain: text, password, email, number, checkbox, radio, aur submit button. Har input ka 'name' attribute zaroori hota hai taake data server tak sahi tarah pohanche. Misaal: <input type='email' name='userEmail' placeholder='Apna email likhein'> ek email field banata hai jo browser khud check karta hai ke sahi email format hai ya nahi.",
+        candles:[],
+        quiz:[
+          {q:"Login form banane ke liye kaunsa main tag use hota hai?",opts:["<login>", "<form>", "<input>", "<field>"],correct:1},
+          {q:"Password chupane ke liye kaunsa input type use hota hai?",opts:["type='text'", "type='password'", "type='hidden'", "type='email'"],correct:1},
+          {q:"Input ka 'name' attribute kis liye zaroori hai?",opts:["Sirf design ke liye", "Data server tak sahi pohanchane ke liye", "Color set karne ke liye", "Kuch nahi"],correct:1}
+        ]
+      },
+      {
+        id:"html-semantic", tag:"Intermediate", title:"Semantic HTML5 Elements",
+        explain:"Semantic tags wo hain jin ka naam khud batata hai unka maqsad kya hai \u2014 jaise <header> (page ka upar wala hissa), <nav> (navigation menu), <main> (asal content), <section> (ek hissa/topic), <article> (khud-mukhtar content jaise blog post), aur <footer> (page ka neechay wala hissa). Ye purane <div> ke bajaye use karna behtar hai kyun ke ye SEO aur accessibility (screen readers) ke liye zyada behtar hote hain. Misaal: Ek news website mein <article> har news story ke liye use hota hai, aur <nav> mein 'Home, Sports, Politics' jaisay links hote hain.",
+        candles:[],
+        quiz:[
+          {q:"Navigation menu ke liye kaunsa semantic tag use hota hai?",opts:["<menu>", "<nav>", "<links>", "<header>"],correct:1},
+          {q:"Khud-mukhtar content (jaise blog post) ke liye kaunsa tag behtar hai?",opts:["<div>", "<section>", "<article>", "<span>"],correct:2},
+          {q:"Semantic tags ka faida kya hai?",opts:["Sirf design behtar hota hai", "SEO aur accessibility behtar hoti hai", "Page slow ho jata hai", "Koi faida nahi"],correct:1}
+        ]
+      },
+      {
+        id:"html-div-span", tag:"Intermediate", title:"Div Vs Span, Block Vs Inline Elements",
+        explain:"<div> ek block-level element hai jo apni pori line leta hai aur bara container banane ke liye use hota hai. <span> ek inline element hai jo sirf apne content jitni jagah leta hai, aksar chhote hisso ko style karne ke liye use hota hai (jaise ek paragraph ke andar ek lafz ko highlight karna). Block elements (jaise <p>, <div>, <h1>) hamesha nayi line se shuru hote hain, jab ke inline elements (jaise <span>, <a>, <strong>) sath sath aa sakte hain. Misaal: <p>Ye <span style='color:red'>lafz</span> laal hai.</p> \u2014 yahan span sirf ek lafz ko affect karta hai, poori line ko nahi.",
+        candles:[],
+        quiz:[
+          {q:"<div> kaisa element hai?",opts:["Inline", "Block-level", "Dono", "Koi nahi"],correct:1},
+          {q:"<span> aksar kis kaam ke liye use hota hai?",opts:["Poori page banane ke liye", "Chhote hisso ko style karne ke liye", "Table banane ke liye", "Form banane ke liye"],correct:1},
+          {q:"Block-level element ka kya khaasiyat hai?",opts:["Apni pori line leta hai", "Sirf content jitni jagah leta hai", "Kabhi nazar nahi aata", "Sirf images ke liye hota hai"],correct:0}
+        ]
+      },
+      {
+        id:"html-multimedia", tag:"Intermediate", title:"Multimedia \u2014 Audio, Video Aur Iframe",
+        explain:"HTML5 mein <audio> aur <video> tags se seedha media add ki ja sakti hai bina kisi extra plugin ke. Misaal: <video src='movie.mp4' controls></video> ek video player dikhata hai jisme play/pause controls hoti hain. <iframe> tag doosri website ka content apne page ke andar dikhane ke liye use hota hai, jaise YouTube video embed karna. Ye tags web pages ko interactive aur media-rich banate hain.",
+        candles:[],
+        quiz:[
+          {q:"Video dikhane ke liye HTML5 ka tag kaunsa hai?",opts:["<media>", "<video>", "<movie>", "<play>"],correct:1},
+          {q:"'controls' attribute video tag mein kya karta hai?",opts:["Video delete karta hai", "Play/pause jaisi controls dikhata hai", "Video ko hide karta hai", "Kuch nahi"],correct:1},
+          {q:"Doosri website ka content apne page mein embed karne ke liye kaunsa tag use hota hai?",opts:["<embed>", "<iframe>", "<include>", "<link>"],correct:1}
+        ]
+      },
+      {
+        id:"html-storage-canvas", tag:"Advance", title:"HTML5 APIs \u2014 Local Storage Aur Canvas Ka Taaruf",
+        explain:"HTML5 sirf tags nahi balke kuch powerful 'APIs' bhi deta hai. Local Storage browser mein data save karne deta hai jo page reload/close hone ke baad bhi rehta hai (jaise dark-mode setting yaad rakhna). Canvas ek aisa element hai jis par JavaScript se drawing, graphs ya games banaye ja sakte hain \u2014 <canvas id='myCanvas'></canvas> ek khaali drawing area banata hai jisay JavaScript se control kiya jata hai. Ye advanced features web apps ko desktop apps jaisa mehsoos karati hain.",
+        candles:[],
+        quiz:[
+          {q:"Local Storage ka faida kya hai?",opts:["Data browser mein reload ke baad bhi rehta hai", "Page ko slow karta hai", "Sirf images store karta hai", "Internet band kar deta hai"],correct:0},
+          {q:"Canvas element kis kaam aata hai?",opts:["Sirf text likhne ke liye", "Drawing/games banane ke liye JavaScript ke sath", "Form banane ke liye", "Link banane ke liye"],correct:1},
+          {q:"Canvas ko control karne ke liye kya use hota hai?",opts:["CSS", "JavaScript", "HTML akela", "Koi zarurat nahi"],correct:1}
+        ]
+      },
+      {
+        id:"html-accessibility-seo", tag:"Advance", title:"Accessibility (ARIA) Aur SEO Meta Tags",
+        explain:"Accessibility ka matlab hai website ko un logon ke liye bhi usable banana jo screen reader jaisi assistive technology use karte hain \u2014 is mein ARIA attributes (jaise aria-label) madad karte hain. SEO (Search Engine Optimization) ke liye <head> mein meta tags zaroori hain, jaise <meta name='description' content='...'> jo Google ko batata hai page kis baare mein hai, aur ye search results mein bhi nazar aata hai. Semantic tags (pichle lesson wale) bhi accessibility aur SEO dono ko behtar banate hain. Misaal: Ek e-commerce site jo achi tarah accessible aur SEO-friendly ho, wo zyada log tak pohanchti hai.",
+        candles:[],
+        quiz:[
+          {q:"Accessibility kis ke liye zaroori hai?",opts:["Sirf designers ke liye", "Assistive technology (jaise screen reader) use karne walon ke liye", "Sirf mobile users ke liye", "Kisi ke liye zaroori nahi"],correct:1},
+          {q:"SEO meta description kahan likhi jati hai?",opts:["<body> mein", "<head> mein", "<footer> mein", "<img> mein"],correct:1},
+          {q:"Semantic HTML tags ka SEO par kya asar hota hai?",opts:["Koi asar nahi", "Behtar samajh aane se SEO behtar hoti hai", "SEO kharab hoti hai", "Page delete ho jata hai"],correct:1}
+        ]
+      },
+      {
+        id:"html-best-practices", tag:"Advance", title:"Bare Projects Ke Liye HTML Best Practices",
+        explain:"Bare web projects mein HTML likhte waqt kuch usool follow karne chahiye: 1) Hamesha semantic tags use karein, sirf <div> par inhisar na karein. 2) Indentation aur naming clean rakhein taake code parhna asaan ho. 3) Images mein hamesha 'alt' text dein. 4) Forms mein <label> tags use karein taake accessibility behtar ho. 5) HTML ko validate karein (W3C Validator jaisay tools se) taake koi galti na ho. Ye achi aadatein bari teams mein kaam karna aur code maintain karna asaan banati hain.",
+        candles:[],
+        quiz:[
+          {q:"Bare projects mein sirf <div> use karne ke bajaye kya behtar hai?",opts:["Semantic tags use karna", "Sab kuch table mein daalna", "Comments hata dena", "Kuch bhi likh dena"],correct:0},
+          {q:"Forms mein accessibility ke liye kaunsa tag zaroori hai?",opts:["<label>", "<title>", "<meta>", "<link>"],correct:0},
+          {q:"HTML code ki sehat check karne ke liye kya use hota hai?",opts:["Photoshop", "W3C Validator jaisa tool", "Calculator", "Spreadsheet"],correct:1}
+        ]
+      }
+    ]
+  },
+  webdev: {
+    title: "Web Development \u2014 Complete Overview Course",
+    icon: "\ud83c\udf10",
+    desc: "Frontend, backend, tools aur deployment tak \u2014 poori Web Development ka safar, beginner se super-advance level tak, asaan alfaaz mein.",
+    parts: [
+      {
+        id:"wd-intro", tag:"Bunyadi Baatein", title:"Web Development Kya Hai? (Frontend Vs Backend Vs Fullstack)",
+        explain:"Web Development ka matlab hai websites aur web applications banana. Is mein 3 mukhtalif kaam hote hain: Frontend Development \u2014 jo user ko seedha nazar aata hai (design, buttons, layout) aur HTML, CSS, JavaScript se banta hai. Backend Development \u2014 jo peeche chalta hai (server, database, logic) aur languages jaise Node.js, Python, PHP se banta hai. Fullstack Developer wo hota hai jo dono, frontend aur backend, dono kaam kar sakta ho. Misaal: Jab aap Facebook kholte hain, jo aap dekhte hain (posts, buttons) wo frontend hai, aur jab aap post karte hain to wo data jahan save hota hai wo backend hai.",
+        candles:[],
+        quiz:[
+          {q:"Jo user ko screen par nazar aata hai use kya kehte hain?",opts:["Backend", "Frontend", "Database", "Server"],correct:1},
+          {q:"Server aur database ka kaam kis mein aata hai?",opts:["Frontend", "Backend", "Design", "Marketing"],correct:1},
+          {q:"Jo developer dono frontend aur backend kar sakta ho use kya kehte hain?",opts:["Designer", "Fullstack Developer", "Tester", "Manager"],correct:1}
+        ]
+      },
+      {
+        id:"wd-how-web-works", tag:"Bunyadi Baatein", title:"Web Kaise Kaam Karta Hai (Client-Server, HTTP, DNS)",
+        explain:"Jab aap browser mein koi website ka naam (jaise google.com) likhte hain, pehle DNS (Domain Name System) us naam ko ek IP address mein badalta hai (server ka asal address). Phir aapka browser (Client) us server ko ek 'HTTP Request' bhejta hai, aur server jawab mein 'HTTP Response' bhejta hai jisme website ka data (HTML, CSS, images) hota hai. HTTPS, HTTP ka mehfooz (encrypted) version hai. Misaal: Ye bilkul aisa hai jaise aap kisi ko chitthi bhejte hain (request), aur wo aapko jawab bhejta hai (response) \u2014 bas ye sab seconds mein hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Domain name ko IP address mein kaun badalta hai?",opts:["Browser", "DNS", "CSS", "HTML"],correct:1},
+          {q:"Browser ko is process mein kya kehte hain?",opts:["Server", "Client", "Database", "Router"],correct:1},
+          {q:"HTTPS, HTTP se kis lehaz se behtar hai?",opts:["Tez hai", "Encrypted/mehfooz hai", "Sasta hai", "Chota hai"],correct:1}
+        ]
+      },
+      {
+        id:"wd-css-basics", tag:"Bunyadi Baatein", title:"CSS Basics \u2014 Selectors, Colors, Box Model",
+        explain:"CSS (Cascading Style Sheets) HTML ko khoobsurat banane ke liye use hoti hai \u2014 rang, font, spacing waghera. Selectors se ye tay hota hai kis element par style lagegi, jaise 'p { color: blue; }' sab paragraphs ko neela kar deta hai. Box Model har HTML element ko ek 'box' ki tarah samajhta hai jisme content, padding (andar ki khaali jagah), border, aur margin (bahar ki khaali jagah) hote hain \u2014 ye samajhna layout ke liye bunyadi hai.",
+        candles:[],
+        quiz:[
+          {q:"CSS ka poora naam kya hai?",opts:["Cascading Style Sheets", "Computer Style System", "Creative Style Sheets", "Color Style Sheets"],correct:0},
+          {q:"Box Model mein content ke charon taraf andar ki khaali jagah ko kya kehte hain?",opts:["Margin", "Padding", "Border", "Outline"],correct:1},
+          {q:"'p { color: blue; }' iska kya matlab hai?",opts:["Sab headings neeli hongi", "Sab paragraphs neela text honge", "Page ka background neela hoga", "Kuch nahi hoga"],correct:1}
+        ]
+      },
+      {
+        id:"wd-css-layout", tag:"Intermediate", title:"CSS Layouts \u2014 Flexbox Aur Grid",
+        explain:"Flexbox aik-dimension (row ya column) mein elements ko align karne ke liye use hota hai \u2014 jaise ek navbar mein items ko barabar spacing ke sath sath rakhna (display: flex; justify-content: space-between;). Grid do-dimension (rows aur columns dono) mein layout banane ke liye behtareen hai \u2014 jaise ek photo gallery ya poore page ka layout. Dono modern web design ki buniyad hain aur purane 'float' based layouts ki jagah le chuke hain.",
+        candles:[],
+        quiz:[
+          {q:"Ek line (row/column) mein items align karne ke liye behtareen tool kaunsa hai?",opts:["Flexbox", "Table", "Float", "Canvas"],correct:0},
+          {q:"Do-dimension (rows aur columns) layout ke liye kya use hota hai?",opts:["Flexbox", "CSS Grid", "Span", "List"],correct:1},
+          {q:"'display: flex' kis property mein likha jata hai?",opts:["HTML tag mein", "CSS mein", "JavaScript mein", "Meta tag mein"],correct:1}
+        ]
+      },
+      {
+        id:"wd-responsive", tag:"Intermediate", title:"Responsive Design Aur Media Queries",
+        explain:"Responsive Design ka matlab hai website har device (mobile, tablet, laptop) par achi tarah dikhe. Media Queries CSS ka wo tareeqa hain jisse hum screen size ke mutabiq alag styles de sakte hain, jaise: @media (max-width: 600px) { ... } \u2014 is code ke andar likhi styles sirf chhoti screens (mobile) par apply hongi. Mobile-first approach mein pehle mobile ke liye design karte hain, phir bare screens ke liye behtar banate hain. Aaj kal zyadatar log mobile se hi internet use karte hain, is liye responsive design bohat zaroori hai.",
+        candles:[],
+        quiz:[
+          {q:"Responsive Design ka maqsad kya hai?",opts:["Sirf laptop ke liye website banana", "Har device par achi tarah dikhna", "Website ko slow karna", "Sirf design khoobsurat banana"],correct:1},
+          {q:"Screen size ke mutabiq alag CSS dene ke liye kya use hota hai?",opts:["Media Queries", "Flexbox akela", "HTML tags", "Canvas"],correct:0},
+          {q:"Mobile-first approach ka matlab kya hai?",opts:["Sirf mobile ke liye banana", "Pehle mobile design phir bare screens", "Mobile ko ignore karna", "Sirf desktop ke liye banana"],correct:1}
+        ]
+      },
+      {
+        id:"wd-git", tag:"Intermediate", title:"Version Control \u2014 Git Aur GitHub",
+        explain:"Git ek 'version control system' hai jo code ki tabdeeliyon (changes) ko track karta hai, taake developer purani versions par wapis ja sake ya kai log mil kar ek hi project par kaam kar sakein bina ek-doosre ka kaam kharab kiye. GitHub ek online platform hai jahan Git repositories host ki jati hain, taake team collaborate kar sake. Bunyadi commands: 'git commit' (change save karna), 'git push' (online bhejna), 'git pull' (online se lena). Ye har professional developer ke liye zaroori skill hai.",
+        candles:[],
+        quiz:[
+          {q:"Git ka bunyadi kaam kya hai?",opts:["Website design karna", "Code ki tabdeeliyon ko track karna", "Server chalana", "Database banana"],correct:1},
+          {q:"GitHub kya hai?",opts:["Ek programming language", "Git repositories host karne ka online platform", "Ek CSS framework", "Ek browser"],correct:1},
+          {q:"Apna save shuda change online bhejne ke liye kaunsi command use hoti hai?",opts:["git pull", "git push", "git save", "git upload"],correct:1}
+        ]
+      },
+      {
+        id:"wd-backend-basics", tag:"Advance", title:"Backend Basics \u2014 Server, API Aur Database Ka Taaruf",
+        explain:"Backend wo hissa hai jo user ko nazar nahi aata lekin poori website ko chalata hai. Server ek computer hota hai jo requests receive karta aur responses bhejta hai. API (Application Programming Interface) wo tareeqa hai jisse frontend aur backend ek doosre se baat karte hain \u2014 jaise ek waiter jo aapka order (request) kitchen (server) tak le jata hai aur khana (response) wapis le kar aata hai. Database wo jaga hai jahan data (users, posts, orders) permanent tor par save hota hai. Ye teeno mil kar ek poori web application banate hain.",
+        candles:[],
+        quiz:[
+          {q:"API ka bunyadi kaam kya hai?",opts:["Design behtar banana", "Frontend aur backend ke darmiyan communication", "Sirf images store karna", "Internet band karna"],correct:1},
+          {q:"Data permanent tor par kahan save hota hai?",opts:["Browser mein", "Database mein", "CSS file mein", "Sirf RAM mein"],correct:1},
+          {q:"API ko kis se tashbeeh di ja sakti hai?",opts:["Ek waiter jo order le jata hai", "Ek chair", "Ek pen", "Ek diwar"],correct:0}
+        ]
+      },
+      {
+        id:"wd-rest-json", tag:"Advance", title:"REST APIs Aur JSON",
+        explain:"REST (Representational State Transfer) ek popular tareeqa hai APIs banane ka, jisme HTTP methods use hote hain: GET (data lena), POST (naya data bhejna), PUT/PATCH (data update karna), DELETE (data hatana). JSON (JavaScript Object Notation) wo format hai jisme data server aur browser ke darmiyan bheja jata hai \u2014 ye asaan-parhne-wala format hai jaise {'naam': 'Ali', 'umar': 25}. Aaj kal zyadatar web apps REST APIs se JSON format mein data ka len-den karti hain.",
+        candles:[],
+        quiz:[
+          {q:"Naya data server ko bhejne ke liye kaunsa HTTP method use hota hai?",opts:["GET", "POST", "DELETE", "HEAD"],correct:1},
+          {q:"Data hasil karne (fetch) ke liye kaunsa method common hai?",opts:["GET", "POST", "PUT", "DELETE"],correct:0},
+          {q:"JSON ka poora naam kya hai?",opts:["JavaScript Object Notation", "Java Simple Object Network", "Joint System Object Notation", "JavaScript Online Network"],correct:0}
+        ]
+      },
+      {
+        id:"wd-databases", tag:"Advance", title:"Databases \u2014 SQL Vs NoSQL",
+        explain:"SQL Databases (jaise MySQL, PostgreSQL) data ko 'tables' (rows aur columns) mein rakhti hain, jaise Excel sheet \u2014 inka structure fixed hota hai aur ye complex relationships ke liye behtareen hain. NoSQL Databases (jaise MongoDB) data ko flexible tareeqe se rakhti hain (jaise JSON documents), aur badi, tezi se badhne wali applications ke liye behtar hoti hain jahan data ka structure baar baar badal sakta hai. Kaunsi database use karni hai ye project ki zaroorat par depend karta hai.",
+        candles:[],
+        quiz:[
+          {q:"SQL databases data ko kaise store karti hain?",opts:["Tables (rows/columns) mein", "Sirf text file mein", "Images ki tarah", "Sirf memory mein"],correct:0},
+          {q:"NoSQL database ki misaal kaunsi hai?",opts:["MySQL", "PostgreSQL", "MongoDB", "Oracle SQL"],correct:2},
+          {q:"Flexible, tezi se badalne wale data ke liye kaunsi database behtar hoti hai?",opts:["SQL", "NoSQL", "Koi bhi nahi", "Excel"],correct:1}
+        ]
+      },
+      {
+        id:"wd-web-security-basics", tag:"Advance", title:"Web Security Basics \u2014 HTTPS Aur CORS",
+        explain:"HTTPS website aur user ke darmiyan data ko encrypt kar deta hai taake koi beech mein data na chura sake \u2014 browser mein lock ka icon isi ki nishani hai. CORS (Cross-Origin Resource Sharing) ek security rule hai jo tay karta hai ke ek website doosri website ke server se data mangwa sakti hai ya nahi \u2014 ye galat websites ko aapke data tak pohanchne se rokta hai. In bunyadi security concepts ko samajhna har web developer ke liye zaroori hai (is topic par tafseeli maloomat ke liye website ka alag Cyber Security course dekhein).",
+        candles:[],
+        quiz:[
+          {q:"HTTPS ka bunyadi faida kya hai?",opts:["Website tez chalti hai", "Data encrypted/mehfooz hota hai", "Design behtar hota hai", "Free hosting milti hai"],correct:1},
+          {q:"CORS kis cheez ko control karta hai?",opts:["Website ka rang", "Cross-origin (doosri site se) data requests", "Font size", "Image quality"],correct:1},
+          {q:"Lock icon browser mein kis cheez ki nishani hai?",opts:["Slow internet", "HTTPS/mehfooz connection", "Purana browser", "Ad blocker"],correct:1}
+        ]
+      },
+      {
+        id:"wd-deployment", tag:"Super Advance", title:"Deployment Aur Hosting",
+        explain:"Website banane ke baad usay internet par 'live' karna Deployment kehlata hai. Hosting wo service hai jo aapki website ki files ek server par rakhti hai taake har koi usay internet se access kar sake (jaise Netlify, Vercel, ya Firebase Hosting). Domain Name (jaise mywebsite.com) wo pata hai jo log type karte hain. CI/CD (Continuous Integration/Deployment) ek advanced tareeqa hai jisme code GitHub par push karte hi automatically test aur live ho jata hai \u2014 ye bare projects mein waqt bachata hai aur galtiyan kam karta hai.",
+        candles:[],
+        quiz:[
+          {q:"Website ko internet par live karne ke process ko kya kehte hain?",opts:["Coding", "Deployment", "Designing", "Testing"],correct:1},
+          {q:"Website ki files kahan rakhi jati hain taake internet se access ho sakein?",opts:["Hosting server par", "Sirf apne laptop par", "Kagaz par", "USB mein"],correct:0},
+          {q:"CI/CD ka faida kya hai?",opts:["Manual kaam barhata hai", "Code push karte hi automatic test/deploy", "Website ko band kar deta hai", "Sirf design behtar karta hai"],correct:1}
+        ]
+      },
+      {
+        id:"wd-tools-frameworks", tag:"Super Advance", title:"Modern Tools Aur Frameworks Ka Taaruf (npm, Bundlers, Frameworks)",
+        explain:"Modern web development mein tools use hote hain jo kaam asaan banate hain. npm (Node Package Manager) se hum ready-made code 'packages' install kar sakte hain, taake har cheez khud se na likhni pade. Bundlers (jaise Webpack, Vite) kai chhoti JavaScript/CSS files ko mila kar ek behtar, tez file banate hain jo production ke liye behtar hoti hai. Frameworks (jaise React, Vue, Angular) large-scale applications banane ke liye structure aur reusable components dete hain \u2014 ye seekhna pehle HTML/CSS/JS ki achi buniyad hone ke baad hi asaan hota hai.",
+        candles:[],
+        quiz:[
+          {q:"npm ka kaam kya hai?",opts:["Ready-made code packages install karna", "Website design karna", "Server band karna", "Password check karna"],correct:0},
+          {q:"Bundler (jaise Webpack) ka kaam kya hai?",opts:["Files ko mila kar behtar file banana", "Password generate karna", "Database banana", "Image edit karna"],correct:0},
+          {q:"Framework (jaise React) seekhne se pehle kya zaroori hai?",opts:["Kuch bhi nahi", "HTML/CSS/JS ki achi buniyad", "Sirf English zaban", "Naya laptop"],correct:1}
+        ]
+      },
+      {
+        id:"wd-performance", tag:"Super Advance", title:"Performance Optimization \u2014 Caching Aur Lazy Loading",
+        explain:"Website ki speed user experience aur SEO dono ke liye ahem hai. Caching ka matlab hai baar baar use hone wala data (jaise images, files) browser ya server par 'yaad' rakh lena taake dobara download na karna pade \u2014 is se website tezi se load hoti hai. Lazy Loading ka matlab hai sirf wo content load karna jo user filhaal dekh raha hai (jaise scroll karte waqt hi neeche wali images load hon), is se shuru mein page bohat tez khulta hai. Ye dono super-advanced techniques bari, professional websites mein zaroor use hoti hain.",
+        candles:[],
+        quiz:[
+          {q:"Caching se website par kya asar hota hai?",opts:["Website slow ho jati hai", "Website tezi se load hoti hai", "Website delete ho jati hai", "Koi asar nahi"],correct:1},
+          {q:"Lazy Loading ka bunyadi maqsad kya hai?",opts:["Sab kuch ek sath load karna", "Sirf zaroori content pehle load karna", "Images hata dena", "Internet band karna"],correct:1},
+          {q:"Performance Optimization kis cheez ke liye zaroori hai?",opts:["Sirf design ke liye", "User experience aur SEO ke liye", "Sirf print karne ke liye", "Kisi kaam ki nahi"],correct:1}
+        ]
+      }
+    ]
+  },
+  javascript: {
+    title: "JavaScript \u2014 Beginner Se Super Advance Tak",
+    icon: "\ud83d\udfe8",
+    desc: "Variables se le kar Event Loop aur Design Patterns tak \u2014 poora JavaScript course, misaalon aur quiz ke sath, asaan zaban mein.",
+    parts: [
+      {
+        id:"js-intro-vars", tag:"Bunyadi Baatein", title:"JavaScript Kya Hai Aur Variables (var, let, const)",
+        explain:"JavaScript wo zaban hai jo web pages ko 'zinda' (interactive) banati hai \u2014 jaise button click hone par kuch hona, form check karna, waghera. Ye HTML/CSS ke sath mil kar kaam karti hai. Variables data store karne ke liye use hote hain. 'var' purana tareeqa hai (kam use hota hai ab), 'let' aik value hai jo badal sakti hai, aur 'const' aik value hai jo ek dafa set hone ke baad badli nahi ja sakti. Misaal: let umar = 25; \u2014 is se 'umar' naam ka variable bana jisme 25 store hai, aur ye baad mein badla ja sakta hai.",
+        candles:[],
+        quiz:[
+          {q:"JavaScript ka bunyadi kaam website mein kya hai?",opts:["Sirf design karna", "Website ko interactive banana", "Sirf text likhna", "Database banana"],correct:1},
+          {q:"Wo variable jis ki value badli nahi ja sakti, kaunsa keyword use hota hai?",opts:["var", "let", "const", "static"],correct:2},
+          {q:"'let umar = 25;' iska kya matlab hai?",opts:["Ek function banaya", "Ek variable banaya jisme 25 store hai", "Ek image load hui", "Ek error aayi"],correct:1}
+        ]
+      },
+      {
+        id:"js-datatypes", tag:"Bunyadi Baatein", title:"Data Types Aur Operators",
+        explain:"JavaScript mein bunyadi data types hote hain: String (text, jaise 'Ali'), Number (jaise 25 ya 3.14), Boolean (true/false), Array (list of values), aur Object (key-value pairs). Operators se hum calculations aur comparisons karte hain: + - * / (math ke liye), === (barabar hai ya nahi check karna), > < (bara/chota check karna), && || (aur/ya logic ke liye). Misaal: agar umar >= 18 hai to 'Baaligh' hai, warna 'Nabaligh' \u2014 ye check operators se hi hota hai.",
+        candles:[],
+        quiz:[
+          {q:"'Ali' jaisi cheez ka data type kya kehlata hai?",opts:["Number", "String", "Boolean", "Array"],correct:1},
+          {q:"Do values barabar hain ya nahi, ye check karne ke liye kya use hota hai?",opts:["=", "===", "+", "%"],correct:1},
+          {q:"true ya false wali value ka data type kya kehlata hai?",opts:["Boolean", "String", "Number", "Object"],correct:0}
+        ]
+      },
+      {
+        id:"js-conditionals", tag:"Bunyadi Baatein", title:"Conditionals \u2014 If/Else Aur Switch",
+        explain:"Conditionals se hum program ko faisla lene dete hain. 'if' statement check karta hai ke condition sach hai to ek kaam karo, 'else' mein doosra kaam. Misaal: if (umar >= 18) { console.log('Baaligh'); } else { console.log('Nabaligh'); }. 'switch' statement tab useful hai jab ek variable ki kai possible values check karni hon, jaise din ka naam (Monday, Tuesday, waghera) \u2014 ye kai 'if-else' likhne se behtar aur saaf hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Condition sach na ho to kya chalti hai?",opts:["if block", "else block", "Koi nahi", "Dono"],correct:1},
+          {q:"Jab ek variable ki kai values check karni hon to kya behtar hai?",opts:["if-else har dafa", "switch statement", "Sirf loop", "Array"],correct:1},
+          {q:"'if (umar >= 18)' kya check kar raha hai?",opts:["umar 18 se bara ya barabar hai ya nahi", "umar 18 se chota hai", "umar string hai", "umar delete ho gayi"],correct:0}
+        ]
+      },
+      {
+        id:"js-loops", tag:"Bunyadi Baatein", title:"Loops \u2014 For Aur While",
+        explain:"Loops ek kaam ko baar baar dohrane ke liye use hote hain. 'for' loop tab use hota hai jab humein pata ho kitni martaba dohrana hai, jaise: for (let i=0; i<5; i++) { console.log(i); } \u2014 ye 0 se 4 tak print karega. 'while' loop tab use hota hai jab hume pata na ho kitni martaba chalna hai, condition sach hone tak chalta rehta hai. Misaal: Agar aap 1 se 100 tak numbers print karna chahein, to for loop is kaam ko sirf ek line mein kar deta hai, bar bar likhna nahi parhta.",
+        candles:[],
+        quiz:[
+          {q:"'for' loop kab zyada use hota hai?",opts:["Jab dohrane ki tadaad pata ho", "Jab kabhi na dohrana ho", "Sirf strings ke liye", "Sirf images ke liye"],correct:0},
+          {q:"'while' loop kab chalta rehta hai?",opts:["Hamesha ek hi dafa", "Jab tak condition sach ho", "Kabhi nahi chalta", "Sirf 5 martaba"],correct:1},
+          {q:"Loops ka bunyadi faida kya hai?",opts:["Code ko baar baar likhna", "Ek kaam ko dohrana bina baar baar likhe", "Website ko slow karna", "Design behtar karna"],correct:1}
+        ]
+      },
+      {
+        id:"js-functions", tag:"Intermediate", title:"Functions \u2014 Declaration, Expression Aur Arrow Functions",
+        explain:"Function ek reusable code ka block hota hai jo ek khaas kaam karta hai. Function Declaration: function jama(a, b) { return a + b; }. Arrow Function ek naya, chota tareeqa hai likhne ka: const jama = (a, b) => a + b;. Functions ko baar baar 'call' kar ke istemal kiya ja sakta hai bina code dobara likhe. Misaal: Agar hume 10 jaghon par do numbers jama karne hain, to ek function bana kar hum usay 10 jaghon par 'call' kar sakte hain, is se code chota aur saaf rehta hai.",
+        candles:[],
+        quiz:[
+          {q:"Function ka bunyadi faida kya hai?",opts:["Code ko reuse karna", "Code ko lamba karna", "Website ko slow karna", "Design badalna"],correct:0},
+          {q:"'const jama = (a, b) => a + b;' kis type ka function hai?",opts:["Normal function declaration", "Arrow function", "Loop", "Object"],correct:1},
+          {q:"Function se value wapis bhejne ke liye kaunsa keyword use hota hai?",opts:["return", "send", "give", "output"],correct:0}
+        ]
+      },
+      {
+        id:"js-arrays", tag:"Intermediate", title:"Arrays Aur Array Methods (map, filter, reduce)",
+        explain:"Array values ki ek list hoti hai, jaise: let fruits = ['seb', 'kela', 'aam'];. Modern JavaScript mein powerful array methods hote hain: map() har item ko badal kar naya array deta hai, filter() sirf un items ko rakhta hai jo condition poori karein, aur reduce() poore array ko ek single value mein badal deta hai (jaise sab numbers ka total). Misaal: agar hume sirf 18 saal se bare logon ki list chahiye, to filter() use hota hai; agar sab ki umar mein 1 add karni ho, to map() use hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Array kya hoti hai?",opts:["Ek akela number", "Values ki ek list", "Ek function", "Ek boolean"],correct:1},
+          {q:"Kis method se sirf condition poori karne wale items milte hain?",opts:["map()", "filter()", "reduce()", "push()"],correct:1},
+          {q:"Poore array ko ek single value (jaise total) mein badalne ke liye kya use hota hai?",opts:["map()", "filter()", "reduce()", "sort()"],correct:2}
+        ]
+      },
+      {
+        id:"js-objects-this", tag:"Intermediate", title:"Objects Aur 'this' Keyword",
+        explain:"Object key-value pairs mein data rakhta hai, jaise: let user = { naam: 'Ali', umar: 25 };. Data access karne ke liye user.naam likhte hain. 'this' keyword function ke andar 'current object' ko refer karta hai \u2014 is ka matlab context ke hisab se badalta hai. Misaal: let person = { naam: 'Sara', bolo: function(){ console.log(this.naam); } }; \u2014 jab person.bolo() call hoga, 'this.naam' 'Sara' print karega, kyun ke 'this' yahan person object ko point kar raha hai.",
+        candles:[],
+        quiz:[
+          {q:"Object mein data kis tarah store hota hai?",opts:["Sirf numbers mein", "Key-value pairs mein", "Sirf text mein", "Loops mein"],correct:1},
+          {q:"'this' keyword ka bunyadi kaam kya hai?",opts:["Current object ko refer karna", "Loop chalana", "Array banana", "Function delete karna"],correct:0},
+          {q:"'let user = {naam:'Ali'}; console.log(user.naam);' kya print karega?",opts:["undefined", "'Ali'", "Error", "Nothing"],correct:1}
+        ]
+      },
+      {
+        id:"js-dom-events", tag:"Intermediate", title:"DOM Manipulation Aur Events",
+        explain:"DOM (Document Object Model) HTML page ki wo 'tree structure' hai jise JavaScript access aur badal sakti hai. document.getElementById('id') se hum kisi element ko select karte hain, aur .innerHTML se uska content badal sakte hain. Events wo actions hain jo user karta hai, jaise click, hover, ya form submit \u2014 hum addEventListener('click', function(){...}) se in par react karte hain. Misaal: Jab user 'Submit' button click kare, JavaScript form ka data check kar sakti hai aur agar ghalat ho to error dikha sakti hai \u2014 bina page reload kiye.",
+        candles:[],
+        quiz:[
+          {q:"DOM kis cheez ko represent karta hai?",opts:["HTML page ka structure", "Sirf CSS", "Sirf images", "Database"],correct:0},
+          {q:"Button click hone par kuch karne ke liye kya use hota hai?",opts:["addEventListener", "getElementById akela", "console.log akela", "Array"],correct:0},
+          {q:"Element ka content badalne ke liye kya use hota hai?",opts:[".innerHTML", ".color", ".size", ".delete()"],correct:0}
+        ]
+      },
+      {
+        id:"js-async", tag:"Advance", title:"Asynchronous JavaScript \u2014 Callbacks, Promises Aur Async/Await",
+        explain:"JavaScript aksar aise kaam karti hai jinme waqt lagta hai, jaise server se data mangwana \u2014 is dauran poori website 'freeze' nahi honi chahiye, isi ko Asynchronous (Async) programming kehte hain. Callback ek function hai jo doosre function ke khatam hone ke baad chalta hai. Promise ek 'waada' hai ke result baad mein milega (ya to success ya failure). async/await Promises ko asaan tareeqe se likhne ka naya, saaf tareeqa hai \u2014 code seedha, upar se neeche parhne jaisa lagta hai. Misaal: Weather app mein jab tak internet se data na aaye, app 'Loading...' dikhati hai \u2014 ye async programming ki wajah se mumkin hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Asynchronous programming ka faida kya hai?",opts:["Website freeze ho jati hai wait karte waqt", "Website freeze nahi hoti, dusre kaam chalte rehte hain", "Internet band ho jata hai", "Sirf design behtar hota hai"],correct:1},
+          {q:"Promise kya represent karta hai?",opts:["Ek fixed value", "Ek 'waada' jo baad mein poora ya fail ho", "Ek loop", "Ek array"],correct:1},
+          {q:"async/await kis cheez ko asaan banata hai?",opts:["CSS likhna", "Promises ko saaf tareeqe se likhna", "HTML tags", "Image loading"],correct:1}
+        ]
+      },
+      {
+        id:"js-fetch-api", tag:"Advance", title:"Fetch API \u2014 Server Se Data Mangwana",
+        explain:"fetch() function browser ka built-in tareeqa hai server se data mangwane (API call karne) ka. Misaal: fetch('https://api.example.com/data').then(response => response.json()).then(data => console.log(data)); \u2014 ye pehle request bhejta hai, phir response ko JSON mein badalta hai, phir usay use karta hai. Modern tareeqa async/await ke sath: async function getData(){ let res = await fetch(url); let data = await res.json(); }. Ye web apps ko real-time data (jaise weather, news) dikhane ki salahiyat deta hai.",
+        candles:[],
+        quiz:[
+          {q:"fetch() ka bunyadi kaam kya hai?",opts:["Server se data mangwana", "CSS badalna", "Loop chalana", "Variable banana"],correct:0},
+          {q:"Server ka response aksar kis format mein aata hai?",opts:["JSON", "MP3", "EXE", "ZIP"],correct:0},
+          {q:"Fetch ke sath async/await use karne ka faida kya hai?",opts:["Code ghair-zaroori tor par lamba ho jata hai", "Code saaf aur parhne mein asaan hota hai", "Fetch band ho jata hai", "Koi faida nahi"],correct:1}
+        ]
+      },
+      {
+        id:"js-es6", tag:"Advance", title:"ES6+ Features \u2014 Destructuring, Spread/Rest, Template Literals, Modules",
+        explain:"Modern JavaScript (ES6 aur is se aagay) mein kai useful features aaye. Destructuring se hum array/object se values seedha nikaal sakte hain: const {naam, umar} = user;. Spread operator (...) ek array/object ke elements ko phaila deta hai: const nayaArray = [...oldArray, 4,5];. Template Literals se strings mein variables asaan tareeqe se daal sakte hain: `Mera naam ${naam} hai`. Modules se hum code ko alag-alag files mein baant kar 'import/export' kar sakte hain, jo bare projects ko organize karne mein madad deta hai.",
+        candles:[],
+        quiz:[
+          {q:"'const {naam} = user;' iska kya kaam hai?",opts:["Destructuring se seedha value nikalna", "Loop chalana", "Function banana", "Array delete karna"],correct:0},
+          {q:"Spread operator ka symbol kya hai?",opts:["...", "**", "##", "&&"],correct:0},
+          {q:"Template literal kis symbol se banti hai?",opts:["Single quotes ('...')", "Backticks (`...`)", "Double quotes (\"...\")", "Brackets ([...])"],correct:1}
+        ]
+      },
+      {
+        id:"js-closures-scope", tag:"Advance", title:"Closures Aur Scope (Advance Concept)",
+        explain:"Scope tay karta hai ke ek variable kahan 'nazar' aata hai \u2014 Global Scope (har jaga) ya Local/Function Scope (sirf us function ke andar). Closure ek advanced concept hai jahan ek inner function apne outer function ki variables ko 'yaad' rakhta hai, chahe outer function ka kaam khatam ho chuka ho. Misaal: function counter(){ let count = 0; return function(){ count++; return count; }; } const c = counter(); c(); // 1  c(); // 2 \u2014 yahan inner function 'count' variable ko yaad rakhta hai. Closures private data banane aur advanced patterns (jaise counters, modules) ke liye use hote hain.",
+        candles:[],
+        quiz:[
+          {q:"Global Scope ka matlab kya hai?",opts:["Sirf ek function ke andar variable nazar aana", "Poore code mein har jaga variable nazar aana", "Variable kabhi nazar na aana", "Sirf loop ke andar"],correct:1},
+          {q:"Closure kya karta hai?",opts:["Inner function outer ki variables bhool jata hai", "Inner function outer ki variables yaad rakhta hai", "Variable delete ho jata hai", "Function kabhi chalti nahi"],correct:1},
+          {q:"Closures aksar kis kaam ke liye use hote hain?",opts:["Private data/counters banane ke liye", "Sirf CSS ke liye", "Images load karne ke liye", "HTML likhne ke liye"],correct:0}
+        ]
+      },
+      {
+        id:"js-prototypes", tag:"Super Advance", title:"Prototypes Aur Prototypal Inheritance",
+        explain:"JavaScript mein har object ek 'prototype' se juda hota hai jis se wo properties aur methods 'inherit' (waras mein) leta hai \u2014 isay Prototypal Inheritance kehte hain. Misaal: Array ke sare objects (jaise [1,2,3]) ko .map() ya .filter() jaisay methods Array.prototype se milte hain, hume har array mein ye methods dobara likhne ki zaroorat nahi. Classes (jo ES6 mein aayi) prototypes ke upar hi 'syntactic sugar' hain \u2014 yani asal mein andar prototypes hi kaam kar rahe hote hain, class sirf usay likhne ka asaan tareeqa hai. Ye samajhna JavaScript ki gehri buniyad samajhne ke liye zaroori hai.",
+        candles:[],
+        quiz:[
+          {q:"Prototypal Inheritance ka matlab kya hai?",opts:["Objects properties/methods 'waras' mein lete hain", "Objects kabhi kuch inherit nahi karte", "Sirf functions ke liye hota hai", "CSS ka hissa hai"],correct:0},
+          {q:"Array ke sare objects ko .map() jaisay methods kahan se milte hain?",opts:["Har baar khud likhne se", "Array.prototype se", "CSS se", "HTML se"],correct:1},
+          {q:"JavaScript Classes asal mein kis cheez ke upar bani hain?",opts:["Prototypes ke upar", "Arrays ke upar", "CSS ke upar", "HTML tags ke upar"],correct:0}
+        ]
+      },
+      {
+        id:"js-event-loop", tag:"Super Advance", title:"Event Loop Aur Call Stack \u2014 JavaScript Andar Se Kaise Kaam Karti Hai",
+        explain:"JavaScript 'single-threaded' hai, yani ek waqt mein sirf ek kaam kar sakti hai \u2014 lekin phir bhi ye asynchronous kaam (jaise fetch) handle kar leti hai, is ke peeche Event Loop ka kamaal hai. Call Stack wo jaga hai jahan functions 'stack' (dher) ki tarah execute hote hain \u2014 jo function pehle andar aaya wo baad mein bahar nikalta hai. Jab koi async kaam (jaise fetch ya setTimeout) hota hai, wo alag se 'Web APIs' mein chala jata hai, aur khatam hone par 'Callback Queue' mein aata hai. Event Loop hamesha check karta rehta hai ke Call Stack khaali hai to Queue se agla kaam utha kar chala deta hai. Ye JavaScript ke sab se advance aur ahem concepts mein se ek hai.",
+        candles:[],
+        quiz:[
+          {q:"JavaScript kis tarah ki language hai (threading ke lehaz se)?",opts:["Multi-threaded", "Single-threaded", "No-threaded", "Sirf async"],correct:1},
+          {q:"Call Stack kis tarah kaam karta hai?",opts:["Random order mein", "Jo pehle andar aaya wo baad mein bahar (stack)", "Sirf ek dafa chalta hai", "Kabhi khaali nahi hota"],correct:1},
+          {q:"Event Loop ka bunyadi kaam kya hai?",opts:["Call Stack khaali hone par Queue se kaam uthana", "CSS badalna", "HTML likhna", "Server band karna"],correct:0}
+        ]
+      },
+      {
+        id:"js-design-patterns", tag:"Super Advance", title:"JavaScript Mein Design Patterns Aur Best Practices",
+        explain:"Design Patterns wo aam (common) hal hain jo baar baar aane wale programming masail ke liye pehle se soche gaye hote hain. Kuch mash'hoor patterns: Module Pattern (code ko private aur public hisso mein baant'na, closures ka istemal karte huay), Singleton Pattern (yakeeni banana ke sirf ek hi instance ek waqt mein maujood ho), aur Observer Pattern (jab ek cheez badle to doosri cheezein khud-ba-khud khabar paa jayein, jaise event listeners). Best Practices mein shamil hain: variables ko meaningful naam dena, functions ko chota aur ek hi kaam karne wala rakhna, aur code ko DRY (Don't Repeat Yourself) rakhna. Ye advanced concepts bare, professional projects likhne ke liye zaroori hain.",
+        candles:[],
+        quiz:[
+          {q:"Design Pattern kya hota hai?",opts:["Ek random code", "Aam masail ke liye pehle se socha gaya hal", "Sirf CSS style", "Ek error"],correct:1},
+          {q:"Observer Pattern ka bunyadi khayal kya hai?",opts:["Kuch bhi khabar na dena", "Ek cheez badle to doosri khud khabar payein", "Sirf ek dafa chalna", "Data delete karna"],correct:1},
+          {q:"DRY principle ka matlab kya hai?",opts:["Don't Repeat Yourself \u2014 code dobara na likhna", "Data Rapidly Yield", "Delete Random Yearly", "Kuch aur"],correct:0}
+        ]
+      }
+    ]
   }
 };
 
