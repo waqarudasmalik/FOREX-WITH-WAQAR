@@ -317,6 +317,66 @@
   </div>
 </div>
 
+<div id="registerOverlay" class="auth-overlay" style="display:none; z-index:10001;">
+  <div class="auth-box" style="max-width:480px; text-align:left; max-height:88vh; overflow-y:auto;">
+    <h2 style="color:#fff;margin-bottom:6px; text-align:center;">Registration Form</h2>
+    <p style="color:#94a3b8;margin-bottom:16px; text-align:center; font-size:13px;">Aagay barhne se pehle neeche di gayi tamam maloomat bharen. Har field zaroori (required) hai — bina fill kiye aagay nahi ja sakte.</p>
+
+    <div class="field-row">
+      <label>First Name *</label>
+      <input type="text" id="regFirstName" placeholder="First Name">
+    </div>
+    <div class="field-row">
+      <label>Second Name (Last Name) *</label>
+      <input type="text" id="regLastName" placeholder="Second / Last Name">
+    </div>
+    <div class="field-row">
+      <label>Nick Name *</label>
+      <input type="text" id="regNickName" placeholder="Nick Name">
+    </div>
+    <div class="field-row">
+      <label>Gmail Address *</label>
+      <input type="email" id="regGmail" placeholder="example@gmail.com">
+    </div>
+    <div class="field-row">
+      <label>ID Card Number *</label>
+      <input type="text" id="regIdNumber" placeholder="ID Card Number">
+    </div>
+    <div class="field-row">
+      <label>Address *</label>
+      <input type="text" id="regAddress" placeholder="Poora Ghar Ka Address">
+    </div>
+
+    <div class="field-row">
+      <label>ID Card — Front Side Upload *</label>
+      <div class="kyc-upload-drop" onclick="document.getElementById('regIdFrontInput').click()">
+        📄 Click karke Front Side Upload Karein
+        <input type="file" id="regIdFrontInput" accept="image/*,.pdf" onchange="ffRegHandleFile(event,'front')">
+      </div>
+      <div id="regIdFrontPreviewBox" style="display:none; text-align:center; margin-bottom:10px;">
+        <img id="regIdFrontPreview" style="max-width:220px; border-radius:10px; border:1px solid rgba(148,163,184,0.3);">
+        <div style="font-size:11px; color:#4ade80; margin-top:4px;">✔ Front side attach ho gayi</div>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <label>ID Card — Back Side Upload *</label>
+      <div class="kyc-upload-drop" onclick="document.getElementById('regIdBackInput').click()">
+        📄 Click karke Back Side Upload Karein
+        <input type="file" id="regIdBackInput" accept="image/*,.pdf" onchange="ffRegHandleFile(event,'back')">
+      </div>
+      <div id="regIdBackPreviewBox" style="display:none; text-align:center; margin-bottom:10px;">
+        <img id="regIdBackPreview" style="max-width:220px; border-radius:10px; border:1px solid rgba(148,163,184,0.3);">
+        <div style="font-size:11px; color:#4ade80; margin-top:4px;">✔ Back side attach ho gayi</div>
+      </div>
+    </div>
+
+    <div id="regErrorMsg" style="color:#fda4af; font-size:12.5px; margin-bottom:12px; display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:10px 12px;"></div>
+
+    <button class="google-btn" style="width:100%;" onclick="ffSubmitRegistration()">Submit &amp; Continue</button>
+  </div>
+</div>
+
 <script>
 (function(){
   window.ffCopyWalletAddress = function(){
@@ -344,15 +404,101 @@
 
   window.ffProceedAfterSubscribe = function(){
     try { localStorage.setItem('ffSubscriptionAck', '1'); } catch(e){}
-    var el = document.getElementById('subscribeOverlay');
-    if (el) el.style.display = 'none';
+    var subEl = document.getElementById('subscribeOverlay');
+    if (subEl) subEl.style.display = 'none';
+
+    var regDone = false;
+    try { regDone = localStorage.getItem('ffRegistrationDone') === '1'; } catch(e){}
+    if (!regDone) {
+      var regEl = document.getElementById('registerOverlay');
+      if (regEl) regEl.style.display = 'flex';
+    }
+  };
+
+  var ffRegFiles = { front: null, back: null };
+
+  window.ffRegHandleFile = function(evt, side){
+    var file = evt.target.files && evt.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      ffRegFiles[side] = e.target.result;
+      var previewBox = document.getElementById(side === 'front' ? 'regIdFrontPreviewBox' : 'regIdBackPreviewBox');
+      var previewImg = document.getElementById(side === 'front' ? 'regIdFrontPreview' : 'regIdBackPreview');
+      if (file.type && file.type.indexOf('image') === 0) {
+        previewImg.src = e.target.result;
+        previewImg.style.display = 'block';
+      } else {
+        previewImg.style.display = 'none';
+      }
+      previewBox.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.ffSubmitRegistration = function(){
+    var firstName = document.getElementById('regFirstName').value.trim();
+    var lastName = document.getElementById('regLastName').value.trim();
+    var nickName = document.getElementById('regNickName').value.trim();
+    var gmail = document.getElementById('regGmail').value.trim();
+    var idNumber = document.getElementById('regIdNumber').value.trim();
+    var address = document.getElementById('regAddress').value.trim();
+    var errEl = document.getElementById('regErrorMsg');
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    var missing = [];
+    if (!firstName) missing.push('First Name');
+    if (!lastName) missing.push('Second Name');
+    if (!nickName) missing.push('Nick Name');
+    if (!gmail || !emailPattern.test(gmail)) missing.push('Valid Gmail Address');
+    if (!idNumber) missing.push('ID Card Number');
+    if (!address) missing.push('Address');
+    if (!ffRegFiles.front) missing.push('ID Card Front Side Upload');
+    if (!ffRegFiles.back) missing.push('ID Card Back Side Upload');
+
+    if (missing.length) {
+      errEl.textContent = 'Yeh fields zaroori hain, pehle inhein bharein: ' + missing.join(', ');
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    var regData = {
+      firstName: firstName,
+      lastName: lastName,
+      nickName: nickName,
+      gmail: gmail,
+      idNumber: idNumber,
+      address: address,
+      submittedAt: new Date().toISOString()
+    };
+
+    try {
+      localStorage.setItem('ffRegistrationData', JSON.stringify(regData));
+      localStorage.setItem('ffRegistrationDone', '1');
+    } catch(e){}
+
+    var regEl = document.getElementById('registerOverlay');
+    if (regEl) regEl.style.display = 'none';
   };
 
   document.addEventListener('DOMContentLoaded', function(){
-    var seen = false;
-    try { seen = localStorage.getItem('ffSubscriptionAck') === '1'; } catch(e){}
-    var el = document.getElementById('subscribeOverlay');
-    if (el && seen) el.style.display = 'none';
+    var subSeen = false, regDone = false;
+    try { subSeen = localStorage.getItem('ffSubscriptionAck') === '1'; } catch(e){}
+    try { regDone = localStorage.getItem('ffRegistrationDone') === '1'; } catch(e){}
+
+    var subEl = document.getElementById('subscribeOverlay');
+    var regEl = document.getElementById('registerOverlay');
+
+    if (subEl && subSeen) subEl.style.display = 'none';
+
+    if (regEl) {
+      if (regDone) {
+        regEl.style.display = 'none';
+      } else if (subSeen) {
+        regEl.style.display = 'flex';
+      }
+    }
   });
 })();
 </script>
