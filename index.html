@@ -433,8 +433,10 @@
     if (subEl && subSeen) subEl.style.display = 'none';
   });
 
-  // ===== Registration form: files + Firestore/Storage submit =====
-  var ffRegFiles = { front: null, back: null };
+  // ===== Registration form: files as base64 → directly into Firestore =====
+  // Firebase Storage bilkul use nahi hoti — debit card / billing ki zaroorat nahi.
+  // Dono documents (front/back) base64 string ban kar Firestore mein save hote hain.
+  var ffRegFiles = { front: null, back: null, frontB64: null, backB64: null };
 
   window.ffRegHandleFile = function(evt, side){
     var file = evt.target.files && evt.target.files[0];
@@ -442,10 +444,14 @@
     ffRegFiles[side] = file;
     var reader = new FileReader();
     reader.onload = function(e){
+      var b64 = e.target.result; // "data:image/jpeg;base64,..."
+      if (side === 'front') ffRegFiles.frontB64 = b64;
+      else ffRegFiles.backB64 = b64;
+
       var previewBox = document.getElementById(side === 'front' ? 'regIdFrontPreviewBox' : 'regIdBackPreviewBox');
       var previewImg = document.getElementById(side === 'front' ? 'regIdFrontPreview' : 'regIdBackPreview');
       if (file.type && file.type.indexOf('image') === 0) {
-        previewImg.src = e.target.result;
+        previewImg.src = b64;
         previewImg.style.display = 'block';
       } else {
         previewImg.style.display = 'none';
@@ -484,8 +490,8 @@
     if (!gmail || !emailPattern.test(gmail)) missing.push('Valid Gmail Address');
     if (!idNumber) missing.push('ID Card Number');
     if (!address) missing.push('Address');
-    if (!ffRegFiles.front) missing.push('ID Card Front Side Upload');
-    if (!ffRegFiles.back) missing.push('ID Card Back Side Upload');
+    if (!ffRegFiles.frontB64) missing.push('ID Card Front Side Upload');
+    if (!ffRegFiles.backB64) missing.push('ID Card Back Side Upload');
 
     if (missing.length) {
       errEl.textContent = 'Yeh fields zaroori hain, pehle inhein bharein: ' + missing.join(', ');
@@ -493,24 +499,20 @@
       return;
     }
 
+    // File size warning: Firestore document limit 1 MB hai.
+    // 2 images milake ~750 KB base64 se zyada ho sakti hain — warn karo lekin rokna nahi.
+    var totalLen = (ffRegFiles.frontB64.length + ffRegFiles.backB64.length);
+    if (totalLen > 900000) {
+      errEl.textContent = 'Warning: Document size bara hai (' + Math.round(totalLen/1024) + ' KB). Agar submit fail ho to camera se chhoti tasveer lein ya JPEG compress karein.';
+      errEl.style.display = 'block';
+    }
+
     btn.disabled = true;
     btn.textContent = 'Submit ho raha hai...';
-    statusEl.textContent = 'Documents upload ho rahe hain, thora intezaar karein...';
+    statusEl.textContent = 'Maloomat Firestore mein save ho rahi hai, intezaar karein...';
     statusEl.style.display = 'block';
 
     try {
-      var storage = firebase.storage();
-      var frontExt = (ffRegFiles.front.name.split('.').pop() || 'jpg').toLowerCase();
-      var backExt = (ffRegFiles.back.name.split('.').pop() || 'jpg').toLowerCase();
-
-      var frontRef = storage.ref('registrationDocs/' + user.uid + '/id_front.' + frontExt);
-      await frontRef.put(ffRegFiles.front);
-      var frontUrl = await frontRef.getDownloadURL();
-
-      var backRef = storage.ref('registrationDocs/' + user.uid + '/id_back.' + backExt);
-      await backRef.put(ffRegFiles.back);
-      var backUrl = await backRef.getDownloadURL();
-
       await firebase.firestore().collection('users').doc(user.uid).set({
         registration: {
           firstName: firstName,
@@ -519,23 +521,26 @@
           gmail: gmail,
           idNumber: idNumber,
           address: address,
-          idFrontUrl: frontUrl,
-          idBackUrl: backUrl,
+          idFrontB64: ffRegFiles.frontB64,
+          idBackB64: ffRegFiles.backB64,
           submitted: true,
           submittedAt: firebase.firestore.FieldValue.serverTimestamp()
         }
       }, { merge: true });
 
-      statusEl.textContent = 'Submit ho gaya — ab admin aapki maloomat review karega. Approve hote hi aap login kar sakenge.';
-      // The Firestore onSnapshot listener elsewhere on the page will now see
-      // registration.submitted = true and swap this overlay for the
-      // pending/approved/rejected overlay automatically.
+      errEl.style.display = 'none';
+      statusEl.textContent = '✅ Submit ho gaya — ab admin aapki maloomat aur documents review karega. Approve hote hi aap login kar sakenge.';
+      // onSnapshot listener automatically pendingOverlay dikhaega
     } catch (err) {
       btn.disabled = false;
       btn.textContent = 'Submit & Send to Admin';
-      errEl.textContent = 'Submit karte waqt error aayi: ' + err.message;
-      errEl.style.display = 'block';
       statusEl.style.display = 'none';
+      if (err.message && err.message.toLowerCase().includes('quota')) {
+        errEl.textContent = 'Document size bahut bara hai — meherbani karke chhoti (compressed) tasveer use karein aur dobara koshish karein.';
+      } else {
+        errEl.textContent = 'Submit karte waqt error aayi: ' + err.message;
+      }
+      errEl.style.display = 'block';
     }
   };
 })();
@@ -2805,8 +2810,8 @@
               <p style="color:#e2e8f0; font-size:12.5px; margin-bottom:2px;"><strong>ID Card #:</strong> ${escapeHtml(r.idNumber)}</p>
               <p style="color:#e2e8f0; font-size:12.5px; margin-bottom:8px;"><strong>Address:</strong> ${escapeHtml(r.address)}</p>
               <div class="kyc-admin-imgs">
-                ${r.idFrontUrl ? `<a href="${escapeHtml(r.idFrontUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.idFrontUrl)}" title="ID Front"></a>` : ''}
-                ${r.idBackUrl ? `<a href="${escapeHtml(r.idBackUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.idBackUrl)}" title="ID Back"></a>` : ''}
+                ${r.idFrontB64 ? `<a href="${escapeHtml(r.idFrontB64)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.idFrontB64)}" title="ID Front" style="width:90px;height:90px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid rgba(148,163,184,0.2);"></a>` : ''}
+                ${r.idBackB64 ? `<a href="${escapeHtml(r.idBackB64)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.idBackB64)}" title="ID Back" style="width:90px;height:90px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid rgba(148,163,184,0.2);"></a>` : ''}
               </div>
             </div>
           `;
