@@ -1644,6 +1644,10 @@
     color:#0f172a;font-weight:700;font-size:11.5px;cursor:pointer;white-space:nowrap;}
   .cc-pay-copy-btn:hover{opacity:.9;}
   .cc-pay-note{font-size:10.5px;color:var(--cc-mute);margin-top:7px;}
+  .cc-wa-btn{display:block;text-align:center;margin-top:12px;padding:9px 14px;border-radius:10px;
+    background:linear-gradient(135deg,#25D366,#128C7E);color:#04140c;font-weight:700;font-size:12.5px;
+    text-decoration:none;cursor:pointer;transition:.15s;}
+  .cc-wa-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,211,102,0.4);}
   .cc-parts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0;}
   .cc-part-card{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;}
   .cc-part-card:hover{border-color:var(--cc-gold);}
@@ -6879,6 +6883,10 @@ function renderLinePattern(id, points, zones, notes){
 // mein apna doosra asal TRC20 address daal dein.
 var TRC20_WALLET = "TGGmb1fnspzWprcff12JSfjVaE7XQYcVTi";
 
+// Admin ke liye WhatsApp Signals channel link — har course folder card par
+// button ki soorat mein dikhta hai, lekin SIRF admin ko (ccIsAdmin true ho).
+var WHATSAPP_SIGNALS_LINK = "https://whatsapp.com/channel/0029Vb7SJb72P59fq8vAhu12";
+
 var COURSES = {
   smc: {
     title: "SMC — Smart Money Concepts",
@@ -8639,12 +8647,17 @@ function ccRenderFolders(){
         '<div class="cc-pay-note">Sirf TRC20 (Tron) network se USDT bhejein, phir access ke liye admin se rabta karein.</div>'+
       '</div>';
     }
+    var waBox = '';
+    if(ccIsAdmin){
+      waBox = '<a class="cc-wa-btn" href="'+WHATSAPP_SIGNALS_LINK+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">📲 WhatsApp Signals Dekhein</a>';
+    }
     html += '<div class="cc-folder'+(folderUnlocked?'':' cc-locked')+'" onclick="ccOpenFolder(\''+key+'\')">'+
       '<span class="cc-count">'+unlockedPartsCount+'/'+c.parts.length+'</span>'+
       '<div style="font-size:30px">'+c.icon+'</div>'+
       '<h3>'+c.title+'</h3><p>'+c.desc+'</p>'+
       (folderUnlocked ? '' : '<span class="cc-lock-badge">🔒 Admin access required</span>')+
       payBox+
+      waBox+
       '</div>';
   });
   document.getElementById('ccFolderView').innerHTML = html;
