@@ -1682,6 +1682,8 @@
   .cc-quiz-opt.correct{background:#123a24;border-color:var(--cc-green);}
   .cc-quiz-opt.wrong{background:#3a1414;border-color:var(--cc-red);}
   .cc-quiz-opt.disabled{pointer-events:none;}
+  .cc-quiz-answer{margin-top:8px;padding:8px 12px;background:#0a1f16;border:1px solid var(--cc-green);
+    border-radius:8px;font-size:13px;color:#9fe6b8;font-weight:600;}
   .cc-locked-msg{text-align:center;padding:50px 20px;color:var(--cc-mute);}
   .cc-locked-msg .cc-lock-icon{font-size:40px;display:block;margin-bottom:10px;}
   .cc-admin-panel{background:var(--cc-panel);border:1px solid var(--cc-gold);border-radius:14px;padding:20px;margin:20px 0;}
@@ -6588,6 +6590,68 @@ const messages = [{ role: 'system', content: aichatBuildSystemPrompt() }, ...aic
    zones:   [{from,to,top,bottom,color,label}]  from/to = candle index range
    notes:   [{at,y,text,color}] small text label pinned at a candle index/price
 */
+/* ==========================================================================
+   GENERIC LESSON ILLUSTRATION (for non-trading courses: cybersecurity, html,
+   webdev, javascript, css, php, ai, socialmedia). Auto-generates a simple,
+   consistent SVG banner per lesson: course icon, tag, title, and a "Misaal"
+   (example) callout extracted from the explain text — no per-lesson art
+   needed, applies instantly to every lesson in every course.
+   ========================================================================== */
+function ccWrapText(text, maxChars, maxLines){
+  var words = (text||'').split(/\s+/).filter(Boolean);
+  var lines = [], cur = '';
+  for (var i=0;i<words.length;i++){
+    var test = cur ? (cur+' '+words[i]) : words[i];
+    if (test.length > maxChars && cur){ lines.push(cur); cur = words[i]; }
+    else cur = test;
+    if (lines.length === maxLines) break;
+  }
+  if (cur && lines.length < maxLines) lines.push(cur);
+  if (lines.length === maxLines && words.join(' ').length > lines.join(' ').length){
+    var last = lines[lines.length-1];
+    lines[lines.length-1] = last.length>maxChars-1 ? last.slice(0,maxChars-1)+'…' : last+'…';
+  }
+  return lines;
+}
+function ccExtractMisaal(explain){
+  if(!explain) return '';
+  var idx = explain.indexOf('Misaal:');
+  if (idx === -1) return explain.slice(0, 160);
+  return explain.slice(idx+7).trim();
+}
+function ccEsc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderConceptIllustration(id, icon, tag, title, explain){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var W=700,H=190;
+  var titleLines = ccWrapText(title, 26, 2);
+  var misaal = ccExtractMisaal(explain);
+  var misaalLines = ccWrapText(misaal, 74, 3);
+  var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="cc-diagram" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<defs><linearGradient id="ccig'+id+'" x1="0" y1="0" x2="1" y2="1">'+
+    '<stop offset="0%" stop-color="#0e1420"/><stop offset="100%" stop-color="#141b2b"/></linearGradient></defs>';
+  svg += '<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="12" fill="url(#ccig'+id+')" stroke="rgba(148,163,184,0.18)"/>';
+  // icon circle
+  svg += '<circle cx="72" cy="60" r="42" fill="rgba(212,175,55,0.08)" stroke="var(--cc-gold)" stroke-width="1.4"/>';
+  svg += '<text x="72" y="76" font-size="40" text-anchor="middle">'+ccEsc(icon||'📘')+'</text>';
+  // tag pill
+  svg += '<rect x="128" y="20" width="'+(Math.min(300,18+tag.length*7.2))+'" height="20" rx="10" fill="rgba(212,175,55,0.15)"/>';
+  svg += '<text x="138" y="34" font-size="11" fill="var(--cc-gold)" font-weight="700" font-family="sans-serif">'+ccEsc((tag||'').toUpperCase())+'</text>';
+  // title (wrapped)
+  titleLines.forEach(function(line,i){
+    svg += '<text x="128" y="'+(58+i*24)+'" font-size="19" fill="#e8edf5" font-weight="700" font-family="sans-serif">'+ccEsc(line)+'</text>';
+  });
+  // divider
+  svg += '<line x1="20" y1="118" x2="'+(W-20)+'" y2="118" stroke="rgba(148,163,184,0.15)" stroke-width="1"/>';
+  // misaal callout
+  svg += '<text x="20" y="138" font-size="12.5" fill="var(--cc-green)" font-weight="700" font-family="sans-serif">💡 Misaal</text>';
+  misaalLines.forEach(function(line,i){
+    svg += '<text x="20" y="'+(156+i*17)+'" font-size="12.5" fill="#b8c4d9" font-family="sans-serif">'+ccEsc(line)+'</text>';
+  });
+  svg += '</svg>';
+  el.innerHTML = svg;
+}
+
 function renderCandles(id, candles, zones, notes){
   zones = zones || []; notes = notes || [];
 
@@ -8455,6 +8519,7 @@ function ccOpenPart(folderKey, partId){
       q.opts.forEach(function(opt,oi){
         html += '<button class="cc-quiz-opt" onclick="ccAnswerQuiz(this,'+oi+','+q.correct+')">'+opt+'</button>';
       });
+      html += '<div class="cc-quiz-answer">✅ Sahi Jawab: '+q.opts[q.correct]+'</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -8470,6 +8535,8 @@ function ccOpenPart(folderKey, partId){
       renderCandles(diagId, p.candles, p.zones, p.notes);
     } else if(p.points && p.points.length){
       renderLinePattern(diagId, p.points, p.zones || p.lineZones, p.notes || p.notes2);
+    } else {
+      renderConceptIllustration(diagId, c.icon, p.tag, p.title, p.explain);
     }
   }, 0);
 
