@@ -1644,10 +1644,6 @@
     color:#0f172a;font-weight:700;font-size:11.5px;cursor:pointer;white-space:nowrap;}
   .cc-pay-copy-btn:hover{opacity:.9;}
   .cc-pay-note{font-size:10.5px;color:var(--cc-mute);margin-top:7px;}
-  .cc-wa-btn{display:block;text-align:center;margin-top:12px;padding:9px 14px;border-radius:10px;
-    background:linear-gradient(135deg,#25D366,#128C7E);color:#04140c;font-weight:700;font-size:12.5px;
-    text-decoration:none;cursor:pointer;transition:.15s;}
-  .cc-wa-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,211,102,0.4);}
   .cc-parts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0;}
   .cc-part-card{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;}
   .cc-part-card:hover{border-color:var(--cc-gold);}
@@ -6883,10 +6879,6 @@ function renderLinePattern(id, points, zones, notes){
 // mein apna doosra asal TRC20 address daal dein.
 var TRC20_WALLET = "TGGmb1fnspzWprcff12JSfjVaE7XQYcVTi";
 
-// Admin ke liye WhatsApp Signals channel link — har course folder card par
-// button ki soorat mein dikhta hai, lekin SIRF admin ko (ccIsAdmin true ho).
-var WHATSAPP_SIGNALS_LINK = "https://whatsapp.com/channel/0029Vb7SJb72P59fq8vAhu12";
-
 var COURSES = {
   smc: {
     title: "SMC — Smart Money Concepts",
@@ -8283,7 +8275,28 @@ var COURSES = {
         ]
       },
       {
+        id:"ai-tools-comparison-chat", tag:"Advance", title:"Chat/Text AI Tools Ka Comparison — Kaunsa Kis Kaam Mein Best Hai?",
+        explain:"Aaj kal market mein kai AI Chatbots maujood hain aur har ek ki apni khaas khoobi (strength) aur kami (weakness) hai — koi ek AI 'sab se best' nahi hota, balke kaam ke hisab se behtareen tool alag hota hai. ChatGPT (OpenAI) sab se zyada versatile aur mashhoor hai, iska ecosystem (plugins, image generation, voice mode) sab se bara hai, lekin lambay documents ke liye iska context window (yani ek waqt mein kitna text 'yaad' rakh sakta hai) doosron ke muqable chhota hota hai. Claude (Anthropic) coding, lambay documents parhna, aur diye gaye exact instructions follow karne mein khaas tor par acha mana jata hai, aur ghalat/jhooti maloomat (hallucination) kam deta hai — lekin iska apna image-generation tool nahi hai aur overall ecosystem chota hai. Gemini (Google) ka sab se bara faida Google Search, Gmail, aur Workspace ke sath seedha integration hai, aur ye bohat bara context window sambhal sakta hai — lekin coding mein kabhi kabhi doosron se thora peeche reh jata hai. Grok (xAI) real-time X (Twitter) data tak rasai rakhta hai, aur DeepSeek ek open-source, sasta option hai jo achi performance deta hai lekin data privacy ka khayal khud rakhna zaroori hai. Perplexity 'search-native' AI hai — ye jawab ke sath seedha sources/citations deta hai, is liye research aur fact-checking ke liye behtareen hai, lekin general chit-chat ya creative likhne ke liye utna acha nahi. Misaal: Agar aapko ek lamba legal document ya PDF parh kar uska summary chahiye to Claude ya Gemini (bare context window ki wajah se) behtar rahenge, agar Google Sheets/Gmail ke sath seedha kaam karna hai to Gemini best hai, agar fact-checked research chahiye jahan har baat ka source diya jaye to Perplexity behtareen hai, aur agar ek general-purpose tool chahiye jo har kaam mein thora thora acha ho to ChatGPT sab se versatile hai.",
+        candles:[],
+        quiz:[
+          {q:"AI Chatbots ke baare mein sab se sahi baat kya hai?",opts:["Ek hi AI har kaam mein hamesha sab se best hota hai","Har AI ki apni khoobi/kami hoti hai, kaam ke hisab se behtareen tool alag hota hai","Sab AI bilkul same hain","Sirf mehnga AI hi acha hota hai"],correct:1},
+          {q:"Perplexity kis kaam ke liye khaas tor par acha hai?",opts:["Research/fact-checking (sources ke sath jawab)","Video editing","Game khelna","Music banana"],correct:0},
+          {q:"Gemini ka sab se bara faida kya hai?",opts:["Google Search, Gmail aur Workspace ke sath seedha integration","Sirf offline kaam karta hai","Sirf ek zaban samajhta hai","Koi faida nahi"],correct:0}
+        ]
+      },
+      {
+        id:"ai-tools-comparison-visual", tag:"Advance", title:"Image Aur Video Generation AI Tools Ka Comparison",
+        explain:"Text se tasveerain aur videos banane wale AI tools mein bhi har ek ki apni khaasiyat hai. Midjourney apni artistic aur khoobsurat (aesthetic) quality ki wajah se mashhoor hai — professional design aur art ke liye behtareen mana jata hai, lekin traditionally Discord app ke zariye chalta hai jo naye logon ko thora mushkil lag sakta hai. DALL-E (jo ab ChatGPT ke andar bhi maujood hai, 'ChatGPT Images' ke naam se) istemal karna sab se asaan hai aur seedha chat ke andar images bana deta hai, lekin Midjourney jitni fine artistic detail hamesha nahi deta. Stable Diffusion ek open-source tool hai jise aap apne khud ke computer par bhi chala sakte hain aur mukammal control (customization) milta hai, lekin isay chalane ke liye thori technical maloomat chahiye hoti hai. Video Generation ki duniya mein Sora (OpenAI), Runway, aur Pika jaisay tools text se seedha chhoti video clips bana dete hain — ye technology bohat tezi se behtar ho rahi hai lekin abhi bhi lambi, mukammal consistent videos banane mein mushkil aati hai (jaise character ka chehra har frame mein bilkul same rakhna). Misaal: Agar aap ek unique, artistic poster banana chahte hain to Midjourney behtareen hai, agar aapko jaldi se ek simple image chahiye aur aap pehle se ChatGPT use kar rahe hain to DALL-E/ChatGPT Images sab se asaan raasta hai, aur agar aapko poori tarah customize kar ke apne khud ke data par tasveerain banani hain to Stable Diffusion sab se zyada azaadi deta hai.",
+        candles:[],
+        quiz:[
+          {q:"Midjourney kis cheez ke liye mashhoor hai?",opts:["Artistic/khoobsurat image quality","Sirf text likhna","Coding","Music banana"],correct:0},
+          {q:"Stable Diffusion ki khaas baat kya hai?",opts:["Open-source hai aur poori customization deta hai","Sirf mobile app hai","Sirf paid hai, koi free option nahi","Sirf video banata hai"],correct:0},
+          {q:"Video generation AI tools (jaise Sora) ko abhi bhi kis cheez mein mushkil hoti hai?",opts:["Lambi, consistent video banane mein (jaise chehra har frame mein same rakhna)","Bilkul koi mushkil nahi","Sirf audio add karne mein","Sirf color choose karne mein"],correct:0}
+        ]
+      },
+      {
         id:"ai-tools-daily", tag:"Advance", title:"Roz-marra Zindagi Mein AI Tools Ka Istemal",
+
         explain:"Aaj kal AI tools kaam ko tez aur asaan banane ke liye har jaga use ho rahe hain. Text/Chat AI tools sawalon ke jawab dene, likhne mein madad, aur ideas dene ke liye use hote hain. Image Generation tools designs aur graphics banane mein madad karte hain. Coding mein AI assistants developers ko code likhne aur bugs dhoondne mein madad dete hain. Business mein AI customer support (chatbots), data analysis, aur automation ke liye use hota hai. Ye tools kaam ko replace karne ke bajaye, aksar kaam ko tez aur behtar banane ka zariya hote hain — insaan ka faisla (judgment) aur creativity abhi bhi zaroori hoti hai.",
         candles:[],
         quiz:[
@@ -8647,17 +8660,12 @@ function ccRenderFolders(){
         '<div class="cc-pay-note">Sirf TRC20 (Tron) network se USDT bhejein, phir access ke liye admin se rabta karein.</div>'+
       '</div>';
     }
-    var waBox = '';
-    if(ccIsAdmin){
-      waBox = '<a class="cc-wa-btn" href="'+WHATSAPP_SIGNALS_LINK+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">📲 WhatsApp Signals Dekhein</a>';
-    }
     html += '<div class="cc-folder'+(folderUnlocked?'':' cc-locked')+'" onclick="ccOpenFolder(\''+key+'\')">'+
       '<span class="cc-count">'+unlockedPartsCount+'/'+c.parts.length+'</span>'+
       '<div style="font-size:30px">'+c.icon+'</div>'+
       '<h3>'+c.title+'</h3><p>'+c.desc+'</p>'+
       (folderUnlocked ? '' : '<span class="cc-lock-badge">🔒 Admin access required</span>')+
       payBox+
-      waBox+
       '</div>';
   });
   document.getElementById('ccFolderView').innerHTML = html;
