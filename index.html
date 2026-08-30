@@ -8075,6 +8075,280 @@ var COURSES = {
         ]
       }
     ]
+  },
+  ai: {
+    title: "Artificial Intelligence — Beginner Se Super Advance Tak",
+    icon: "🤖",
+    desc: "AI, Machine Learning, Neural Networks se le kar Generative AI, Prompt Engineering aur AI Ethics tak — poora AI course, misaalon aur quiz ke sath.",
+    parts: [
+      {
+        id:"ai-intro", tag:"Bunyadi Baatein", title:"Artificial Intelligence (AI) Kya Hai?",
+        explain:"Artificial Intelligence (AI) computer systems ki wo salahiyat hai jis se wo aise kaam kar sakein jo aam tor par insaani zehanat (intelligence) chahte hain — jaise samajhna, faisla lena, seekhna, ya pattern pehchanna. AI koi ek cheez nahi, balke ek bara field hai jisme kai technologies shamil hain. Misaal: Jab aapka phone chehra pehchan kar unlock hota hai, ya Netflix aapko movies suggest karta hai, ya Google Maps behtareen rasta batata hai — ye sab AI ki misaalain hain jo hum roz istemal karte hain, aksar bina soche ke.",
+        candles:[],
+        quiz:[
+          {q:"AI ka poora naam kya hai?",opts:["Automatic Internet", "Artificial Intelligence", "Advanced Information", "Auto Interaction"],correct:1},
+          {q:"AI ki roz-marra misaal kaunsi hai?",opts:["Netflix ka movie suggest karna", "Sirf calculator", "Sirf TV dekhna", "Kitab parhna"],correct:0},
+          {q:"AI ka bunyadi maqsad kya hai?",opts:["Insaani zehanat jaisay kaam karna (samajhna, seekhna, faisla lena)", "Sirf internet chalana", "Sirf games khelna", "Sirf photos khenchna"],correct:0}
+        ]
+      },
+      {
+        id:"ai-vs-ml-dl", tag:"Bunyadi Baatein", title:"AI Vs Machine Learning Vs Deep Learning",
+        explain:"Ye teen alfaaz aksar mix ho jate hain lekin in ka rishta 'dairon' (circles) ki tarah hai. AI sab se bara daira hai — koi bhi cheez jo insaani zehanat jaisi lage. Machine Learning (ML) AI ka ek hissa hai — is mein computer ko seedha rules diye jaane ke bajaye, wo khud data se 'seekhta' hai. Deep Learning ML ka bhi ek hissa hai, jo 'Neural Networks' (insaani dimagh se mutasir structure) use karta hai aur bohat bara data handle kar sakta hai — ye aaj kal ke advance AI (jaise ChatGPT jaisay tools) ke peeche ki taqat hai.",
+        candles:[],
+        quiz:[
+          {q:"In teenon ka rishta kis tarah hai?",opts:["Bilkul alag, koi rishta nahi", "Dairon (circles) ki tarah — ML AI ka hissa, DL ML ka hissa", "DL sab se bara hai", "AI sab se chota hai"],correct:1},
+          {q:"Machine Learning ki khaasiyat kya hai?",opts:["Computer ko seedha rules diye jate hain", "Computer khud data se seekhta hai", "Computer kuch nahi karta", "Sirf calculator jaisa hai"],correct:1},
+          {q:"Deep Learning kis cheez ka istemal karta hai?",opts:["Neural Networks", "Sirf calculator", "Sirf spreadsheets", "Sirf text files"],correct:0}
+        ]
+      },
+      {
+        id:"ai-types", tag:"Bunyadi Baatein", title:"AI Ki Aqsam (Narrow, General, Super)",
+        explain:"Narrow AI (jise Weak AI bhi kehte hain) sirf ek khaas kaam ke liye banaya jata hai, jaise face recognition ya chess khelna — aaj jitna bhi AI humare ird-gird hai, wo sab Narrow AI hai. General AI (AGI) ek soch-samajh wala AI hoga jo insaan jaisi wasee zehanat rakhta ho aur har tarah ka kaam seekh sake — ye abhi tak nahi bana. Super AI ek nazariya (concept) hai jahan AI insaan se bhi zyada zehin ho jaye — ye filhaal science fiction ka hissa hai. Aaj hum jo bhi AI tools use karte hain (ChatGPT, face unlock, waghera) sab Narrow AI ki misaalain hain.",
+        candles:[],
+        quiz:[
+          {q:"Aaj jitna bhi AI humare ird-gird hai wo kis category mein aata hai?",opts:["General AI", "Narrow AI", "Super AI", "Koi bhi nahi"],correct:1},
+          {q:"General AI (AGI) abhi kaisi cheez hai?",opts:["Har jaga maujood hai", "Abhi tak nahi bani", "Sirf phones mein hai", "Sirf robots mein hai"],correct:1},
+          {q:"Super AI kis nazariye ko represent karta hai?",opts:["AI jo insaan se bhi zyada zehin ho", "Sirf ek chota calculator", "Purana computer", "Kuch nahi"],correct:0}
+        ]
+      },
+      {
+        id:"ai-ml-training", tag:"Intermediate", title:"Machine Learning Kaise Kaam Karta Hai (Training Data)",
+        explain:"Machine Learning model ko 'training' ke zariye seekhaya jata hai — is mein model ko bohat sara data (Training Data) dikhaya jata hai jis mein pehle se sahi jawab maujood hon, aur model dheere dheere pattern pehchanna seekh leta hai. Misaal: Agar hum ek model ko bilion 'billi' aur 'kutte' ki tasveerain dikhayein, saath mein bata dein kaunsi kya hai, to model waqt ke sath pehchanna seekh leta hai ke naya image billi hai ya kutta. Jitna acha aur zyada Training Data hoga, model utna behtar kaam karega — ye is liye ahem hai kyun ke ganda ya kam data se model ghalat seekh sakta hai.",
+        candles:[],
+        quiz:[
+          {q:"Training Data ka kaam kya hai?",opts:["Model ko pattern pehchanna seekhana", "Internet band karna", "Sirf storage bharna", "Computer slow karna"],correct:0},
+          {q:"Agar Training Data ganda ya kam ho to kya hoga?",opts:["Model behtar seekhega", "Model ghalat seekh sakta hai", "Koi asar nahi", "Model automatically theek ho jayega"],correct:1},
+          {q:"Model ko billi/kutta pehchanna seekhane ke liye kya dikhaya jata hai?",opts:["Bohat sari labeled tasveerein", "Sirf ek tasveer", "Sirf text", "Kuch nahi"],correct:0}
+        ]
+      },
+      {
+        id:"ai-neural-networks", tag:"Intermediate", title:"Neural Networks Ki Buniyad",
+        explain:"Neural Network AI ka wo structure hai jo insaani dimagh ke 'neurons' se mutasir hai. Isme kai 'layers' hoti hain: Input Layer (data andar aata hai), Hidden Layers (jahan asal 'sochne' ka kaam hota hai, pattern nikale jate hain), aur Output Layer (final jawab/result). Har connection ka apna 'weight' hota hai jo training ke dauran adjust hota rehta hai taake model behtar se behtar jawab de sake. Jitni zyada hidden layers hon, model utna 'deep' kehlata hai — isi liye 'Deep Learning' naam para.",
+        candles:[],
+        quiz:[
+          {q:"Neural Network kis cheez se mutasir hai?",opts:["Insaani dimagh ke neurons", "Calculator", "Camera", "TV"],correct:0},
+          {q:"Jahan asal 'sochne' ka kaam hota hai use kya kehte hain?",opts:["Input Layer", "Hidden Layers", "Output Layer", "Storage Layer"],correct:1},
+          {q:"Zyada hidden layers wale network ko kya kehte hain?",opts:["Shallow Network", "Deep Network", "Flat Network", "Small Network"],correct:1}
+        ]
+      },
+      {
+        id:"ai-nlp", tag:"Intermediate", title:"Natural Language Processing (NLP) Ka Taaruf",
+        explain:"NLP AI ka wo hissa hai jo computer ko insaani zaban (text/awaaz) samajhne aur is par react karne ki salahiyat deta hai. Misaal: jab Google Translate ek zaban se doosri mein tarjuma karta hai, ya Siri/Alexa aapki awaaz samajh kar jawab deti hai, ya ChatGPT jaisay tools aapke sawal samajh kar jawab dete hain — ye sab NLP ki misaalain hain. NLP ki khaas mushkil ye hai ke insaani zaban mein bohat abhaas (ambiguity) hota hai — ek hi lafz ke kai matlab ho sakte hain, is liye NLP models ko context samajhna aata hai taake sahi matlab nikal sakein.",
+        candles:[],
+        quiz:[
+          {q:"NLP ka poora naam kya hai?",opts:["Natural Language Processing", "National Language Program", "New Learning Process", "Network Language Program"],correct:0},
+          {q:"NLP ki misaal kaunsi hai?",opts:["Face unlock", "Google Translate", "Camera zoom", "Battery charging"],correct:1},
+          {q:"NLP mein sab se badi mushkil kya hai?",opts:["Bohat tez computer chahiye", "Insaani zaban ka abhaas (ambiguity)", "Sirf English samajhna", "Koi mushkil nahi"],correct:1}
+        ]
+      },
+      {
+        id:"ai-computer-vision", tag:"Intermediate", title:"Computer Vision Ka Taaruf",
+        explain:"Computer Vision AI ka wo hissa hai jo computer ko tasveerain aur videos 'dekhna' aur samajhna sikhata hai. Isse computer ye pehchan sakta hai ke tasveer mein kya hai (jaise chehra, gari, jaanwar), ya video mein kya ho raha hai. Misaal: Face unlock, self-driving cars ka rasta pehchanna, ya medical scans mein bimari detect karna — sab Computer Vision ki misaalain hain. Ye Neural Networks (khaas tor par CNN — Convolutional Neural Networks) ke zariye kaam karta hai jo tasveer ke chhote chhote hisso ko analyze kar ke poori tasveer samajhte hain.",
+        candles:[],
+        quiz:[
+          {q:"Computer Vision kis cheez ke saath kaam karta hai?",opts:["Sirf text", "Tasveerain aur videos", "Sirf awaaz", "Sirf numbers"],correct:1},
+          {q:"Face unlock kis technology ki misaal hai?",opts:["Computer Vision", "Sirf hardware", "Sirf battery", "Sirf wifi"],correct:0},
+          {q:"Computer Vision aksar kis type ke Neural Network se kaam karta hai?",opts:["CNN (Convolutional Neural Network)", "Calculator", "Spreadsheet", "Basic loop"],correct:0}
+        ]
+      },
+      {
+        id:"ai-generative", tag:"Advance", title:"Generative AI — LLMs Aur Image Generation",
+        explain:"Generative AI wo AI hai jo naya content 'bana' sakta hai — text, images, audio, ya code. LLMs (Large Language Models, jaise ChatGPT, Claude) bohat bara text data parh kar seekhte hain aur phir naye, insaani-andaz mein jawab likh sakte hain. Image Generation AI (jaise Midjourney, DALL-E) text description se bilkul nayi tasveerain bana sakta hai jo pehle kabhi maujood nahi thin. Ye technology content creation, coding, design, aur bohat se kaam tez aur asaan bana rahi hai — lekin isay istemal karte waqt sahi jaankari (fact-checking) aur copyright ka khayal rakhna zaroori hai.",
+        candles:[],
+        quiz:[
+          {q:"LLM ka poora naam kya hai?",opts:["Large Language Model", "Long Learning Machine", "Local Language Method", "Live Learning Model"],correct:0},
+          {q:"Generative AI kya kar sakta hai?",opts:["Naya content bana sakta hai (text, images waghera)", "Sirf purana data delete kar sakta hai", "Sirf internet band kar sakta hai", "Kuch bhi nahi kar sakta"],correct:0},
+          {q:"Generative AI istemal karte waqt kis baat ka khayal rakhna zaroori hai?",opts:["Fact-checking aur copyright", "Kuch bhi nahi", "Sirf design", "Sirf speed"],correct:0}
+        ]
+      },
+      {
+        id:"ai-prompt-engineering", tag:"Advance", title:"Prompt Engineering Kya Hai?",
+        explain:"Prompt Engineering wo hunar hai jisme hum AI tools (jaise ChatGPT) ko is tarah sawal ya hidayat dete hain ke behtareen jawab mile. Achay prompts mein ye baatein hoti hain: Clear aur specific hona (mubham na hona), context dena (background jaankari), aur agar zaroorat ho to example dena ke jawab kis tarah chahiye. Misaal: 'Mujhe kuch likh do' ek kamzor prompt hai, jab ke 'Ek 100-lafzon ka professional email likho jo client ko meeting reschedule karne ke liye ho, tone friendly ho' ek behtareen, specific prompt hai jo zyada behtar jawab dega.",
+        candles:[],
+        quiz:[
+          {q:"Prompt Engineering ka bunyadi maqsad kya hai?",opts:["AI se behtareen jawab lena, sahi tareeqe se pooch kar", "AI ko band karna", "Internet tez karna", "Password banana"],correct:0},
+          {q:"Achay prompt ki khaasiyat kya hai?",opts:["Mubham (vague) hona", "Clear, specific aur context wala hona", "Sirf ek lafz ka hona", "Kabhi context na dena"],correct:1},
+          {q:"'Mujhe kuch likh do' aisa prompt kaisa hai?",opts:["Behtareen aur specific", "Kamzor aur mubham", "Perfect", "Ideal"],correct:1}
+        ]
+      },
+      {
+        id:"ai-tools-daily", tag:"Advance", title:"Roz-marra Zindagi Mein AI Tools Ka Istemal",
+        explain:"Aaj kal AI tools kaam ko tez aur asaan banane ke liye har jaga use ho rahe hain. Text/Chat AI tools sawalon ke jawab dene, likhne mein madad, aur ideas dene ke liye use hote hain. Image Generation tools designs aur graphics banane mein madad karte hain. Coding mein AI assistants developers ko code likhne aur bugs dhoondne mein madad dete hain. Business mein AI customer support (chatbots), data analysis, aur automation ke liye use hota hai. Ye tools kaam ko replace karne ke bajaye, aksar kaam ko tez aur behtar banane ka zariya hote hain — insaan ka faisla (judgment) aur creativity abhi bhi zaroori hoti hai.",
+        candles:[],
+        quiz:[
+          {q:"AI tools aaj kal kis maqsad ke liye zyada use hote hain?",opts:["Kaam ko tez aur asaan banane ke liye", "Sirf khelne ke liye", "Sirf internet band karne ke liye", "Koi maqsad nahi"],correct:0},
+          {q:"Coding mein AI assistants kis kaam aate hain?",opts:["Code likhne aur bugs dhoondne mein madad", "Sirf photos khenchna", "Sirf gana bajana", "Kuch nahi"],correct:0},
+          {q:"AI tools ke bawajood kis cheez ki zaroorat abhi bhi hai?",opts:["Insaan ka faisla aur creativity", "Kuch bhi zaroori nahi", "Sirf internet", "Sirf battery"],correct:0}
+        ]
+      },
+      {
+        id:"ai-trading", tag:"Advance", title:"AI Ka Trading Aur Business Mein Istemal",
+        explain:"AI aaj kal trading aur business duniya mein bhi bohat use ho raha hai. Trading mein AI algorithms bara data (price history, news, patterns) tezi se analyze kar ke signals de sakte hain, ya automatic trades bhi execute kar sakte hain (Algorithmic Trading). Business mein AI customer behavior analyze kar ke behtar marketing decisions lene mein madad karta hai, aur repetitive kaam automate karta hai taake insaan zyada ahem kaamon par focus kar sake. Lekin ye yaad rakhna zaroori hai ke AI sirf ek tool hai — final faisla aur risk management ka zimma abhi bhi insaan par hi hota hai, khaas tor par trading jaisay high-risk kaamon mein.",
+        candles:[],
+        quiz:[
+          {q:"Algorithmic Trading mein AI kya karta hai?",opts:["Data analyze kar ke signals deta ya trades execute karta hai", "Sirf chai banata hai", "Internet band karta hai", "Kuch nahi karta"],correct:0},
+          {q:"Business mein AI customer behavior se kya madad deta hai?",opts:["Behtar marketing decisions lene mein", "Sirf photos khenchne mein", "Sirf gaane sunne mein", "Kuch nahi"],correct:0},
+          {q:"Trading mein final faisla aur risk management ka zimma kiska hota hai?",opts:["Sirf AI ka", "Insaan ka", "Kisi ka nahi", "Sirf broker ka"],correct:1}
+        ]
+      },
+      {
+        id:"ai-ethics-bias", tag:"Super Advance", title:"AI Ethics Aur Bias",
+        explain:"AI Ethics is baat ka khayal rakhti hai ke AI zimmedari aur insaaf (fairness) se banaya aur istemal kiya jaye. AI Bias ek bara masla hai — agar Training Data mein pehle se koi tarafdari (jaise ek khaas group ke khilaf) maujood ho, to AI model bhi wahi tarafdari 'seekh' leta hai aur ghalat/na-insafi wale faisle de sakta hai. Misaal: Agar ek hiring AI purana data use kare jisme ek khaas group ko kam mauka mila ho, to AI bhi ussi tarah ka bias dikha sakta hai. Isi liye AI banane walon ko diverse aur balanced data use karna, aur AI ke faislon ko regularly check karna zaroori hota hai.",
+        candles:[],
+        quiz:[
+          {q:"AI Bias kis wajah se aata hai?",opts:["Training Data mein pehle se maujood tarafdari se", "Sirf slow internet se", "Sirf purane computer se", "Kabhi nahi aata"],correct:0},
+          {q:"AI Ethics kis baat ka khayal rakhti hai?",opts:["AI ka zimmedari aur insaaf se istemal", "Sirf AI ko tez banana", "Sirf paisa kamana", "Kuch nahi"],correct:0},
+          {q:"AI Bias se bachne ke liye kya zaroori hai?",opts:["Diverse aur balanced Training Data use karna", "Data hi na dena", "Kuch na karna", "Sirf ek group ka data use karna"],correct:0}
+        ]
+      },
+      {
+        id:"ai-future-career", tag:"Super Advance", title:"AI Ka Mustaqbil Aur Is Field Mein Career",
+        explain:"AI field tezi se barh rahi hai aur mustaqbil mein har industry (health, education, business, entertainment) mein iska istemal aur barhega. AI mein career banane ke liye kai raaste hain: Machine Learning Engineer (models banana), Data Scientist (data se insights nikalna), Prompt Engineer (AI tools ko behtar istemal karna), aur AI Ethics Researcher (zimmedar AI banana). In sab ke liye buniyadi maths (statistics), programming (khaas tor par Python), aur mustaqil seekhte rehna zaroori hai, kyun ke ye field bohat tezi se badalti hai. Chahe koi is field mein career na bhi bana raha ho, AI tools ka basic samajh har professional ke liye ab ek zaroori hunar ban chuka hai.",
+        candles:[],
+        quiz:[
+          {q:"AI field ka mustaqbil kaisa nazar aata hai?",opts:["Khatam ho rahi hai", "Tezi se barh rahi hai, har industry mein", "Koi tabdeeli nahi", "Sirf ek sector tak mehdood hai"],correct:1},
+          {q:"AI mein career ke liye kaunsi programming language khaas tor par zaroori hai?",opts:["Python", "Sirf HTML", "Sirf CSS", "Koi bhi zaroori nahi"],correct:0},
+          {q:"AI field mein kaam karne ke liye kaunsi aadat zaroori hai?",opts:["Mustaqil seekhte rehna kyun ke field tezi se badalti hai", "Sirf ek dafa seekhna kaafi hai", "Kuch na seekhna", "Sirf memorize karna"],correct:0}
+        ]
+      }
+    ]
+  },
+  socialmedia: {
+    title: "TikTok & YouTube SEO — Growth Aur Account Recovery",
+    icon: "📱",
+    desc: "YouTube aur TikTok Algorithm, Keywords, Thumbnails, Engagement, Monetization se le kar Account Freeze/Suspend hone par recovery tak — mukammal Social Media Growth course.",
+    parts: [
+      {
+        id:"sm-intro", tag:"Bunyadi Baatein", title:"Social Media SEO Kya Hai?",
+        explain:"Social Media SEO (Search Engine Optimization) ka matlab hai apne content (videos, posts) ko is tarah banana aur likhna ke wo platform ke algorithm ko samajh aaye aur zyada se zyada logon tak khud-ba-khud pohanche — bina paisay khcarch kiye ads par. Har platform (YouTube, TikTok, Instagram) ka apna algorithm hota hai jo tay karta hai kis content ko kitne logon tak dikhana hai, lekin bunyadi usool (keywords, engagement, watch time) ek jaise hi hote hain. Misaal: Agar aapke video ka title, description aur tags sahi keywords se bharay hon, to YouTube ko samajh aata hai ke aapka video kis topic par hai, aur wo usay sahi logon tak pohanchata hai.",
+        candles:[],
+        quiz:[
+          {q:"Social Media SEO ka bunyadi maqsad kya hai?",opts:["Content ko organic tareeqe se zyada logon tak pohanchana", "Sirf paisay kharch karna", "Video delete karna", "Account band karna"],correct:0},
+          {q:"Kya har platform ka algorithm bilkul same hota hai?",opts:["Haan, bilkul same", "Nahi, har platform ka apna algorithm hai lekin bunyadi usool milte julte hain", "Koi algorithm hota hi nahi", "Sirf YouTube ka algorithm hota hai"],correct:1},
+          {q:"Sahi keywords use karne ka kya faida hai?",opts:["Platform ko content samajh aata hai aur sahi logon tak pohanchata hai", "Video delete ho jata hai", "Koi faida nahi", "Account freeze ho jata hai"],correct:0}
+        ]
+      },
+      {
+        id:"sm-yt-algorithm", tag:"Bunyadi Baatein", title:"YouTube Algorithm Ko Samajhna",
+        explain:"YouTube ka algorithm bunyadi tor par ye dekhta hai ke video kitni der tak dekha ja raha hai (Watch Time), log kitna click kar rahe hain (Click-Through Rate), aur log video ke baad kya karte hain (agla video dekhna, channel subscribe karna, waghera). YouTube ka maqsad ye hota hai ke log platform par zyada waqt guzarein, is liye jo videos logon ko rokay rakhte hain, unhe zyada promote kiya jata hai. Algorithm 'Suggested Videos', 'Search Results', aur 'Home Page' — teeno jaghon par alag alag tareeqe se kaam karta hai, lekin sab mein watch time aur engagement ahem hote hain.",
+        candles:[],
+        quiz:[
+          {q:"YouTube Algorithm sab se zyada kis cheez ko ahmiyat deta hai?",opts:["Video ki lambai", "Watch Time aur Engagement", "Sirf title ka rang", "Video ka size"],correct:1},
+          {q:"YouTube ka bunyadi maqsad kya hai?",opts:["Log kam waqt platform par guzarein", "Log zyada waqt platform par guzarein", "Videos delete karna", "Sirf ads dikhana"],correct:1},
+          {q:"Algorithm kin jaghon par kaam karta hai?",opts:["Sirf Search mein", "Suggested, Search, aur Home Page teeno mein", "Sirf Home Page mein", "Kahin nahi"],correct:1}
+        ]
+      },
+      {
+        id:"sm-yt-keywords", tag:"Intermediate", title:"YouTube Ke Liye Keyword Research (Title, Tags, Description)",
+        explain:"Keyword Research ka matlab hai ye pata karna ke log YouTube par kya search karte hain, phir apne video ke Title, Description, aur Tags mein wahi alfaaz (keywords) istemal karna. YouTube Search bar mein khud type kar ke suggestions dekhna ek asaan tareeqa hai keywords dhoondne ka. Title mein main keyword shuru mein hona chahiye aur ye click karne ke liye dilchasp bhi hona chahiye. Description mein keyword ko naturally 2-3 martaba use karna chahiye, aur pehli 1-2 lines sab se ahem hain kyun ke wo search results mein nazar aati hain.",
+        candles:[],
+        quiz:[
+          {q:"Keyword Research ka bunyadi maqsad kya hai?",opts:["Ye pata karna log kya search karte hain", "Video delete karna", "Sirf design behtar karna", "Password banana"],correct:0},
+          {q:"Title mein main keyword kahan hona chahiye?",opts:["Aakhir mein", "Shuru mein", "Kahin bhi farak nahi padta", "Title mein keyword ki zaroorat nahi"],correct:1},
+          {q:"Description ki pehli 1-2 lines kyun ahem hain?",opts:["Wo search results mein nazar aati hain", "Unka koi asar nahi", "Sirf design ke liye hain", "YouTube unhe hata deta hai"],correct:0}
+        ]
+      },
+      {
+        id:"sm-yt-thumbnails-ctr", tag:"Intermediate", title:"Thumbnails Aur Click-Through Rate (CTR)",
+        explain:"Thumbnail wo chhoti tasveer hai jo video ke sath dikhti hai — ye pehla taasur hota hai jo user ko video par click karne par majboor karta hai. Achay Thumbnails mein clear, bara text (2-4 lafz), tez rang, aur expressive chehray (agar mumkin ho) hote hain jo curiosity paida karein. Click-Through Rate (CTR) ye batata hai ke jitne logon ne video dekha, un mein se kitne percent ne click kiya — jitna zyada CTR, utna behtar YouTube video ko samajhta hai ke ye 'attractive' hai aur usay zyada dikhata hai. Lekin misleading (jhoothay) thumbnails se bachna chahiye, kyun ke agar log click kar ke fauran video chhor dein, to watch time kam ho jati hai jo algorithm ke liye bura hai.",
+        candles:[],
+        quiz:[
+          {q:"Thumbnail ka bunyadi maqsad kya hai?",opts:["User ko click karne par majboor karna", "Video ka size barhana", "Video ko delete karna", "Kuch nahi"],correct:0},
+          {q:"CTR kya batata hai?",opts:["Kitne percent logon ne video dekh kar click kiya", "Video ki lambai", "Video ka size", "Password"],correct:0},
+          {q:"Misleading thumbnail ka kya nuqsan ho sakta hai?",opts:["Watch time kam ho sakti hai (log fauran chhor dete hain)", "Hamesha faida hi hota hai", "Koi nuqsan nahi", "Video automatically viral ho jata hai"],correct:0}
+        ]
+      },
+      {
+        id:"sm-yt-retention", tag:"Intermediate", title:"Watch Time Aur Audience Retention",
+        explain:"Watch Time (poora waqt jo logon ne aapke videos dekhne mein guzara) YouTube ke liye sab se ahem factors mein se ek hai. Audience Retention ye batati hai ke video ke kitne percent hisse tak log ruke rahe — agar log video ke shuru mein hi chhor dete hain, to retention kam hoti hai jo algorithm ke liye buri nishani hai. Behtar retention ke liye: video ka shuru dilchasp hona chahiye (pehle 10-15 second sab se ahem hain), video mein 'filler' ya faltu baatein kam honi chahiye, aur video ka structure clear hona chahiye. YouTube Studio mein 'Audience Retention Graph' dikhata hai ke log kahan video chhorte hain — ye behtari ke liye bohat useful hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Watch Time kis cheez ko represent karta hai?",opts:["Video ka size", "Poora waqt jo logon ne video dekhne mein guzara", "Sirf title ki lambai", "Comments ki tadaad"],correct:1},
+          {q:"Video ke kaunse hisse ko sab se ahem samjha jata hai retention ke liye?",opts:["Aakhri 5 second", "Pehle 10-15 second", "Middle hissa", "Koi hissa ahem nahi"],correct:1},
+          {q:"Audience Retention Graph kahan dekha ja sakta hai?",opts:["YouTube Studio mein", "Sirf Instagram mein", "Kahin nahi", "Sirf Google Maps mein"],correct:0}
+        ]
+      },
+      {
+        id:"sm-tiktok-algorithm", tag:"Intermediate", title:"TikTok Algorithm Ko Samajhna",
+        explain:"TikTok ka algorithm YouTube se kaafi mukhtalif hai — ye har video ko pehle chhote se group of users ko dikhata hai (test karta hai), aur agar us group mein achi engagement (watch time, likes, shares, comments) mile to video ko bare group tak pohanchaya jata hai — is process ko baar baar dohraya jata hai. Is wajah se TikTok par channel ke followers ki tadaad utni ahem nahi jitni har individual video ki performance — chhote channels ke videos bhi viral ho sakte hain agar wo pehle group ko pasand aayein. 'For You Page' (FYP) TikTok ka bunyadi discovery mechanism hai jo is tarah kaam karta hai.",
+        candles:[],
+        quiz:[
+          {q:"TikTok algorithm har video ko pehle kis ko dikhata hai?",opts:["Sab ko ek sath", "Ek chhote group ko (test)", "Kisi ko nahi", "Sirf followers ko"],correct:1},
+          {q:"TikTok par kya zyada ahem hai — followers ya video performance?",opts:["Sirf followers", "Har individual video ki performance", "Dono ka koi asar nahi", "Sirf account ki age"],correct:1},
+          {q:"TikTok ka bunyadi discovery mechanism kya kehlata hai?",opts:["Home Page", "For You Page (FYP)", "Search Only", "Explore Tab"],correct:1}
+        ]
+      },
+      {
+        id:"sm-tiktok-hashtags", tag:"Intermediate", title:"TikTok Hashtags Aur Trends",
+        explain:"Hashtags TikTok ko batate hain aapka video kis topic ke baare mein hai, jis se wo sahi audience tak pohanchta hai. Mix karna behtar hota hai: kuch bare, popular hashtags (zyada log dekhte hain lekin competition bhi zyada), aur kuch chhotay, niche hashtags (kam competition, targeted audience). Trending Sounds aur Trends use karna bhi discoverability barhata hai, kyun ke TikTok trending content ko active tor par promote karta hai — lekin trend ko apne content ke sath naturally jorna zaroori hai, sirf trend follow karne ke liye kuch bhi na banayein.",
+        candles:[],
+        quiz:[
+          {q:"Hashtags ka bunyadi kaam kya hai?",opts:["TikTok ko batana video kis topic ke baare mein hai", "Video ko delete karna", "Video ki lambai barhana", "Kuch nahi"],correct:0},
+          {q:"Achi hashtag strategy mein kya shamil hai?",opts:["Sirf bare hashtags", "Bare aur niche hashtags ka mix", "Koi hashtag na lagana", "Sirf ek hashtag"],correct:1},
+          {q:"Trending Sounds/Trends use karne ka faida kya hai?",opts:["Discoverability barhati hai", "Video delete ho jata hai", "Koi faida nahi", "Account freeze ho jata hai"],correct:0}
+        ]
+      },
+      {
+        id:"sm-hook-editing", tag:"Advance", title:"Video Hook Aur Editing Basics",
+        explain:"'Hook' video ke pehle 1-3 second ko kehte hain jo decide karte hain ke user ruke ga ya scroll kar jayega — khaas tor par TikTok aur YouTube Shorts jaisay short-form content mein ye sab se ahem hissa hai. Achay hooks mein ek dilchasp sawal, chaunka dene wala statement, ya visually attractive shuruaat hoti hai. Editing mein tez cuts (jaldi jaldi scenes badalna), text overlays (ahem baatein screen par likhna), aur background music ka sahi istemal video ko zyada engaging banata hai. Zyada lambi, sust (slow) shuruaat log ko fauran scroll karne par majboor kar deti hai.",
+        candles:[],
+        quiz:[
+          {q:"'Hook' kis waqt ko kehte hain?",opts:["Video ka aakhri hissa", "Video ke pehle 1-3 second", "Video ka middle", "Comments section"],correct:1},
+          {q:"Short-form content (TikTok/Shorts) mein hook kyun itna ahem hai?",opts:["Kyun ke log turant scroll kar sakte hain agar dilchaspi na aaye", "Koi wajah nahi", "Sirf design ke liye", "Hook zaroori nahi"],correct:0},
+          {q:"Achi editing mein kya shamil hota hai?",opts:["Tez cuts, text overlays, sahi music", "Sirf lamba, sust content", "Koi editing na karna", "Sirf black screen"],correct:0}
+        ]
+      },
+      {
+        id:"sm-consistency", tag:"Advance", title:"Consistency Aur Posting Schedule",
+        explain:"Consistency (musalsal, niymi tor par post karna) social media growth ke liye bohat ahem hai — algorithms un channels/accounts ko pasand karte hain jo regularly naya content dete hain, kyun ke is se platform ko pata chalta hai ke ye account 'active' hai. Ek Posting Schedule banana (jaise hafta mein 3 din, fixed waqt par) audience ko bhi pata rehta hai kab naya content aayega, jis se wo wapis aane ki aadat banate hain. Quality ko quantity par qurbaan nahi karna chahiye — behtar hai kam lekin acha content banaya jaye, bajaye is ke ke jaldi jaldi ganda content dala jaye.",
+        candles:[],
+        quiz:[
+          {q:"Consistency social media growth mein kyun ahem hai?",opts:["Algorithms active accounts ko pasand karte hain", "Koi ahmiyat nahi", "Sirf design ke liye zaroori hai", "Consistency zaroori nahi"],correct:0},
+          {q:"Posting Schedule ka faida kya hai?",opts:["Audience ko pata rehta hai kab naya content aayega", "Video delete ho jata hai", "Account freeze ho jata hai", "Koi faida nahi"],correct:0},
+          {q:"Quality aur Quantity mein se kya zyada ahem hai?",opts:["Sirf Quantity", "Quality ko qurbaan nahi karna chahiye", "Dono zaroori nahi", "Sirf lamba content"],correct:1}
+        ]
+      },
+      {
+        id:"sm-engagement", tag:"Advance", title:"Engagement (Likes, Comments, Shares) Ki Ahmiyat",
+        explain:"Engagement (likes, comments, shares, saves) algorithm ko batati hai ke log content ko pasand kar rahe hain — jitni zyada engagement, utna zyada content promote hota hai. Comments ka jawab dena (khaas tor par shuru ke ghanton mein) engagement ko aur barhata hai, kyun ke platform ise 'conversation' ki tarah dekhta hai. Video mein 'Call to Action' (jaise 'Apni raye comment mein batayein') dena log ko engage karne ke liye kaha ja sakta hai. Shares aur Saves khaas tor par bohat qeemti maane jate hain kyun ke ye batate hain content itna acha hai ke log dobara dekhna ya kisi aur ke sath share karna chahte hain.",
+        candles:[],
+        quiz:[
+          {q:"Engagement mein kya kya shamil hai?",opts:["Sirf views", "Likes, comments, shares, saves", "Sirf video ki lambai", "Sirf title"],correct:1},
+          {q:"Comments ka jawab dena kyun faida-mand hai?",opts:["Engagement barhata hai, platform 'conversation' samajhta hai", "Koi faida nahi", "Video delete kar deta hai", "Views kam kar deta hai"],correct:0},
+          {q:"Shares aur Saves ko itna qeemti kyun mana jata hai?",opts:["Kyun ke ye batate hain content bohat acha hai", "Koi wajah nahi", "Ye sab se kam ahem hain", "Ye sirf design ke liye hain"],correct:0}
+        ]
+      },
+      {
+        id:"sm-analytics", tag:"Super Advance", title:"Analytics — YouTube Studio Aur TikTok Analytics Samajhna",
+        explain:"Analytics dekhna content strategy behtar banane ke liye zaroori hai. YouTube Studio mein Watch Time, CTR, Audience Retention, aur Traffic Source (log video tak kaise pohnche — Search, Suggested, waghera) dekhi ja sakti hai. TikTok Analytics mein Video Views, Average Watch Time, aur Audience ki demographics (umar, location) dekhi ja sakti hain. In numbers ko dekh kar creator samajh sakta hai kaunsa content acha chal raha hai aur kaunsa nahi, aur us hisab se agla content plan kar sakta hai — ye 'guess' karne ke bajaye data ke zariye faisla lene ka tareeqa hai.",
+        candles:[],
+        quiz:[
+          {q:"Analytics dekhne ka bunyadi faida kya hai?",opts:["Data ke zariye behtar faisle lena", "Video delete karna", "Account freeze karna", "Koi faida nahi"],correct:0},
+          {q:"YouTube Studio mein Traffic Source kya batata hai?",opts:["Log video tak kaise pohnche (Search, Suggested waghera)", "Video ka size", "Password", "Comments ki tadaad"],correct:0},
+          {q:"TikTok Analytics mein kya dekha ja sakta hai?",opts:["Video Views, Watch Time, Demographics", "Sirf password", "Sirf internet speed", "Kuch nahi"],correct:0}
+        ]
+      },
+      {
+        id:"sm-monetization", tag:"Super Advance", title:"Monetization Basics — AdSense Aur Creator Fund",
+        explain:"YouTube par monetize hone ke liye YouTube Partner Program (YPP) join karna zaroori hai, jis ke liye subscribers aur watch hours ki khaas shart poori karni parti hai — is ke baad AdSense ke zariye videos par ads se kamai hoti hai. TikTok par bhi Creator Rewards Program jaisay features hain jo qualifying creators ko views ke mutabiq kamai dete hain. In ke ilawa, Brand Deals (companies ka apna product promote karwana) aur Affiliate Marketing (kisi cheez ka link share kar ke commission lena) bhi creators ke liye kamai ke bare zariye hain. Har platform ki shartein (eligibility criteria) waqt ke sath badalti rehti hain, is liye official platform documentation check karte rehna zaroori hai.",
+        candles:[],
+        quiz:[
+          {q:"YouTube par ads se kamane ke liye kis program mein shamil hona zaroori hai?",opts:["YouTube Partner Program (YPP)", "Koi program nahi chahiye", "Sirf subscribe karna", "Sirf video banana"],correct:0},
+          {q:"Brand Deals kya hoti hain?",opts:["Companies apna product promote karwati hain", "Video delete karna", "Account freeze karna", "Koi kamai nahi"],correct:0},
+          {q:"Platform ki eligibility criteria (shartein) kaisi hoti hain?",opts:["Hamesha same rehti hain", "Waqt ke sath badalti rehti hain", "Kabhi nahi badalti", "Koi shart nahi hoti"],correct:1}
+        ]
+      },
+      {
+        id:"sm-account-freeze", tag:"Super Advance", title:"Account Suspend/Freeze Ho Jaye To Kya Karein? (Recovery Guide)",
+        explain:"Social media account (YouTube, TikTok, ya koi bhi platform) kai wajoohaat se suspend/freeze ho sakta hai: Community Guidelines ki khilaf-warzi (jaise copyright, harassment, ya galat content), spam jaisi shak-nak activity (jaise achanak bohat sari follow/unfollow, ya bought/fake followers ka istemal), ya security masla (jaise account hack hona). Agar account freeze ho jaye, ye qadam uthayein: 1) Ghabrayein nahi, pehle platform ka Help Center/Support Page check karein taake wajah samajh sakein. 2) Official 'Appeal' ya 'Report a Problem' form bharein — sirf yehi tareeqa mehfooz aur qanooni hai. 3) Agar ID verification manga jaye to sahi, asal documents dein. 4) Sabar se review period ka intezar karein (kuch din se hafte tak lag sakte hain). Zaroori Ehtiyaat: Kabhi bhi 'Guaranteed Unban' ya 'Paid Unlock Service' jaisay third-party logon/websites par bharosa na karein — ye aksar scam hote hain aur aapki maloomat (login details) chura sakte hain, jis se masla aur bhi bara ho sakta hai. Aainda bachne ke liye: hamesha Community Guidelines parh kar samajhein, fake followers/engagement na khareedein, aur apne account ki security (mazboot password, 2FA) ka khayal rakhein.",
+        candles:[],
+        quiz:[
+          {q:"Agar account suspend ho jaye to sab se pehle kya karna chahiye?",opts:["Ghabra kar third-party se rabta karna", "Platform ka Official Help Center/Appeal form check karna", "Naya account bana lena", "Kuch na karna"],correct:1},
+          {q:"'Guaranteed Unban Service' jaisay third-party offers ke baare mein kya sach hai?",opts:["Ye hamesha kaam karte hain", "Aksar scam hote hain aur data chura sakte hain", "In ka koi khatra nahi", "Ye official platform service hai"],correct:1},
+          {q:"Account ko aainda freeze hone se bachane ke liye kya zaroori hai?",opts:["Community Guidelines samajhna aur fake engagement na khareedna", "Zyada fake followers khareedna", "Password kabhi na badalna", "Guidelines ignore karna"],correct:0}
+        ]
+      }
+    ]
   }
 };
 
