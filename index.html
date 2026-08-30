@@ -592,6 +592,7 @@
    <a href="#fundamentalanalysis">📰 Fundamental Analysis</a>
     <a href="#record">Trade Record</a>
    <a href="#buffercalc">Buffer Loss Calc</a>
+    <a href="#hedgeslcalc">Hedge SL/TP (Loss Se)</a>
     <a href="#advcalc">Position Calculator</a>
     <a href="#losstracker">Loss Tracker</a>
     <a href="#accountmanager">Accounts</a>
@@ -639,6 +640,7 @@
       <a class="sd-folder" href="#fundamentalanalysis"><div class="sd-icon">📰</div><h4>Fundamental Analysis</h4><p>XAUUSD ko move karne wali high-impact news, unka schedule, aur analysis karne ka step-by-step tareeqa.</p></a>
       <a class="sd-folder" href="#record"><div class="sd-icon">📒</div><h4>Apna Trade Record (Auto-Update)</h4><p>Apni trades track karein, khud-badh (auto-update) hone wale record ke sath.</p></a>
       <a class="sd-folder" href="#buffercalc"><div class="sd-icon">⚖️</div><h4>Entry Difference & Buffer Loss Calculator</h4><p>Entry difference aur buffer loss nikalne ka tool.</p></a>
+      <a class="sd-folder" href="#hedgeslcalc"><div class="sd-icon">🧮</div><h4>Hedge SL/TP Level Calculator (Loss Se)</h4><p>Loss aur Lot Size se, dono hedge accounts ke SL/TP price levels khud nikalta hai (0.40 buffer TP ke sath).</p></a>
       <a class="sd-folder" href="#advcalc"><div class="sd-icon">🧠</div><h4>Advanced Position Calculator</h4><p>Position sizing ke liye advanced calculator.</p></a>
       <a class="sd-folder" href="#losstracker"><div class="sd-icon">📉</div><h4>Account Loss Tracker</h4><p>Account-wise losses track karne ka tool.</p></a>
       <a class="sd-folder" href="#accountmanager"><div class="sd-icon">👥</div><h4>Hedging Accounts Manager</h4><p>Apne hedging accounts manage karein.</p></a>
@@ -1240,6 +1242,63 @@
       <div class="label">Total Combined Loss</div>
       <div class="value" id="bcTotalLoss">$0.00</div>
     </div>
+  </div>
+</section>
+
+<section id="hedgeslcalc">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>Hedge SL/TP Level Calculator (Loss Se)</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
+      Ye pehle wale Buffer Calculator se ulta kaam karta hai — us mein hum price difference daal kar loss nikalte thay, is mein hum apna chaha hua Loss aur Lot Size dete hain, aur ye khud calculate karta hai ke kitne dollar (price) ka farq par Account A ka SL / Account B ka TP banega, aur Account B ka SL / Account A ka TP banega. TP hamesha buffer (0.40) ki wajah se SL se pehle hit hota hai.
+    </p>
+
+    <div class="global-inputs">
+      <div class="input-group"><label>Current Price</label><input type="number" id="hsCurrentPrice" step="0.01" value="0.00" oninput="calcHedgeSlTp()"></div>
+      <div class="input-group"><label>Lot Size</label><input type="number" id="hsLot" step="0.01" value="0.10" oninput="calcHedgeSlTp()"></div>
+      <div class="input-group"><label>Loss ($)</label><input type="number" id="hsLoss" step="0.01" value="0.00" oninput="calcHedgeSlTp()"></div>
+      <div class="input-group"><label>Buffer TP ($ Value)</label><input type="number" id="hsBuffer" step="0.01" value="0.40" oninput="calcHedgeSlTp()"></div>
+      <div class="input-group">
+        <label>Account A Direction</label>
+        <select id="hsDirection" onchange="calcHedgeSlTp()">
+          <option value="buy">BUY</option>
+          <option value="sell">SELL</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="buffer-calc-grid">
+      <div class="buffer-result-box">
+        <div class="label">Price Movement (is Loss/Lot par)</div>
+        <div class="value" id="hsDistance" style="color:#38bdf8;">0.00</div>
+      </div>
+    </div>
+
+    <div class="buffer-calc-grid">
+      <div class="buffer-result-box" style="border-color:rgba(239,68,68,0.4);">
+        <div class="label">Account A — Stop Loss</div>
+        <div class="value" id="hsASL" style="color:#ef4444;">0.00</div>
+      </div>
+      <div class="buffer-result-box" style="border-color:rgba(62,207,142,0.4);">
+        <div class="label">Account A — Take Profit (Buffered)</div>
+        <div class="value" id="hsATP" style="color:#3ecf8e;">0.00</div>
+      </div>
+    </div>
+
+    <div class="buffer-calc-grid">
+      <div class="buffer-result-box" style="border-color:rgba(239,68,68,0.4);">
+        <div class="label">Account B — Stop Loss</div>
+        <div class="value" id="hsBSL" style="color:#ef4444;">0.00</div>
+      </div>
+      <div class="buffer-result-box" style="border-color:rgba(62,207,142,0.4);">
+        <div class="label">Account B — Take Profit (Buffered)</div>
+        <div class="value" id="hsBTP" style="color:#3ecf8e;">0.00</div>
+      </div>
+    </div>
+
+    <p style="color:#64748b; font-size:11.5px; margin-top:4px;">
+      Note: Account A ka SL hamesha Account B ke TP ke raw level ke barabar hota hai, aur Account B ka SL Account A ke TP ke raw level ke barabar — lekin har TP apne matching SL se <b>0.40</b> (buffer) pehle rakha gaya hai, taake TP hamesha SL se pehle hit ho.
+    </p>
   </div>
 </section>
 
@@ -1866,6 +1925,47 @@
     document.getElementById('bcTotalLoss').textContent = `$${totalLoss.toFixed(2)}`;
   }
   calcBufferLoss();
+
+  // ===== Hedge SL/TP Level Calculator (reverse of Buffer Loss Calculator:
+  // yahan Loss aur Lot Size diye jate hain, aur ye khud price-distance nikal
+  // kar donon accounts ke SL/TP price levels bata deta hai, buffer TP ke sath) =====
+  function calcHedgeSlTp() {
+    const currentPrice = parseFloat(document.getElementById('hsCurrentPrice').value) || 0;
+    const lot = parseFloat(document.getElementById('hsLot').value) || 0;
+    const loss = parseFloat(document.getElementById('hsLoss').value) || 0;
+    const buffer = parseFloat(document.getElementById('hsBuffer').value) || 0;
+    const direction = document.getElementById('hsDirection').value;
+
+    const ounces = lot * 100;
+    const distance = ounces !== 0 ? loss / ounces : 0;
+
+    const upperLevel = currentPrice + distance; // price upar jaye to yahan pahunchega
+    const lowerLevel = currentPrice - distance; // price neeche jaye to yahan pahunchega
+
+    let aSL, aTP, bSL, bTP;
+    if (direction === 'buy') {
+      // Account A = BUY -> price girne par A ka SL, price barhne par A ka TP (buffered)
+      aSL = lowerLevel;
+      aTP = upperLevel - buffer;
+      // Account B = SELL (opposite) -> price barhne par B ka SL, price girne par B ka TP (buffered)
+      bSL = upperLevel;
+      bTP = lowerLevel + buffer;
+    } else {
+      // Account A = SELL -> price barhne par A ka SL, price girne par A ka TP (buffered)
+      aSL = upperLevel;
+      aTP = lowerLevel + buffer;
+      // Account B = BUY (opposite) -> price girne par B ka SL, price barhne par B ka TP (buffered)
+      bSL = lowerLevel;
+      bTP = upperLevel - buffer;
+    }
+
+    document.getElementById('hsDistance').textContent = distance.toFixed(2);
+    document.getElementById('hsASL').textContent = aSL.toFixed(2);
+    document.getElementById('hsATP').textContent = aTP.toFixed(2);
+    document.getElementById('hsBSL').textContent = bSL.toFixed(2);
+    document.getElementById('hsBTP').textContent = bTP.toFixed(2);
+  }
+  calcHedgeSlTp();
 
   // ===== Advanced Position Calculator =====
   const unitLabels = {
