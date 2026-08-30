@@ -1632,6 +1632,18 @@
     border-radius:20px;font-size:11px;color:var(--cc-gold);}
   .cc-folder.cc-locked{opacity:.55;cursor:not-allowed;}
   .cc-folder .cc-lock-badge{font-size:12px;color:var(--cc-red);margin-top:8px;display:block;}
+  .cc-pay-box{margin-top:12px;padding:12px;background:rgba(0,0,0,0.25);border:1px solid var(--cc-line);
+    border-radius:10px;cursor:default;}
+  .cc-pay-fee{font-size:13px;color:var(--cc-text);margin-bottom:8px;}
+  .cc-pay-fee b{color:var(--cc-gold);font-size:16px;}
+  .cc-pay-wallet-label{font-size:10.5px;color:var(--cc-mute);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+  .cc-pay-wallet-row{display:flex;gap:6px;}
+  .cc-pay-wallet-input{flex:1;min-width:0;padding:7px 8px;border-radius:8px;border:1px solid var(--cc-line);
+    background:#0a0f18;color:var(--cc-text);font-size:11px;font-family:monospace;}
+  .cc-pay-copy-btn{padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+    color:#0f172a;font-weight:700;font-size:11.5px;cursor:pointer;white-space:nowrap;}
+  .cc-pay-copy-btn:hover{opacity:.9;}
+  .cc-pay-note{font-size:10.5px;color:var(--cc-mute);margin-top:7px;}
   .cc-parts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:16px 0;}
   .cc-part-card{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;}
   .cc-part-card:hover{border-color:var(--cc-gold);}
@@ -6860,10 +6872,19 @@ function renderLinePattern(id, points, zones, notes){
 /* ==========================================================================
    COURSES DATA — SMC (Order Block ki tamam iqsam + FVG ki tamam iqsam)
    ========================================================================== */
+// Har course ki apni subscription fee aur (chaho to) apna alag TRC20 wallet
+// ho sakta hai. Filhaal sab courses isi wallet par bhejte hain (ye site ka
+// pehle se maujood, asal TRC20 address hai) — agar har course ke liye
+// mukhtalif/alag wallet chahiye to bas neeche har course ke "wallet:" field
+// mein apna doosra asal TRC20 address daal dein.
+var TRC20_WALLET = "TGGmb1fnspzWprcff12JSfjVaE7XQYcVTi";
+
 var COURSES = {
   smc: {
     title: "SMC — Smart Money Concepts",
     icon: "🏦",
+    fee: 100.00,
+    wallet: TRC20_WALLET,
     desc: "Order Block aur Fair Value Gap ki tamam iqsam, institutional entries ke sath.",
     parts: [
       {
@@ -7001,6 +7022,8 @@ var COURSES = {
   ict: {
     title: "ICT — Inner Circle Trader Concepts",
     icon: "🧠",
+    fee: 100.85,
+    wallet: TRC20_WALLET,
     desc: "Liquidity, market structure, timing aur institutional order-flow ke tamam concepts.",
     parts: [
       {
@@ -7125,6 +7148,8 @@ var COURSES = {
   pa: {
     title: "Price Action — Full Course",
     icon: "📈",
+    fee: 101.70,
+    wallet: TRC20_WALLET,
     desc: "Support/Resistance se le kar risk management tak — price action ka poora course.",
     parts: [
       {
@@ -7270,6 +7295,8 @@ var COURSES = {
   cybersecurity: {
     title: "Cyber Security — Beginner se Advance Tak",
     icon: "🛡️",
+    fee: 102.55,
+    wallet: TRC20_WALLET,
     desc: "Cyber Security ke bunyadi concepts se le kar advance level tak, asaan alfaaz mein, misaalon aur quiz ke sath. (Sirf Admin)",
     adminOnly: true,
     parts: [
@@ -7428,6 +7455,8 @@ var COURSES = {
   html: {
     title: "HTML \u2014 Beginner Se Super Advance Tak",
     icon: "\ud83d\udcc4",
+    fee: 103.40,
+    wallet: TRC20_WALLET,
     desc: "Web pages ki buniyadi zaban HTML, shuruaat se le kar advance semantic aur accessibility concepts tak, misaalon aur quiz ke sath.",
     parts: [
       {
@@ -7545,6 +7574,8 @@ var COURSES = {
   webdev: {
     title: "Web Development \u2014 Complete Overview Course",
     icon: "\ud83c\udf10",
+    fee: 104.25,
+    wallet: TRC20_WALLET,
     desc: "Frontend, backend, tools aur deployment tak \u2014 poori Web Development ka safar, beginner se super-advance level tak, asaan alfaaz mein.",
     parts: [
       {
@@ -7682,6 +7713,8 @@ var COURSES = {
   javascript: {
     title: "JavaScript \u2014 Beginner Se Super Advance Tak",
     icon: "\ud83d\udfe8",
+    fee: 105.10,
+    wallet: TRC20_WALLET,
     desc: "Variables se le kar Event Loop aur Design Patterns tak \u2014 poora JavaScript course, misaalon aur quiz ke sath, asaan zaban mein.",
     parts: [
       {
@@ -7839,6 +7872,8 @@ var COURSES = {
   css: {
     title: "CSS \u2014 Beginner Se Super Advance Tak",
     icon: "\ud83c\udfa8",
+    fee: 105.95,
+    wallet: TRC20_WALLET,
     desc: "Selectors aur box model se le kar Grid, animations aur SASS tak \u2014 poora CSS course, misaalon aur quiz ke sath.",
     parts: [
       {
@@ -7996,6 +8031,8 @@ var COURSES = {
   php: {
     title: "PHP \u2014 Beginner Se Super Advance Tak",
     icon: "\ud83d\udc18",
+    fee: 106.80,
+    wallet: TRC20_WALLET,
     desc: "Server-side programming ki buniyad se le kar OOP, database aur security tak \u2014 poora PHP course, misaalon aur quiz ke sath.",
     parts: [
       {
@@ -8143,6 +8180,8 @@ var COURSES = {
   ai: {
     title: "Artificial Intelligence — Beginner Se Super Advance Tak",
     icon: "🤖",
+    fee: 107.65,
+    wallet: TRC20_WALLET,
     desc: "AI, Machine Learning, Neural Networks se le kar Generative AI, Prompt Engineering aur AI Ethics tak — poora AI course, misaalon aur quiz ke sath.",
     parts: [
       {
@@ -8280,6 +8319,8 @@ var COURSES = {
   socialmedia: {
     title: "TikTok & YouTube SEO — Growth Aur Account Recovery",
     icon: "📱",
+    fee: 108.50,
+    wallet: TRC20_WALLET,
     desc: "YouTube aur TikTok Algorithm, Keywords, Thumbnails, Engagement, Monetization se le kar Account Freeze/Suspend hone par recovery tak — mukammal Social Media Growth course.",
     parts: [
       {
@@ -8413,7 +8454,137 @@ var COURSES = {
         ]
       }
     ]
+  },
+  videoediting: {
+    title: "Video Editing — Beginner Se Professional Tak",
+    icon: "🎬",
+    fee: 109.35,
+    wallet: TRC20_WALLET,
+    desc: "Timeline aur cuts se le kar color grading, audio mixing aur export tak — poora Video Editing course, har lesson ke sath visual diagram/example aur quiz.",
+    parts: [
+      {
+        id:"ve-intro", tag:"Bunyadi Baatein", title:"Video Editing Kya Hai?",
+        explain:"Video Editing wo hunar hai jisme raw (kachi) video clips ko kaat-chhant kar, tarteeb (order) mein laga kar, aur unme sound, text, effects mila kar ek mukammal, dekhne laayak video banaya jata hai. Editor ke 3 bunyadi kaam hote hain: sahi hisson ko chunna (selecting), unhe ek behtareen tarteeb mein lagana (sequencing), aur poori video ko polish karna (color, audio, effects). Achi editing wo hoti hai jo nazar hi na aaye — yani viewer ko cuts mehsoos na hon, sirf kahani (story) mehsoos ho. Misaal: Agar aap ne 20 minute ki raw footage shoot ki hai lekin usme se sirf 5 minute ka best content nikal kar, sahi tarteeb mein laga kar, background music ke sath ek chust (tight) video banayein — yehi video editing hai.",
+        candles:[],
+        quiz:[
+          {q:"Video Editing ka bunyadi maqsad kya hai?",opts:["Raw footage ko kaat kar aik mukammal, dekhne laayak video banana","Sirf video ko delete karna","Camera kharidna","Sirf video ki length barhana"],correct:0},
+          {q:"Achi editing kaisi mehsoos hoti hai?",opts:["Cuts bohat zyada nazar aate hain","Cuts mehsoos nahi hote, sirf kahani mehsoos hoti hai","Video hamesha slow hoti hai","Koi farak nahi padta"],correct:1},
+          {q:"Editor ke teen bunyadi kaam kaunse hain?",opts:["Selecting, Sequencing, Polishing","Sirf recording karna","Sirf upload karna","Sirf thumbnail banana"],correct:0}
+        ]
+      },
+      {
+        id:"ve-timeline", tag:"Bunyadi Baatein", title:"Timeline, Tracks Aur Clips",
+        explain:"Timeline har video editing software (Premiere Pro, CapCut, DaVinci Resolve waghera) ka dil hota hai — ye ek horizontal line hoti hai jahan aap apni clips ko waqt (time) ke hisab se tarteeb dete hain. Timeline mein alag-alag Tracks hoti hain: Video Tracks (upar wali, jisme clips, text, overlays hote hain) aur Audio Tracks (neeche wali, jisme music, voice-over, sound effects hote hain). Har chhoti video ya audio piece jo timeline par rakhi jati hai use Clip kehte hain. Zyada tracks use karne se aap layers bana sakte hain — jaise ek video ke upar text, aur uske upar logo bhi rakh sakte hain. Misaal: Ek YouTube video mein Track 1 par main camera footage, Track 2 par background music, aur Track 3 par sirf text overlays rakhi jati hain — sab ek sath sync ho kar chalti hain.",
+        candles:[],
+        quiz:[
+          {q:"Timeline kis cheez ke liye use hoti hai?",opts:["Clips ko waqt ke hisab se tarteeb dena","Sirf video export karna","Sirf photo kheenchna","Internet chalane ke liye"],correct:0},
+          {q:"Video Tracks aur Audio Tracks mein farq kya hai?",opts:["Koi farak nahi","Video Tracks mein visuals, Audio Tracks mein sound hoti hai","Dono sirf audio ke liye hote hain","Dono sirf video ke liye hote hain"],correct:1},
+          {q:"Zyada tracks use karne ka faida kya hai?",opts:["Layers (jaise text, logo) bana sakte hain","Video automatically delete ho jati hai","Koi faida nahi","Sirf file size barhta hai"],correct:0}
+        ]
+      },
+      {
+        id:"ve-cutting", tag:"Bunyadi Baatein", title:"Cutting, Trimming Aur Ripple/Roll Edit",
+        explain:"Trimming ka matlab hai ek clip ke shuru ya aakhir se ghair-zaroori hissa hata dena, bina naya cut banaye. Cutting (ya Splitting) ka matlab hai ek lambi clip ko beech se do ya zyada hisson mein tor dena, taake un hisson ko alag alag jagah rakha ja sake ya darmiyan se koi hissa nikala ja sake. Ripple Edit jab aap ek clip trim karte hain to us ke baad wali sab clips khud-ba-khud aage/peeche khisak jati hain taake koi khaali jagah (gap) na rahe. Roll Edit do clips ke darmiyan wali cut point ko move karta hai, lekin poori timeline ki total length wahi rehti hai. Misaal: Agar interview video mein beech mein 3 second ki khamoshi (silence) hai, to us hisse ko cut kar ke nikal dena aur baaki clips ko ripple edit se khud-ba-khud jorh dena — is se video tight aur smooth ban jati hai.",
+        candles:[],
+        quiz:[
+          {q:"Trimming ka matlab kya hai?",opts:["Clip ke shuru/aakhir se ghair-zaroori hissa hatana","Naya video record karna","Music add karna","Video ko delete karna"],correct:0},
+          {q:"Ripple Edit ka kya faida hai?",opts:["Baad wali clips khud khisak kar gap khatam kar deti hain","Video ka color badal deta hai","Audio mute kar deta hai","Kuch nahi karta"],correct:0},
+          {q:"Cutting (Splitting) se kya hota hai?",opts:["Ek clip ka color grade badalta hai","Ek lambi clip do ya zyada hisson mein tootti hai","Video export hoti hai","Timeline delete hoti hai"],correct:1}
+        ]
+      },
+      {
+        id:"ve-transitions", tag:"Intermediate", title:"Transitions (Cut, Dissolve, Wipe)",
+        explain:"Transition wo tareeqa hai jis se ek clip doosri clip mein badalti hai. Sab se aam transition Hard Cut hai — jahan ek clip achanak khatam ho kar doosri shuru ho jati hai, koi effect nahi hota, aur ye sab se natural lagta hai. Cross Dissolve mein ek clip dheere dheere fade ho kar doosri clip mein blend ho jati hai — ye time guzarne ya soft mood dikhane ke liye acha hai. Wipe transition mein ek clip doosri ko kisi shape/direction mein 'push' kar ke hataati hai. Zyada transitions (jaise spinning, flashy effects) use karna aksar amateur lagta hai — professional editors zyada tar Hard Cuts hi use karte hain aur sirf khaas jagah par Dissolve/Wipe lagate hain. Misaal: Ek travel vlog mein jab scene 'subah' se 'shaam' mein badalti hai, wahan Cross Dissolve lagana time ka guzarna dikhata hai, lekin normal dialogue ke beech Hard Cut hi behtar lagta hai.",
+        candles:[],
+        quiz:[
+          {q:"Sab se zyada natural aur aam transition kaunsa hai?",opts:["Hard Cut","Spinning Effect","3D Cube","Flash Zoom"],correct:0},
+          {q:"Cross Dissolve kis kaam ke liye acha hota hai?",opts:["Time guzarne ya soft mood dikhane ke liye","Video delete karne ke liye","Audio mute karne ke liye","Sirf logo dikhane ke liye"],correct:0},
+          {q:"Zyada flashy transitions use karne ka kya nateeja hota hai?",opts:["Video zyada professional lagti hai","Aksar amateur lagti hai","Video automatically viral hoti hai","Koi farak nahi padta"],correct:1}
+        ]
+      },
+      {
+        id:"ve-colorcorrection", tag:"Intermediate", title:"Color Correction Kya Hai?",
+        explain:"Color Correction wo pehla step hai jisme footage ke exposure (roshni), white balance, aur contrast ko theek kiya jata hai taake video 'normal' aur natural nazar aaye — jaise camera ne asal mein jaisa dekha tha. Ye galtiyon ko theek karne ka kaam hai: agar shot bohat dark, ya bohat zard (yellow) ya bohat neela lag raha ho, to color correction se use neutral banaya jata hai. Ye har clip par sab se pehle kiya jata hai, Color Grading (agla lesson) se pehle. Misaal: Agar ek clip indoor light mein zard (yellowish) lag rahi hai jabke doosri clip outdoor mein neeli (bluish) lag rahi hai, to color correction se dono clips ka white balance theek kar ke unhe ek jaisa aur natural banaya jata hai, taake jab dono clips ek sath chalein to farq nazar na aaye.",
+        candles:[],
+        quiz:[
+          {q:"Color Correction ka bunyadi maqsad kya hai?",opts:["Footage ko natural aur normal dikhana (galtiyan theek karna)","Video ko cinematic mood dena","Music add karna","Video delete karna"],correct:0},
+          {q:"Color Correction kab kiya jata hai?",opts:["Color Grading ke baad","Color Grading se pehle","Export ke baad","Kabhi nahi"],correct:1},
+          {q:"Agar clip zard (yellowish) lag rahi ho to kya theek kiya jata hai?",opts:["White Balance","Video ki length","Audio volume","File name"],correct:0}
+        ]
+      },
+      {
+        id:"ve-colorgrading", tag:"Intermediate", title:"Color Grading Aur Look Banana",
+        explain:"Color Grading, Color Correction ke baad ka creative step hai — is mein video ko ek khaas 'mood' ya 'look' diya jata hai (sirf theek karna nahi, balke artistic style dena). Jaise horror videos mein aksar thanda (blue/green) tone use hota hai taake darr ka ehsaas ho, romantic scenes mein garam (warm/orange) tones use hoti hain, aur cinematic videos mein aksar 'Teal and Orange' look popular hai (shadows mein neela, skin tones mein orange). LUTs (Look-Up Tables) ek shortcut hain — ye pehle se bane hue color presets hote hain jo ek click mein poori video par ek consistent look laga dete hain. Misaal: Ek wedding video ko warm, golden tone dena taake romantic aur khushnuma ehsaas aaye, jabke ek crime-documentary video ko desaturated (kam rang wali), thandi look di jati hai taake serious mood bane.",
+        candles:[],
+        quiz:[
+          {q:"Color Grading, Color Correction se kaise mukhtalif hai?",opts:["Bilkul same hai","Ye creative mood/look deta hai, sirf galtiyan theek nahi karta","Ye sirf audio ke liye hai","Ye sirf export ke liye hai"],correct:1},
+          {q:"LUT kya hota hai?",opts:["Pehle se bana hua color preset jo ek click mein look de deta hai","Ek audio effect","Ek transition ka naam","Video ka file format"],correct:0},
+          {q:"'Teal and Orange' look mein kya hota hai?",opts:["Shadows neeli, skin tones orange","Sab kuch black and white","Sirf red color","Koi color nahi"],correct:0}
+        ]
+      },
+      {
+        id:"ve-audio", tag:"Intermediate", title:"Audio Editing Aur Mixing",
+        explain:"Video mein achi audio, achi video se bhi zyada ahem hoti hai — log kharab video bardasht kar lete hain lekin kharab (crackling ya bohat halki/tez) audio se video turant chhor dete hain. Audio Levels ko theek rakhna zaroori hai: voice-over/dialogue sab se zyada clear aur upar honi chahiye, background music thora neeche (taake dialogue dab na jaye). Fade In/Fade Out se audio achanak shuru ya khatam hone ke bajaye dheere dheere aati/jati hai — is se transition smooth lagta hai. Noise Reduction ek tool hai jo background ki halki awazain (jaise fan ki awaz, hiss) kam karta hai. Misaal: Agar interview mein background music dialogue se zyada tez ho to viewer baat samajh nahi payega — is liye music ko -20dB tak neeche kar ke sirf halka sa 'ambient' feel dena chahiye, taake voice clearly sunai de.",
+        candles:[],
+        quiz:[
+          {q:"Log kharab audio par kaisa react karte hain?",opts:["Ignore kar dete hain","Video turant chhor dete hain","Zyada dekhte hain","Koi farak nahi padta"],correct:1},
+          {q:"Background music ka level dialogue ke muqable mein kaisa hona chahiye?",opts:["Dialogue se zyada tez","Dialogue se neeche","Bilkul mute","Koi farak nahi"],correct:1},
+          {q:"Noise Reduction tool kis kaam aata hai?",opts:["Background ki halki awazain (hiss/fan) kam karne ke liye","Video ka color badalne ke liye","Text add karne ke liye","Video delete karne ke liye"],correct:0}
+        ]
+      },
+      {
+        id:"ve-keyframes", tag:"Advance", title:"Keyframes Aur Animation",
+        explain:"Keyframe ek marker hota hai jo timeline par ek khaas waqt par kisi property (jaise position, size/scale, opacity, rotation) ki value set karta hai. Jab aap do ya zyada keyframes alag alag values ke sath rakhte hain, to software khud-ba-khud un ke darmiyan smooth animation bana deta hai — ise interpolation kehte hain. Is se text slide-in ho sakta hai, image zoom-in/zoom-out (Ken Burns effect) ho sakti hai, ya logo fade-in ho sakta hai. Easing (jaise Ease In/Ease Out) animation ko natural banata hai — bina easing ke movement robotic/mechanical lagti hai. Misaal: Ek logo ko video ke shuru mein chhota aur transparent (opacity 0%) rakh kar, 1 second baad bara aur poora visible (opacity 100%) karne ke liye do keyframes lagayein — beech ka smooth zoom-in aur fade-in software khud bana dega.",
+        candles:[],
+        quiz:[
+          {q:"Keyframe kya hota hai?",opts:["Ek marker jo khaas waqt par property ki value set karta hai","Ek audio file","Ek transition ka naam","Ek export setting"],correct:0},
+          {q:"Do keyframes ke darmiyan software kya karta hai?",opts:["Kuch nahi","Smooth animation (interpolation) khud bana deta hai","Video delete kar deta hai","Audio mute kar deta hai"],correct:1},
+          {q:"Easing ka kya faida hai?",opts:["Animation natural lagti hai, robotic nahi","Video ka size barhta hai","Audio tez ho jati hai","Koi faida nahi"],correct:0}
+        ]
+      },
+      {
+        id:"ve-titles", tag:"Advance", title:"Text, Titles Aur Lower Thirds",
+        explain:"Titles aur Text Overlays video mein ahem maloomat dikhane ke liye use hote hain — jaise khud ka naam, video ka title, ya important points. Lower Third ek chhota text/graphic hota hai jo screen ke neechay (lower) hisse mein dikhta hai, aksar kisi shaks ka naam aur unwaan (jaise 'Ali Khan — CEO') dikhane ke liye. Achi typography ke usool: text hamesha itna bara aur clear ho ke mobile screen par bhi asaani se parha ja sake, aur background ke sath acha contrast ho (jaise light background par dark text ya iske ulat). Text zyada der screen par na rahe na hi bohat jaldi ghayab ho — usually 2-4 second kaafi hote hain parhne ke liye. Misaal: Ek YouTube tutorial mein jab presenter apna naam bataye, screen ke neechay corner mein ek Lower Third animate ho kar aata hai jisme unka naam aur channel ka naam likha hota hai, phir 3 second baad fade out ho jata hai.",
+        candles:[],
+        quiz:[
+          {q:"Lower Third kya hota hai?",opts:["Screen ke upar wala bara text","Screen ke neechay wala chhota naam/unwaan wala graphic","Ek audio effect","Ek color filter"],correct:1},
+          {q:"Text screen par kitni der rehna chahiye taake asaani se parha ja sake?",opts:["0.5 second se kam","Usually 2-4 second","10 minute","Hamesha permanent"],correct:1},
+          {q:"Achi typography ke liye kya zaroori hai?",opts:["Text aur background ke darmiyan acha contrast","Bohat chhota text","Koi contrast na ho","Text hamesha ghuma hua ho"],correct:0}
+        ]
+      },
+      {
+        id:"ve-chromakey", tag:"Advance", title:"Green Screen / Chroma Key",
+        explain:"Chroma Key ek technique hai jisme ek single, flat color (aksar sabz/green, kabhi neela/blue) ko video se 'hata' (remove) diya jata hai taake us jagah koi doosra background ya video dikhaya ja sake. Green use hota hai kyun ke ye human skin tone se sab se door color hai, is liye software asaani se sirf background hata sakta hai bina insaan ko affect kiye. Achi chroma key ke liye zaroori hai: background achi tarah, barabar roshni ke sath lit ho (koi shadow ya wrinkle na ho), aur subject green screen se kaafi door khara ho (taake green ki halki chamak subject par na pade — ise 'spill' kehte hain). Zyada tar editing software mein ek 'Keyer' tool hota hai jahan aap green color select kar ke use transparent bana dete hain. Misaal: Ek weather reporter jo TV par map ke saamne khara nazar aata hai, asal mein ek plain green room mein khara hota hai — editing mein us green ko hata kar peeche animated weather map laga di jati hai.",
+        candles:[],
+        quiz:[
+          {q:"Green screen mein aksar konsa color use hota hai aur kyun?",opts:["Red, kyun ke tez hai","Green, kyun ke skin tone se door hai","Black, kyun ke saada hai","White, kyun ke chamakdar hai"],correct:1},
+          {q:"Achi chroma key ke liye kya zaroori hai?",opts:["Background barabar lit ho aur shadows na hon","Subject green screen se chipka ho","Room mein andhera ho","Koi lighting zaroori nahi"],correct:0},
+          {q:"'Spill' kis cheez ko kehte hain?",opts:["Green screen ki halki chamak jo subject par pad jati hai","Audio ka masla","Video export ka error","Timeline ka gap"],correct:0}
+        ]
+      },
+      {
+        id:"ve-speedramp", tag:"Advance", title:"Speed Ramping Aur Slow Motion",
+        explain:"Speed Ramping wo technique hai jisme ek hi clip ke andar speed ko dynamically badla jata hai — misaal ke tor par clip normal speed se shuru ho, phir achanak bohat slow ho jaye (dramatic moment ke liye), phir wapis normal ya fast ho jaye. Slow Motion (speed 100% se kam, jaise 50% ya 25%) kisi action ko detail mein dikhane ya emotional/dramatic ehsaas dene ke liye use hoti hai. Fast Forward/Time-lapse (speed 100% se zyada) lambay waqt ko chhota kar ke dikhane ke liye hota hai, jaise sunrise se sunset tak ka time compress karna. Smooth slow motion ke liye zaroori hai ke original footage high frame rate (jaise 60fps ya 120fps) par shoot ki gayi ho, warna slow karne par video jerky (attki hui) lagti hai. Misaal: Sports highlight video mein jab player goal karta hai, us moment ko normal speed se slow motion mein 'ramp' kiya jata hai taake dramatic impact bare — phir dobara normal speed par wapis aa jati hai.",
+        candles:[],
+        quiz:[
+          {q:"Speed Ramping kya hai?",opts:["Ek hi clip mein speed ko dynamically badalna","Sirf audio ki speed badalna","Video ko delete karna","Sirf color badalna"],correct:0},
+          {q:"Smooth slow motion ke liye footage kaisi honi chahiye?",opts:["Low frame rate","High frame rate (jaise 60fps/120fps)","Koi frame rate zaroori nahi","Sirf black and white"],correct:1},
+          {q:"Time-lapse mein speed kaisi hoti hai?",opts:["100% se kam (slow)","100% se zyada (fast)","Bilkul 0","Hamesha same"],correct:1}
+        ]
+      },
+      {
+        id:"ve-export", tag:"Super Advance", title:"Export Settings — Resolution, Bitrate Aur Codec",
+        explain:"Export (Rendering) wo aakhri step hai jisme timeline ki poori editing ko ek single, chalne wali (playable) video file mein tabdeel kiya jata hai. Resolution (jaise 1080p Full HD, ya 4K) batata hai video kitni sharp/clear hogi — zyada resolution matlab zyada file size bhi. Bitrate ye tay karta hai video ki quality kitni achi hogi (zyada bitrate = behtar quality lekin bara file size); har platform (YouTube, Instagram, TikTok) apni recommended bitrate range deta hai. Codec (jaise H.264 ya H.265) wo tareeqa hai jis se video data ko compress kiya jata hai taake file size kam ho lekin quality zyada kharab na ho — H.264 sab se zyada compatible aur aam hai. Har platform ki apni requirements hoti hain, is liye export karne se pehle target platform (YouTube, Instagram Reels, TikTok) ke recommended settings check kar lena chahiye. Misaal: YouTube ke liye aksar 1080p, H.264 codec, aur MP4 format best result deta hai — jabke Instagram Reels vertical (9:16) format mangta hai.",
+        candles:[],
+        quiz:[
+          {q:"Export (Rendering) ka kaam kya hai?",opts:["Timeline ki editing ko ek chalne wali video file mein tabdeel karna","Sirf video delete karna","Sirf audio record karna","Camera set karna"],correct:0},
+          {q:"Zyada Bitrate ka kya asar hota hai?",opts:["Behtar quality lekin bara file size","Video khud delete ho jati hai","Koi asar nahi","Sirf audio behtar hoti hai"],correct:0},
+          {q:"H.264 kya hai?",opts:["Ek popular video codec (compression tareeqa)","Ek transition ka naam","Ek audio effect","Ek color filter"],correct:0}
+        ]
+      }
+    ]
   }
+
 };
 
 /* ==========================================================================
@@ -8455,11 +8626,25 @@ function ccRenderFolders(){
     else if(ccAccess && ccAccess[key] && ccAccess[key].parts){
       c.parts.forEach(function(p){ if(ccAccess[key].parts[p.id]) unlockedPartsCount++; });
     }
+    var payBox = '';
+    if(!folderUnlocked && c.fee!=null && c.wallet){
+      var walletInputId = 'ccWallet_'+key;
+      payBox = '<div class="cc-pay-box" onclick="event.stopPropagation()">'+
+        '<div class="cc-pay-fee">Subscription Fee: <b>$'+c.fee.toFixed(2)+'</b></div>'+
+        '<div class="cc-pay-wallet-label">TRC20 Wallet Address (USDT)</div>'+
+        '<div class="cc-pay-wallet-row">'+
+          '<input id="'+walletInputId+'" type="text" readonly value="'+c.wallet+'" class="cc-pay-wallet-input">'+
+          '<button class="cc-pay-copy-btn" onclick="ccCopyCourseWallet(\''+walletInputId+'\', this)">Copy</button>'+
+        '</div>'+
+        '<div class="cc-pay-note">Sirf TRC20 (Tron) network se USDT bhejein, phir access ke liye admin se rabta karein.</div>'+
+      '</div>';
+    }
     html += '<div class="cc-folder'+(folderUnlocked?'':' cc-locked')+'" onclick="ccOpenFolder(\''+key+'\')">'+
       '<span class="cc-count">'+unlockedPartsCount+'/'+c.parts.length+'</span>'+
       '<div style="font-size:30px">'+c.icon+'</div>'+
       '<h3>'+c.title+'</h3><p>'+c.desc+'</p>'+
       (folderUnlocked ? '' : '<span class="cc-lock-badge">🔒 Admin access required</span>')+
+      payBox+
       '</div>';
   });
   document.getElementById('ccFolderView').innerHTML = html;
@@ -8485,6 +8670,21 @@ function ccOpenFolder(key){
   document.getElementById('ccDetailView').style.display='none';
   var pv = document.getElementById('ccPartsView');
   pv.style.display='block'; pv.innerHTML = html;
+}
+
+function ccCopyCourseWallet(inputId, btn){
+  var input = document.getElementById(inputId);
+  if(!input) return;
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try{
+    navigator.clipboard.writeText(input.value);
+  }catch(e){
+    try{ document.execCommand('copy'); }catch(e2){}
+  }
+  var old = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(function(){ btn.textContent = old; }, 1500);
 }
 
 function ccShowFolders(){
@@ -8788,6 +8988,7 @@ window.ccToggleFolder = ccToggleFolder;
 window.ccTogglePart = ccTogglePart;
 window.ccUploadVideo = ccUploadVideo;
 window.ccDeleteVideo = ccDeleteVideo;
+window.ccCopyCourseWallet = ccCopyCourseWallet;
 
 })();
 </script>
