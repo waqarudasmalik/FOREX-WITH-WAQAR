@@ -4403,6 +4403,7 @@
   const PA_BASE_BODY_MAX_PCT = 45;      // candle counted as "base" if body <= 45% of its range
   const PA_LEGOUT_MIN_PCT = 60;         // leg-out candle must have body >= 60% of its range (strong, small wicks)
   const PA_RR = 1;                      // risk:reward for generated signals
+  const PA_MIN_CONFIDENCE_SCORE = 80;   // sirf 80%+ confluence confidence par hi Price Action signal fire hoga
   const PA_PIVOT_LEN = 2;               // 1-minute pivot length for LTF confirmation
   const PA_FETCH_INTERVAL = { "5min": 5*60*1000, "15min": 15*60*1000, "1h": 60*60*1000, "4h": 4*60*60*1000, "1day": 24*60*60*1000 };
   const PA_TF_RANK = { "1min":1, "5min":2, "15min":3, "1h":4, "4h":5, "1day":6 };
@@ -4507,6 +4508,7 @@
 
       zones.push({
         type, direction, proximal, distal, baseCount: baseCandles.length,
+        legOutBodyPct: paBodyPct(legOut) * 100,
         formedIndex: legOutIdx, formedTime: baseCandles[0].t, legOutTime: legOut.t,
         status: 'fresh', statusDetail: '', testedTime: null, testedIndex: null
       });
@@ -4604,6 +4606,49 @@
     return { highs, lows };
   }
 
+  // ========================= SIGNAL CONFIDENCE SCORE (mirrors ICT Signals bot) =========================
+  // Confluence-based estimate — kitne factors is zone/entry ke haq mein hain. Statistically-proven
+  // "win probability" nahi, sirf yeh dikhata hai ke setup engine ke apne criteria ke mutabiq
+  // "kitna mazboot/complete" hai.
+  function paComputeConfidence(z, tf, barsToConfirm){
+    const breakdown = [];
+    let score = 0;
+
+    // 1) Zone tightness — kam base candles = zyada sharp/clean zone
+    let basePts = 5;
+    if (z.baseCount <= 1) basePts = 25;
+    else if (z.baseCount === 2) basePts = 20;
+    else if (z.baseCount === 3) basePts = 15;
+    else if (z.baseCount === 4) basePts = 10;
+    breakdown.push({ label: 'Zone Tightness (' + z.baseCount + ' base candle' + (z.baseCount>1?'s':'') + ')', points: basePts, max: 25 });
+    score += basePts;
+
+    // 2) Timeframe weight — higher TF zones carry more institutional weight
+    const tfPts = Math.round(((PA_TF_RANK[tf] || 1) / 6) * 25);
+    breakdown.push({ label: 'Zone Timeframe (' + tf + ')', points: tfPts, max: 25 });
+    score += tfPts;
+
+    // 3) Leg-out strength — bigger, cleaner leg-out body = stronger imbalance
+    const legPts = Math.round(Math.min(Math.max((z.legOutBodyPct - PA_LEGOUT_MIN_PCT) / (100 - PA_LEGOUT_MIN_PCT), 0), 1) * 25);
+    breakdown.push({ label: 'Leg-Out Strength (' + z.legOutBodyPct.toFixed(0) + '% body)', points: legPts, max: 25 });
+    score += legPts;
+
+    // 4) LTF (1-min) confirmation speed — faster 2-pivot break = more decisive move
+    let speedPts = 6;
+    if (barsToConfirm <= 10) speedPts = 25;
+    else if (barsToConfirm <= 20) speedPts = 18;
+    else if (barsToConfirm <= 40) speedPts = 12;
+    breakdown.push({ label: 'LTF Confirmation Speed (' + barsToConfirm + ' bars)', points: speedPts, max: 25 });
+    score += speedPts;
+
+    let tier = 'Low';
+    if (score >= 80) tier = 'High';
+    else if (score >= 65) tier = 'Medium-High';
+    else if (score >= 50) tier = 'Medium';
+
+    return { score: Math.round(score), tier, breakdown };
+  }
+
   async function paCheckLTFConfirmation(zoneKey, z, tf){
     if (paPendingConfirm[zoneKey]) return;
     paPendingConfirm[zoneKey] = true;
@@ -4614,14 +4659,14 @@
     let startIdx = m1.findIndex(c => (z.direction === 'demand' ? (c.l <= z.proximal && c.l >= z.distal) : (c.h >= z.proximal && c.h <= z.distal)));
     if (startIdx === -1) startIdx = 0;
 
-    let entry=null, sl=null, tp=null, confirmTime=null;
+    let entry=null, sl=null, tp=null, confirmTime=null, barsToConfirm=null;
     if (z.direction === 'demand') {
       const pl = lows.find(idx => idx >= startIdx);
       if (pl !== undefined) {
         const ph = highs.find(idx => idx > pl);
         if (ph !== undefined) {
           const breakIdx = m1.findIndex((c, idx) => idx > ph && c.c > m1[ph].h);
-          if (breakIdx !== -1) { entry = m1[breakIdx].c; sl = z.distal; tp = entry + (entry - sl) * PA_RR; confirmTime = m1[breakIdx].t; }
+          if (breakIdx !== -1) { entry = m1[breakIdx].c; sl = z.distal; tp = entry + (entry - sl) * PA_RR; confirmTime = m1[breakIdx].t; barsToConfirm = breakIdx - startIdx; }
         }
       }
     } else {
@@ -4630,17 +4675,23 @@
         const pl = lows.find(idx => idx > ph);
         if (pl !== undefined) {
           const breakIdx = m1.findIndex((c, idx) => idx > pl && c.c < m1[pl].l);
-          if (breakIdx !== -1) { entry = m1[breakIdx].c; sl = z.distal; tp = entry - (sl - entry) * PA_RR; confirmTime = m1[breakIdx].t; }
+          if (breakIdx !== -1) { entry = m1[breakIdx].c; sl = z.distal; tp = entry - (sl - entry) * PA_RR; confirmTime = m1[breakIdx].t; barsToConfirm = breakIdx - startIdx; }
         }
       }
     }
 
     if (entry !== null) {
-      paLogFeed(`✅ [${tf}] LTF confirmation mil gayi — ${z.direction === 'demand' ? 'BUY' : 'SELL'} signal fire.`);
-      await paCreateSignal({
-        direction: z.direction === 'demand' ? 'BUY' : 'SELL', entry, sl, tp,
-        type: z.type, direction2: z.direction, confirmTime, tf
-      });
+      const confidence = paComputeConfidence(z, tf, barsToConfirm);
+      if (confidence.score < PA_MIN_CONFIDENCE_SCORE) {
+        paLogFeed(`⚠️ [${tf}] ${z.direction} zone confirm hui lekin confidence sirf ${confidence.score}% (${confidence.tier}) hai — ${PA_MIN_CONFIDENCE_SCORE}%+ chahiye, is liye signal skip.`);
+      } else {
+        paLogFeed(`✅ [${tf}] LTF confirmation mil gayi — ${z.direction === 'demand' ? 'BUY' : 'SELL'} signal fire (Confidence: ${confidence.score}%, ${confidence.tier}).`);
+        await paCreateSignal({
+          direction: z.direction === 'demand' ? 'BUY' : 'SELL', entry, sl, tp,
+          type: z.type, direction2: z.direction, confirmTime, tf,
+          confidence: confidence.score, confidenceTier: confidence.tier, confidenceBreakdown: confidence.breakdown
+        });
+      }
     } else {
       paLogFeed(`⏳ [${tf}] 2-pivot confirmation abhi nahi bani — bot wait karega.`);
     }
@@ -4654,7 +4705,8 @@
     await db.collection('priceActionSignals').add({
       direction: sig.direction, entry: sig.entry, sl: sig.sl, tp: sig.tp,
       zoneType: sig.type, zoneDirection: sig.direction2, zoneTimeframe: sig.tf, status: 'open',
-      reason: `${sig.type} (${sig.direction2}) zone — ${sig.tf} timeframe, 1-min 2-pivot confirmation ke baad entry.`,
+      confidence: sig.confidence, confidenceTier: sig.confidenceTier, confidenceBreakdown: sig.confidenceBreakdown,
+      reason: `${sig.type} (${sig.direction2}) zone — ${sig.tf} timeframe, 1-min 2-pivot confirmation ke baad entry. Confidence Score: ${sig.confidence}% (${sig.confidenceTier}) — ${PA_MIN_CONFIDENCE_SCORE}%+ threshold pass.`,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }
@@ -5231,6 +5283,7 @@
   const FOS_ATR_SL_MULT = 1.5;
   const FOS_ATR_TP_MULT = 2.5;
   const FOS_MIN_ATR_PCT = 0.0003;              // bilkul dead market mein signal na de
+  const FOS_MIN_CONFIDENCE_SCORE = 80;         // sirf 80%+ confluence confidence par hi fundamental-only signal fire hoga
   const FOS_RELEASE_COOLDOWN_HOURS = 0.25;     // Rule 7/8: news ke pehle 15 min ka sharp spike/retracement ignore karo
   const FOS_DXY_TREND_LOOKBACK = 8;            // DXY 1h candles jitne peeche dekh kar trend nikalna hai
   const FOS_YIELD_TREND_LOOKBACK = 8;
@@ -5497,6 +5550,11 @@
     const rr = (Math.abs(tp-entry) / Math.abs(entry-sl));
 
     const conf = fosComputeConfidence(fb);
+    if (conf.score < FOS_MIN_CONFIDENCE_SCORE){
+      fosLogFeed(`⚠️ Fundamental bias ${adjLabel.toUpperCase()} tha lekin confidence sirf ${conf.score}% (${conf.tier}) hai — ${FOS_MIN_CONFIDENCE_SCORE}%+ chahiye, is liye signal skip.`);
+      fosSetStatus(`Live — bias ${adjLabel.toUpperCase()} tha, confidence (${conf.score}%) ${FOS_MIN_CONFIDENCE_SCORE}% se kam thi, wait kar rahe hain.`);
+      return;
+    }
     const newsLines = fb.items.map(it => `• ${it.title}: Actual ${it.actual} vs Forecast ${it.forecast}${it.previous !== undefined ? ' (Previous ' + it.previous + ')' : ''} (${it.ageHours}h pehle, weight ${it.weight}) → ${it.direction>0?'Gold-bullish':'Gold-bearish'} surprise`).join('\n');
     // Rule 9: yeh bot khud technical confluence use nahi karta, lekin ICT engine ka live technical
     // bias (agar available ho) sirf reference/advisory ke taur par reason mein dikha dete hain.
@@ -5509,7 +5567,7 @@
       newsLines,
       `DXY Trend: ${dxyTrend.toUpperCase()} (confirms) | US10Y Trend: ${yieldTrend.toUpperCase()} (confirms)`,
       `SL/TP basis: 1H ATR (${atr1h.toFixed(2)}) — SL: ${(FOS_ATR_SL_MULT)}x ATR, TP: ${(FOS_ATR_TP_MULT)}x ATR (RR ~1:${rr.toFixed(2)}).`,
-      `Confidence Score: ${conf.score}% (${conf.tier}) — news-surprise strength/count/recency par based hai.`,
+      `Confidence Score: ${conf.score}% (${conf.tier}) — news-surprise strength/count/recency par based hai. ${FOS_MIN_CONFIDENCE_SCORE}%+ threshold pass.`,
       techNote
     ].join('\n');
 
