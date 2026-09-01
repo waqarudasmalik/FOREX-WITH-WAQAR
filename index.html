@@ -606,6 +606,7 @@
    <a href="#priceaction">📦 Price Action Signals</a>
    <a href="#ictsignals">ICT Signals</a>
    <a href="#signalconfidence">🎯 Signal Confidence</a>
+   <a href="#allsignals">🧾 All Signals (Ek Jaga)</a>
    <a href="#fundamentalsignals">📰🤖 Fundamental-Only Signals</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
@@ -654,6 +655,7 @@
       <a class="sd-folder" href="#priceaction"><div class="sd-icon">📦</div><h4>Price Action Signals — Demand/Supply Bot</h4><p>RBR/DBD/DBR/RBD zones, multi-timeframe check aur LTF pivot confirmation ke sath khud-bakhud signal.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🤖</div><h4>ICT Signals — AI Gold Bot</h4><p>XAUUSD ke liye AI-generated ICT signals.</p></a>
       <a class="sd-folder" href="#signalconfidence"><div class="sd-icon">🎯</div><h4>Signal Confidence Score</h4><p>Har signal ka Entry/SL/TP sath mein "kitna percent confident/perfect" hai uska breakdown.</p></a>
+      <a class="sd-folder" href="#allsignals"><div class="sd-icon">🧾</div><h4>All Signals — Ek Hi Jagah</h4><p>Tamam bots (ICT/SMC, Price Action, Fractal ICT, Fundamental) ke signals ek jagah, strategy aur reason ke sath.</p></a>
       <a class="sd-folder" href="#fundamentalsignals"><div class="sd-icon">📰🤖</div><h4>Fundamental-Only Signals</h4><p>Sirf news/fundamental data ki bina par (koi ICT/technical nahi) mustaqil signal — Entry/SL/TP ke sath.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
@@ -4228,6 +4230,7 @@
       window.ictSignalStats = { total: docs.length, fullWin, partialWin, fullLoss, winRate, todayCount };
       window.ictAllSignals = docs;
       if (typeof window.ictConfSectionRefresh === 'function') window.ictConfSectionRefresh();
+      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
     });
   }
 
@@ -4720,6 +4723,8 @@
       document.getElementById('paTpCount').textContent = tp;
       document.getElementById('paSlCount').textContent = sl;
       document.getElementById('paWinRate').textContent = (closed ? ((tp/closed)*100).toFixed(1) : '0') + '%';
+      window.paAllSignals = docs;
+      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
     });
   }
 
@@ -4889,6 +4894,194 @@
   window.ictConfSectionRefresh = renderConfidenceSection;
   renderConfidenceSection();
   setInterval(renderConfidenceSection, 5000); // fallback poll in case Firestore listener fires before this section loads
+})();
+</script>
+
+<!-- ==========================================
+     ALL SIGNALS — TAMAM BOTS KE SIGNALS EK HI FOLDER/JAGA PAR
+     (ICT/SMC Day-Trade Bot + Price Action Demand/Supply Bot +
+      Fractal ICT Bot + Fundamental-Only Bot — sab merge kar ke
+      ek list mein, strategy aur poori reason ke sath)
+     ========================================== -->
+<style>
+  .asig-toprow{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+  .asig-stat{flex:1;min-width:120px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;text-align:center;}
+  .asig-stat .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
+  .asig-stat .value{font-size:20px;font-weight:800;margin-top:6px;color:#22c55e;}
+  .asig-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .asig-filter-btn{padding:8px 16px;border-radius:999px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.6);color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s;}
+  .asig-filter-btn:hover{border-color:#38bdf8;}
+  .asig-filter-btn.active{background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;border-color:transparent;}
+  .asig-list{display:flex;flex-direction:column;gap:14px;}
+  .asig-card{background:rgba(17,24,39,0.7);border:1px solid rgba(148,163,184,0.15);border-radius:16px;padding:18px 20px;}
+  .asig-card.buy{border-left:4px solid #22c55e;}
+  .asig-card.sell{border-left:4px solid #ef4444;}
+  .asig-card-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
+  .asig-source-badge{font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.35);text-transform:uppercase;letter-spacing:0.4px;}
+  .asig-dir-badge{font-weight:900;font-size:15px;padding:3px 14px;border-radius:999px;}
+  .asig-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .asig-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .asig-status-badge{font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:999px;text-transform:uppercase;}
+  .asig-status-badge.open{background:rgba(250,204,21,0.15);color:#facc15;}
+  .asig-status-badge.partial{background:rgba(250,204,21,0.15);color:#facc15;}
+  .asig-status-badge.tp_hit,.asig-status-badge.tp2_hit{background:rgba(34,197,94,0.15);color:#22c55e;}
+  .asig-status-badge.breakeven_exit{background:rgba(148,163,184,0.15);color:#94a3b8;}
+  .asig-status-badge.sl_hit{background:rgba(239,68,68,0.15);color:#ef4444;}
+  .asig-strategy{color:#facc15;font-weight:700;font-size:14px;margin-bottom:4px;}
+  .asig-time{color:#64748b;font-size:11.5px;}
+  .asig-levels{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .asig-level-box{flex:1;min-width:100px;background:rgba(15,23,42,0.6);border-radius:10px;padding:9px;text-align:center;}
+  .asig-level-box .l{font-size:10.5px;color:#94a3b8;}
+  .asig-level-box .v{font-size:14.5px;font-weight:800;color:#e2e8f0;}
+  .asig-confidence{display:inline-block;font-size:12px;font-weight:800;padding:3px 12px;border-radius:999px;background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.35);margin-bottom:8px;}
+  .asig-reason-toggle{cursor:pointer;color:#38bdf8;font-size:12.5px;font-weight:700;margin-top:6px;}
+  .asig-reason-body{display:none;white-space:pre-line;color:#cbd5e1;font-size:13px;line-height:1.7;background:rgba(15,23,42,0.5);border-left:3px solid #38bdf8;border-radius:8px;padding:12px 14px;margin-top:8px;}
+  .asig-reason-body.show{display:block;}
+</style>
+<section id="allsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🧾 All Signals — Tamam Bots Ke Signals Ek Hi Jagah</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px; line-height:1.6;">
+      Site ke <strong>tamam signal-generating bots</strong> — <a href="#ictsignals" style="color:#38bdf8;">ICT/SMC Day-Trade Bot</a>,
+      <a href="#priceaction" style="color:#38bdf8;">Price Action Demand/Supply Bot</a>,
+      <a href="#fractalictsignals" style="color:#38bdf8;">Fractal ICT Bot</a> aur
+      <a href="#fundamentalsignals" style="color:#38bdf8;">Fundamental-Only Bot</a> — ke tamam signals is ek
+      jagah par combine kar ke dikhaye jate hain. Har card par saaf batata hai ke ye signal <strong>kis bot/strategy
+      ki base par diya gaya</strong> aur <strong>kis reason (confluence) ki wajah se diya gaya</strong> — poori
+      reason text expand kar ke dekhi ja sakti hai.
+    </p>
+
+    <div class="asig-toprow">
+      <div class="asig-stat"><div class="label">Total Signals</div><div class="value" id="asigTotal">0</div></div>
+      <div class="asig-stat"><div class="label">Open / Active</div><div class="value" id="asigOpen">0</div></div>
+      <div class="asig-stat"><div class="label">BUY</div><div class="value" id="asigBuy">0</div></div>
+      <div class="asig-stat"><div class="label">SELL</div><div class="value" id="asigSell">0</div></div>
+    </div>
+
+    <div class="asig-filters" id="asigFilters">
+      <button class="asig-filter-btn active" data-filter="all">Sab</button>
+      <button class="asig-filter-btn" data-filter="open">Sirf Open</button>
+      <button class="asig-filter-btn" data-filter="BUY">Sirf BUY</button>
+      <button class="asig-filter-btn" data-filter="SELL">Sirf SELL</button>
+      <button class="asig-filter-btn" data-filter="ict">🤖 ICT/SMC Bot</button>
+      <button class="asig-filter-btn" data-filter="pa">📦 Price Action Bot</button>
+      <button class="asig-filter-btn" data-filter="fractal">🔮 Fractal ICT Bot</button>
+      <button class="asig-filter-btn" data-filter="fundamental">📰 Fundamental Bot</button>
+    </div>
+
+    <div class="asig-list" id="asigList">
+      <p style="color:#64748b; font-size:13px;">Signals load ho rahe hain...</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  let asigFilter = 'all';
+
+  function asigSourceMeta(key){
+    if (key === 'ict') return { label: '🤖 ICT/SMC Day-Trade Bot', defaultStrategy: 'ICT/SMC Confluence (Zone / S-R / Breakout)' };
+    if (key === 'pa') return { label: '📦 Price Action — Demand/Supply Bot', defaultStrategy: 'Price Action — Demand/Supply Zone + 2-Pivot Confirmation' };
+    if (key === 'fractal') return { label: '🔮 Fractal ICT Bot', defaultStrategy: 'Fractal ICT — Bias (4H) + Structure (1H) + Liquidity Sweep (15M)' };
+    if (key === 'fundamental') return { label: '📰 Fundamental-Only Bot', defaultStrategy: 'Fundamental Analysis — News Surprise + DXY/US10Y + Fed/COT' };
+    return { label: key, defaultStrategy: 'N/A' };
+  }
+
+  function asigNormalize(){
+    const groups = [
+      { key:'ict', docs: window.ictAllSignals || [] },
+      { key:'pa', docs: window.paAllSignals || [] },
+      { key:'fractal', docs: window.ficAllSignals || [] },
+      { key:'fundamental', docs: window.fosAllSignals || [] }
+    ];
+    let merged = [];
+    groups.forEach(g => {
+      const meta = asigSourceMeta(g.key);
+      g.docs.forEach(d => {
+        let strategy = d.strategy;
+        if (!strategy && g.key === 'pa') strategy = (d.zoneType || 'Zone') + ' (' + (d.zoneDirection || '') + ') — ' + (d.zoneTimeframe || '');
+        if (!strategy) strategy = meta.defaultStrategy;
+        const tp = d.tp !== undefined ? d.tp : (d.tp2 !== undefined ? d.tp2 : d.tp1);
+        merged.push({
+          id: g.key + '_' + d.id,
+          source: g.key, sourceLabel: meta.label,
+          direction: d.direction, entry: d.entry, sl: d.sl, tp,
+          tp1: d.tp1, tp2: d.tp2,
+          status: d.status || 'open',
+          strategy, reason: d.reason || 'Reason available nahi.',
+          confidence: d.confidence, confidenceTier: d.confidenceTier,
+          createdAt: d.createdAt
+        });
+      });
+    });
+    merged.sort((a,b) => {
+      const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+      const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+    return merged;
+  }
+
+  function asigApplyFilter(list){
+    if (asigFilter === 'all') return list;
+    if (asigFilter === 'open') return list.filter(d => d.status === 'open' || d.status === 'partial');
+    if (asigFilter === 'BUY' || asigFilter === 'SELL') return list.filter(d => d.direction === asigFilter);
+    return list.filter(d => d.source === asigFilter);
+  }
+
+  function asigCard(d){
+    const time = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleString() : 'Abhi';
+    const tpLabel = (d.tp1 !== undefined && d.tp2 !== undefined) ? `TP1: ${d.tp1.toFixed(2)} | TP2: ${d.tp2.toFixed(2)}` : (d.tp !== undefined ? d.tp.toFixed(2) : '—');
+    const confHtml = (d.confidence !== undefined) ? `<div class="asig-confidence">🎯 ${d.confidence}% Confidence (${d.confidenceTier || ''})</div>` : '';
+    const reasonId = 'asigReason_' + d.id.replace(/[^a-zA-Z0-9_]/g,'');
+    return `<div class="asig-card ${d.direction === 'BUY' ? 'buy' : 'sell'}">
+      <div class="asig-card-top">
+        <div>
+          <span class="asig-source-badge">${escapeHtml(d.sourceLabel)}</span>
+          <span class="asig-dir-badge ${d.direction}" style="margin-left:8px;">${d.direction}</span>
+          <span class="asig-status-badge ${d.status}" style="margin-left:6px;">${(d.status||'').replace('_',' ')}</span>
+        </div>
+        <span class="asig-time">${escapeHtml(time)}</span>
+      </div>
+      <div class="asig-strategy">📌 Strategy: ${escapeHtml(d.strategy)}</div>
+      ${confHtml}
+      <div class="asig-levels">
+        <div class="asig-level-box"><div class="l">Entry</div><div class="v">${d.entry !== undefined ? d.entry.toFixed(2) : '—'}</div></div>
+        <div class="asig-level-box"><div class="l">Stop Loss</div><div class="v" style="color:#fda4af;">${d.sl !== undefined ? d.sl.toFixed(2) : '—'}</div></div>
+        <div class="asig-level-box"><div class="l">Take Profit</div><div class="v" style="color:#67e8f9;">${tpLabel}</div></div>
+      </div>
+      <div class="asig-reason-toggle" onclick="document.getElementById('${reasonId}').classList.toggle('show')">💬 Reason (kis wajah se signal diya gaya) — dikhayein/chupayein</div>
+      <div class="asig-reason-body" id="${reasonId}">${escapeHtml(d.reason)}</div>
+    </div>`;
+  }
+
+  function renderAllSignalsUnified(){
+    const listEl = document.getElementById('asigList');
+    if (!listEl) return;
+    const merged = asigNormalize();
+    document.getElementById('asigTotal').textContent = merged.length;
+    document.getElementById('asigOpen').textContent = merged.filter(d => d.status === 'open' || d.status === 'partial').length;
+    document.getElementById('asigBuy').textContent = merged.filter(d => d.direction === 'BUY').length;
+    document.getElementById('asigSell').textContent = merged.filter(d => d.direction === 'SELL').length;
+
+    const filtered = asigApplyFilter(merged).slice(0, 80);
+    listEl.innerHTML = filtered.length
+      ? filtered.map(asigCard).join('')
+      : '<p style="color:#64748b; font-size:13px;">Is filter ke liye abhi koi signal nahi hai.</p>';
+  }
+
+  document.getElementById('asigFilters').addEventListener('click', function(e){
+    const btn = e.target.closest('.asig-filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('#asigFilters .asig-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    asigFilter = btn.getAttribute('data-filter');
+    renderAllSignalsUnified();
+  });
+
+  window.allSignalsRefresh = renderAllSignalsUnified;
+  renderAllSignalsUnified();
+  setInterval(renderAllSignalsUnified, 5000); // fallback poll in case listeners fire before this section loads
 })();
 </script>
 
@@ -5400,6 +5593,8 @@
       document.getElementById('fosTpCount').textContent = tpHits;
       document.getElementById('fosSlCount').textContent = slHits;
       document.getElementById('fosWinRate').textContent = winRate + '%';
+      window.fosAllSignals = docs;
+      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
     });
   }
 
@@ -5923,9 +6118,14 @@
   }
 
   function ficListen(){
-    db.collection('fractalIctSignals').orderBy('createdAt','desc').limit(1)
-      .onSnapshot(snap => { ficRenderCard(snap.empty ? null : snap.docs[0].data()); },
-                  () => { ficRenderCard(null); });
+    db.collection('fractalIctSignals').orderBy('createdAt','desc').limit(50)
+      .onSnapshot(snap => {
+        const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        ficRenderCard(docs.length ? docs[0] : null);
+        window.ficAllSignals = docs;
+        window.ficOpenSignal = docs.find(d => d.status === 'open') || null;
+        if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
+      }, () => { ficRenderCard(null); });
   }
 
   // ========================= INIT =========================
