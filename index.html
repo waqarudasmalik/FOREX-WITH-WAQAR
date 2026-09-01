@@ -8704,6 +8704,76 @@ var COURSES = {
         ]
       }
     ]
+  },
+
+  cybersecurity: {
+    title: "Cyber Security — Awareness Aur Bunyadi Hifazat",
+    icon: "🛡️",
+    fee: 110.20,
+    wallet: TRC20_WALLET,
+    desc: "Passwords, phishing, 2FA aur safe browsing se le kar social engineering aur malware tak — online hifazat ke bunyadi usool, har lesson ke sath quiz.",
+    parts: [
+      {
+        id:"cs-intro", tag:"Bunyadi Baatein", title:"Cyber Security Kya Hai?",
+        explain:"Cyber Security un tareeqon aur aadaton ka naam hai jin se hum apne accounts, devices aur data ko online hamlon (attacks) se mehfooz rakhte hain. Zyada tar hamle technical nahi hote — attacker aapke device ko hack nahi karta, balke aapko dhoka de kar khud apni maloomat (password, OTP, card details) hasil kar leta hai. Isi liye awareness (agahi) sab se bara hifazati hathiyar hai: agar aap janty hain ke khatra kaisa dikhta hai, to us mein phasnay ka imkaan bohat kam ho jata hai.",
+        candles:[],
+        quiz:[
+          {q:"Zyada tar cyber attacks ka tareeqa kya hota hai?",opts:["User ko dhoka de kar khud maloomat hasil karna","Hamesha complex hacking software","Sirf device chori karna","Sirf internet band kar dena"],correct:0},
+          {q:"Cyber Security mein sab se bara hathiyar kya hai?",opts:["Mehnga antivirus","Agahi (Awareness)","Internet band karna","Naya phone kharidna"],correct:1},
+          {q:"Cyber Security ka bunyadi maqsad kya hai?",opts:["Accounts, devices aur data ko hamlon se mehfooz rakhna","Sirf games khelna","Internet speed barhana","Sirf photos save karna"],correct:0}
+        ]
+      },
+      {
+        id:"cs-passwords", tag:"Passwords", title:"Mazboot Passwords Aur Password Managers",
+        explain:"Ek mazboot password lamba (kam az kam 12-14 characters), mukhtalif qisam ke characters (bare-chhote huruf, numbers, symbols) par mushtamil, aur andaza lagana mushkil hona chahiye — apna naam, tareekh-e-paidaish ya '123456' jaisi cheezein kabhi use na karein. Har account ke liye alag password rakhna zaroori hai, kyunke agar ek account leak ho jaye to attacker wahi password baaki accounts par bhi try karta hai (isay 'credential stuffing' kehte hain). Itne saare mushkil passwords yaad rakhna namumkin hai — is liye Password Manager (jaise Bitwarden, 1Password) istemal karna behtareen tareeqa hai: ye har account ke liye khud-b-khud mazboot password banata aur mehfooz rakhta hai, aapko sirf ek master password yaad rakhna hota hai.",
+        candles:[],
+        quiz:[
+          {q:"Mazboot password ki nishani kya hai?",opts:["Lamba, mushtamil aur andaza lagana mushkil","Sirf naam", "Sirf numbers","'123456' jaisa simple"],correct:0},
+          {q:"Credential stuffing kya hai?",opts:["Ek leaked password ko doosre accounts par try karna","Naya password banana","Password yaad rakhna","Antivirus chalana"],correct:0},
+          {q:"Password Manager ka faida kya hai?",opts:["Har account ke liye alag mazboot password khud banata aur mehfooz rakhta hai","Internet tez karta hai","Sirf photos save karta hai","Wifi password share karta hai"],correct:0}
+        ]
+      },
+      {
+        id:"cs-2fa", tag:"Authentication", title:"Two-Factor Authentication (2FA)",
+        explain:"Two-Factor Authentication (2FA) login ke waqt ek extra security layer add karta hai: sirf password (jo aap 'jante' hain) kaafi nahi, balke ek doosri cheez bhi chahiye hoti hai — jaise aapke phone par aane wala OTP code, ya ek authenticator app (Google Authenticator, Authy) ka code (jo aapke 'paas' hai). Agar attacker aapka password chura bhi le, tab bhi wo dusra factor na hone ki wajah se account mein login nahi kar sakta. Jahan mumkin ho, SMS OTP ke bajaye Authenticator App wala 2FA behtar hai kyunke SIM-swap attacks se SMS OTP chori ho sakta hai.",
+        candles:[],
+        quiz:[
+          {q:"2FA login ke waqt kya karta hai?",opts:["Ek extra security layer add karta hai (kuch jo aapke paas ho)","Password delete karta hai","Internet band karta hai","Account delete karta hai"],correct:0},
+          {q:"Agar 2FA on ho aur attacker sirf password chura le to?",opts:["Wo phir bhi login nahi kar sakta bina dusre factor ke","Wo foran login kar leta hai","Account khud delete ho jata hai","Kuch farak nahi padta"],correct:0},
+          {q:"SMS OTP ke muqable mein Authenticator App zyada mehfooz kyun hai?",opts:["SIM-swap attacks se SMS OTP chori ho sakta hai","SMS OTP kabhi kaam nahi karta","Authenticator App internet use nahi karta isliye behtar hai","Koi farak nahi"],correct:0}
+        ]
+      },
+      {
+        id:"cs-phishing", tag:"Phishing", title:"Phishing Attacks Ko Pehchanna",
+        explain:"Phishing wo dhoka hai jisme attacker khud ko kisi bharosemand cheez (bank, company, dost) ki tarah zahir kar ke email, SMS ya WhatsApp par jaali link ya message bhejta hai, taake aap apna password, OTP ya card details khud de dein. Aam nishaniyan: bohat zyada jaldi (urgency) dikhana ('Aapka account 24 ghante mein band ho jayega'), ajeeb ya mismatch email address, spelling mistakes, aur aise link jo asal website jaisi lagti hain lekin thora mukhtalif URL rakhti hain (jaise 'paypa1.com'). Kabhi bhi kisi unknown link par click kar ke apni maloomat na dein — hamesha official app ya website khud type kar ke kholein.",
+        candles:[],
+        quiz:[
+          {q:"Phishing attack mein attacker kya karta hai?",opts:["Khud ko bharosemand zahir kar ke maloomat churata hai","Directly device hack karta hai","Sirf wifi band karta hai","Sirf spam bhejta hai bina maqsad"],correct:0},
+          {q:"Phishing ki aam nishani kya hoti hai?",opts:["Bohat zyada urgency aur ajeeb link","Bilkul normal, dheemi si request","Koi link hi nahi hota","Hamesha phone call hoti hai"],correct:0},
+          {q:"Agar koi unknown link mile to kya karna chahiye?",opts:["Click kar ke apni maloomat de dein","Click na karein, official website khud type kar ke kholein","Foran password bhej dein","Link ko forward kar dein"],correct:1}
+        ]
+      },
+      {
+        id:"cs-social-eng", tag:"Social Engineering", title:"Social Engineering — Insaani Kamzori Ka Fayda",
+        explain:"Social Engineering ek aisi technique hai jisme attacker technical hacking ke bajaye insaani nafsiyat (psychology) — jaise dar, jaldi, lalach ya madad karne ki khwahish — ka fayda utha kar aapko dhoka deta hai. Misaal ke tor par, koi khud ko 'IT support' zahir kar ke phone karta hai aur kehta hai 'aapke account mein masla hai, apna OTP bata dein', ya koi 'customer care' bann kar refund ka lalach de kar card details mangta hai. Yaad rakhein: koi bhi asal bank, company ya IT support kabhi aap se password ya OTP nahi maangta. Agar koi urgency ya lalach ke sath maloomat maange, to ye sab se pehli red flag hoti hai.",
+        candles:[],
+        quiz:[
+          {q:"Social Engineering mein attacker kis cheez ka fayda uthata hai?",opts:["Insaani nafsiyat (dar, jaldi, lalach)","Sirf software bugs","Sirf hardware kharabi","Sirf internet slow hona"],correct:0},
+          {q:"Asal bank ya IT support aap se kya kabhi nahi mangta?",opts:["Password ya OTP","Naam","Email address","Shikayat"],correct:0},
+          {q:"Urgency ya lalach ke sath maloomat mangna kis cheez ki nishani hai?",opts:["Red flag / khatre ki nishani","Normal customer service","Kuch nahi","Achi service ki nishani"],correct:0}
+        ]
+      },
+      {
+        id:"cs-malware", tag:"Malware", title:"Malware Aur Ransomware Ki Bunyadi Baatein",
+        explain:"Malware ('malicious software') wo nuqsandeh software hota hai jo bina ijazat aapke device mein ghus kar data churata, nigrani karta ya nuqsan pohanchata hai — jaise virus, spyware ya trojan (jo kisi acchi app ki tarah dikh kar chupke se nuqsan pohanchata hai). Ransomware ek khaas qisam ka malware hai jo aapki files ko lock/encrypt kar deta hai aur wapis kholne ke liye paise (ransom) manga jata hai. Malware zyada tar in tareeqon se failta hai: unknown attachments kholna, jaali software/cracks download karna, ya na-mehfooz (untrusted) websites se files lena. Bachne ke tareeqe: sirf official sources se software install karein, attachments khol'ne se pehle sochein, aur apna operating system aur antivirus hamesha update rakhein.",
+        candles:[],
+        quiz:[
+          {q:"Ransomware kya karta hai?",opts:["Files ko lock kar ke paise manga jata hai","Sirf internet speed kam karta hai","Sirf battery khatam karta hai","Kuch nahi karta"],correct:0},
+          {q:"Malware zyada tar kis tareeqe se failta hai?",opts:["Unknown attachments aur jaali/cracked software se","Sirf naye phone kharidne se","Sirf WiFi password change karne se","Sirf antivirus install karne se"],correct:0},
+          {q:"Malware se bachne ka behtareen tareeqa kya hai?",opts:["Sirf official sources se software install karna aur system update rakhna","Kabhi bhi apna phone update na karna","Har jaali link par click karna","Antivirus delete kar dena"],correct:0}
+        ]
+      }
+    ]
   }
 
 };
