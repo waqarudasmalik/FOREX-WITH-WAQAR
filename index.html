@@ -604,6 +604,8 @@
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
    <a href="#fundamentalsignals">📰🤖 Fundamental-Only Signals</a>
+   <a href="#fractalictsignals">🔮 Fractal ICT Signals</a>
+   <a href="#priceactionsignals">🕯️🤖 Price Action Signals</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -649,6 +651,8 @@
       <a class="sd-folder" href="#interview"><div class="sd-icon">🎤</div><h4>Live Interview Practice</h4><p>150 practice questions ke sath interview prep.</p></a>
       <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
       <a class="sd-folder" href="#fundamentalsignals"><div class="sd-icon">📰🤖</div><h4>Fundamental-Only Signals</h4><p>Sirf news/fundamental data ki bina par (koi ICT/technical nahi) mustaqil signal — Entry/SL/TP ke sath.</p></a>
+      <a class="sd-folder" href="#fractalictsignals"><div class="sd-icon">🔮</div><h4>Fractal ICT Signals</h4><p>Bias + Structure + Liquidity (multi-timeframe True ICT) — live guide ke sath.</p></a>
+      <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -4519,6 +4523,642 @@
   }
 })();
 </script>
+
+<style>
+  .pas-wrap{display:flex;flex-direction:column;gap:20px;}
+  .pas-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .pas-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;animation:recPulse 1.2s infinite;}
+  .pas-strategy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px;}
+  .pas-strategy{background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;}
+  .pas-strategy .pas-s-title{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .pas-strategy .pas-s-val{font-size:15px;font-weight:800;margin-bottom:6px;}
+  .pas-strategy .pas-s-val.bullish{color:#22c55e;}
+  .pas-strategy .pas-s-val.bearish{color:#ef4444;}
+  .pas-strategy .pas-s-val.neutral,.pas-strategy .pas-s-val.waiting{color:#94a3b8;}
+  .pas-strategy .pas-s-desc{font-size:12px;color:#64748b;line-height:1.5;}
+  .pas-strategy .pas-s-score{font-size:11px;color:#a78bfa;margin-top:6px;font-weight:700;}
+  .pas-toprow{display:flex;gap:15px;flex-wrap:wrap;}
+  .pas-stat{flex:1;min-width:140px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:16px;text-align:center;}
+  .pas-stat .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
+  .pas-stat .value{font-size:22px;font-weight:800;margin-top:6px;}
+  .pas-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(167,139,250,0.35);border-radius:18px;padding:22px;}
+  .pas-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
+  .pas-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
+  .pas-live-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .pas-dir-badge{font-weight:900;font-size:18px;padding:4px 16px;border-radius:999px;}
+  .pas-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .pas-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .pas-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .pas-strategy-badge{font-size:12px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.35);padding:3px 12px;border-radius:999px;}
+  .pas-time{color:#64748b;font-size:12px;}
+  .pas-levels{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .pas-level-box{flex:1;min-width:110px;background:rgba(15,23,42,0.6);border-radius:12px;padding:12px;text-align:center;}
+  .pas-level-box .label{font-size:11px;color:#94a3b8;}
+  .pas-level-box .value{font-size:18px;font-weight:800;margin-top:4px;}
+  .pas-reason{background:rgba(15,23,42,0.5);border-left:3px solid #a78bfa;border-radius:8px;padding:14px 16px;color:#cbd5e1;font-size:13.5px;line-height:1.7;white-space:pre-line;}
+  .pas-feed{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .pas-feed-item{font-size:12.5px;color:#94a3b8;padding:8px 12px;background:rgba(15,23,42,0.45);border-radius:8px;border-left:2px solid rgba(148,163,184,0.3);}
+  .pas-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;gap:6px;}
+  .pas-badge-status{font-weight:800;font-size:11px;padding:3px 10px;border-radius:999px;}
+  .pas-badge-status.tp_hit{background:rgba(34,197,94,0.15);color:#22c55e;}
+  .pas-badge-status.sl_hit{background:rgba(239,68,68,0.15);color:#ef4444;}
+  .pas-badge-status.open{background:rgba(250,204,21,0.15);color:#facc15;}
+</style>
+
+<section id="priceactionsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🕯️🤖 Price Action Signals — Break &amp; Retest · Order Block · Liquidity Sweep</h3>
+    <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
+      Yeh bot XAUUSD ka live price (1H/15M/5M) khud fetch kar ke teen alag price-action setups
+      independently monitor karta hai: <b>Break &amp; Retest</b>, <b>Order Block + FVG</b>, aur
+      <b>Liquidity Sweep + Micro Structure Shift</b>. Har setup ka apna confluence-based
+      <b>"Setup Quality Score"</b> (0-100%) hota hai — signal sirf tab fire hota hai jab is score ka
+      <b>80%+</b> ho. Neeche live guide panel har strategy ka current status dikhata hai.
+    </p>
+    <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; line-height:1.6;">
+      ⚠️ <b>Zaroori clarification:</b> Yeh 80%+ number ek <b>rule-based "setup quality" score</b> hai —
+      jitne confluence factors (trend, displacement, rejection, freshness, structure-shift, session
+      timing) is waqt align hain, unka weighted total. Yeh <b>guaranteed win-rate nahi</b> hai — koi bhi
+      price-action setup 100% certain nahi hota. Neeche jo <b>"Win Rate"</b> stat dikh raha hai, wo is
+      bot ke apne, is website par <b>real logged history</b> se (TP hits ÷ closed trades) calculate hota
+      hai — jitna time guzrega, utna hi zyada meaningful hoga. Hamesha apna risk management khud follow
+      karein.
+    </p>
+
+    <div class="pas-engine-status">
+      <span class="pas-dot"></span>
+      <span id="pasEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <h4 style="color:#a78bfa; font-size:15px; margin-bottom:10px;">📖 Live Guide — Teeno Strategies Abhi Kya Keh Rahi Hain</h4>
+    <div class="pas-strategy-grid">
+      <div class="pas-strategy">
+        <div class="pas-s-title">1. Break &amp; Retest</div>
+        <div class="pas-s-val waiting" id="pasS1Val">—</div>
+        <div class="pas-s-desc" id="pasS1Desc">1H trend + 15M breakout displacement + 5M retest-rejection dhoond rahe hain...</div>
+        <div class="pas-s-score" id="pasS1Score"></div>
+      </div>
+      <div class="pas-strategy">
+        <div class="pas-s-title">2. Order Block + FVG</div>
+        <div class="pas-s-val waiting" id="pasS2Val">—</div>
+        <div class="pas-s-desc" id="pasS2Desc">Fresh 1H order block + Fair Value Gap confluence + 5M micro structure-shift dhoond rahe hain...</div>
+        <div class="pas-s-score" id="pasS2Score"></div>
+      </div>
+      <div class="pas-strategy">
+        <div class="pas-s-title">3. Liquidity Sweep + MSS</div>
+        <div class="pas-s-val waiting" id="pasS3Val">—</div>
+        <div class="pas-s-desc" id="pasS3Desc">Equal highs/lows sweep + micro structure-shift + session timing dhoond rahe hain...</div>
+        <div class="pas-s-score" id="pasS3Score"></div>
+      </div>
+    </div>
+
+    <div class="pas-toprow" style="margin-bottom:18px;">
+      <div class="pas-stat"><div class="label">Total Signals</div><div class="value" id="pasTotal" style="color:#facc15;">0</div></div>
+      <div class="pas-stat"><div class="label">TP Hits</div><div class="value" id="pasTpCount" style="color:#22c55e;">0</div></div>
+      <div class="pas-stat"><div class="label">SL Hits</div><div class="value" id="pasSlCount" style="color:#ef4444;">0</div></div>
+      <div class="pas-stat"><div class="label">Win Rate (Real, Logged)</div><div class="value" id="pasWinRate" style="color:#a78bfa;">0%</div></div>
+    </div>
+
+    <h4 style="color:#a78bfa; font-size:15px; margin-bottom:10px;">Current Signal</h4>
+    <div class="pas-live-card" id="pasLiveCard">
+      <div class="pas-live-head">
+        <span class="pas-dir-badge NONE" id="pasDirBadge">NO ACTIVE SIGNAL</span>
+        <span class="pas-time" id="pasLiveTime">—</span>
+      </div>
+      <div class="pas-levels">
+        <div class="pas-level-box"><div class="label">Strategy</div><div class="value" id="pasStrategyName" style="color:#a78bfa; font-size:14px;">—</div></div>
+        <div class="pas-level-box"><div class="label">Entry</div><div class="value" id="pasEntry" style="color:#e2e8f0;">—</div></div>
+        <div class="pas-level-box"><div class="label">Stop Loss</div><div class="value" id="pasSL" style="color:#fda4af;">—</div></div>
+        <div class="pas-level-box"><div class="label">Take Profit</div><div class="value" id="pasTP" style="color:#67e8f9;">—</div></div>
+        <div class="pas-level-box"><div class="label">Setup Score</div><div class="value" id="pasConfidence" style="color:#a78bfa;">—</div></div>
+      </div>
+      <div class="pas-reason" id="pasReason">Abhi koi active Price Action signal nahi hai. Bot teeno strategies ko monitor kar raha hai.</div>
+    </div>
+
+    <h4 style="color:#a78bfa; font-size:15px; margin:26px 0 10px;">Live Commentary</h4>
+    <div class="pas-feed" id="pasFeed">
+      <p style="color:#64748b; font-size:13px;">Feed load ho raha hai...</p>
+    </div>
+
+    <h4 style="color:#a78bfa; font-size:15px; margin:26px 0 10px;">Signal History</h4>
+    <div id="pasHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>Har strategy ke rules (is bot mein jaisay implement hain):</b>
+      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
+        <li><b>Break &amp; Retest:</b> 1H swing-based trend bias nikalti hai → 15M par us bias ki
+          direction mein ek key swing-level ka strong displacement breakout (candle body, ATR ke
+          muqable mein — real tick-volume forex mein available nahi, is liye displacement/candle-range
+          isi ka proxy hai) → phir 5M par level ke qareeb retest, saath ek rejection wick/candle. Score:
+          trend clarity + breakout displacement + retest precision + rejection strength (25 pts each).</li>
+        <li><b>Order Block + FVG:</b> 1H par last opposite-direction candle (jis ke baad impulsive move
+          aayi) — sirf <b>fresh/unmitigated</b> block count hota hai (jahan price wapas nahi aayi). Uske
+          sath 3-candle Fair Value Gap (imbalance) ho to confluence strong. Price zone mein wapas aaye to
+          5M par micro structure-shift confirm hoti hai. Score: freshness + FVG confluence + HTF trend
+          alignment + LTF confirmation (25 pts each).</li>
+        <li><b>Liquidity Sweep + MSS:</b> 15M par recent equal-highs/equal-lows (liquidity pool)
+          dhoondi jaati hai → wick se sweep, close wapas andar → phir 5M par micro Break of Structure
+          (MSS) opposite direction confirm karta hai. Session timing (London/NY overlap = zyada
+          reliable, Asian dead-zone = kam) bhi score mein shamil hai. Score: sweep depth + pool quality
+          + MSS strength + session timing (25 pts each).</li>
+        <li>Teeno strategies <b>independently</b> chalti hain — jo bhi pehle 80%+ score achieve kare,
+          wahi signal fire hota hai (uska naam "Strategy" field mein saaf likha hota hai). SL/TP struktur
+          ke logical levels se (sweep wick, order block edge, retest level) nikalte hain, na ke random.</li>
+      </ol>
+      <p style="margin-top:10px;">Yeh teeno bhi <b>rule-based technical frameworks</b> hain, guarantee
+        nahi — market conditions, spread/slippage aur news ki wajah se koi bhi setup fail ho sakta hai.
+        Hamesha apna risk management (position size, max daily loss) khud follow karein.</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // ========================= CONFIG (independent bot — apna alag Firestore collection 'priceActionSignals') =========================
+  const PAS_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
+  const PAS_SYMBOL = "XAU/USD";
+  const PAS_HTF_INTERVAL = '1h', PAS_MTF_INTERVAL = '15min', PAS_LTF_INTERVAL = '5min';
+  const PAS_SWING_STRENGTH = 2;
+  const PAS_CYCLE_MS = 5 * 60 * 1000;
+  const PAS_MONITOR_MS = 60 * 1000;
+  const PAS_MIN_SCORE = 80; // sirf 80%+ setup-quality score par hi signal fire hota hai
+  const PAS_EQUAL_TOL_ATR_MULT = 0.25; // "equal" highs/lows kitni ATR-tolerance ke andar equal maani jayengi
+  const PAS_SWEEP_RECENCY = 8;
+  const PAS_ATR_SL_BUFFER_MULT = 0.3;
+
+  let pasHtf = [], pasMtf = [], pasLtf = [];
+  let pasTimer = null, pasMonitorTimer = null;
+
+  // ========================= SHARED HELPERS =========================
+  function pasLogFeed(msg){
+    const el = document.getElementById('pasFeed');
+    if (!el) return;
+    const line = document.createElement('div');
+    line.className = 'pas-feed-item';
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.prepend(line);
+    while (el.childElementCount > 40) el.removeChild(el.lastChild);
+  }
+  function pasSetStatus(msg){
+    const el = document.getElementById('pasEngineStatusText');
+    if (el) el.textContent = msg;
+  }
+  async function pasFetchCandles(interval, outputsize){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(PAS_SYMBOL)}&interval=${interval}&outputsize=${outputsize}&apikey=${PAS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) return [];
+      return data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+    } catch(err){ return []; }
+  }
+  async function pasFetchLatestPrice(){
+    try {
+      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(PAS_SYMBOL)}&apikey=${PAS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const p = parseFloat(data.price);
+      return isNaN(p) ? null : p;
+    } catch(err){ return null; }
+  }
+  function pasAtr(candles, period){
+    if (candles.length < period + 1) return 0;
+    let trs = [];
+    for (let i = candles.length - period; i < candles.length; i++){
+      const c = candles[i], p = candles[i-1];
+      trs.push(Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close)));
+    }
+    return trs.reduce((a,b) => a+b, 0) / trs.length;
+  }
+  function pasFindSwings(candles, strength){
+    const highs = [], lows = [];
+    for (let i = strength; i < candles.length - strength; i++){
+      const c = candles[i];
+      let isHigh = true, isLow = true;
+      for (let k = 1; k <= strength; k++){
+        if (candles[i-k].high >= c.high || candles[i+k].high >= c.high) isHigh = false;
+        if (candles[i-k].low <= c.low || candles[i+k].low <= c.low) isLow = false;
+      }
+      if (isHigh) highs.push({ index:i, price:c.high, time:c.time });
+      if (isLow) lows.push({ index:i, price:c.low, time:c.time });
+    }
+    return { highs, lows };
+  }
+  function pasHtfBias(htfCandles){
+    const { highs, lows } = pasFindSwings(htfCandles, PAS_SWING_STRENGTH);
+    if (highs.length < 2 || lows.length < 2) return { bias:'neutral', reason:'1H par abhi kaafi swing points nahi bane.' };
+    const h1 = highs[highs.length-1], h0 = highs[highs.length-2];
+    const l1 = lows[lows.length-1], l0 = lows[lows.length-2];
+    if (h1.price > h0.price && l1.price > l0.price) return { bias:'bullish', reason:`1H Higher-High + Higher-Low — bullish trend.`, lastHigh:h1, lastLow:l1 };
+    if (h1.price < h0.price && l1.price < l0.price) return { bias:'bearish', reason:`1H Lower-High + Lower-Low — bearish trend.`, lastHigh:h1, lastLow:l1 };
+    return { bias:'neutral', reason:'1H swings mixed hain — trend abhi neutral/ranging.', lastHigh:h1, lastLow:l1 };
+  }
+  function pasSessionQuality(){
+    const h = new Date().getUTCHours();
+    if (h >= 13 && h < 17) return { pts: 25, label: 'London-NY Overlap (peak liquidity)' };
+    if ((h >= 8 && h < 13) || (h >= 17 && h < 21)) return { pts: 15, label: 'Single major session (London ya NY)' };
+    return { pts: 5, label: 'Asian / low-liquidity session' };
+  }
+
+  // ========================= STRATEGY 1: Break & Retest =========================
+  function pasDetectBreakRetest(htf, mtf, ltf, htfAtr, mtfAtr, ltfAtr){
+    const bias = pasHtfBias(htf);
+    if (bias.bias === 'neutral'){
+      return { ready:false, guideVal:'Neutral', guideCls:'neutral', guideDesc:bias.reason };
+    }
+    const { highs, lows } = pasFindSwings(mtf.slice(0, -1), PAS_SWING_STRENGTH);
+    const level = bias.bias === 'bullish' ? (highs.length ? highs[highs.length-1] : null) : (lows.length ? lows[lows.length-1] : null);
+    if (!level){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:`Bias ${bias.bias} hai, lekin 15M par koi clear key-level nahi mila.` };
+    }
+    // Breakout: recent MTF candles ne level ko displacement ke sath tod diya ho
+    const recent = mtf.slice(-6);
+    let breakoutCandle = null;
+    for (const c of recent){
+      const body = Math.abs(c.close - c.open);
+      const displaced = mtfAtr > 0 ? body / mtfAtr : 0;
+      if (bias.bias === 'bullish' && c.close > level.price && displaced > 0.4){ breakoutCandle = { c, displaced }; break; }
+      if (bias.bias === 'bearish' && c.close < level.price && displaced > 0.4){ breakoutCandle = { c, displaced }; break; }
+    }
+    if (!breakoutCandle){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:`Bias ${bias.bias}, key-level ${level.price.toFixed(2)} — strong displacement breakout ka wait.` };
+    }
+    // Retest: LTF par price wapas level ke qareeb aaye, phir rejection candle bane
+    const ltfRecent = ltf.slice(-10);
+    let retestCandle = null;
+    for (let i = 1; i < ltfRecent.length; i++){
+      const c = ltfRecent[i];
+      const nearLevel = Math.abs(c.low - level.price) <= ltfAtr * 0.6 || Math.abs(c.high - level.price) <= ltfAtr * 0.6;
+      if (!nearLevel) continue;
+      const wick = bias.bias === 'bullish' ? (Math.min(c.open, c.close) - c.low) : (c.high - Math.max(c.open, c.close));
+      const body = Math.abs(c.close - c.open) || 0.0001;
+      if (wick / body > 0.6 && (bias.bias === 'bullish' ? c.close > c.open : c.close < c.open)){
+        retestCandle = { c, wickRatio: wick / body };
+        break;
+      }
+    }
+    if (!retestCandle){
+      return { ready:false, guideVal:'Forming', guideCls: bias.bias, guideDesc:`Breakout ho chuka hai (${level.price.toFixed(2)}), 5M par retest + rejection candle ka wait.` };
+    }
+    const trendPts = Math.round(Math.min((Math.abs((bias.lastHigh?.price||0) - level.price)) / (htfAtr || 1) / 1.5, 1) * 25);
+    const dispPts = Math.round(Math.min(breakoutCandle.displaced / 1.2, 1) * 25);
+    const retestPrecision = 1 - Math.min(Math.abs(retestCandle.c.close - level.price) / ((ltfAtr||1) * 1.5), 1);
+    const retestPts = Math.round(retestPrecision * 25);
+    const rejPts = Math.round(Math.min(retestCandle.wickRatio / 2, 1) * 25);
+    const score = trendPts + dispPts + retestPts + rejPts;
+    const breakdown = [
+      { label:'HTF Trend Clarity', points:trendPts, max:25 },
+      { label:'Breakout Displacement (volume-proxy)', points:dispPts, max:25 },
+      { label:'Retest Precision', points:retestPts, max:25 },
+      { label:'Rejection Candle Strength', points:rejPts, max:25 }
+    ];
+    const direction = bias.bias === 'bullish' ? 'BUY' : 'SELL';
+    const entry = retestCandle.c.close;
+    const sl = direction === 'BUY' ? Math.min(retestCandle.c.low, level.price) - ltfAtr * PAS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : Math.max(retestCandle.c.high, level.price) + ltfAtr * PAS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Break & Retest (1H trend / 15M breakout / 5M retest-rejection).`,
+      `1) Trend (1H): ${bias.reason}`,
+      `2) Breakout (15M): key-level ${level.price.toFixed(2)} strong displacement ke sath toota (volume-proxy candle-range: ${breakoutCandle.displaced.toFixed(2)}x ATR).`,
+      `3) Retest (5M): price wapas ${level.price.toFixed(2)} ke qareeb aaya, rejection candle bani (wick:body = ${retestCandle.wickRatio.toFixed(2)}).`,
+      `SL: retest candle ke peeche + spread buffer. TP: 1:2 RR (structure logic).`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish',
+      guideDesc:`Setup ready — score ${score}%.`, score, breakdown, direction, entry, sl, tp, reason,
+      strategy:'Break & Retest' };
+  }
+
+  // ========================= STRATEGY 2: Order Block + FVG =========================
+  function pasDetectOrderBlock(htf, ltf, htfAtr, ltfAtr){
+    const bias = pasHtfBias(htf);
+    if (bias.bias === 'neutral'){
+      return { ready:false, guideVal:'Neutral', guideCls:'neutral', guideDesc:bias.reason };
+    }
+    // 1H par last opposite-direction candle dhoondo jis ke baad impulsive move aayi (order block candidate)
+    let obIdx = -1;
+    for (let i = htf.length - 3; i >= Math.max(1, htf.length - 30); i--){
+      const c = htf[i], next1 = htf[i+1], next2 = htf[i+2];
+      const isOpposite = bias.bias === 'bullish' ? c.close < c.open : c.close > c.open;
+      const impulsive = bias.bias === 'bullish'
+        ? (next1.close > c.high || next2.close > c.high)
+        : (next1.close < c.low || next2.close < c.low);
+      if (isOpposite && impulsive){ obIdx = i; break; }
+    }
+    if (obIdx === -1){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:`Bias ${bias.bias}, lekin koi clear order-block candle nahi mili.` };
+    }
+    const obCandle = htf[obIdx];
+    const obHigh = Math.max(obCandle.open, obCandle.close), obLow = Math.min(obCandle.open, obCandle.close);
+    // Freshness: obIdx ke baad, koi HTF candle wapas is zone ke andar close hui ho to "mitigated" (fresh nahi)
+    let mitigated = false;
+    for (let i = obIdx + 1; i < htf.length - 1; i++){
+      if (htf[i].close <= obHigh && htf[i].close >= obLow){ mitigated = true; break; }
+    }
+    // FVG: obIdx, obIdx+1, obIdx+2 ke 3-candle imbalance
+    let fvg = null;
+    if (obIdx + 2 < htf.length){
+      const c1 = htf[obIdx], c3 = htf[obIdx+2];
+      if (bias.bias === 'bullish' && c1.high < c3.low) fvg = { top:c3.low, bottom:c1.high };
+      if (bias.bias === 'bearish' && c1.low > c3.high) fvg = { top:c1.low, bottom:c3.high };
+    }
+    if (mitigated){
+      return { ready:false, guideVal:'Mitigated', guideCls:'waiting', guideDesc:`Order block mila (${obLow.toFixed(2)}-${obHigh.toFixed(2)}) lekin already mitigated hai — fresh block ka wait.` };
+    }
+    const lastPrice = ltf[ltf.length-1].close;
+    const inZone = lastPrice <= obHigh + ltfAtr*0.2 && lastPrice >= obLow - ltfAtr*0.2;
+    if (!inZone){
+      return { ready:false, guideVal:'Forming', guideCls:bias.bias, guideDesc:`Fresh order-block zone ${obLow.toFixed(2)}-${obHigh.toFixed(2)} mila, price return ka wait.` };
+    }
+    // LTF micro structure-shift confirmation
+    const ltfRecent = ltf.slice(-8);
+    const { highs, lows } = pasFindSwings(ltfRecent, 1);
+    let mss = false, mssRef = null;
+    if (bias.bias === 'bullish' && highs.length){
+      mssRef = highs[highs.length-1];
+      mss = ltfRecent[ltfRecent.length-1].close > mssRef.price;
+    } else if (bias.bias === 'bearish' && lows.length){
+      mssRef = lows[lows.length-1];
+      mss = ltfRecent[ltfRecent.length-1].close < mssRef.price;
+    }
+    if (!mss){
+      return { ready:false, guideVal:'In Zone', guideCls:bias.bias, guideDesc:`Price order-block zone mein hai, 5M micro structure-shift confirmation ka wait.` };
+    }
+    const freshPts = 25; // already checked unmitigated above
+    const fvgPts = fvg ? Math.round(Math.min(Math.abs(fvg.top - fvg.bottom) / (htfAtr||1) / 0.5, 1) * 25) : 5;
+    const trendPts = 20; // bias already confirmed direction
+    const mssPts = 25;
+    const score = freshPts + fvgPts + trendPts + mssPts;
+    const breakdown = [
+      { label:'Order Block Freshness (Unmitigated)', points:freshPts, max:25 },
+      { label:'FVG Confluence', points:fvgPts, max:25 },
+      { label:'HTF Trend Alignment', points:trendPts, max:25 },
+      { label:'LTF Micro Structure-Shift', points:mssPts, max:25 }
+    ];
+    const direction = bias.bias === 'bullish' ? 'BUY' : 'SELL';
+    const entry = lastPrice;
+    const sl = direction === 'BUY' ? obLow - ltfAtr * PAS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : obHigh + ltfAtr * PAS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Order Block + FVG (1H order block / 1H FVG / 5M micro structure-shift).`,
+      `1) Order Block (1H): fresh/unmitigated zone ${obLow.toFixed(2)}-${obHigh.toFixed(2)}, bias ${bias.bias} ke direction mein.`,
+      `2) FVG: ${fvg ? 'confluence mili (' + fvg.bottom.toFixed(2) + '-' + fvg.top.toFixed(2) + ').' : 'clear FVG nahi mila, sirf order block par based.'}`,
+      `3) LTF (5M): price zone mein return hui, micro structure-shift confirm hui.`,
+      `SL: order-block edge ke peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish',
+      guideDesc:`Setup ready — score ${score}%.`, score, breakdown, direction, entry, sl, tp, reason,
+      strategy:'Order Block + FVG' };
+  }
+
+  // ========================= STRATEGY 3: Liquidity Sweep + MSS =========================
+  function pasDetectLiquiditySweep(mtf, ltf, mtfAtr, ltfAtr){
+    const recent = mtf.slice(-30);
+    const { highs, lows } = pasFindSwings(recent, PAS_SWING_STRENGTH);
+    const tol = mtfAtr * PAS_EQUAL_TOL_ATR_MULT;
+    function findEqualPool(points){
+      for (let i = points.length - 1; i > 0; i--){
+        for (let j = i - 1; j >= 0; j--){
+          if (Math.abs(points[i].price - points[j].price) <= tol) return { level:(points[i].price+points[j].price)/2, idx:points[i].index };
+        }
+      }
+      return null;
+    }
+    const eqHighPool = findEqualPool(highs);
+    const eqLowPool = findEqualPool(lows);
+    const session = pasSessionQuality();
+    if (!eqHighPool && !eqLowPool){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'15M par abhi koi clear equal-highs/equal-lows liquidity pool nahi bana.' };
+    }
+    // Check sweep on either pool (whichever most recent)
+    let candidatePool = null, sweepDir = null;
+    [{pool:eqLowPool, dir:'bullish'}, {pool:eqHighPool, dir:'bearish'}].forEach(({pool,dir}) => {
+      if (!pool) return;
+      const startIdx = Math.max(pool.idx + 1, recent.length - PAS_SWEEP_RECENCY);
+      for (let i = startIdx; i < recent.length; i++){
+        const c = recent[i];
+        if (dir === 'bullish' && c.low < pool.level && c.close > pool.level){ candidatePool = { ...pool, wick:c.low }; sweepDir = dir; }
+        if (dir === 'bearish' && c.high > pool.level && c.close < pool.level){ candidatePool = { ...pool, wick:c.high }; sweepDir = dir; }
+      }
+    });
+    if (!candidatePool){
+      return { ready:false, guideVal:'Pool Found', guideCls:'waiting', guideDesc:'Equal highs/lows pool mila hai, sweep ka wait ho raha hai.' };
+    }
+    // LTF micro BOS confirmation
+    const ltfRecent = ltf.slice(-8);
+    const swings = pasFindSwings(ltfRecent, 1);
+    let mss = false, mssRef = null;
+    if (sweepDir === 'bullish' && swings.highs.length){
+      mssRef = swings.highs[swings.highs.length-1];
+      mss = ltfRecent[ltfRecent.length-1].close > mssRef.price;
+    } else if (sweepDir === 'bearish' && swings.lows.length){
+      mssRef = swings.lows[swings.lows.length-1];
+      mss = ltfRecent[ltfRecent.length-1].close < mssRef.price;
+    }
+    if (!mss){
+      return { ready:false, guideVal:'Swept', guideCls: sweepDir==='bullish'?'bullish':'bearish', guideDesc:`Liquidity sweep ho chuki hai (${candidatePool.level.toFixed(2)}), 5M micro-BOS confirmation ka wait.` };
+    }
+    const sweepDepth = sweepDir === 'bullish' ? (candidatePool.level - candidatePool.wick) : (candidatePool.wick - candidatePool.level);
+    const sweepPts = Math.round(Math.min(Math.max(sweepDepth,0) / ((ltfAtr||1) * 0.8), 1) * 25);
+    const poolPts = 25; // equal-level tolerance already enforced above
+    const mssPts = 25;
+    const sessionPts = session.pts;
+    const score = sweepPts + poolPts + mssPts + sessionPts;
+    const breakdown = [
+      { label:'Sweep Depth', points:sweepPts, max:25 },
+      { label:'Equal-Level Pool Quality', points:poolPts, max:25 },
+      { label:'Micro Structure-Shift (MSS)', points:mssPts, max:25 },
+      { label:'Session Timing', points:sessionPts, max:25 }
+    ];
+    const direction = sweepDir === 'bullish' ? 'BUY' : 'SELL';
+    const entry = ltfRecent[ltfRecent.length-1].close;
+    const sl = direction === 'BUY' ? candidatePool.wick - (ltfAtr||0) * PAS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : candidatePool.wick + (ltfAtr||0) * PAS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Liquidity Sweep + MSS (15M equal-levels / 15M sweep / 5M micro-BOS).`,
+      `1) Liquidity Pool (15M): equal ${direction==='BUY'?'lows':'highs'} ~${candidatePool.level.toFixed(2)} identify hui.`,
+      `2) Sweep: wick ${candidatePool.wick.toFixed(2)} tak gayi, phir close wapas andar — stop-hunt confirm.`,
+      `3) MSS (5M): micro structure-shift ${direction} direction mein confirm hui.`,
+      `4) Session: ${session.label} (timing score ${sessionPts}/25).`,
+      `SL: sweep wick ke thora peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish',
+      guideDesc:`Setup ready — score ${score}%.`, score, breakdown, direction, entry, sl, tp, reason,
+      strategy:'Liquidity Sweep + MSS' };
+  }
+
+  // ========================= GUIDE UI =========================
+  function pasSetGuideCard(prefix, res){
+    const val = document.getElementById(prefix + 'Val');
+    const desc = document.getElementById(prefix + 'Desc');
+    const scoreEl = document.getElementById(prefix + 'Score');
+    if (val){ val.textContent = res.guideVal; val.className = 'pas-s-val ' + res.guideCls; }
+    if (desc) desc.textContent = res.guideDesc;
+    if (scoreEl) scoreEl.textContent = res.score !== undefined ? `Score: ${res.score}%` : '';
+  }
+
+  // ========================= MAIN CYCLE =========================
+  async function pasRunCycle(){
+    const openSnap = await db.collection('priceActionSignals').where('status','in',['open']).limit(1).get();
+    if (!openSnap.empty){
+      await pasMonitor(openSnap.docs[0]);
+      pasSetStatus('Live — ek Price Action signal already open hai, monitor ho raha hai.');
+      return;
+    }
+
+    const [htf, mtf, ltf] = await Promise.all([
+      pasFetchCandles(PAS_HTF_INTERVAL, 60), pasFetchCandles(PAS_MTF_INTERVAL, 100), pasFetchCandles(PAS_LTF_INTERVAL, 100)
+    ]);
+    pasHtf = htf; pasMtf = mtf; pasLtf = ltf;
+    if (htf.length < 15 || mtf.length < 15 || ltf.length < 15){ pasSetStatus('Price history jama ho rahi hai...'); return; }
+
+    const htfAtr = pasAtr(htf, 14), mtfAtr = pasAtr(mtf, 14), ltfAtr = pasAtr(ltf, 14);
+
+    const r1 = pasDetectBreakRetest(htf, mtf, ltf, htfAtr, mtfAtr, ltfAtr);
+    const r2 = pasDetectOrderBlock(htf, ltf, htfAtr, ltfAtr);
+    const r3 = pasDetectLiquiditySweep(mtf, ltf, mtfAtr, ltfAtr);
+    pasSetGuideCard('pasS1', r1);
+    pasSetGuideCard('pasS2', r2);
+    pasSetGuideCard('pasS3', r3);
+
+    const candidates = [r1, r2, r3].filter(r => r.ready && r.score >= PAS_MIN_SCORE);
+    if (!candidates.length){
+      pasSetStatus('Live — teeno strategies monitor ho rahi hain, abhi koi 80%+ setup nahi.');
+      return;
+    }
+    candidates.sort((a,b) => b.score - a.score);
+    const best = candidates[0];
+
+    const rr = Math.abs(best.tp - best.entry) / Math.abs(best.entry - best.sl);
+    if (!isFinite(rr) || rr < 1){
+      pasLogFeed(`⚠️ ${best.strategy} setup mila (score ${best.score}%) lekin Risk:Reward kam tha — skip.`);
+      pasSetStatus('Live — RR insufficient tha, signal skip hua.');
+      return;
+    }
+
+    const exposure = await crossBotExposureCheck(best.direction);
+    if (!exposure.allowed){
+      pasLogFeed(`⛔ ${best.direction} direction mein already ${exposure.openCount} bots ke signals open hain (cap: ${CROSS_BOT_MAX_SAME_DIRECTION}) — cross-bot exposure control ki wajah se skip.`);
+      pasSetStatus('Live — cross-bot exposure cap ki wajah se signal skip hua.');
+      return;
+    }
+
+    await db.collection('priceActionSignals').add({
+      strategy: best.strategy, direction: best.direction, entry: best.entry, sl: best.sl, tp: best.tp, rr,
+      confidence: best.score, confidenceTier: best.score >= 90 ? 'Very High' : 'High', confidenceBreakdown: best.breakdown,
+      reason: best.reason, status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    pasLogFeed(`✅ Naya ${best.direction} signal — ${best.strategy} (score ${best.score}%).`);
+    pasSetStatus(`Live — naya ${best.direction} signal fire hua: ${best.strategy} (score ${best.score}%).`);
+  }
+
+  async function pasMonitor(doc){
+    const livePrice = await pasFetchLatestPrice();
+    const price = livePrice !== null ? livePrice : (pasLtf.length ? pasLtf[pasLtf.length-1].close : null);
+    if (price === null) return;
+    const d = doc.data();
+    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
+    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
+    if (hitTP){
+      await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      pasLogFeed(`🎯 ${d.strategy} signal TP hit!`);
+    } else if (hitSL){
+      await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      pasLogFeed(`🛑 ${d.strategy} signal SL hit.`);
+    }
+  }
+
+  // ========================= UI RENDER =========================
+  function pasRenderLive(sig){
+    const card = document.getElementById('pasLiveCard');
+    const badge = document.getElementById('pasDirBadge');
+    if (!card || !badge) return;
+    if (!sig){
+      card.className = 'pas-live-card';
+      badge.className = 'pas-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('pasStrategyName').textContent = '—';
+      document.getElementById('pasEntry').textContent = '—';
+      document.getElementById('pasSL').textContent = '—';
+      document.getElementById('pasTP').textContent = '—';
+      document.getElementById('pasConfidence').textContent = '—';
+      document.getElementById('pasReason').textContent = 'Abhi koi active Price Action signal nahi hai. Bot teeno strategies ko monitor kar raha hai.';
+      document.getElementById('pasLiveTime').textContent = '—';
+      return;
+    }
+    card.className = 'pas-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
+    badge.className = 'pas-dir-badge ' + sig.direction;
+    badge.textContent = sig.direction + (sig.status !== 'open' ? ' — ' + sig.status.toUpperCase() : '');
+    document.getElementById('pasStrategyName').textContent = sig.strategy;
+    document.getElementById('pasEntry').textContent = sig.entry.toFixed(2);
+    document.getElementById('pasSL').textContent = sig.sl.toFixed(2);
+    document.getElementById('pasTP').textContent = sig.tp.toFixed(2);
+    document.getElementById('pasConfidence').textContent = `${sig.confidence}% (${sig.confidenceTier})`;
+    document.getElementById('pasReason').textContent = sig.reason;
+    document.getElementById('pasLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
+  }
+  function pasRenderHistory(docs){
+    const container = document.getElementById('pasHistory');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!docs.length){ container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'pas-history-item';
+      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#a78bfa;">(${d.strategy}, Score: ${d.confidence}%)</em></span>
+        <span class="pas-badge-status ${d.status}">${(d.status||'').replace('_',' ').toUpperCase()}</span>`;
+      container.appendChild(row);
+    });
+  }
+  function pasListen(){
+    db.collection('priceActionSignals').orderBy('createdAt','desc').limit(50).onSnapshot(snap => {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const active = docs.find(d => d.status === 'open');
+      pasRenderLive(active || null);
+      pasRenderHistory(docs.slice(0, 15));
+      const tpHits = docs.filter(d => d.status === 'tp_hit').length;
+      const slHits = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = tpHits + slHits;
+      const winRate = closed > 0 ? ((tpHits/closed)*100).toFixed(1) : '0';
+      document.getElementById('pasTotal').textContent = docs.length;
+      document.getElementById('pasTpCount').textContent = tpHits;
+      document.getElementById('pasSlCount').textContent = slHits;
+      document.getElementById('pasWinRate').textContent = winRate + '%';
+      window.pasAllSignals = docs;
+      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
+    }, () => { pasRenderLive(null); });
+  }
+
+  // ========================= INIT =========================
+  function pasStartEngine(){
+    pasListen();
+    pasLogFeed('Price Action bot start ho gaya — Break&Retest / Order Block+FVG / Liquidity Sweep+MSS monitor ho rahe hain.');
+    pasRunCycle();
+    pasTimer = setInterval(pasRunCycle, PAS_CYCLE_MS);
+    pasMonitorTimer = setInterval(async () => {
+      try {
+        const openSnap = await db.collection('priceActionSignals').where('status','in',['open']).limit(1).get();
+        if (!openSnap.empty) await pasMonitor(openSnap.docs[0]);
+      } catch(err){ /* best-effort */ }
+    }, PAS_MONITOR_MS);
+  }
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) pasStartEngine();
+      else {
+        if (pasTimer) { clearInterval(pasTimer); pasTimer = null; }
+        if (pasMonitorTimer) { clearInterval(pasMonitorTimer); pasMonitorTimer = null; }
+      }
+    });
+  }
+})();
+</script>
+
 
  <script>
 (function(){
