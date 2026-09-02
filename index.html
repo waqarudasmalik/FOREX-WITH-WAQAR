@@ -606,6 +606,7 @@
    <a href="#fundamentalsignals">📰🤖 Fundamental-Only Signals</a>
    <a href="#fractalictsignals">🔮 Fractal ICT Signals</a>
    <a href="#priceactionsignals">🕯️🤖 Price Action Signals</a>
+   <a href="#ictsignals">🧭🤖 ICT Signals</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -653,6 +654,7 @@
       <a class="sd-folder" href="#fundamentalsignals"><div class="sd-icon">📰🤖</div><h4>Fundamental-Only Signals</h4><p>Sirf news/fundamental data ki bina par (koi ICT/technical nahi) mustaqil signal — Entry/SL/TP ke sath.</p></a>
       <a class="sd-folder" href="#fractalictsignals"><div class="sd-icon">🔮</div><h4>Fractal ICT Signals</h4><p>Bias + Structure + Liquidity (multi-timeframe True ICT) — live guide ke sath.</p></a>
       <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
+      <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -5158,6 +5160,765 @@
   }
 })();
 </script>
+
+<style>
+  .icts-wrap{display:flex;flex-direction:column;gap:20px;}
+  .icts-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .icts-dot{width:8px;height:8px;border-radius:50%;background:#facc15;animation:recPulse 1.2s infinite;}
+  .icts-strategy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px;}
+  .icts-strategy{background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;}
+  .icts-strategy .icts-s-title{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .icts-strategy .icts-s-val{font-size:14px;font-weight:800;margin-bottom:6px;}
+  .icts-strategy .icts-s-val.bullish{color:#22c55e;}
+  .icts-strategy .icts-s-val.bearish{color:#ef4444;}
+  .icts-strategy .icts-s-val.neutral,.icts-strategy .icts-s-val.waiting{color:#94a3b8;}
+  .icts-strategy .icts-s-desc{font-size:11.5px;color:#64748b;line-height:1.5;}
+  .icts-strategy .icts-s-score{font-size:11px;color:#facc15;margin-top:6px;font-weight:700;}
+  .icts-toprow{display:flex;gap:15px;flex-wrap:wrap;}
+  .icts-stat{flex:1;min-width:140px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:16px;text-align:center;}
+  .icts-stat .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
+  .icts-stat .value{font-size:22px;font-weight:800;margin-top:6px;}
+  .icts-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(250,204,21,0.35);border-radius:18px;padding:22px;}
+  .icts-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
+  .icts-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
+  .icts-live-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .icts-dir-badge{font-weight:900;font-size:18px;padding:4px 16px;border-radius:999px;}
+  .icts-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .icts-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .icts-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .icts-time{color:#64748b;font-size:12px;}
+  .icts-levels{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .icts-level-box{flex:1;min-width:110px;background:rgba(15,23,42,0.6);border-radius:12px;padding:12px;text-align:center;}
+  .icts-level-box .label{font-size:11px;color:#94a3b8;}
+  .icts-level-box .value{font-size:17px;font-weight:800;margin-top:4px;}
+  .icts-reason{background:rgba(15,23,42,0.5);border-left:3px solid #facc15;border-radius:8px;padding:14px 16px;color:#cbd5e1;font-size:13.5px;line-height:1.7;white-space:pre-line;}
+  .icts-feed{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .icts-feed-item{font-size:12.5px;color:#94a3b8;padding:8px 12px;background:rgba(15,23,42,0.45);border-radius:8px;border-left:2px solid rgba(148,163,184,0.3);}
+  .icts-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;gap:6px;}
+  .icts-badge-status{font-weight:800;font-size:11px;padding:3px 10px;border-radius:999px;}
+  .icts-badge-status.tp_hit{background:rgba(34,197,94,0.15);color:#22c55e;}
+  .icts-badge-status.sl_hit{background:rgba(239,68,68,0.15);color:#ef4444;}
+  .icts-badge-status.open{background:rgba(250,204,21,0.15);color:#facc15;}
+</style>
+
+<section id="ictsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🧭🤖 ICT Signals — Killzone·OB+FVG·Judas·OTE·PO3·CHoCH</h3>
+    <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
+      Yeh bot XAUUSD ka live price (1H/15M/5M) khud fetch kar ke <b>6 ICT concepts</b> independently
+      monitor karta hai: Killzone + Liquidity Sweep + BOS, Order Block + FVG, Judas Swing, OTE
+      (Optimal Trade Entry), Power of Three (PO3), aur CHoCH Reversal. Har strategy ka apna
+      confluence-based <b>"Setup Quality Score"</b> (0-100%) hai — signal sirf tab fire hota hai jab
+      score <b>80%+</b> ho. Live guide neeche har strategy ka current status dikhata hai.
+    </p>
+    <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; line-height:1.6;">
+      ⚠️ <b>Zaroori clarification:</b> 80%+ ek <b>rule-based "setup quality" score</b> hai (kitne
+      confluence factors is waqt align hain), <b>guaranteed win-rate nahi</b>. "Prior session
+      liquidity level" jaisi cheezein is bot mein ek <b>recency-based proxy</b> se nikaali jaati hain
+      (asal calendar-day boundary se nahi, kyunki live feed exchange-timezone precisely expose nahi
+      karta) — is liye levels approximate hain, exact nahi. "Win Rate" stat neeche is bot ke apne
+      <b>real logged history</b> se (TP hits ÷ closed trades) calculate hoti hai. Hamesha apna risk
+      management khud follow karein.
+    </p>
+
+    <div class="icts-engine-status">
+      <span class="icts-dot"></span>
+      <span id="ictsEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <h4 style="color:#facc15; font-size:15px; margin-bottom:10px;">📖 Live Guide — 6 ICT Strategies Abhi Kya Keh Rahi Hain</h4>
+    <div class="icts-strategy-grid">
+      <div class="icts-strategy">
+        <div class="icts-s-title">1. Killzone+Sweep+BOS</div>
+        <div class="icts-s-val waiting" id="ictsS1Val">—</div>
+        <div class="icts-s-desc" id="ictsS1Desc">London/NY killzone mein equal-level sweep + closing BOS dhoond rahe hain...</div>
+        <div class="icts-s-score" id="ictsS1Score"></div>
+      </div>
+      <div class="icts-strategy">
+        <div class="icts-s-title">2. Order Block + FVG</div>
+        <div class="icts-s-val waiting" id="ictsS2Val">—</div>
+        <div class="icts-s-desc" id="ictsS2Desc">Fresh 1H order block + FVG confluence + 5M confirmation dhoond rahe hain...</div>
+        <div class="icts-s-score" id="ictsS2Score"></div>
+      </div>
+      <div class="icts-strategy">
+        <div class="icts-s-title">3. Judas Swing</div>
+        <div class="icts-s-val waiting" id="ictsS3Val">—</div>
+        <div class="icts-s-desc" id="ictsS3Desc">Session-open fakeout + sharp reversal + BOS dhoond rahe hain...</div>
+        <div class="icts-s-score" id="ictsS3Score"></div>
+      </div>
+      <div class="icts-strategy">
+        <div class="icts-s-title">4. OTE (61.8-79%)</div>
+        <div class="icts-s-val waiting" id="ictsS4Val">—</div>
+        <div class="icts-s-desc" id="ictsS4Desc">Clean impulsive leg ka OTE zone + confluence + rejection dhoond rahe hain...</div>
+        <div class="icts-s-score" id="ictsS4Score"></div>
+      </div>
+      <div class="icts-strategy">
+        <div class="icts-s-title">5. Power of Three</div>
+        <div class="icts-s-val waiting" id="ictsS5Val">—</div>
+        <div class="icts-s-desc" id="ictsS5Desc">Tight range (accumulation) + sweep (manipulation) + displacement (distribution) dhoond rahe hain...</div>
+        <div class="icts-s-score" id="ictsS5Score"></div>
+      </div>
+      <div class="icts-strategy">
+        <div class="icts-s-title">6. CHoCH Reversal</div>
+        <div class="icts-s-val waiting" id="ictsS6Val">—</div>
+        <div class="icts-s-desc" id="ictsS6Desc">Trend ke against pehla structure-break + retest + confluence dhoond rahe hain...</div>
+        <div class="icts-s-score" id="ictsS6Score"></div>
+      </div>
+    </div>
+
+    <div class="icts-toprow" style="margin-bottom:18px;">
+      <div class="icts-stat"><div class="label">Total Signals</div><div class="value" id="ictsTotal" style="color:#facc15;">0</div></div>
+      <div class="icts-stat"><div class="label">TP Hits</div><div class="value" id="ictsTpCount" style="color:#22c55e;">0</div></div>
+      <div class="icts-stat"><div class="label">SL Hits</div><div class="value" id="ictsSlCount" style="color:#ef4444;">0</div></div>
+      <div class="icts-stat"><div class="label">Win Rate (Real, Logged)</div><div class="value" id="ictsWinRate" style="color:#facc15;">0%</div></div>
+    </div>
+
+    <h4 style="color:#facc15; font-size:15px; margin-bottom:10px;">Current Signal</h4>
+    <div class="icts-live-card" id="ictsLiveCard">
+      <div class="icts-live-head">
+        <span class="icts-dir-badge NONE" id="ictsDirBadge">NO ACTIVE SIGNAL</span>
+        <span class="icts-time" id="ictsLiveTime">—</span>
+      </div>
+      <div class="icts-levels">
+        <div class="icts-level-box"><div class="label">Strategy</div><div class="value" id="ictsStrategyName" style="color:#facc15; font-size:13px;">—</div></div>
+        <div class="icts-level-box"><div class="label">Entry</div><div class="value" id="ictsEntry" style="color:#e2e8f0;">—</div></div>
+        <div class="icts-level-box"><div class="label">Stop Loss</div><div class="value" id="ictsSL" style="color:#fda4af;">—</div></div>
+        <div class="icts-level-box"><div class="label">Take Profit</div><div class="value" id="ictsTP" style="color:#67e8f9;">—</div></div>
+        <div class="icts-level-box"><div class="label">Setup Score</div><div class="value" id="ictsConfidence" style="color:#facc15;">—</div></div>
+      </div>
+      <div class="icts-reason" id="ictsReason">Abhi koi active ICT signal nahi hai. Bot 6 strategies ko monitor kar raha hai.</div>
+    </div>
+
+    <h4 style="color:#facc15; font-size:15px; margin:26px 0 10px;">Live Commentary</h4>
+    <div class="icts-feed" id="ictsFeed">
+      <p style="color:#64748b; font-size:13px;">Feed load ho raha hai...</p>
+    </div>
+
+    <h4 style="color:#facc15; font-size:15px; margin:26px 0 10px;">Signal History</h4>
+    <div id="ictsHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>Har strategy ke rules (is bot mein jaisay implement hain):</b>
+      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
+        <li><b>Killzone + Sweep + BOS:</b> Sirf London (6-9 UTC) ya NY (12-15 UTC) killzone mein
+          active. 15M par equal-highs/lows liquidity pool ki sweep, phir <b>closing-basis</b> Break of
+          Structure confirm hone par hi signal.</li>
+        <li><b>Order Block + FVG:</b> 1H ka fresh/unmitigated order block, sath FVG confluence ho to
+          extra score, phir 5M par micro structure-shift confirmation.</li>
+        <li><b>Judas Swing:</b> Sirf London/NY open ke pehle ~1 ghante mein active. Recent
+          session-range se aage ek fake sweep, phir sharp reversal candle + micro BOS confirmation.</li>
+        <li><b>OTE:</b> 1H ki last clean impulsive leg ka 61.8%-79% retracement zone. Zone mein
+          OB/FVG confluence + rejection candle honi chahiye.</li>
+        <li><b>Power of Three:</b> Pehle ek tight range (Accumulation), phir us se sweep (Manipulation),
+          phir displacement + BOS us se door (Distribution) — session timing bhi score mein shamil.</li>
+        <li><b>CHoCH Reversal:</b> Prevailing 1H trend ke against 15M par pehla clear closing-basis
+          structure-break, phir retest, phir confirmation candle. HTF momentum-shrinkage bhi confluence
+          ke taur par check hoti hai.</li>
+        <li>Chheh strategies <b>independently</b> chalti hain — jo pehle 80%+ score achieve kare, wahi
+          signal fire hota hai ("Strategy" field mein naam saaf likha hota hai).</li>
+      </ol>
+      <p style="margin-top:10px;">Yeh sab <b>rule-based technical frameworks</b> hain, guarantee nahi —
+        news, spread/slippage aur unexpected volatility ki wajah se koi bhi setup fail ho sakta hai.
+        Apna risk management (position size, max daily loss) hamesha khud follow karein.</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // ========================= CONFIG (independent bot — apna alag Firestore collection 'ictSignals') =========================
+  const ICTS_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
+  const ICTS_SYMBOL = "XAU/USD";
+  const ICTS_HTF_INTERVAL = '1h', ICTS_MTF_INTERVAL = '15min', ICTS_LTF_INTERVAL = '5min';
+  const ICTS_SWING_STRENGTH = 2;
+  const ICTS_CYCLE_MS = 5 * 60 * 1000;
+  const ICTS_MONITOR_MS = 60 * 1000;
+  const ICTS_MIN_SCORE = 80;
+  const ICTS_EQUAL_TOL_ATR_MULT = 0.25;
+  const ICTS_SWEEP_RECENCY = 8;
+  const ICTS_ATR_SL_BUFFER_MULT = 0.3;
+
+  let ictsHtf = [], ictsMtf = [], ictsLtf = [];
+  let ictsTimer = null, ictsMonitorTimer = null;
+
+  // ========================= SHARED HELPERS =========================
+  function ictsLogFeed(msg){
+    const el = document.getElementById('ictsFeed');
+    if (!el) return;
+    const line = document.createElement('div');
+    line.className = 'icts-feed-item';
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.prepend(line);
+    while (el.childElementCount > 40) el.removeChild(el.lastChild);
+  }
+  function ictsSetStatus(msg){
+    const el = document.getElementById('ictsEngineStatusText');
+    if (el) el.textContent = msg;
+  }
+  async function ictsFetchCandles(interval, outputsize){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(ICTS_SYMBOL)}&interval=${interval}&outputsize=${outputsize}&apikey=${ICTS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) return [];
+      return data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+    } catch(err){ return []; }
+  }
+  async function ictsFetchLatestPrice(){
+    try {
+      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(ICTS_SYMBOL)}&apikey=${ICTS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const p = parseFloat(data.price);
+      return isNaN(p) ? null : p;
+    } catch(err){ return null; }
+  }
+  function ictsAtr(candles, period){
+    if (candles.length < period + 1) return 0;
+    let trs = [];
+    for (let i = candles.length - period; i < candles.length; i++){
+      const c = candles[i], p = candles[i-1];
+      trs.push(Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close)));
+    }
+    return trs.reduce((a,b) => a+b, 0) / trs.length;
+  }
+  function ictsFindSwings(candles, strength){
+    const highs = [], lows = [];
+    for (let i = strength; i < candles.length - strength; i++){
+      const c = candles[i];
+      let isHigh = true, isLow = true;
+      for (let k = 1; k <= strength; k++){
+        if (candles[i-k].high >= c.high || candles[i+k].high >= c.high) isHigh = false;
+        if (candles[i-k].low <= c.low || candles[i+k].low <= c.low) isLow = false;
+      }
+      if (isHigh) highs.push({ index:i, price:c.high, time:c.time });
+      if (isLow) lows.push({ index:i, price:c.low, time:c.time });
+    }
+    return { highs, lows };
+  }
+  function ictsHtfBias(htf){
+    const { highs, lows } = ictsFindSwings(htf, ICTS_SWING_STRENGTH);
+    if (highs.length < 2 || lows.length < 2) return { bias:'neutral', reason:'1H par abhi kaafi swing points nahi bane.' };
+    const h1 = highs[highs.length-1], h0 = highs[highs.length-2];
+    const l1 = lows[lows.length-1], l0 = lows[lows.length-2];
+    if (h1.price > h0.price && l1.price > l0.price) return { bias:'bullish', reason:'1H Higher-High + Higher-Low — bullish trend.', lastHigh:h1, prevHigh:h0, lastLow:l1, prevLow:l0 };
+    if (h1.price < h0.price && l1.price < l0.price) return { bias:'bearish', reason:'1H Lower-High + Lower-Low — bearish trend.', lastHigh:h1, prevHigh:h0, lastLow:l1, prevLow:l0 };
+    return { bias:'neutral', reason:'1H swings mixed hain — trend abhi neutral/ranging.', lastHigh:h1, prevHigh:h0, lastLow:l1, prevLow:l0 };
+  }
+  function ictsSessionInfo(){
+    const h = new Date().getUTCHours();
+    const inLondonKZ = h >= 6 && h < 9;
+    const inNYKZ = h >= 12 && h < 15;
+    const inLondonOpen = h >= 7 && h < 8;
+    const inNYOpen = h >= 13 && h < 14;
+    const inAsian = h >= 0 && h < 7;
+    let qualityPts = 5, label = 'Off-session / low liquidity';
+    if (inLondonKZ || inNYKZ){ qualityPts = 25; label = inLondonKZ ? 'London Killzone' : 'NY Killzone'; }
+    else if (h >= 6 && h < 17){ qualityPts = 15; label = 'Active session (non-killzone)'; }
+    return { h, inLondonKZ, inNYKZ, inLondonOpen, inNYOpen, inAsian, qualityPts, label };
+  }
+  function ictsFindEqualPool(points, tol){
+    for (let i = points.length - 1; i > 0; i--){
+      for (let j = i - 1; j >= 0; j--){
+        if (Math.abs(points[i].price - points[j].price) <= tol) return { level:(points[i].price+points[j].price)/2, idx:points[i].index };
+      }
+    }
+    return null;
+  }
+  function ictsDetectFVG(candles, idx, biasDir){
+    if (idx + 2 >= candles.length || idx < 0) return null;
+    const c1 = candles[idx], c3 = candles[idx+2];
+    if (biasDir === 'bullish' && c1.high < c3.low) return { top:c3.low, bottom:c1.high };
+    if (biasDir === 'bearish' && c1.low > c3.high) return { top:c1.low, bottom:c3.high };
+    return null;
+  }
+  function ictsFindOrderBlock(htf, biasDir){
+    for (let i = htf.length - 3; i >= Math.max(1, htf.length - 30); i--){
+      const c = htf[i], n1 = htf[i+1], n2 = htf[i+2];
+      const isOpp = biasDir === 'bullish' ? c.close < c.open : c.close > c.open;
+      const impulsive = biasDir === 'bullish' ? (n1.close > c.high || n2.close > c.high) : (n1.close < c.low || n2.close < c.low);
+      if (isOpp && impulsive) return i;
+    }
+    return -1;
+  }
+  function ictsIsMitigated(htf, obIdx, obHigh, obLow){
+    for (let i = obIdx + 1; i < htf.length - 1; i++){
+      if (htf[i].close <= obHigh && htf[i].close >= obLow) return true;
+    }
+    return false;
+  }
+  function ictsMicroShift(recentCandles, dir){
+    const { highs, lows } = ictsFindSwings(recentCandles, 1);
+    if (dir === 'bullish' && highs.length) return recentCandles[recentCandles.length-1].close > highs[highs.length-1].price;
+    if (dir === 'bearish' && lows.length) return recentCandles[recentCandles.length-1].close < lows[lows.length-1].price;
+    return false;
+  }
+  function ictsRejection(c, dir){
+    const wick = dir === 'bullish' ? (Math.min(c.open, c.close) - c.low) : (c.high - Math.max(c.open, c.close));
+    const body = Math.abs(c.close - c.open) || 0.0001;
+    const bodyOk = dir === 'bullish' ? c.close > c.open : c.close < c.open;
+    return { wickRatio: wick / body, ok: (wick / body > 0.6) && bodyOk };
+  }
+
+  // ========================= STRATEGY 1: Killzone + Liquidity Sweep + BOS =========================
+  function ictsDetectKillzone(htf, mtf, ltf, mtfAtr, session){
+    if (!(session.inLondonKZ || session.inNYKZ)){
+      return { ready:false, guideVal:'Off-Killzone', guideCls:'waiting', guideDesc:'Killzone window ke bahar hai (London 6-9 UTC / NY 12-15 UTC).' };
+    }
+    const bias = ictsHtfBias(htf);
+    if (bias.bias === 'neutral') return { ready:false, guideVal:'Neutral', guideCls:'neutral', guideDesc:bias.reason };
+    const recent = mtf.slice(-30);
+    const { highs, lows } = ictsFindSwings(recent, ICTS_SWING_STRENGTH);
+    const tol = mtfAtr * ICTS_EQUAL_TOL_ATR_MULT;
+    const pool = bias.bias === 'bullish' ? ictsFindEqualPool(lows, tol) : ictsFindEqualPool(highs, tol);
+    if (!pool) return { ready:false, guideVal:'Waiting', guideCls:bias.bias, guideDesc:`Bias ${bias.bias}, ${session.label} — equal-level liquidity pool ka wait.` };
+    const startIdx = Math.max(pool.idx + 1, recent.length - ICTS_SWEEP_RECENCY);
+    let sweepCandle = null;
+    for (let i = startIdx; i < recent.length; i++){
+      const c = recent[i];
+      if (bias.bias === 'bullish' && c.low < pool.level && c.close > pool.level){ sweepCandle = c; break; }
+      if (bias.bias === 'bearish' && c.high > pool.level && c.close < pool.level){ sweepCandle = c; break; }
+    }
+    if (!sweepCandle) return { ready:false, guideVal:'Pool Found', guideCls:bias.bias, guideDesc:`${session.label} mein equal-level pool ${pool.level.toFixed(2)} mila, sweep ka wait.` };
+    // Closing-basis BOS after sweep: recent structure point must be broken by a CLOSE (not just wick)
+    const postSweep = recent.slice(recent.indexOf(sweepCandle) + 1);
+    const structRef = bias.bias === 'bullish' ? (highs.length ? highs[highs.length-1] : null) : (lows.length ? lows[lows.length-1] : null);
+    let bosConfirmed = false;
+    if (structRef){
+      for (const c of (postSweep.length ? postSweep : [recent[recent.length-1]])){
+        if (bias.bias === 'bullish' && c.close > structRef.price) { bosConfirmed = true; break; }
+        if (bias.bias === 'bearish' && c.close < structRef.price) { bosConfirmed = true; break; }
+      }
+    }
+    if (!bosConfirmed) return { ready:false, guideVal:'Swept', guideCls:bias.bias, guideDesc:`Sweep ho chuki (${pool.level.toFixed(2)}), closing-basis BOS ka wait.` };
+    const displaced = mtfAtr > 0 ? Math.abs(sweepCandle.close - sweepCandle.open) / mtfAtr : 0;
+    const equalPts = 25;
+    const dispPts = Math.round(Math.min(displaced / 1.2, 1) * 25);
+    const bosPts = 25;
+    const sessionPts = 25;
+    const score = equalPts + dispPts + bosPts + sessionPts;
+    const direction = bias.bias === 'bullish' ? 'BUY' : 'SELL';
+    const entry = ltf[ltf.length-1].close;
+    const ltfAtrLocal = ictsAtr(ltf, 14);
+    const sl = direction === 'BUY' ? sweepCandle.low - ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : sweepCandle.high + ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Killzone + Liquidity Sweep + BOS (${session.label}).`,
+      `1) Bias (1H): ${bias.reason}`,
+      `2) Sweep (15M): equal-level pool ${pool.level.toFixed(2)} sweep hui.`,
+      `3) BOS: closing-basis structure break confirm hua (${structRef.price.toFixed(2)}).`,
+      `SL: sweep extreme ke peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish', guideDesc:`Setup ready — score ${score}%.`,
+      score, breakdown:[{label:'Equal-Level Sweep',points:equalPts,max:25},{label:'Displacement Strength',points:dispPts,max:25},{label:'Closing-Basis BOS',points:bosPts,max:25},{label:'Killzone Timing',points:sessionPts,max:25}],
+      direction, entry, sl, tp, reason, strategy:'Killzone + Sweep + BOS' };
+  }
+
+  // ========================= STRATEGY 2: Order Block + FVG =========================
+  function ictsDetectOrderBlockFVG(htf, ltf, htfAtr){
+    const bias = ictsHtfBias(htf);
+    if (bias.bias === 'neutral') return { ready:false, guideVal:'Neutral', guideCls:'neutral', guideDesc:bias.reason };
+    const obIdx = ictsFindOrderBlock(htf, bias.bias);
+    if (obIdx === -1) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:`Bias ${bias.bias}, order-block candle abhi nahi mili.` };
+    const obCandle = htf[obIdx];
+    const obHigh = Math.max(obCandle.open, obCandle.close), obLow = Math.min(obCandle.open, obCandle.close);
+    if (ictsIsMitigated(htf, obIdx, obHigh, obLow)) return { ready:false, guideVal:'Mitigated', guideCls:'waiting', guideDesc:`Order block mila (${obLow.toFixed(2)}-${obHigh.toFixed(2)}) lekin mitigated — fresh block ka wait.` };
+    const fvg = ictsDetectFVG(htf, obIdx, bias.bias);
+    const ltfAtr = ictsAtr(ltf, 14);
+    const lastPrice = ltf[ltf.length-1].close;
+    const inZone = lastPrice <= obHigh + ltfAtr*0.2 && lastPrice >= obLow - ltfAtr*0.2;
+    if (!inZone) return { ready:false, guideVal:'Forming', guideCls:bias.bias, guideDesc:`Fresh OB zone ${obLow.toFixed(2)}-${obHigh.toFixed(2)}, price return ka wait.` };
+    if (!ictsMicroShift(ltf.slice(-8), bias.bias)) return { ready:false, guideVal:'In Zone', guideCls:bias.bias, guideDesc:`Zone mein hai, 5M micro structure-shift confirmation ka wait.` };
+    const basePts = 25, freshPts = 25;
+    const fvgPts = fvg ? Math.round(Math.min(Math.abs(fvg.top - fvg.bottom) / (htfAtr||1) / 0.5, 1) * 25) : 5;
+    const ltfPts = 25;
+    const score = basePts + freshPts + fvgPts + ltfPts;
+    const direction = bias.bias === 'bullish' ? 'BUY' : 'SELL';
+    const entry = lastPrice;
+    const sl = direction === 'BUY' ? obLow - ltfAtr * ICTS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER : obHigh + ltfAtr * ICTS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Order Block + FVG.`,
+      `1) Order Block (1H): fresh/unmitigated ${obLow.toFixed(2)}-${obHigh.toFixed(2)}, bias ${bias.bias}.`,
+      `2) FVG: ${fvg ? 'confluence mili (' + fvg.bottom.toFixed(2) + '-' + fvg.top.toFixed(2) + ').' : 'clear FVG nahi mila.'}`,
+      `3) LTF (5M): micro structure-shift confirm hui.`,
+      `SL: OB edge ke peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish', guideDesc:`Setup ready — score ${score}%.`,
+      score, breakdown:[{label:'Setup Validity',points:basePts,max:25},{label:'Freshness (Unmitigated)',points:freshPts,max:25},{label:'FVG Confluence',points:fvgPts,max:25},{label:'LTF Confirmation',points:ltfPts,max:25}],
+      direction, entry, sl, tp, reason, strategy:'Order Block + FVG' };
+  }
+
+  // ========================= STRATEGY 3: Judas Swing =========================
+  function ictsDetectJudas(mtf, ltf, mtfAtr, session){
+    if (!(session.inLondonOpen || session.inNYOpen)){
+      return { ready:false, guideVal:'Off-Window', guideCls:'waiting', guideDesc:'Session-open window (London/NY open ke pehle ~1H) ke bahar hai.' };
+    }
+    if (mtf.length < 45) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Price history jama ho rahi hai.' };
+    const priorSlice = mtf.slice(-40, -8);
+    const rangeHigh = Math.max(...priorSlice.map(c => c.high));
+    const rangeLow = Math.min(...priorSlice.map(c => c.low));
+    const recent = mtf.slice(-8);
+    const recentHigh = Math.max(...recent.map(c => c.high));
+    const recentLow = Math.min(...recent.map(c => c.low));
+    let sweepDir = null, sweepExtreme = null;
+    if (recentHigh > rangeHigh){ sweepDir = 'bearish'; sweepExtreme = recentHigh; }
+    else if (recentLow < rangeLow){ sweepDir = 'bullish'; sweepExtreme = recentLow; }
+    if (!sweepDir) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:`${session.label === 'Off-session / low liquidity' ? 'Session-open' : session.label} — recent range se koi fake sweep abhi nahi hui.` };
+    const lastLtf = ltf.slice(-6);
+    let reversalCandle = null;
+    for (const c of lastLtf){
+      const r = ictsRejection(c, sweepDir);
+      if (r.ok){ reversalCandle = { c, wickRatio: r.wickRatio }; break; }
+    }
+    if (!reversalCandle) return { ready:false, guideVal:'Swept', guideCls:sweepDir, guideDesc:`Fake sweep hui (${sweepExtreme.toFixed(2)}), sharp reversal candle ka wait.` };
+    if (!ictsMicroShift(ltf.slice(-8), sweepDir)) return { ready:false, guideVal:'Reversing', guideCls:sweepDir, guideDesc:`Reversal candle bani, micro BOS confirmation ka wait.` };
+    const levelDist = sweepDir === 'bullish' ? (rangeLow - sweepExtreme) : (sweepExtreme - rangeHigh);
+    const levelPts = Math.round(Math.min(Math.max(levelDist,0) / ((mtfAtr||1)*0.6), 1) * 25);
+    const revPts = Math.round(Math.min(reversalCandle.wickRatio / 2, 1) * 25);
+    const sessionPts = 25, bosPts = 25;
+    const score = levelPts + revPts + sessionPts + bosPts;
+    const direction = sweepDir === 'bullish' ? 'BUY' : 'SELL';
+    const ltfAtrLocal = ictsAtr(ltf, 14);
+    const entry = ltf[ltf.length-1].close;
+    const sl = direction === 'BUY' ? sweepExtreme - ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : sweepExtreme + ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Judas Swing (${session.label}).`,
+      `1) Fake move: recent range se aage ${sweepExtreme.toFixed(2)} tak sweep hui (prior-session-range proxy).`,
+      `2) Reversal (5M): sharp rejection candle bani (wick:body = ${reversalCandle.wickRatio.toFixed(2)}).`,
+      `3) BOS: micro structure-shift ${direction} direction mein confirm hui.`,
+      `SL: sweep extreme ke peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish', guideDesc:`Setup ready — score ${score}%.`,
+      score, breakdown:[{label:'HTF Liquidity Level Swept',points:levelPts,max:25},{label:'Reversal Candle Strength',points:revPts,max:25},{label:'Session-Open Window',points:sessionPts,max:25},{label:'BOS Confirmation',points:bosPts,max:25}],
+      direction, entry, sl, tp, reason, strategy:'Judas Swing' };
+  }
+
+  // ========================= STRATEGY 4: OTE (Optimal Trade Entry) =========================
+  function ictsDetectOTE(htf, mtf, ltf, htfAtr){
+    const bias = ictsHtfBias(htf);
+    if (bias.bias === 'neutral' || !bias.lastHigh || !bias.lastLow) return { ready:false, guideVal:'Neutral', guideCls:'neutral', guideDesc:bias.reason };
+    const legHigh = bias.lastHigh.price, legLow = bias.lastLow.price;
+    const range = legHigh - legLow;
+    if (range <= 0) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Clean impulsive leg abhi identify nahi hui.' };
+    const legClarity = htfAtr > 0 ? range / htfAtr : 0;
+    let zoneTop, zoneBottom;
+    if (bias.bias === 'bullish'){ zoneTop = legHigh - range*0.618; zoneBottom = legHigh - range*0.79; }
+    else { zoneTop = legLow + range*0.79; zoneBottom = legLow + range*0.618; }
+    const lastPrice = ltf[ltf.length-1].close;
+    const inZone = lastPrice <= zoneTop && lastPrice >= zoneBottom;
+    if (!inZone) return { ready:false, guideVal:'Waiting', guideCls:bias.bias, guideDesc:`OTE zone ${zoneBottom.toFixed(2)}-${zoneTop.toFixed(2)} — price abhi bahar hai.` };
+    // Confluence: FVG overlap on mtf within recent lookback
+    let confluence = false;
+    for (let i = 0; i < mtf.length - 2; i++){
+      const fvg = ictsDetectFVG(mtf, i, bias.bias);
+      if (fvg && Math.max(fvg.bottom, zoneBottom) <= Math.min(fvg.top, zoneTop)){ confluence = true; break; }
+    }
+    const lastLtf = ltf.slice(-6);
+    let rejectionCandle = null;
+    for (const c of lastLtf){
+      const r = ictsRejection(c, bias.bias);
+      if (r.ok){ rejectionCandle = { c, wickRatio: r.wickRatio }; break; }
+    }
+    if (!rejectionCandle) return { ready:false, guideVal:'In Zone', guideCls:bias.bias, guideDesc:`Price OTE zone mein hai, rejection candle ka wait.` };
+    const legPts = Math.round(Math.min(legClarity / 2.5, 1) * 25);
+    const confluencePts = confluence ? 25 : 10;
+    const biasPts = 25;
+    const rejPts = Math.round(Math.min(rejectionCandle.wickRatio / 2, 1) * 25);
+    const score = legPts + confluencePts + biasPts + rejPts;
+    const direction = bias.bias === 'bullish' ? 'BUY' : 'SELL';
+    const entry = lastPrice;
+    const ltfAtrLocal = ictsAtr(ltf, 14);
+    const sl = direction === 'BUY' ? zoneBottom - ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : zoneTop + ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? legHigh : legLow;
+    const reason = [
+      `Strategy: OTE (Optimal Trade Entry, 61.8%-79%).`,
+      `1) Impulsive Leg (1H): ${legLow.toFixed(2)} - ${legHigh.toFixed(2)}, bias ${bias.bias}.`,
+      `2) OTE Zone: ${zoneBottom.toFixed(2)} - ${zoneTop.toFixed(2)} — price zone mein aa gaya.`,
+      `3) Confluence: ${confluence ? 'FVG overlap mila.' : 'sirf Fib zone, clear FVG overlap nahi mila.'}`,
+      `4) Rejection (5M): candle bani (wick:body = ${rejectionCandle.wickRatio.toFixed(2)}).`,
+      `SL: zone ke bahar + spread buffer. TP: leg ka opposite extreme (structure logic).`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish', guideDesc:`Setup ready — score ${score}%.`,
+      score, breakdown:[{label:'Leg Clarity/Displacement',points:legPts,max:25},{label:'OB/FVG Confluence',points:confluencePts,max:25},{label:'HTF Bias Alignment',points:biasPts,max:25},{label:'Rejection Candle',points:rejPts,max:25}],
+      direction, entry, sl, tp, reason, strategy:'OTE' };
+  }
+
+  // ========================= STRATEGY 5: Power of Three (PO3) =========================
+  function ictsDetectPO3(mtf, ltf, mtfAtr, session){
+    if (mtf.length < 40) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Price history jama ho rahi hai.' };
+    const rangeSlice = mtf.slice(-38, -8);
+    const rangeHigh = Math.max(...rangeSlice.map(c => c.high));
+    const rangeLow = Math.min(...rangeSlice.map(c => c.low));
+    const tightness = mtfAtr > 0 ? (rangeHigh - rangeLow) / mtfAtr : 99;
+    if (tightness > 3.5) return { ready:false, guideVal:'No Range', guideCls:'waiting', guideDesc:'Abhi tight range (Accumulation) nahi bani.' };
+    const recent = mtf.slice(-8);
+    const recentHigh = Math.max(...recent.map(c => c.high));
+    const recentLow = Math.min(...recent.map(c => c.low));
+    let sweepDir = null, sweepExtreme = null;
+    if (recentHigh > rangeHigh){ sweepDir = 'bearish'; sweepExtreme = recentHigh; }
+    else if (recentLow < rangeLow){ sweepDir = 'bullish'; sweepExtreme = recentLow; }
+    if (!sweepDir) return { ready:false, guideVal:'Range Ready', guideCls:'waiting', guideDesc:`Tight range bani (${rangeLow.toFixed(2)}-${rangeHigh.toFixed(2)}), Manipulation sweep ka wait.` };
+    if (!ictsMicroShift(ltf.slice(-8), sweepDir)) return { ready:false, guideVal:'Swept', guideCls:sweepDir, guideDesc:`Manipulation sweep ho chuki, Distribution displacement+BOS ka wait.` };
+    const sweepDist = sweepDir === 'bullish' ? (rangeLow - sweepExtreme) : (sweepExtreme - rangeHigh);
+    const tightnessPts = Math.round(Math.max(0, 1 - tightness/3.5) * 25);
+    const sweepPts = Math.round(Math.min(Math.max(sweepDist,0) / ((mtfAtr||1)*0.6), 1) * 25);
+    const distPts = 25;
+    const sessionPts = session.qualityPts;
+    const score = tightnessPts + sweepPts + distPts + sessionPts;
+    const direction = sweepDir === 'bullish' ? 'BUY' : 'SELL';
+    const entry = ltf[ltf.length-1].close;
+    const ltfAtrLocal = ictsAtr(ltf, 14);
+    const sl = direction === 'BUY' ? sweepExtreme - ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : sweepExtreme + ltfAtrLocal * ICTS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: Power of Three (Accumulation → Manipulation → Distribution).`,
+      `1) Accumulation: tight range ${rangeLow.toFixed(2)}-${rangeHigh.toFixed(2)} (tightness ${tightness.toFixed(2)}x ATR).`,
+      `2) Manipulation: range se aage ${sweepExtreme.toFixed(2)} tak sweep hui.`,
+      `3) Distribution: micro structure-shift ${direction} direction mein confirm hui.`,
+      `4) Session: ${session.label} (${sessionPts}/25).`,
+      `SL: sweep extreme ke peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish', guideDesc:`Setup ready — score ${score}%.`,
+      score, breakdown:[{label:'Range Tightness',points:tightnessPts,max:25},{label:'Sweep Clarity',points:sweepPts,max:25},{label:'Displacement+BOS',points:distPts,max:25},{label:'Session Timing',points:sessionPts,max:25}],
+      direction, entry, sl, tp, reason, strategy:'Power of Three' };
+  }
+
+  // ========================= STRATEGY 6: CHoCH Reversal =========================
+  function ictsDetectCHoCH(htf, mtf, ltf, mtfAtr){
+    const trend = ictsHtfBias(htf);
+    if (trend.bias === 'neutral') return { ready:false, guideVal:'Neutral', guideCls:'neutral', guideDesc:trend.reason };
+    const { highs, lows } = ictsFindSwings(mtf.slice(-30), ICTS_SWING_STRENGTH);
+    const chochDir = trend.bias === 'bullish' ? 'bearish' : 'bullish';
+    const ref = chochDir === 'bearish' ? (lows.length ? lows[lows.length-1] : null) : (highs.length ? highs[highs.length-1] : null);
+    if (!ref) return { ready:false, guideVal:'Waiting', guideCls:trend.bias, guideDesc:`Trend ${trend.bias} hai, CHoCH ke liye reference swing nahi mila.` };
+    const recentMtf = mtf.slice(-6);
+    let breakCandle = null;
+    for (const c of recentMtf){
+      if (chochDir === 'bearish' && c.close < ref.price){ breakCandle = c; break; }
+      if (chochDir === 'bullish' && c.close > ref.price){ breakCandle = c; break; }
+    }
+    if (!breakCandle) return { ready:false, guideVal:'Trending', guideCls:trend.bias, guideDesc:`Trend ${trend.bias} hai, abhi CHoCH closing-break nahi hua.` };
+    // Retest: LTF price wapas break-level ke qareeb aana chahiye
+    const ltfAtrLocal = ictsAtr(ltf, 14);
+    const ltfRecent = ltf.slice(-10);
+    let retestCandle = null;
+    for (let i = 1; i < ltfRecent.length; i++){
+      const c = ltfRecent[i];
+      const near = Math.abs(c.high - ref.price) <= ltfAtrLocal*0.6 || Math.abs(c.low - ref.price) <= ltfAtrLocal*0.6;
+      if (!near) continue;
+      const r = ictsRejection(c, chochDir);
+      if (r.ok){ retestCandle = { c, wickRatio: r.wickRatio }; break; }
+    }
+    if (!retestCandle) return { ready:false, guideVal:'CHoCH ✓', guideCls:chochDir, guideDesc:`CHoCH break hui (${ref.price.toFixed(2)}), retest + confirmation candle ka wait.` };
+    const breakDist = chochDir === 'bearish' ? (ref.price - breakCandle.close) : (breakCandle.close - ref.price);
+    const dispPts = Math.round(Math.min(Math.max(breakDist,0) / ((mtfAtr||1)*0.8), 1) * 25);
+    const retestPts = 25;
+    // HTF confluence: compare last two impulse legs' size (momentum shrinking = confluence)
+    let confluencePts = 10;
+    if (trend.lastHigh && trend.prevHigh && trend.lastLow && trend.prevLow){
+      const leg1 = Math.abs(trend.lastHigh.price - trend.prevLow.price);
+      const leg0 = Math.abs(trend.prevHigh.price - trend.prevLow.price);
+      if (leg1 < leg0) confluencePts = 25;
+    }
+    const structPts = 25;
+    const score = dispPts + retestPts + confluencePts + structPts;
+    const direction = chochDir === 'bullish' ? 'BUY' : 'SELL';
+    const entry = ltfRecent[ltfRecent.length-1].close;
+    const sl = direction === 'BUY' ? Math.min(retestCandle.c.low, ref.price) - ltfAtrLocal*ICTS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+                                   : Math.max(retestCandle.c.high, ref.price) + ltfAtrLocal*ICTS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? entry + Math.abs(entry - sl) * 2 : entry - Math.abs(entry - sl) * 2;
+    const reason = [
+      `Strategy: CHoCH Reversal.`,
+      `1) Prevailing Trend (1H): ${trend.reason}`,
+      `2) CHoCH (15M): closing-basis break ${ref.price.toFixed(2)} ke against — trend-change signal.`,
+      `3) Retest (5M): level ke qareeb wapas aakar rejection candle bani (wick:body ${retestCandle.wickRatio.toFixed(2)}).`,
+      `4) HTF Confluence: ${confluencePts===25 ? 'pichli impulse leg shrink ho rahi thi (momentum exhaustion).' : 'momentum-shrinkage clear nahi, weak confluence.'}`,
+      `SL: retest extreme ke peeche + spread buffer. TP: 1:2 RR.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls:direction==='BUY'?'bullish':'bearish', guideDesc:`Setup ready — score ${score}%.`,
+      score, breakdown:[{label:'CHoCH Displacement',points:dispPts,max:25},{label:'Retest Confirmation',points:retestPts,max:25},{label:'HTF Momentum Confluence',points:confluencePts,max:25},{label:'Structure Break Clarity',points:structPts,max:25}],
+      direction, entry, sl, tp, reason, strategy:'CHoCH Reversal' };
+  }
+
+  // ========================= GUIDE UI =========================
+  function ictsSetGuideCard(prefix, res){
+    const val = document.getElementById(prefix + 'Val');
+    const desc = document.getElementById(prefix + 'Desc');
+    const scoreEl = document.getElementById(prefix + 'Score');
+    if (val){ val.textContent = res.guideVal; val.className = 'icts-s-val ' + res.guideCls; }
+    if (desc) desc.textContent = res.guideDesc;
+    if (scoreEl) scoreEl.textContent = res.score !== undefined ? `Score: ${res.score}%` : '';
+  }
+
+  // ========================= MAIN CYCLE =========================
+  async function ictsRunCycle(){
+    const openSnap = await db.collection('ictSignals').where('status','in',['open']).limit(1).get();
+    if (!openSnap.empty){
+      await ictsMonitor(openSnap.docs[0]);
+      ictsSetStatus('Live — ek ICT signal already open hai, monitor ho raha hai.');
+      return;
+    }
+
+    const [htf, mtf, ltf] = await Promise.all([
+      ictsFetchCandles(ICTS_HTF_INTERVAL, 60), ictsFetchCandles(ICTS_MTF_INTERVAL, 100), ictsFetchCandles(ICTS_LTF_INTERVAL, 100)
+    ]);
+    ictsHtf = htf; ictsMtf = mtf; ictsLtf = ltf;
+    if (htf.length < 15 || mtf.length < 45 || ltf.length < 15){ ictsSetStatus('Price history jama ho rahi hai...'); return; }
+
+    const mtfAtr = ictsAtr(mtf, 14), htfAtr = ictsAtr(htf, 14);
+    const session = ictsSessionInfo();
+
+    const r1 = ictsDetectKillzone(htf, mtf, ltf, mtfAtr, session);
+    const r2 = ictsDetectOrderBlockFVG(htf, ltf, htfAtr);
+    const r3 = ictsDetectJudas(mtf, ltf, mtfAtr, session);
+    const r4 = ictsDetectOTE(htf, mtf, ltf, htfAtr);
+    const r5 = ictsDetectPO3(mtf, ltf, mtfAtr, session);
+    const r6 = ictsDetectCHoCH(htf, mtf, ltf, mtfAtr);
+    ictsSetGuideCard('ictsS1', r1); ictsSetGuideCard('ictsS2', r2); ictsSetGuideCard('ictsS3', r3);
+    ictsSetGuideCard('ictsS4', r4); ictsSetGuideCard('ictsS5', r5); ictsSetGuideCard('ictsS6', r6);
+
+    const candidates = [r1, r2, r3, r4, r5, r6].filter(r => r.ready && r.score >= ICTS_MIN_SCORE);
+    if (!candidates.length){
+      ictsSetStatus('Live — 6 strategies monitor ho rahi hain, abhi koi 80%+ setup nahi.');
+      return;
+    }
+    candidates.sort((a,b) => b.score - a.score);
+    const best = candidates[0];
+
+    const rr = Math.abs(best.tp - best.entry) / Math.abs(best.entry - best.sl);
+    if (!isFinite(rr) || rr < 1){
+      ictsLogFeed(`⚠️ ${best.strategy} setup mila (score ${best.score}%) lekin RR kam tha — skip.`);
+      ictsSetStatus('Live — RR insufficient tha, signal skip hua.');
+      return;
+    }
+
+    const exposure = await crossBotExposureCheck(best.direction);
+    if (!exposure.allowed){
+      ictsLogFeed(`⛔ ${best.direction} direction mein already ${exposure.openCount} bots ke signals open hain (cap: ${CROSS_BOT_MAX_SAME_DIRECTION}) — skip.`);
+      ictsSetStatus('Live — cross-bot exposure cap ki wajah se signal skip hua.');
+      return;
+    }
+
+    await db.collection('ictSignals').add({
+      strategy: best.strategy, direction: best.direction, entry: best.entry, sl: best.sl, tp: best.tp, rr,
+      confidence: best.score, confidenceTier: best.score >= 90 ? 'Very High' : 'High', confidenceBreakdown: best.breakdown,
+      reason: best.reason, status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ictsLogFeed(`✅ Naya ${best.direction} signal — ${best.strategy} (score ${best.score}%).`);
+    ictsSetStatus(`Live — naya ${best.direction} signal fire hua: ${best.strategy} (score ${best.score}%).`);
+  }
+
+  async function ictsMonitor(doc){
+    const livePrice = await ictsFetchLatestPrice();
+    const price = livePrice !== null ? livePrice : (ictsLtf.length ? ictsLtf[ictsLtf.length-1].close : null);
+    if (price === null) return;
+    const d = doc.data();
+    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
+    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
+    if (hitTP){
+      await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      ictsLogFeed(`🎯 ${d.strategy} signal TP hit!`);
+    } else if (hitSL){
+      await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      ictsLogFeed(`🛑 ${d.strategy} signal SL hit.`);
+    }
+  }
+
+  // ========================= UI RENDER =========================
+  function ictsRenderLive(sig){
+    const card = document.getElementById('ictsLiveCard');
+    const badge = document.getElementById('ictsDirBadge');
+    if (!card || !badge) return;
+    if (!sig){
+      card.className = 'icts-live-card';
+      badge.className = 'icts-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('ictsStrategyName').textContent = '—';
+      document.getElementById('ictsEntry').textContent = '—';
+      document.getElementById('ictsSL').textContent = '—';
+      document.getElementById('ictsTP').textContent = '—';
+      document.getElementById('ictsConfidence').textContent = '—';
+      document.getElementById('ictsReason').textContent = 'Abhi koi active ICT signal nahi hai. Bot 6 strategies ko monitor kar raha hai.';
+      document.getElementById('ictsLiveTime').textContent = '—';
+      return;
+    }
+    card.className = 'icts-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
+    badge.className = 'icts-dir-badge ' + sig.direction;
+    badge.textContent = sig.direction + (sig.status !== 'open' ? ' — ' + sig.status.toUpperCase() : '');
+    document.getElementById('ictsStrategyName').textContent = sig.strategy;
+    document.getElementById('ictsEntry').textContent = sig.entry.toFixed(2);
+    document.getElementById('ictsSL').textContent = sig.sl.toFixed(2);
+    document.getElementById('ictsTP').textContent = sig.tp.toFixed(2);
+    document.getElementById('ictsConfidence').textContent = `${sig.confidence}% (${sig.confidenceTier})`;
+    document.getElementById('ictsReason').textContent = sig.reason;
+    document.getElementById('ictsLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
+  }
+  function ictsRenderHistory(docs){
+    const container = document.getElementById('ictsHistory');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!docs.length){ container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'icts-history-item';
+      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#facc15;">(${d.strategy}, Score: ${d.confidence}%)</em></span>
+        <span class="icts-badge-status ${d.status}">${(d.status||'').replace('_',' ').toUpperCase()}</span>`;
+      container.appendChild(row);
+    });
+  }
+  function ictsListen(){
+    db.collection('ictSignals').orderBy('createdAt','desc').limit(50).onSnapshot(snap => {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const active = docs.find(d => d.status === 'open');
+      ictsRenderLive(active || null);
+      ictsRenderHistory(docs.slice(0, 15));
+      const tpHits = docs.filter(d => d.status === 'tp_hit').length;
+      const slHits = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = tpHits + slHits;
+      const winRate = closed > 0 ? ((tpHits/closed)*100).toFixed(1) : '0';
+      document.getElementById('ictsTotal').textContent = docs.length;
+      document.getElementById('ictsTpCount').textContent = tpHits;
+      document.getElementById('ictsSlCount').textContent = slHits;
+      document.getElementById('ictsWinRate').textContent = winRate + '%';
+      window.ictsAllSignals = docs;
+      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
+    }, () => { ictsRenderLive(null); });
+  }
+
+  // ========================= INIT =========================
+  function ictsStartEngine(){
+    ictsListen();
+    ictsLogFeed('ICT Signals bot start ho gaya — 6 strategies (Killzone, OB+FVG, Judas, OTE, PO3, CHoCH) monitor ho rahi hain.');
+    ictsRunCycle();
+    ictsTimer = setInterval(ictsRunCycle, ICTS_CYCLE_MS);
+    ictsMonitorTimer = setInterval(async () => {
+      try {
+        const openSnap = await db.collection('ictSignals').where('status','in',['open']).limit(1).get();
+        if (!openSnap.empty) await ictsMonitor(openSnap.docs[0]);
+      } catch(err){ /* best-effort */ }
+    }, ICTS_MONITOR_MS);
+  }
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) ictsStartEngine();
+      else {
+        if (ictsTimer) { clearInterval(ictsTimer); ictsTimer = null; }
+        if (ictsMonitorTimer) { clearInterval(ictsMonitorTimer); ictsMonitorTimer = null; }
+      }
+    });
+  }
+})();
+</script>
+
 
 
  <script>
