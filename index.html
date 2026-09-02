@@ -607,6 +607,7 @@
    <a href="#fractalictsignals">🔮 Fractal ICT Signals</a>
    <a href="#priceactionsignals">🕯️🤖 Price Action Signals</a>
    <a href="#ictsignals">🧭🤖 ICT Signals</a>
+   <a href="#gannsignals">🔱🤖 Gann Signals</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -655,6 +656,7 @@
       <a class="sd-folder" href="#fractalictsignals"><div class="sd-icon">🔮</div><h4>Fractal ICT Signals</h4><p>Bias + Structure + Liquidity (multi-timeframe True ICT) — live guide ke sath.</p></a>
       <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
+      <a class="sd-folder" href="#gannsignals"><div class="sd-icon">🔱🤖</div><h4>Gann Signals</h4><p>Gann Number support/resistance levels par Rejection + Breakout confirmation — 80%+ setup-score signals, live ladder ke sath.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -2781,7 +2783,7 @@
   // agar cap se zyada hon to naya signal skip ho jata hai (fail-open agar query hi fail ho jaye,
   // taake ek Firestore glitch sab bots ko permanently stuck na kar de).
   const CROSS_BOT_MAX_SAME_DIRECTION = 2;
-  const CROSS_BOT_COLLECTIONS = ['ictSignals', 'priceActionSignals', 'fundOnlySignals', 'fractalIctSignals'];
+  const CROSS_BOT_COLLECTIONS = ['ictSignals', 'priceActionSignals', 'fundOnlySignals', 'fractalIctSignals', 'gannSignals'];
   // Realistic spread/slippage buffer for XAUUSD (in price $) — pehle SL/TP calculations "clean" theoretical
   // levels par based the, jaisay broker fill exact ho. Ab har bot ka SL is buffer se thora aur door rakha
   // jata hai taake normal spread widening (khaas kar news ya Asian session mein) se SL ko waqt se pehle
@@ -6103,6 +6105,573 @@ INTEGRATION STEPS:
   .kyc-admin-imgs { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
   .kyc-admin-imgs img { width:90px; height:90px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid rgba(148,163,184,0.2); }
 </style>
+
+<style>
+  .gs-wrap{display:flex;flex-direction:column;gap:20px;}
+  .gs-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .gs-dot{width:8px;height:8px;border-radius:50%;background:#fb923c;animation:recPulse 1.2s infinite;}
+  .gs-ladder{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+  .gs-ladder-box{flex:1;min-width:120px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;text-align:center;}
+  .gs-ladder-box.current{border-color:rgba(251,146,60,0.5);box-shadow:0 0 18px rgba(251,146,60,0.15);}
+  .gs-ladder-box .label{font-size:10.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
+  .gs-ladder-box .value{font-size:17px;font-weight:800;margin-top:6px;color:#e2e8f0;}
+  .gs-ladder-box.current .value{color:#fb923c;}
+  .gs-strategy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px;}
+  .gs-strategy{background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:14px;}
+  .gs-strategy .gs-s-title{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+  .gs-strategy .gs-s-val{font-size:15px;font-weight:800;margin-bottom:6px;}
+  .gs-strategy .gs-s-val.bullish{color:#22c55e;}
+  .gs-strategy .gs-s-val.bearish{color:#ef4444;}
+  .gs-strategy .gs-s-val.neutral,.gs-strategy .gs-s-val.waiting{color:#94a3b8;}
+  .gs-strategy .gs-s-desc{font-size:12px;color:#64748b;line-height:1.5;}
+  .gs-strategy .gs-s-score{font-size:11px;color:#fb923c;margin-top:6px;font-weight:700;}
+  .gs-toprow{display:flex;gap:15px;flex-wrap:wrap;}
+  .gs-stat{flex:1;min-width:140px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:16px;text-align:center;}
+  .gs-stat .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
+  .gs-stat .value{font-size:22px;font-weight:800;margin-top:6px;}
+  .gs-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(251,146,60,0.35);border-radius:18px;padding:22px;}
+  .gs-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
+  .gs-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
+  .gs-live-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .gs-dir-badge{font-weight:900;font-size:18px;padding:4px 16px;border-radius:999px;}
+  .gs-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .gs-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .gs-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .gs-time{color:#64748b;font-size:12px;}
+  .gs-levels{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .gs-level-box{flex:1;min-width:110px;background:rgba(15,23,42,0.6);border-radius:12px;padding:12px;text-align:center;}
+  .gs-level-box .label{font-size:11px;color:#94a3b8;}
+  .gs-level-box .value{font-size:18px;font-weight:800;margin-top:4px;}
+  .gs-reason{background:rgba(15,23,42,0.5);border-left:3px solid #fb923c;border-radius:8px;padding:14px 16px;color:#cbd5e1;font-size:13.5px;line-height:1.7;white-space:pre-line;}
+  .gs-feed{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+  .gs-feed-item{font-size:12.5px;color:#94a3b8;padding:8px 12px;background:rgba(15,23,42,0.45);border-radius:8px;border-left:2px solid rgba(148,163,184,0.3);}
+  .gs-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;gap:6px;}
+  .gs-badge-status{font-weight:800;font-size:11px;padding:3px 10px;border-radius:999px;}
+  .gs-badge-status.tp_hit{background:rgba(34,197,94,0.15);color:#22c55e;}
+  .gs-badge-status.sl_hit{background:rgba(239,68,68,0.15);color:#ef4444;}
+  .gs-badge-status.open{background:rgba(250,204,21,0.15);color:#facc15;}
+</style>
+
+<section id="gannsignals">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🔱🤖 Gann Numbers Signals — Rejection &amp; Breakout Confirmation</h3>
+    <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
+      Yeh bot XAUUSD ka live price khud fetch kar ke, Gann Number formula (natural number ka square →
+      odd ho to wahi, even ho to +1) se ek <b>live support/resistance ladder</b> banata hai, aur do
+      independent setups monitor karta hai: <b>Gann Rejection</b> (level se reversal) aur
+      <b>Gann Breakout</b> (level ke clean paar continuation). Har setup ka apna confluence-based
+      <b>"Signal Score"</b> (0-100%) hota hai — signal sirf tab fire hota hai jab score <b>80%+</b> ho.
+    </p>
+    <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; line-height:1.6;">
+      ⚠️ <b>Zaroori clarification:</b> Gann Numbers ek <b>discretionary/numerology-based technique</b>
+      hai — iski koi scientific/statistical backing proven nahi. Yahan 80%+ jo dikh raha hai wo ek
+      <b>rule-based "confirmation quality" score</b> hai (proximity, rejection/displacement strength,
+      trend alignment, level spacing ka weighted total) — <b>guaranteed win-rate nahi</b>. "Win Rate"
+      stat neeche is bot ki apni, is website par <b>real logged history</b> se (TP hits ÷ closed trades)
+      hai. Hamesha apna risk management khud follow karein.
+    </p>
+
+    <div class="gs-engine-status">
+      <span class="gs-dot"></span>
+      <span id="gsEngineStatusText">Bot initialize ho raha hai...</span>
+    </div>
+
+    <h4 style="color:#fb923c; font-size:15px; margin-bottom:10px;">🔱 Live Gann Ladder (Current Price ke Aas-Paas)</h4>
+    <div class="gs-ladder">
+      <div class="gs-ladder-box"><div class="label">Next Support</div><div class="value" id="gsNextSupport">—</div></div>
+      <div class="gs-ladder-box"><div class="label">Support</div><div class="value" id="gsSupport">—</div></div>
+      <div class="gs-ladder-box current"><div class="label">Current Price</div><div class="value" id="gsCurrentPrice">—</div></div>
+      <div class="gs-ladder-box"><div class="label">Resistance</div><div class="value" id="gsResistance">—</div></div>
+      <div class="gs-ladder-box"><div class="label">Next Resistance</div><div class="value" id="gsNextResistance">—</div></div>
+    </div>
+
+    <h4 style="color:#fb923c; font-size:15px; margin-bottom:10px;">📖 Live Guide — Dono Setups Abhi Kya Keh Rahe Hain</h4>
+    <div class="gs-strategy-grid">
+      <div class="gs-strategy">
+        <div class="gs-s-title">1. Gann Rejection (Reversal)</div>
+        <div class="gs-s-val waiting" id="gsS1Val">—</div>
+        <div class="gs-s-desc" id="gsS1Desc">5M par Gann level ke qareeb rejection wick/candle dhoond rahe hain...</div>
+        <div class="gs-s-score" id="gsS1Score"></div>
+      </div>
+      <div class="gs-strategy">
+        <div class="gs-s-title">2. Gann Breakout (Continuation)</div>
+        <div class="gs-s-val waiting" id="gsS2Val">—</div>
+        <div class="gs-s-desc" id="gsS2Desc">15M par Gann level ka strong displacement breakout + 5M continuation confirmation dhoond rahe hain...</div>
+        <div class="gs-s-score" id="gsS2Score"></div>
+      </div>
+    </div>
+
+    <div class="gs-toprow" style="margin-bottom:18px;">
+      <div class="gs-stat"><div class="label">Total Signals</div><div class="value" id="gsTotal" style="color:#facc15;">0</div></div>
+      <div class="gs-stat"><div class="label">TP Hits</div><div class="value" id="gsTpCount" style="color:#22c55e;">0</div></div>
+      <div class="gs-stat"><div class="label">SL Hits</div><div class="value" id="gsSlCount" style="color:#ef4444;">0</div></div>
+      <div class="gs-stat"><div class="label">Win Rate (Real, Logged)</div><div class="value" id="gsWinRate" style="color:#fb923c;">0%</div></div>
+    </div>
+
+    <h4 style="color:#fb923c; font-size:15px; margin-bottom:10px;">Current Signal</h4>
+    <div class="gs-live-card" id="gsLiveCard">
+      <div class="gs-live-head">
+        <span class="gs-dir-badge NONE" id="gsDirBadge">NO ACTIVE SIGNAL</span>
+        <span class="gs-time" id="gsLiveTime">—</span>
+      </div>
+      <div class="gs-levels">
+        <div class="gs-level-box"><div class="label">Strategy</div><div class="value" id="gsStrategyName" style="color:#fb923c; font-size:14px;">—</div></div>
+        <div class="gs-level-box"><div class="label">Entry</div><div class="value" id="gsEntry" style="color:#e2e8f0;">—</div></div>
+        <div class="gs-level-box"><div class="label">Stop Loss</div><div class="value" id="gsSL" style="color:#fda4af;">—</div></div>
+        <div class="gs-level-box"><div class="label">Take Profit</div><div class="value" id="gsTP" style="color:#67e8f9;">—</div></div>
+        <div class="gs-level-box"><div class="label">Signal Score</div><div class="value" id="gsConfidence" style="color:#fb923c;">—</div></div>
+      </div>
+      <div class="gs-reason" id="gsReason">Abhi koi active Gann signal nahi hai. Bot dono setups ko monitor kar raha hai.</div>
+    </div>
+
+    <h4 style="color:#fb923c; font-size:15px; margin:26px 0 10px;">Live Commentary</h4>
+    <div class="gs-feed" id="gsFeed">
+      <p style="color:#64748b; font-size:13px;">Feed load ho raha hai...</p>
+    </div>
+
+    <h4 style="color:#fb923c; font-size:15px; margin:26px 0 10px;">Signal History</h4>
+    <div id="gsHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>Formula aur setup rules (is bot mein jaisay implement hain):</b>
+      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
+        <li><b>Gann Number Formula:</b> har natural number (n) ka square nikalte hain. Agar square odd
+          hai to wahi Gann number hai; agar even hai to us mein 1 add karte hain. In numbers ki ek
+          ascending ladder current price ke aas-paas banai jaati hai — jo level price se neeche hai wo
+          <b>Support</b>, jo upar hai wo <b>Resistance</b>.</li>
+        <li><b>Gann Rejection:</b> 5M par price jab Support/Resistance level ke qareeb (ATR-tolerance ke
+          andar) aati hai aur wahan se ek strong rejection wick/candle bana kar wapas jaati hai, to
+          reversal signal (Resistance se SELL, Support se BUY) fire hota hai. Score: Trend Alignment
+          (1H bias) + Rejection Precision (level ke kitne qareeb) + Wick Strength (wick:body ratio) +
+          Level Spacing (support-resistance gap ATR ke muqable) — 25 pts each.</li>
+        <li><b>Gann Breakout:</b> 15M par price kisi Gann level ko strong displacement candle (body,
+          ATR ke muqable) ke sath clean cross kar jaye, aur 5M par continuation confirm ho (agla candle
+          bhi level ke usi taraf close ho), to continuation signal fire hota hai — target agla Gann
+          level. Score: Displacement Strength + Trend Alignment (1H bias) + Target Spacing + 5M
+          Continuation Confirmation — 25 pts each.</li>
+        <li>Dono setups <b>independently</b> chalte hain — jo bhi pehle 80%+ score achieve kare, wahi
+          signal fire hota hai. SL/TP Gann ladder ke agle/pichle level se nikalte hain, na ke random.</li>
+      </ol>
+      <p style="margin-top:10px;">Gann theory ek <b>discretionary framework</b> hai, guarantee nahi —
+        market conditions, spread/slippage aur news ki wajah se koi bhi setup fail ho sakta hai. Hamesha
+        apna risk management (position size, max daily loss) khud follow karein.</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  // ========================= CONFIG (independent bot — apna alag Firestore collection 'gannSignals') =========================
+  const GS_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
+  const GS_SYMBOL = "XAU/USD";
+  const GS_HTF_INTERVAL = '1h', GS_MTF_INTERVAL = '15min', GS_LTF_INTERVAL = '5min';
+  const GS_SWING_STRENGTH = 2;
+  const GS_LADDER_RANGE = 6; // kitne natural numbers upar/neeche current price ke, ladder ke liye
+  const GS_CYCLE_MS = 5 * 60 * 1000;
+  const GS_MONITOR_MS = 60 * 1000;
+  const GS_MIN_SCORE = 80; // sirf 80%+ confirmation-quality score par hi signal fire hota hai
+  const GS_ATR_SL_BUFFER_MULT = 0.3;
+
+  let gsHtf = [], gsMtf = [], gsLtf = [], gsLadder = [];
+  let gsTimer = null, gsMonitorTimer = null;
+
+  // ========================= SHARED HELPERS =========================
+  function gsLogFeed(msg){
+    const el = document.getElementById('gsFeed');
+    if (!el) return;
+    const line = document.createElement('div');
+    line.className = 'gs-feed-item';
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.prepend(line);
+    while (el.childElementCount > 40) el.removeChild(el.lastChild);
+  }
+  function gsSetStatus(msg){
+    const el = document.getElementById('gsEngineStatusText');
+    if (el) el.textContent = msg;
+  }
+  async function gsFetchCandles(interval, outputsize){
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(GS_SYMBOL)}&interval=${interval}&outputsize=${outputsize}&apikey=${GS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.values) return [];
+      return data.values.reverse().map(v => ({
+        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
+        low: parseFloat(v.low), close: parseFloat(v.close)
+      }));
+    } catch(err){ return []; }
+  }
+  async function gsFetchLatestPrice(){
+    try {
+      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(GS_SYMBOL)}&apikey=${GS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const p = parseFloat(data.price);
+      return isNaN(p) ? null : p;
+    } catch(err){ return null; }
+  }
+  function gsAtr(candles, period){
+    if (candles.length < period + 1) return 0;
+    let trs = [];
+    for (let i = candles.length - period; i < candles.length; i++){
+      const c = candles[i], p = candles[i-1];
+      trs.push(Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close)));
+    }
+    return trs.reduce((a,b) => a+b, 0) / trs.length;
+  }
+  function gsFindSwings(candles, strength){
+    const highs = [], lows = [];
+    for (let i = strength; i < candles.length - strength; i++){
+      const c = candles[i];
+      let isHigh = true, isLow = true;
+      for (let k = 1; k <= strength; k++){
+        if (candles[i-k].high >= c.high || candles[i+k].high >= c.high) isHigh = false;
+        if (candles[i-k].low <= c.low || candles[i+k].low <= c.low) isLow = false;
+      }
+      if (isHigh) highs.push({ index:i, price:c.high, time:c.time });
+      if (isLow) lows.push({ index:i, price:c.low, time:c.time });
+    }
+    return { highs, lows };
+  }
+  function gsHtfBias(htfCandles){
+    const { highs, lows } = gsFindSwings(htfCandles, GS_SWING_STRENGTH);
+    if (highs.length < 2 || lows.length < 2) return { bias:'neutral', reason:'1H par abhi kaafi swing points nahi bane.' };
+    const h1 = highs[highs.length-1], h0 = highs[highs.length-2];
+    const l1 = lows[lows.length-1], l0 = lows[lows.length-2];
+    if (h1.price > h0.price && l1.price > l0.price) return { bias:'bullish', reason:'1H Higher-High + Higher-Low — bullish trend.' };
+    if (h1.price < h0.price && l1.price < l0.price) return { bias:'bearish', reason:'1H Lower-High + Lower-Low — bearish trend.' };
+    return { bias:'neutral', reason:'1H swings mixed hain — trend abhi neutral/ranging.' };
+  }
+
+  // ========================= GANN LADDER =========================
+  // Formula: natural number ka square → odd ho to wahi Gann number, even ho to +1.
+  function gsComputeLadder(price, range){
+    const n = Math.max(2, Math.round(Math.sqrt(price)));
+    const start = Math.max(2, n - range);
+    const levels = [];
+    for (let i = start; i <= n + range; i++){
+      const sq = i * i;
+      const gann = (sq % 2 === 0) ? sq + 1 : sq;
+      levels.push({ n:i, square:sq, gann });
+    }
+    return levels; // ascending
+  }
+  function gsNearestLevels(ladder, price){
+    let idx = -1;
+    for (let i = 0; i < ladder.length; i++){
+      if (ladder[i].gann <= price) idx = i; else break;
+    }
+    if (idx < 1 || idx >= ladder.length - 2) return null; // not enough range on either side
+    return {
+      support: ladder[idx].gann,
+      resistance: ladder[idx+1].gann,
+      nextSupport: ladder[idx-1].gann,
+      nextResistance: ladder[idx+2].gann
+    };
+  }
+  function gsLevelAbove(ladder, level){
+    for (const l of ladder) if (l.gann > level) return l.gann;
+    return null;
+  }
+  function gsLevelBelow(ladder, level){
+    let res = null;
+    for (const l of ladder){ if (l.gann < level) res = l.gann; else break; }
+    return res;
+  }
+  function gsRenderLadder(levels, price){
+    document.getElementById('gsCurrentPrice').textContent = price ? price.toFixed(2) : '—';
+    if (!levels){
+      ['gsSupport','gsResistance','gsNextSupport','gsNextResistance'].forEach(id => document.getElementById(id).textContent = '—');
+      return;
+    }
+    document.getElementById('gsSupport').textContent = levels.support.toFixed(0);
+    document.getElementById('gsResistance').textContent = levels.resistance.toFixed(0);
+    document.getElementById('gsNextSupport').textContent = levels.nextSupport ? levels.nextSupport.toFixed(0) : '—';
+    document.getElementById('gsNextResistance').textContent = levels.nextResistance ? levels.nextResistance.toFixed(0) : '—';
+  }
+
+  // ========================= STRATEGY 1: Gann Rejection =========================
+  function gsDetectRejection(htf, ltf, levels, ltfAtr){
+    if (!levels) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Ladder range abhi price ke aas-paas set ho rahi hai.' };
+    const bias = gsHtfBias(htf);
+    const tol = (ltfAtr || 1) * 0.5;
+    const recent = ltf.slice(-6);
+    let candidate = null;
+    for (let i = recent.length - 1; i >= 0; i--){
+      const c = recent[i];
+      // resistance rejection -> SELL
+      if (c.high >= levels.resistance - tol && c.close < levels.resistance && c.close < c.open){
+        const wick = c.high - Math.max(c.open, c.close);
+        const body = Math.abs(c.close - c.open) || 0.0001;
+        if (wick / body > 0.5){ candidate = { type:'resistance', c, wick, body, level:levels.resistance }; break; }
+      }
+      // support rejection -> BUY
+      if (c.low <= levels.support + tol && c.close > levels.support && c.close > c.open){
+        const wick = Math.min(c.open, c.close) - c.low;
+        const body = Math.abs(c.close - c.open) || 0.0001;
+        if (wick / body > 0.5){ candidate = { type:'support', c, wick, body, level:levels.support }; break; }
+      }
+    }
+    if (!candidate){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting',
+        guideDesc:`Support ${levels.support.toFixed(0)} / Resistance ${levels.resistance.toFixed(0)} — 5M par rejection wick ka wait.` };
+    }
+    const direction = candidate.type === 'resistance' ? 'SELL' : 'BUY';
+    const trendPts = direction === 'SELL'
+      ? (bias.bias === 'bearish' ? 25 : bias.bias === 'neutral' ? 15 : 5)
+      : (bias.bias === 'bullish' ? 25 : bias.bias === 'neutral' ? 15 : 5);
+    const wickPrice = candidate.type === 'resistance' ? candidate.c.high : candidate.c.low;
+    const precision = 1 - Math.min(Math.abs(wickPrice - candidate.level) / ((ltfAtr || 1) * 1.2), 1);
+    const precisionPts = Math.round(precision * 25);
+    const rejPts = Math.round(Math.min((candidate.wick / candidate.body) / 2, 1) * 25);
+    const gap = levels.resistance - levels.support;
+    const spacingPts = Math.round(Math.min(gap / ((ltfAtr || 1) * 3), 1) * 25);
+    const score = trendPts + precisionPts + rejPts + spacingPts;
+    const entry = candidate.c.close;
+    const sl = direction === 'SELL'
+      ? candidate.c.high + (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER
+      : candidate.c.low - (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'SELL' ? levels.support : levels.resistance;
+    const reason = [
+      `Strategy: Gann Rejection (5M rejection at Gann level).`,
+      `1) Trend (1H): ${bias.reason}`,
+      `2) Level: ${candidate.type === 'resistance' ? 'Resistance' : 'Support'} ${candidate.level.toFixed(0)} — price ne wick se test kiya aur rejection candle bani (wick:body = ${(candidate.wick/candidate.body).toFixed(2)}).`,
+      `3) Target: agla Gann ${direction === 'SELL' ? 'support' : 'resistance'} level (${tp.toFixed(0)}).`,
+      `SL: rejection candle ke peeche + spread buffer.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls: direction === 'BUY' ? 'bullish' : 'bearish',
+      guideDesc:`Setup ready — score ${score}%.`, score, direction, entry, sl, tp, reason, strategy:'Gann Rejection' };
+  }
+
+  // ========================= STRATEGY 2: Gann Breakout =========================
+  function gsDetectBreakout(htf, mtf, ltf, ladder, mtfAtr, ltfAtr){
+    const bias = gsHtfBias(htf);
+    const recent = mtf.slice(-8);
+    let brk = null;
+    for (let i = recent.length - 1; i >= 1; i--){
+      const c = recent[i], prev = recent[i-1];
+      for (const lv of ladder){
+        const bullBreak = prev.close < lv.gann && c.close > lv.gann;
+        const bearBreak = prev.close > lv.gann && c.close < lv.gann;
+        if (bullBreak || bearBreak){
+          const body = Math.abs(c.close - c.open);
+          const displaced = mtfAtr > 0 ? body / mtfAtr : 0;
+          if (displaced > 0.4){
+            brk = { level: lv.gann, dir: bullBreak ? 'BUY' : 'SELL', displaced, c };
+            break;
+          }
+        }
+      }
+      if (brk) break;
+    }
+    if (!brk){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'15M par kisi Gann level ka strong displacement breakout ka wait ho raha hai.' };
+    }
+    // 5M continuation confirmation — last 2 candles usi taraf close honi chahiye
+    const ltfRecent = ltf.slice(-2);
+    const confirmed = ltfRecent.length === 2 && ltfRecent.every(c => brk.dir === 'BUY' ? c.close > brk.level : c.close < brk.level);
+    if (!confirmed){
+      return { ready:false, guideVal:'Forming', guideCls: brk.dir === 'BUY' ? 'bullish' : 'bearish',
+        guideDesc:`Breakout ho chuka hai (${brk.level.toFixed(0)}), 5M continuation confirmation ka wait.` };
+    }
+    const target = brk.dir === 'BUY' ? gsLevelAbove(ladder, brk.level) : gsLevelBelow(ladder, brk.level);
+    if (!target){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Breakout confirm, lekin agla target level ladder range se bahar hai.' };
+    }
+    const dispPts = Math.round(Math.min(brk.displaced / 1.2, 1) * 25);
+    const trendPts = brk.dir === 'BUY'
+      ? (bias.bias === 'bullish' ? 25 : bias.bias === 'neutral' ? 15 : 5)
+      : (bias.bias === 'bearish' ? 25 : bias.bias === 'neutral' ? 15 : 5);
+    const spacing = Math.abs(target - brk.level);
+    const spacingPts = Math.round(Math.min(spacing / ((ltfAtr || 1) * 3), 1) * 25);
+    const confPts = 25; // already required both LTF candles confirmed above
+    const score = dispPts + trendPts + spacingPts + confPts;
+    const entry = ltf[ltf.length - 1].close;
+    const sl = brk.dir === 'BUY'
+      ? brk.level - (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+      : brk.level + (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = target;
+    const reason = [
+      `Strategy: Gann Breakout (15M displacement / 5M continuation).`,
+      `1) Trend (1H): ${bias.reason}`,
+      `2) Breakout: Gann level ${brk.level.toFixed(0)} strong displacement ke sath toota (${brk.displaced.toFixed(2)}x ATR).`,
+      `3) Confirmation (5M): last 2 candles ${brk.level.toFixed(0)} ke ${brk.dir === 'BUY' ? 'upar' : 'neeche'} hi close hui.`,
+      `Target: agla Gann level ${tp.toFixed(0)}. SL: broken level ke andar + spread buffer.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls: brk.dir === 'BUY' ? 'bullish' : 'bearish',
+      guideDesc:`Setup ready — score ${score}%.`, score, direction: brk.dir, entry, sl, tp, reason, strategy:'Gann Breakout' };
+  }
+
+  // ========================= GUIDE UI =========================
+  function gsSetGuideCard(prefix, res){
+    const val = document.getElementById(prefix + 'Val');
+    const desc = document.getElementById(prefix + 'Desc');
+    const scoreEl = document.getElementById(prefix + 'Score');
+    if (val){ val.textContent = res.guideVal; val.className = 'gs-s-val ' + res.guideCls; }
+    if (desc) desc.textContent = res.guideDesc;
+    if (scoreEl) scoreEl.textContent = res.score !== undefined ? `Score: ${res.score}%` : '';
+  }
+
+  // ========================= MAIN CYCLE =========================
+  async function gsRunCycle(){
+    const openSnap = await db.collection('gannSignals').where('status','in',['open']).limit(1).get();
+    if (!openSnap.empty){
+      await gsMonitor(openSnap.docs[0]);
+      gsSetStatus('Live — ek Gann signal already open hai, monitor ho raha hai.');
+      return;
+    }
+
+    const [htf, mtf, ltf] = await Promise.all([
+      gsFetchCandles(GS_HTF_INTERVAL, 60), gsFetchCandles(GS_MTF_INTERVAL, 100), gsFetchCandles(GS_LTF_INTERVAL, 100)
+    ]);
+    gsHtf = htf; gsMtf = mtf; gsLtf = ltf;
+    if (htf.length < 15 || mtf.length < 15 || ltf.length < 15){ gsSetStatus('Price history jama ho rahi hai...'); return; }
+
+    const price = ltf[ltf.length - 1].close;
+    gsLadder = gsComputeLadder(price, GS_LADDER_RANGE);
+    const levels = gsNearestLevels(gsLadder, price);
+    gsRenderLadder(levels, price);
+
+    const mtfAtr = gsAtr(mtf, 14), ltfAtr = gsAtr(ltf, 14);
+
+    const r1 = gsDetectRejection(htf, ltf, levels, ltfAtr);
+    const r2 = gsDetectBreakout(htf, mtf, ltf, gsLadder, mtfAtr, ltfAtr);
+    gsSetGuideCard('gsS1', r1);
+    gsSetGuideCard('gsS2', r2);
+
+    const candidates = [r1, r2].filter(r => r.ready && r.score >= GS_MIN_SCORE);
+    if (!candidates.length){
+      gsSetStatus('Live — dono setups monitor ho rahe hain, abhi koi 80%+ confirmation nahi.');
+      return;
+    }
+    candidates.sort((a,b) => b.score - a.score);
+    const best = candidates[0];
+
+    const rr = Math.abs(best.tp - best.entry) / Math.abs(best.entry - best.sl);
+    if (!isFinite(rr) || rr < 1){
+      gsLogFeed(`⚠️ ${best.strategy} setup mila (score ${best.score}%) lekin Risk:Reward kam tha — skip.`);
+      gsSetStatus('Live — RR insufficient tha, signal skip hua.');
+      return;
+    }
+
+    const exposure = await crossBotExposureCheck(best.direction);
+    if (!exposure.allowed){
+      gsLogFeed(`⛔ ${best.direction} direction mein already ${exposure.openCount} bots ke signals open hain (cap: ${CROSS_BOT_MAX_SAME_DIRECTION}) — cross-bot exposure control ki wajah se skip.`);
+      gsSetStatus('Live — cross-bot exposure cap ki wajah se signal skip hua.');
+      return;
+    }
+
+    await db.collection('gannSignals').add({
+      strategy: best.strategy, direction: best.direction, entry: best.entry, sl: best.sl, tp: best.tp, rr,
+      confidence: best.score, confidenceTier: best.score >= 90 ? 'Very High' : 'High',
+      reason: best.reason, status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    gsLogFeed(`✅ Naya ${best.direction} signal — ${best.strategy} (score ${best.score}%).`);
+    gsSetStatus(`Live — naya ${best.direction} signal fire hua: ${best.strategy} (score ${best.score}%).`);
+  }
+
+  async function gsMonitor(doc){
+    const livePrice = await gsFetchLatestPrice();
+    const price = livePrice !== null ? livePrice : (gsLtf.length ? gsLtf[gsLtf.length-1].close : null);
+    if (price === null) return;
+    if (gsLadder.length){ gsRenderLadder(gsNearestLevels(gsLadder, price), price); }
+    const d = doc.data();
+    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
+    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
+    if (hitTP){
+      await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      gsLogFeed(`🎯 ${d.strategy} signal TP hit!`);
+    } else if (hitSL){
+      await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
+      gsLogFeed(`🛑 ${d.strategy} signal SL hit.`);
+    }
+  }
+
+  // ========================= UI RENDER =========================
+  function gsRenderLive(sig){
+    const card = document.getElementById('gsLiveCard');
+    const badge = document.getElementById('gsDirBadge');
+    if (!card || !badge) return;
+    if (!sig){
+      card.className = 'gs-live-card';
+      badge.className = 'gs-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
+      document.getElementById('gsStrategyName').textContent = '—';
+      document.getElementById('gsEntry').textContent = '—';
+      document.getElementById('gsSL').textContent = '—';
+      document.getElementById('gsTP').textContent = '—';
+      document.getElementById('gsConfidence').textContent = '—';
+      document.getElementById('gsReason').textContent = 'Abhi koi active Gann signal nahi hai. Bot dono setups ko monitor kar raha hai.';
+      document.getElementById('gsLiveTime').textContent = '—';
+      return;
+    }
+    card.className = 'gs-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
+    badge.className = 'gs-dir-badge ' + sig.direction;
+    badge.textContent = sig.direction + (sig.status !== 'open' ? ' — ' + sig.status.toUpperCase() : '');
+    document.getElementById('gsStrategyName').textContent = sig.strategy;
+    document.getElementById('gsEntry').textContent = sig.entry.toFixed(2);
+    document.getElementById('gsSL').textContent = sig.sl.toFixed(2);
+    document.getElementById('gsTP').textContent = sig.tp.toFixed(2);
+    document.getElementById('gsConfidence').textContent = `${sig.confidence}% (${sig.confidenceTier})`;
+    document.getElementById('gsReason').textContent = sig.reason;
+    document.getElementById('gsLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
+  }
+  function gsRenderHistory(docs){
+    const container = document.getElementById('gsHistory');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!docs.length){ container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
+    docs.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'gs-history-item';
+      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
+      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#fb923c;">(${d.strategy}, Score: ${d.confidence}%)</em></span>
+        <span class="gs-badge-status ${d.status}">${(d.status||'').replace('_',' ').toUpperCase()}</span>`;
+      container.appendChild(row);
+    });
+  }
+  function gsListen(){
+    db.collection('gannSignals').orderBy('createdAt','desc').limit(50).onSnapshot(snap => {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const active = docs.find(d => d.status === 'open');
+      gsRenderLive(active || null);
+      gsRenderHistory(docs.slice(0, 15));
+      const tpHits = docs.filter(d => d.status === 'tp_hit').length;
+      const slHits = docs.filter(d => d.status === 'sl_hit').length;
+      const closed = tpHits + slHits;
+      const winRate = closed > 0 ? ((tpHits/closed)*100).toFixed(1) : '0';
+      document.getElementById('gsTotal').textContent = docs.length;
+      document.getElementById('gsTpCount').textContent = tpHits;
+      document.getElementById('gsSlCount').textContent = slHits;
+      document.getElementById('gsWinRate').textContent = winRate + '%';
+      window.gsAllSignals = docs;
+      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
+    }, () => { gsRenderLive(null); });
+  }
+
+  // ========================= INIT =========================
+  function gsStartEngine(){
+    gsListen();
+    gsLogFeed('Gann Signals bot start ho gaya — Rejection / Breakout monitor ho rahe hain.');
+    gsRunCycle();
+    gsTimer = setInterval(gsRunCycle, GS_CYCLE_MS);
+    gsMonitorTimer = setInterval(async () => {
+      try {
+        const openSnap = await db.collection('gannSignals').where('status','in',['open']).limit(1).get();
+        if (!openSnap.empty) await gsMonitor(openSnap.docs[0]);
+      } catch(err){ /* best-effort */ }
+    }, GS_MONITOR_MS);
+  }
+  if (typeof firebase !== 'undefined'){
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) gsStartEngine();
+      else {
+        if (gsTimer) { clearInterval(gsTimer); gsTimer = null; }
+        if (gsMonitorTimer) { clearInterval(gsMonitorTimer); gsMonitorTimer = null; }
+      }
+    });
+  }
+})();
+</script>
 
 <section id="kycverify">
   <div class="glass-panel">
