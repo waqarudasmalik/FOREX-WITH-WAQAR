@@ -656,7 +656,7 @@
       <a class="sd-folder" href="#fractalictsignals"><div class="sd-icon">🔮</div><h4>Fractal ICT Signals</h4><p>Bias + Structure + Liquidity (multi-timeframe True ICT) — live guide ke sath.</p></a>
       <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
-      <a class="sd-folder" href="#gannsignals"><div class="sd-icon">🔱🤖</div><h4>Gann Signals</h4><p>Gann Number support/resistance levels par Rejection + Breakout confirmation — 80%+ setup-score signals, live ladder ke sath.</p></a>
+      <a class="sd-folder" href="#gannsignals"><div class="sd-icon">🔱🤖</div><h4>Gann Signals</h4><p>Gann Number support/resistance levels par Hammer/Inverted-Hammer, Breakout aur Strong-Candle confirmation — 80%+ setup-score signals, live ladder ke sath.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -6155,12 +6155,13 @@ INTEGRATION STEPS:
 <section id="gannsignals">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
-    <h3>🔱🤖 Gann Numbers Signals — Rejection &amp; Breakout Confirmation</h3>
+    <h3>🔱🤖 Gann Numbers Signals — Hammer, Breakout &amp; Strong-Candle Confirmation</h3>
     <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
       Yeh bot XAUUSD ka live price khud fetch kar ke, Gann Number formula (natural number ka square →
-      odd ho to wahi, even ho to +1) se ek <b>live support/resistance ladder</b> banata hai, aur do
-      independent setups monitor karta hai: <b>Gann Rejection</b> (level se reversal) aur
-      <b>Gann Breakout</b> (level ke clean paar continuation). Har setup ka apna confluence-based
+      odd ho to wahi, even ho to +1) se ek <b>live support/resistance ladder</b> banata hai, aur teen
+      independent setups monitor karta hai: <b>Hammer / Inverted Hammer Rejection</b> (level se pattern-confirmed
+      reversal), <b>Gann Breakout</b> (level ke clean paar continuation) aur <b>Strong Candle Cross</b>
+      (support/resistance par strong candle + agli candle ka cross). Har setup ka apna confluence-based
       <b>"Signal Score"</b> (0-100%) hota hai — signal sirf tab fire hota hai jab score <b>80%+</b> ho.
     </p>
     <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; line-height:1.6;">
@@ -6186,12 +6187,12 @@ INTEGRATION STEPS:
       <div class="gs-ladder-box"><div class="label">Next Resistance</div><div class="value" id="gsNextResistance">—</div></div>
     </div>
 
-    <h4 style="color:#fb923c; font-size:15px; margin-bottom:10px;">📖 Live Guide — Dono Setups Abhi Kya Keh Rahe Hain</h4>
+    <h4 style="color:#fb923c; font-size:15px; margin-bottom:10px;">📖 Live Guide — Teenon Setups Abhi Kya Keh Rahe Hain</h4>
     <div class="gs-strategy-grid">
       <div class="gs-strategy">
-        <div class="gs-s-title">1. Gann Rejection (Reversal)</div>
+        <div class="gs-s-title">1. Hammer / Inverted Hammer (Rejection)</div>
         <div class="gs-s-val waiting" id="gsS1Val">—</div>
-        <div class="gs-s-desc" id="gsS1Desc">5M par Gann level ke qareeb rejection wick/candle dhoond rahe hain...</div>
+        <div class="gs-s-desc" id="gsS1Desc">Support par Hammer ya Resistance par Inverted Hammer candle dhoond rahe hain...</div>
         <div class="gs-s-score" id="gsS1Score"></div>
       </div>
       <div class="gs-strategy">
@@ -6199,6 +6200,12 @@ INTEGRATION STEPS:
         <div class="gs-s-val waiting" id="gsS2Val">—</div>
         <div class="gs-s-desc" id="gsS2Desc">15M par Gann level ka strong displacement breakout + 5M continuation confirmation dhoond rahe hain...</div>
         <div class="gs-s-score" id="gsS2Score"></div>
+      </div>
+      <div class="gs-strategy">
+        <div class="gs-s-title">3. Strong Candle Cross (Support/Resistance)</div>
+        <div class="gs-s-val waiting" id="gsS3Val">—</div>
+        <div class="gs-s-desc" id="gsS3Desc">Support par strong bullish candle ke upar cross, ya Resistance par strong bearish candle ke neeche cross dhoond rahe hain...</div>
+        <div class="gs-s-score" id="gsS3Score"></div>
       </div>
     </div>
 
@@ -6222,7 +6229,7 @@ INTEGRATION STEPS:
         <div class="gs-level-box"><div class="label">Take Profit</div><div class="value" id="gsTP" style="color:#67e8f9;">—</div></div>
         <div class="gs-level-box"><div class="label">Signal Score</div><div class="value" id="gsConfidence" style="color:#fb923c;">—</div></div>
       </div>
-      <div class="gs-reason" id="gsReason">Abhi koi active Gann signal nahi hai. Bot dono setups ko monitor kar raha hai.</div>
+      <div class="gs-reason" id="gsReason">Abhi koi active Gann signal nahi hai. Bot teenon setups ko monitor kar raha hai.</div>
     </div>
 
     <h4 style="color:#fb923c; font-size:15px; margin:26px 0 10px;">Live Commentary</h4>
@@ -6239,18 +6246,28 @@ INTEGRATION STEPS:
         <li><b>Gann Number Formula:</b> har natural number (n) ka square nikalte hain. Agar square odd
           hai to wahi Gann number hai; agar even hai to us mein 1 add karte hain. In numbers ki ek
           ascending ladder current price ke aas-paas banai jaati hai — jo level price se neeche hai wo
-          <b>Support</b>, jo upar hai wo <b>Resistance</b>.</li>
-        <li><b>Gann Rejection:</b> 5M par price jab Support/Resistance level ke qareeb (ATR-tolerance ke
-          andar) aati hai aur wahan se ek strong rejection wick/candle bana kar wapas jaati hai, to
-          reversal signal (Resistance se SELL, Support se BUY) fire hota hai. Score: Trend Alignment
+          <b>Support</b>, jo upar hai wo <b>Resistance</b>. Ye ladder live ladder box mein upar dikhai
+          jaati hai (Next Support / Support / Current Price / Resistance / Next Resistance), aur har
+          cycle par current price ke hisaab se khud update hoti hai.</li>
+        <li><b>Setup 1 — Hammer / Inverted Hammer Rejection:</b> 5M par jab price Support/Resistance
+          Gann level ke qareeb (ATR-tolerance ke andar) aati hai — agar wahan <b>Hammer</b> candle bane
+          (chhota body upar, lambi neechay wali wick, upar wali wick chhoti) to <b>Support par BUY</b>
+          signal; agar <b>Inverted Hammer</b> candle bane (chhota body neechay, lambi upar wali wick,
+          neechay wali wick chhoti) to <b>Resistance par SELL</b> signal. Score: Trend Alignment
           (1H bias) + Rejection Precision (level ke kitne qareeb) + Wick Strength (wick:body ratio) +
           Level Spacing (support-resistance gap ATR ke muqable) — 25 pts each.</li>
-        <li><b>Gann Breakout:</b> 15M par price kisi Gann level ko strong displacement candle (body,
-          ATR ke muqable) ke sath clean cross kar jaye, aur 5M par continuation confirm ho (agla candle
-          bhi level ke usi taraf close ho), to continuation signal fire hota hai — target agla Gann
-          level. Score: Displacement Strength + Trend Alignment (1H bias) + Target Spacing + 5M
+        <li><b>Setup 2 — Gann Breakout:</b> 15M par price kisi Gann level ko strong displacement candle
+          (body, ATR ke muqable) ke sath clean cross kar jaye, aur 5M par continuation confirm ho (agla
+          candle bhi level ke usi taraf close ho), to continuation signal fire hota hai — target agla
+          Gann level. Score: Displacement Strength + Trend Alignment (1H bias) + Target Spacing + 5M
           Continuation Confirmation — 25 pts each.</li>
-        <li>Dono setups <b>independently</b> chalte hain — jo bhi pehle 80%+ score achieve kare, wahi
+        <li><b>Setup 3 — Strong Candle Cross:</b> Support par ek <b>strong bullish candle</b> bane (body
+          uski range ka bara hissa ho, ATR ke muqable strong) aur <b>agli candle uski high ke upar cross
+          kar ke close</b> kare, to <b>BUY</b> signal. Resistance par ek <b>strong bearish candle</b>
+          bane aur <b>agli candle uski low ke neechay cross kar ke close</b> kare, to <b>SELL</b> signal.
+          Score: Trend Alignment (1H bias) + Candle Strength (body vs ATR) + Cross Strength (kitna clean
+          cross hua) + Level Spacing — 25 pts each.</li>
+        <li>Teenon setups <b>independently</b> chalte hain — jo bhi pehle 80%+ score achieve kare, wahi
           signal fire hota hai. SL/TP Gann ladder ke agle/pichle level se nikalte hain, na ke random.</li>
       </ol>
       <p style="margin-top:10px;">Gann theory ek <b>discretionary framework</b> hai, guarantee nahi —
@@ -6343,6 +6360,44 @@ INTEGRATION STEPS:
     return { bias:'neutral', reason:'1H swings mixed hain — trend abhi neutral/ranging.' };
   }
 
+  // ========================= CANDLE PATTERN HELPERS =========================
+  // Hammer: chhota body candle range ke upper hissay mein, lambi neechay wali wick,
+  // choti/nahi upar wali wick — support par milay to bullish reversal signal.
+  function gsIsHammer(c){
+    const range = c.high - c.low;
+    if (range <= 0) return false;
+    const body = Math.abs(c.close - c.open);
+    if (body <= 0) return false;
+    const bodyTop = Math.max(c.open, c.close), bodyBottom = Math.min(c.open, c.close);
+    const lowerWick = bodyBottom - c.low, upperWick = c.high - bodyTop;
+    return lowerWick >= body * 2 && upperWick <= body * 0.6 && (body / range) <= 0.4;
+  }
+  // Inverted Hammer: chhota body candle range ke lower hissay mein, lambi upar wali
+  // wick, choti/nahi neechay wali wick — resistance par milay to bearish reversal signal.
+  function gsIsInvertedHammer(c){
+    const range = c.high - c.low;
+    if (range <= 0) return false;
+    const body = Math.abs(c.close - c.open);
+    if (body <= 0) return false;
+    const bodyTop = Math.max(c.open, c.close), bodyBottom = Math.min(c.open, c.close);
+    const lowerWick = bodyBottom - c.low, upperWick = c.high - bodyTop;
+    return upperWick >= body * 2 && lowerWick <= body * 0.6 && (body / range) <= 0.4;
+  }
+  // Strong Bullish: bara solid green body, range ka zyada hissa body hi ho, ATR ke
+  // muqable displacement bhi kaafi ho.
+  function gsIsStrongBullish(c, atr){
+    const body = c.close - c.open;
+    const range = c.high - c.low || 0.0001;
+    return body > 0 && (body / range) >= 0.6 && atr > 0 && body >= atr * 0.5;
+  }
+  // Strong Bearish: bara solid red body, range ka zyada hissa body hi ho, ATR ke
+  // muqable displacement bhi kaafi ho.
+  function gsIsStrongBearish(c, atr){
+    const body = c.open - c.close;
+    const range = c.high - c.low || 0.0001;
+    return body > 0 && (body / range) >= 0.6 && atr > 0 && body >= atr * 0.5;
+  }
+
   // ========================= GANN LADDER =========================
   // Formula: natural number ka square → odd ho to wahi Gann number, even ho to +1.
   function gsComputeLadder(price, range){
@@ -6390,7 +6445,8 @@ INTEGRATION STEPS:
     document.getElementById('gsNextResistance').textContent = levels.nextResistance ? levels.nextResistance.toFixed(0) : '—';
   }
 
-  // ========================= STRATEGY 1: Gann Rejection =========================
+  // ========================= STRATEGY 1: Hammer / Inverted Hammer Rejection =========================
+  // Support par Hammer candle = BUY signal. Resistance par Inverted Hammer candle = SELL signal.
   function gsDetectRejection(htf, ltf, levels, ltfAtr){
     if (!levels) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Ladder range abhi price ke aas-paas set ho rahi hai.' };
     const bias = gsHtfBias(htf);
@@ -6399,22 +6455,24 @@ INTEGRATION STEPS:
     let candidate = null;
     for (let i = recent.length - 1; i >= 0; i--){
       const c = recent[i];
-      // resistance rejection -> SELL
-      if (c.high >= levels.resistance - tol && c.close < levels.resistance && c.close < c.open){
-        const wick = c.high - Math.max(c.open, c.close);
+      // Resistance + Inverted Hammer -> SELL
+      if (c.high >= levels.resistance - tol && c.high <= levels.resistance + tol && gsIsInvertedHammer(c)){
+        const bodyTop = Math.max(c.open, c.close);
+        const wick = c.high - bodyTop;
         const body = Math.abs(c.close - c.open) || 0.0001;
-        if (wick / body > 0.5){ candidate = { type:'resistance', c, wick, body, level:levels.resistance }; break; }
+        candidate = { type:'resistance', pattern:'Inverted Hammer', c, wick, body, level:levels.resistance }; break;
       }
-      // support rejection -> BUY
-      if (c.low <= levels.support + tol && c.close > levels.support && c.close > c.open){
-        const wick = Math.min(c.open, c.close) - c.low;
+      // Support + Hammer -> BUY
+      if (c.low <= levels.support + tol && c.low >= levels.support - tol && gsIsHammer(c)){
+        const bodyBottom = Math.min(c.open, c.close);
+        const wick = bodyBottom - c.low;
         const body = Math.abs(c.close - c.open) || 0.0001;
-        if (wick / body > 0.5){ candidate = { type:'support', c, wick, body, level:levels.support }; break; }
+        candidate = { type:'support', pattern:'Hammer', c, wick, body, level:levels.support }; break;
       }
     }
     if (!candidate){
       return { ready:false, guideVal:'Waiting', guideCls:'waiting',
-        guideDesc:`Support ${levels.support.toFixed(0)} / Resistance ${levels.resistance.toFixed(0)} — 5M par rejection wick ka wait.` };
+        guideDesc:`Support ${levels.support.toFixed(0)} par Hammer, ya Resistance ${levels.resistance.toFixed(0)} par Inverted Hammer candle ka wait.` };
     }
     const direction = candidate.type === 'resistance' ? 'SELL' : 'BUY';
     const trendPts = direction === 'SELL'
@@ -6433,14 +6491,14 @@ INTEGRATION STEPS:
       : candidate.c.low - (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER;
     const tp = direction === 'SELL' ? levels.support : levels.resistance;
     const reason = [
-      `Strategy: Gann Rejection (5M rejection at Gann level).`,
+      `Strategy: ${candidate.pattern} Rejection (5M pattern at Gann level).`,
       `1) Trend (1H): ${bias.reason}`,
-      `2) Level: ${candidate.type === 'resistance' ? 'Resistance' : 'Support'} ${candidate.level.toFixed(0)} — price ne wick se test kiya aur rejection candle bani (wick:body = ${(candidate.wick/candidate.body).toFixed(2)}).`,
+      `2) Level: ${candidate.type === 'resistance' ? 'Resistance' : 'Support'} ${candidate.level.toFixed(0)} — price ne ${candidate.pattern} candle bana kar rejection diya (wick:body = ${(candidate.wick/candidate.body).toFixed(2)}).`,
       `3) Target: agla Gann ${direction === 'SELL' ? 'support' : 'resistance'} level (${tp.toFixed(0)}).`,
       `SL: rejection candle ke peeche + spread buffer.`
     ].join('\n');
     return { ready:true, guideVal:'Ready ✓', guideCls: direction === 'BUY' ? 'bullish' : 'bearish',
-      guideDesc:`Setup ready — score ${score}%.`, score, direction, entry, sl, tp, reason, strategy:'Gann Rejection' };
+      guideDesc:`Setup ready — score ${score}%.`, score, direction, entry, sl, tp, reason, strategy:`${candidate.pattern} Rejection` };
   }
 
   // ========================= STRATEGY 2: Gann Breakout =========================
@@ -6502,6 +6560,59 @@ INTEGRATION STEPS:
       guideDesc:`Setup ready — score ${score}%.`, score, direction: brk.dir, entry, sl, tp, reason, strategy:'Gann Breakout' };
   }
 
+  // ========================= STRATEGY 3: Strong Candle Cross (Support/Resistance) =========================
+  // Support par strong bullish candle bane aur agli candle uski high ke upar cross kar ke close kare -> BUY.
+  // Resistance par strong bearish candle bane aur agli candle uski low ke neechay cross kar ke close kare -> SELL.
+  function gsDetectStrongCandleContinuation(htf, ltf, levels, ltfAtr){
+    if (!levels) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Ladder range abhi price ke aas-paas set ho rahi hai.' };
+    const bias = gsHtfBias(htf);
+    const tol = (ltfAtr || 1) * 0.5;
+    const recent = ltf.slice(-8);
+    let candidate = null;
+    for (let i = recent.length - 2; i >= 0; i--){
+      const c = recent[i], next = recent[i+1];
+      const nearSupport = c.low <= levels.support + tol && c.low >= levels.support - tol;
+      const nearResistance = c.high >= levels.resistance - tol && c.high <= levels.resistance + tol;
+      // Support + strong bullish candle + next candle upar cross -> BUY
+      if (nearSupport && gsIsStrongBullish(c, ltfAtr) && next.close > c.high){
+        candidate = { type:'support', c, next, level: levels.support }; break;
+      }
+      // Resistance + strong bearish candle + next candle neechay cross -> SELL
+      if (nearResistance && gsIsStrongBearish(c, ltfAtr) && next.close < c.low){
+        candidate = { type:'resistance', c, next, level: levels.resistance }; break;
+      }
+    }
+    if (!candidate){
+      return { ready:false, guideVal:'Waiting', guideCls:'waiting',
+        guideDesc:`Support ${levels.support.toFixed(0)} par strong bullish candle + upar cross, ya Resistance ${levels.resistance.toFixed(0)} par strong bearish candle + neechay cross ka wait.` };
+    }
+    const direction = candidate.type === 'support' ? 'BUY' : 'SELL';
+    const trendPts = direction === 'BUY'
+      ? (bias.bias === 'bullish' ? 25 : bias.bias === 'neutral' ? 15 : 5)
+      : (bias.bias === 'bearish' ? 25 : bias.bias === 'neutral' ? 15 : 5);
+    const body = Math.abs(candidate.c.close - candidate.c.open);
+    const bodyPts = Math.round(Math.min(body / ((ltfAtr || 1) * 1.2), 1) * 25);
+    const crossDist = direction === 'BUY' ? (candidate.next.close - candidate.c.high) : (candidate.c.low - candidate.next.close);
+    const crossPts = Math.round(Math.min(Math.max(crossDist, 0) / ((ltfAtr || 1) * 0.6), 1) * 25);
+    const gap = levels.resistance - levels.support;
+    const spacingPts = Math.round(Math.min(gap / ((ltfAtr || 1) * 3), 1) * 25);
+    const score = trendPts + bodyPts + crossPts + spacingPts;
+    const entry = candidate.next.close;
+    const sl = direction === 'BUY'
+      ? candidate.c.low - (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT - XAUUSD_SPREAD_BUFFER
+      : candidate.c.high + (ltfAtr || 0) * GS_ATR_SL_BUFFER_MULT + XAUUSD_SPREAD_BUFFER;
+    const tp = direction === 'BUY' ? levels.resistance : levels.support;
+    const reason = [
+      `Strategy: Gann Strong-Candle Continuation.`,
+      `1) Trend (1H): ${bias.reason}`,
+      `2) Level: ${candidate.type === 'support' ? 'Support' : 'Resistance'} ${candidate.level.toFixed(0)} par ek strong ${direction === 'BUY' ? 'bullish' : 'bearish'} candle bani (body iski range ka bara hissa, ATR ke muqable strong).`,
+      `3) Confirmation: agli candle ne ${direction === 'BUY' ? 'us candle ki high ke upar' : 'us candle ki low ke neechay'} close diya — continuation confirm.`,
+      `Target: opposite Gann level (${tp.toFixed(0)}). SL: pattern candle ke peeche + spread buffer.`
+    ].join('\n');
+    return { ready:true, guideVal:'Ready ✓', guideCls: direction === 'BUY' ? 'bullish' : 'bearish',
+      guideDesc:`Setup ready — score ${score}%.`, score, direction, entry, sl, tp, reason, strategy:'Gann Strong-Candle Continuation' };
+  }
+
   // ========================= GUIDE UI =========================
   function gsSetGuideCard(prefix, res){
     const val = document.getElementById(prefix + 'Val');
@@ -6536,12 +6647,14 @@ INTEGRATION STEPS:
 
     const r1 = gsDetectRejection(htf, ltf, levels, ltfAtr);
     const r2 = gsDetectBreakout(htf, mtf, ltf, gsLadder, mtfAtr, ltfAtr);
+    const r3 = gsDetectStrongCandleContinuation(htf, ltf, levels, ltfAtr);
     gsSetGuideCard('gsS1', r1);
     gsSetGuideCard('gsS2', r2);
+    gsSetGuideCard('gsS3', r3);
 
-    const candidates = [r1, r2].filter(r => r.ready && r.score >= GS_MIN_SCORE);
+    const candidates = [r1, r2, r3].filter(r => r.ready && r.score >= GS_MIN_SCORE);
     if (!candidates.length){
-      gsSetStatus('Live — dono setups monitor ho rahe hain, abhi koi 80%+ confirmation nahi.');
+      gsSetStatus('Live — teenon setups monitor ho rahe hain, abhi koi 80%+ confirmation nahi.');
       return;
     }
     candidates.sort((a,b) => b.score - a.score);
@@ -6651,7 +6764,7 @@ INTEGRATION STEPS:
   // ========================= INIT =========================
   function gsStartEngine(){
     gsListen();
-    gsLogFeed('Gann Signals bot start ho gaya — Rejection / Breakout monitor ho rahe hain.');
+    gsLogFeed('Gann Signals bot start ho gaya — Hammer/Inverted-Hammer, Breakout aur Strong-Candle Cross monitor ho rahe hain.');
     gsRunCycle();
     gsTimer = setInterval(gsRunCycle, GS_CYCLE_MS);
     gsMonitorTimer = setInterval(async () => {
