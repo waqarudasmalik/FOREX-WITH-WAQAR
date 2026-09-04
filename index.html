@@ -6286,8 +6286,8 @@ INTEGRATION STEPS:
   const GS_LADDER_RANGE = 6; // kitne natural numbers upar/neeche current price ke, ladder ke liye
   const GS_CYCLE_MS = 5 * 60 * 1000;
   const GS_MONITOR_MS = 60 * 1000;
-  const GS_MIN_SCORE = 80; // sirf 80%+ confirmation-quality score par hi signal fire hota hai
-  const GS_ATR_SL_BUFFER_MULT = 0.3;
+  const GS_MIN_SCORE = 75; // sirf 75%+ confirmation-quality score par hi signal fire hota hai (pehle 80)
+  const GS_ATR_SL_BUFFER_MULT = 0.2; // pehle 0.3 — tighter SL, behtar RR
 
   let gsHtf = [], gsMtf = [], gsLtf = [], gsLadder = [];
   let gsTimer = null, gsMonitorTimer = null;
@@ -6370,7 +6370,7 @@ INTEGRATION STEPS:
     if (body <= 0) return false;
     const bodyTop = Math.max(c.open, c.close), bodyBottom = Math.min(c.open, c.close);
     const lowerWick = bodyBottom - c.low, upperWick = c.high - bodyTop;
-    return lowerWick >= body * 2 && upperWick <= body * 0.6 && (body / range) <= 0.4;
+    return lowerWick >= body * 1.5 && upperWick <= body * 0.8 && (body / range) <= 0.5;
   }
   // Inverted Hammer: chhota body candle range ke lower hissay mein, lambi upar wali
   // wick, choti/nahi neechay wali wick — resistance par milay to bearish reversal signal.
@@ -6381,7 +6381,7 @@ INTEGRATION STEPS:
     if (body <= 0) return false;
     const bodyTop = Math.max(c.open, c.close), bodyBottom = Math.min(c.open, c.close);
     const lowerWick = bodyBottom - c.low, upperWick = c.high - bodyTop;
-    return upperWick >= body * 2 && lowerWick <= body * 0.6 && (body / range) <= 0.4;
+    return upperWick >= body * 1.5 && lowerWick <= body * 0.8 && (body / range) <= 0.5;
   }
   // Strong Bullish: bara solid green body, range ka zyada hissa body hi ho, ATR ke
   // muqable displacement bhi kaafi ho.
@@ -6450,8 +6450,8 @@ INTEGRATION STEPS:
   function gsDetectRejection(htf, ltf, levels, ltfAtr){
     if (!levels) return { ready:false, guideVal:'Waiting', guideCls:'waiting', guideDesc:'Ladder range abhi price ke aas-paas set ho rahi hai.' };
     const bias = gsHtfBias(htf);
-    const tol = (ltfAtr || 1) * 0.5;
-    const recent = ltf.slice(-6);
+    const tol = (ltfAtr || 1) * 0.8;
+    const recent = ltf.slice(-12);
     let candidate = null;
     for (let i = recent.length - 1; i >= 0; i--){
       const c = recent[i];
@@ -6652,9 +6652,15 @@ INTEGRATION STEPS:
     gsSetGuideCard('gsS2', r2);
     gsSetGuideCard('gsS3', r3);
 
+    [['Hammer/Inv-Hammer', r1], ['Breakout', r2], ['Strong-Candle', r3]].forEach(([label, r]) => {
+      if (r.ready){
+        gsLogFeed(`ℹ️ ${label}: pattern mila, score ${r.score}% (min ${GS_MIN_SCORE}%).`);
+      }
+    });
+
     const candidates = [r1, r2, r3].filter(r => r.ready && r.score >= GS_MIN_SCORE);
     if (!candidates.length){
-      gsSetStatus('Live — teenon setups monitor ho rahe hain, abhi koi 80%+ confirmation nahi.');
+      gsSetStatus(`Live — teenon setups monitor ho rahe hain, abhi koi ${GS_MIN_SCORE}%+ confirmation nahi.`);
       return;
     }
     candidates.sort((a,b) => b.score - a.score);
