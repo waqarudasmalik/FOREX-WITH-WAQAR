@@ -600,7 +600,6 @@
    <a href="#fundamentalanalysis">📰 Fundamental Analysis</a>
     <a href="#record">Trade Record</a>
    <a href="#buffercalc">Buffer Loss Calc</a>
-    <a href="#hedgeslcalc">Hedge SL/TP (Loss Se)</a>
     <a href="#advcalc">Position Calculator</a>
     <a href="#losstracker">Loss Tracker</a>
     <a href="#accountmanager">Accounts</a>
@@ -611,7 +610,6 @@
    <a href="#courseCenterSection">📚 Course Center</a>
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
-   <a href="#fundamentalsignals">📰🤖 Fundamental-Only Signals</a>
    <a href="#fractalictsignals">🔮 Fractal ICT Signals</a>
    <a href="#priceactionsignals">🕯️🤖 Price Action Signals</a>
    <a href="#ictsignals">🧭🤖 ICT Signals</a>
@@ -649,7 +647,6 @@
       <a class="sd-folder" href="#fundamentalanalysis"><div class="sd-icon">📰</div><h4>Fundamental Analysis</h4><p>XAUUSD ko move karne wali high-impact news, unka schedule, aur analysis karne ka step-by-step tareeqa.</p></a>
       <a class="sd-folder" href="#record"><div class="sd-icon">📒</div><h4>Apna Trade Record (Auto-Update)</h4><p>Apni trades track karein, khud-badh (auto-update) hone wale record ke sath.</p></a>
       <a class="sd-folder" href="#buffercalc"><div class="sd-icon">⚖️</div><h4>Entry Difference & Buffer Loss Calculator</h4><p>Entry difference aur buffer loss nikalne ka tool.</p></a>
-      <a class="sd-folder" href="#hedgeslcalc"><div class="sd-icon">🧮</div><h4>Hedge SL/TP Level Calculator (Loss Se)</h4><p>Loss aur Lot Size se, dono hedge accounts ke SL/TP price levels khud nikalta hai (0.40 buffer TP ke sath).</p></a>
       <a class="sd-folder" href="#advcalc"><div class="sd-icon">🧠</div><h4>Advanced Position Calculator</h4><p>Position sizing ke liye advanced calculator.</p></a>
       <a class="sd-folder" href="#losstracker"><div class="sd-icon">📉</div><h4>Account Loss Tracker</h4><p>Account-wise losses track karne ka tool.</p></a>
       <a class="sd-folder" href="#accountmanager"><div class="sd-icon">👥</div><h4>Hedging Accounts Manager</h4><p>Apne hedging accounts manage karein.</p></a>
@@ -660,7 +657,6 @@
       <a class="sd-folder" href="#courseCenterSection"><div class="sd-icon">📚</div><h4>Course Center</h4><p>SMC, ICT aur Price Action — diagram, practice aur quiz ke sath.</p></a>
       <a class="sd-folder" href="#interview"><div class="sd-icon">🎤</div><h4>Live Interview Practice</h4><p>150 practice questions ke sath interview prep.</p></a>
       <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
-      <a class="sd-folder" href="#fundamentalsignals"><div class="sd-icon">📰🤖</div><h4>Fundamental-Only Signals</h4><p>Sirf news/fundamental data ki bina par (koi ICT/technical nahi) mustaqil signal — Entry/SL/TP ke sath.</p></a>
       <a class="sd-folder" href="#fractalictsignals"><div class="sd-icon">🔮</div><h4>Fractal ICT Signals</h4><p>Bias + Structure + Liquidity (multi-timeframe True ICT) — live guide ke sath.</p></a>
       <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
@@ -1304,86 +1300,6 @@
   </div>
 </section>
 
-<section id="hedgeslcalc">
-  <div class="glass-panel">
-    <div class="brand-watermark">Forex With Waqar</div>
-    <h3>Hedge SL/TP Level Calculator (Loss Se)</h3>
-    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
-      Ye pehle wale Buffer Calculator se ulta kaam karta hai — us mein hum price difference daal kar loss nikalte thay, is mein hum apna chaha hua Loss aur Lot Size dete hain. Ab Account A aur Account B dono ka apna <b>alag</b> Lot Size aur Loss hota hai — har account apni khud ki value se apna khud ka price-movement (aur is bunyaad par apna SL) nikalta hai. Phir Account A ka SL hi Account B ka TP banta hai, aur Account B ka SL hi Account A ka TP banta hai — TP hamesha buffer ki wajah se us doosre account ke SL se thora pehle rakha jata hai.
-    </p>
-
-    <div class="global-inputs">
-      <div class="input-group"><label>Current Price</label><input type="number" id="hsCurrentPrice" step="0.01" value="0.00" oninput="calcHedgeSlTp()"></div>
-      <div class="input-group"><label>Buffer TP ($ Value)</label><input type="number" id="hsBuffer" step="0.01" value="0.40" oninput="calcHedgeSlTp()"></div>
-      <div class="input-group">
-        <label>Account A Direction</label>
-        <select id="hsDirection" onchange="calcHedgeSlTp()">
-          <option value="buy">BUY</option>
-          <option value="sell">SELL</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label>Account B Direction</label>
-        <input type="text" id="hsDirectionBLabel" value="SELL (opposite)" disabled style="opacity:0.7;">
-      </div>
-    </div>
-
-    <div class="buffer-calc-grid" style="margin-top:6px;">
-      <div class="buffer-result-box" style="border-color:rgba(239,68,68,0.35); text-align:left; padding:16px 18px;">
-        <div class="label" style="margin-bottom:10px;">🅰️ Account A — Apna Lot Size &amp; Loss</div>
-        <div class="global-inputs" style="margin-bottom:0;">
-          <div class="input-group"><label>Lot Size (A)</label><input type="number" id="hsLotA" step="0.01" value="0.10" oninput="calcHedgeSlTp()"></div>
-          <div class="input-group"><label>Loss ($) (A)</label><input type="number" id="hsLossA" step="0.01" value="0.00" oninput="calcHedgeSlTp()"></div>
-        </div>
-      </div>
-      <div class="buffer-result-box" style="border-color:rgba(62,207,142,0.35); text-align:left; padding:16px 18px;">
-        <div class="label" style="margin-bottom:10px;">🅱️ Account B — Apna Lot Size &amp; Loss</div>
-        <div class="global-inputs" style="margin-bottom:0;">
-          <div class="input-group"><label>Lot Size (B)</label><input type="number" id="hsLotB" step="0.01" value="0.10" oninput="calcHedgeSlTp()"></div>
-          <div class="input-group"><label>Loss ($) (B)</label><input type="number" id="hsLossB" step="0.01" value="0.00" oninput="calcHedgeSlTp()"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="buffer-calc-grid">
-      <div class="buffer-result-box">
-        <div class="label">Account A — Price Movement (A ke apne Loss/Lot par)</div>
-        <div class="value" id="hsDistanceA" style="color:#38bdf8;">0.00</div>
-      </div>
-      <div class="buffer-result-box">
-        <div class="label">Account B — Price Movement (B ke apne Loss/Lot par)</div>
-        <div class="value" id="hsDistanceB" style="color:#38bdf8;">0.00</div>
-      </div>
-    </div>
-
-    <div class="buffer-calc-grid">
-      <div class="buffer-result-box" style="border-color:rgba(239,68,68,0.4);">
-        <div class="label">Account A — Stop Loss <span style="color:#64748b;">(A ke apne loss/lot se)</span></div>
-        <div class="value" id="hsASL" style="color:#ef4444;">0.00</div>
-      </div>
-      <div class="buffer-result-box" style="border-color:rgba(62,207,142,0.4);">
-        <div class="label">Account A — Take Profit (Buffered) <span style="color:#64748b;">(= Account B ka SL, buffer se pehle)</span></div>
-        <div class="value" id="hsATP" style="color:#3ecf8e;">0.00</div>
-      </div>
-    </div>
-
-    <div class="buffer-calc-grid">
-      <div class="buffer-result-box" style="border-color:rgba(239,68,68,0.4);">
-        <div class="label">Account B — Stop Loss <span style="color:#64748b;">(B ke apne loss/lot se)</span></div>
-        <div class="value" id="hsBSL" style="color:#ef4444;">0.00</div>
-      </div>
-      <div class="buffer-result-box" style="border-color:rgba(62,207,142,0.4);">
-        <div class="label">Account B — Take Profit (Buffered) <span style="color:#64748b;">(= Account A ka SL, buffer se pehle)</span></div>
-        <div class="value" id="hsBTP" style="color:#3ecf8e;">0.00</div>
-      </div>
-    </div>
-
-    <p style="color:#64748b; font-size:11.5px; margin-top:4px;">
-      Note: Account A ka SL <b>sirf</b> A ke apne Lot Size/Loss se calculate hota hai (Account B se koi taluq nahi), aur Account B ka SL <b>sirf</b> B ke apne Lot Size/Loss se. Lekin Account A ka TP = Account B ke (raw) SL level ke barabar, aur Account B ka TP = Account A ke (raw) SL level ke barabar — har TP apne matching (doosray account ke) SL se <b id="hsBufferNoteVal">0.40</b> pehle rakha gaya hai, taake TP hamesha SL se pehle hit ho.
-    </p>
-  </div>
-</section>
-
 <section id="advcalc">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
@@ -2007,58 +1923,6 @@
     document.getElementById('bcTotalLoss').textContent = `$${totalLoss.toFixed(2)}`;
   }
   calcBufferLoss();
-
-  // ===== Hedge SL/TP Level Calculator (reverse of Buffer Loss Calculator:
-  // yahan har account (A aur B) apna ALAG Loss aur Lot Size deta hai, aur ye khud
-  // har account ka apna price-distance nikal kar uska SL banata hai, aur doosray
-  // account ka (buffered) TP us SL ke barabar rakhta hai =====
-  function calcHedgeSlTp() {
-    const currentPrice = parseFloat(document.getElementById('hsCurrentPrice').value) || 0;
-    const buffer = parseFloat(document.getElementById('hsBuffer').value) || 0;
-    const direction = document.getElementById('hsDirection').value; // Account A ki direction, B hamesha ulti
-
-    const lotA = parseFloat(document.getElementById('hsLotA').value) || 0;
-    const lossA = parseFloat(document.getElementById('hsLossA').value) || 0;
-    const lotB = parseFloat(document.getElementById('hsLotB').value) || 0;
-    const lossB = parseFloat(document.getElementById('hsLossB').value) || 0;
-
-    const ouncesA = lotA * 100;
-    const ouncesB = lotB * 100;
-    const distanceA = ouncesA !== 0 ? lossA / ouncesA : 0; // Account A ka apna price-movement
-    const distanceB = ouncesB !== 0 ? lossB / ouncesB : 0; // Account B ka apna price-movement
-
-    const bLabel = document.getElementById('hsDirectionBLabel');
-
-    let aSL, aTP, bSL, bTP;
-    if (direction === 'buy') {
-      if (bLabel) bLabel.value = 'SELL (opposite)';
-      // Account A = BUY -> price girne par A ka SL (apni A ki distance se)
-      aSL = currentPrice - distanceA;
-      // Account B = SELL -> price barhne par B ka SL (apni B ki distance se)
-      bSL = currentPrice + distanceB;
-      // TP hamesha doosray account ke raw SL ke barabar, buffer se pehle rakha gaya
-      aTP = bSL - buffer;   // A ka TP = B ke SL se buffer pehle
-      bTP = aSL + buffer;   // B ka TP = A ke SL se buffer pehle
-    } else {
-      if (bLabel) bLabel.value = 'BUY (opposite)';
-      // Account A = SELL -> price barhne par A ka SL (apni A ki distance se)
-      aSL = currentPrice + distanceA;
-      // Account B = BUY -> price girne par B ka SL (apni B ki distance se)
-      bSL = currentPrice - distanceB;
-      aTP = bSL + buffer;   // A ka TP = B ke SL se buffer pehle
-      bTP = aSL - buffer;   // B ka TP = A ke SL se buffer pehle
-    }
-
-    document.getElementById('hsDistanceA').textContent = distanceA.toFixed(2);
-    document.getElementById('hsDistanceB').textContent = distanceB.toFixed(2);
-    document.getElementById('hsASL').textContent = aSL.toFixed(2);
-    document.getElementById('hsATP').textContent = aTP.toFixed(2);
-    document.getElementById('hsBSL').textContent = bSL.toFixed(2);
-    document.getElementById('hsBTP').textContent = bTP.toFixed(2);
-    const bufNote = document.getElementById('hsBufferNoteVal');
-    if (bufNote) bufNote.textContent = buffer.toFixed(2);
-  }
-  calcHedgeSlTp();
 
   // ===== Advanced Position Calculator =====
   const unitLabels = {
@@ -3006,7 +2870,7 @@
   const db = firebase.firestore();
 
   // ========================= CROSS-BOT EXPOSURE GUARD =========================
-  // 4 signal bots (ICT, Price Action, Fundamental-Only, Fractal ICT) sab XAUUSD par
+  // 4 signal bots (ICT, Price Action, Fractal ICT, Gann) sab XAUUSD par
   // independently chalte hain. Pehle koi cross-bot check nahi tha — agar 3-4 bots ek sath
   // same direction (sab BUY ya sab SELL) mein signal de dein, to unknowingly exposure
   // 3-4x ho jata tha bina kisi explicit position-sizing control ke. Ab har bot naya signal
@@ -3014,7 +2878,7 @@
   // agar cap se zyada hon to naya signal skip ho jata hai (fail-open agar query hi fail ho jaye,
   // taake ek Firestore glitch sab bots ko permanently stuck na kar de).
   const CROSS_BOT_MAX_SAME_DIRECTION = 2;
-  const CROSS_BOT_COLLECTIONS = ['ictSignals', 'priceActionSignals', 'fundOnlySignals', 'fractalIctSignals', 'gannSignals'];
+  const CROSS_BOT_COLLECTIONS = ['ictSignals', 'priceActionSignals', 'fractalIctSignals', 'gannSignals'];
   // Realistic spread/slippage buffer for XAUUSD (in price $) — pehle SL/TP calculations "clean" theoretical
   // levels par based the, jaisay broker fill exact ho. Ab har bot ka SL is buffer se thora aur door rakha
   // jata hai taake normal spread widening (khaas kar news ya Asian session mein) se SL ko waqt se pehle
@@ -3668,617 +3532,6 @@
 </script>
 
 
-
-<!-- ==========================================
-     FUNDAMENTAL-ONLY SIGNALS — pure news/fundamental-based bot
-     (ICT Signals engine se BILKUL ALAG/independent — koi technical/ICT confluence
-      is mein shamil nahi, sirf Red Flag News actual-vs-forecast data par based)
-     ========================================== -->
-<style>
-  .fos-wrap{display:flex;flex-direction:column;gap:20px;}
-  .fos-toprow{display:flex;gap:15px;flex-wrap:wrap;}
-  .fos-stat{flex:1;min-width:140px;background:rgba(15,23,42,0.6);border:1px solid rgba(148,163,184,0.15);border-radius:14px;padding:16px;text-align:center;}
-  .fos-stat .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;}
-  .fos-stat .value{font-size:22px;font-weight:800;margin-top:6px;}
-  .fos-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(250,204,21,0.35);border-radius:18px;padding:22px;}
-  .fos-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
-  .fos-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
-  .fos-live-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
-  .fos-dir-badge{font-weight:900;font-size:20px;padding:4px 16px;border-radius:999px;}
-  .fos-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
-  .fos-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
-  .fos-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
-  .fos-time{color:#64748b;font-size:12px;}
-  .fos-levels{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
-  .fos-level-box{flex:1;min-width:110px;background:rgba(15,23,42,0.6);border-radius:12px;padding:12px;text-align:center;}
-  .fos-level-box .label{font-size:11px;color:#94a3b8;}
-  .fos-level-box .value{font-size:18px;font-weight:800;margin-top:4px;}
-  .fos-reason{background:rgba(15,23,42,0.5);border-left:3px solid #facc15;border-radius:8px;padding:14px 16px;color:#cbd5e1;font-size:13.5px;line-height:1.7;white-space:pre-line;}
-  .fos-feed{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
-  .fos-feed-item{font-size:12.5px;color:#94a3b8;padding:8px 12px;background:rgba(15,23,42,0.45);border-radius:8px;border-left:2px solid rgba(148,163,184,0.3);}
-  .fos-feed-item .t{color:#facc15;margin-right:6px;}
-  .fos-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;flex-wrap:wrap;gap:6px;}
-  .fos-badge-status{font-weight:800;font-size:11px;padding:3px 10px;border-radius:999px;}
-  .fos-badge-status.tp_hit{background:rgba(34,197,94,0.15);color:#22c55e;}
-  .fos-badge-status.sl_hit{background:rgba(239,68,68,0.15);color:#ef4444;}
-  .fos-badge-status.open{background:rgba(250,204,21,0.15);color:#facc15;}
-  .fos-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;}
-  .fos-dot{width:8px;height:8px;border-radius:50%;background:#facc15;animation:recPulse 1.2s infinite;}
-</style>
-<section id="fundamentalsignals">
-  <div class="glass-panel">
-    <div class="brand-watermark">Forex With Waqar</div>
-    <h3>📰🤖 Fundamental-Only Signals (XAUUSD)</h3>
-    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px; line-height:1.6;">
-      Yeh ek <strong>bilkul alag, independent bot</strong> hai — ICT/technical
-      engine se is ka koi taluq nahi. Yeh sirf <a href="#fundamentalanalysis" style="color:#facc15;">Fundamental Analysis</a>
-      / <a href="#redflagnews" style="color:#facc15;">Red Flag News</a> ke live calendar data (actual-vs-forecast) ko dekh
-      kar, sirf news/fundamentals ki bina par XAUUSD ka BUY/SELL signal deta hai — koi ICT concept, koi chart-structure,
-      koi technical confluence is decision mein shamil nahi hota.
-    </p>
-
-    <div class="fos-engine-status" style="margin-bottom:16px;">
-      <span class="fos-dot"></span>
-      <span id="fosEngineStatusText">Bot initialize ho raha hai...</span>
-    </div>
-
-    <div class="fos-live-card" style="margin-bottom:20px;">
-      <div class="hedge-header" style="margin-bottom:10px;">
-        <h4 style="color:#facc15; font-size:15px;">📊 Fed Stance &amp; COT Positioning — <span style="color:#22c55e;">AUTO</span></h4>
-        <span style="font-size:11px; color:#94a3b8;">Default: auto-detected, no manual input needed</span>
-      </div>
-      <p style="color:#94a3b8; font-size:13px; margin-bottom:12px;">
-        Fed stance ab US10Y real-yield ke trend se market-implied proxy ke taur par khud detect hoti hai
-        (yields up → hawkish-leaning, yields down → dovish-leaning) — yeh literal FOMC statement padhna
-        nahi, balke ek market-based proxy hai. COT positioning CFTC ke free public Commitments-of-Traders
-        data se (Gold, COMEX) khud fetch ho kar, 3-year percentile ke through "extreme" flag hoti hai.
-        Kuch bhi paste karne ki zaroorat nahi — bot khud calculate karta hai har cycle par.
-      </p>
-      <div class="outcome-summary" style="margin-bottom:14px;">
-        <div class="outcome-box"><div class="label">Fed Stance (auto)</div><div class="value" id="fosAutoFedValue">—</div></div>
-        <div class="outcome-box"><div class="label">COT (auto)</div><div class="value" id="fosAutoCotValue">—</div></div>
-      </div>
-      <details>
-        <summary style="cursor:pointer; color:#94a3b8; font-size:12px;">Admin: manual override (optional)</summary>
-        <div class="form-row" style="margin-top:10px; margin-bottom:0;">
-          <select id="fosFedModeSelect"><option value="auto">Fed: Auto</option><option value="manual">Fed: Manual</option></select>
-          <select id="fosFedStanceSelect"><option value="neutral">Neutral</option><option value="hawkish">Hawkish</option><option value="dovish">Dovish</option></select>
-          <select id="fosCotModeSelect"><option value="auto">COT: Auto</option><option value="manual">COT: Manual</option></select>
-          <select id="fosCotSelect"><option value="neutral">Neutral</option><option value="extreme_long">Extreme Long</option><option value="extreme_short">Extreme Short</option></select>
-          <button id="fosSaveBiasBtn" onclick="fosSaveManualBias()">Save</button>
-        </div>
-        <p id="fosBiasSavedNote" style="font-size:12px; color:#64748b; margin-top:8px;"></p>
-      </details>
-    </div>
-
-    <div class="fos-wrap">
-      <div class="fos-toprow">
-        <div class="fos-stat"><div class="label">Total Signals</div><div class="value" id="fosTotal" style="color:#facc15;">0</div></div>
-        <div class="fos-stat"><div class="label">TP Hits</div><div class="value" id="fosTpCount" style="color:#22c55e;">0</div></div>
-        <div class="fos-stat"><div class="label">SL Hits</div><div class="value" id="fosSlCount" style="color:#ef4444;">0</div></div>
-        <div class="fos-stat"><div class="label">Win Rate</div><div class="value" id="fosWinRate" style="color:#a78bfa;">0%</div></div>
-      </div>
-
-      <div class="fos-live-card" id="fosLiveCard">
-        <div class="fos-live-head">
-          <span class="fos-dir-badge NONE" id="fosDirBadge">NO ACTIVE SIGNAL</span>
-          <span class="fos-time" id="fosLiveTime">—</span>
-        </div>
-        <div class="fos-levels">
-          <div class="fos-level-box"><div class="label">Entry</div><div class="value" id="fosEntry" style="color:#e2e8f0;">—</div></div>
-          <div class="fos-level-box"><div class="label">Stop Loss</div><div class="value" id="fosSL" style="color:#fda4af;">—</div></div>
-          <div class="fos-level-box"><div class="label">Take Profit</div><div class="value" id="fosTP" style="color:#67e8f9;">—</div></div>
-          <div class="fos-level-box"><div class="label">Confidence</div><div class="value" id="fosConfidence" style="color:#a78bfa;">—</div></div>
-        </div>
-        <div class="fos-reason" id="fosReason">Abhi koi active fundamental signal nahi hai. Bot recent high-impact USD news ko monitor kar raha hai.</div>
-      </div>
-
-      <div>
-        <h4 style="color:#facc15; font-size:15px; margin-bottom:10px;">Live Commentary</h4>
-        <div class="fos-feed" id="fosFeed"></div>
-      </div>
-
-      <div>
-        <h4 style="color:#facc15; font-size:15px; margin-bottom:10px;">Signal History</h4>
-        <div id="fosHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
-      </div>
-    </div>
-
-    <div class="fa-note" style="margin-top:18px;">
-      💡 <b>Yeh bot kaisay decide karta hai (economic-calendar rules apply):</b>
-      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
-        <li>Sirf <b>High Impact, USD</b> news count hoti hain (NFP, CPI, PCE, GDP, PMI, Retail Sales, Jobless Claims, Unemployment Rate).</li>
-        <li><b>Actual vs Forecast</b> ka farq (surprise) dekha jata hai — jitna bara surprise, utna zyada weight (sirf direction nahi, size bhi matter karta hai).</li>
-        <li><b>Fed Stance</b> (hawkish/dovish, upar admin panel se manually set) score mein add/subtract hota hai.</li>
-        <li><b>DXY Trend</b> check hoti hai — gold signal tabhi fire hota hai jab DXY us se ulta (inverse) trend confirm kare.</li>
-        <li><b>US 10Y Real Yields</b> trend bhi isi tarah confluence ke liye check hoti hai.</li>
-        <li><b>COT Positioning</b> (extreme long/short, admin panel se) contrarian adjustment ke taur par score mein shamil hota hai.</li>
-        <li>News release ke <b>pehle 15 minute</b> ka sharp spike/retracement ignore kiya jata hai (cooldown) — spike settle hone ka wait hota hai.</li>
-        <li>Score kaafi strong ho (ek taraf) to us direction mein signal deta hai; kamzor/mixed ho ya DXY/yield confirm na karein to koi signal nahi deta.</li>
-        <li>Entry current market price hoti hai, SL/TP 1-hour ATR (volatility) se calculate hote hain — chart pattern/technical structure is decision mein shamil nahi (sirf advisory note mein ICT bias dikha diya jata hai).</li>
-      </ol>
-      <p style="margin-top:10px;">Yeh sirf ek <b>rule-based fundamental estimate</b> hai, guarantee nahi — hamesha apna risk management khud follow karein.</p>
-    </div>
-  </div>
-</section>
-<script>
-(function(){
-  // ========================= CONFIG (fully independent from ICT engine) =========================
-  const FOS_API_KEY = "faa70dee4cd94663a55ff3bc640aa831";
-  const FOS_SYMBOL = "XAU/USD";
-  const FOS_DXY_SYMBOL = "DXY";                // Rule 4: DXY trend confluence
-  const FOS_YIELD_SYMBOL = "US10Y";            // Rule 5: US 10Y real-yield proxy trend
-  const FOS_CYCLE_MS = 5 * 60 * 1000;          // pehle 15 min tha — ab 5 min (fallback poll; asal trigger news-event-driven hai, neeche dekhein)
-  const FOS_LOOKBACK_HOURS = 24;               // pichlay kitne ghanton ki released news ginni hain
-  const FOS_RECENT_HOURS = 6;                  // itni recent news ko double weight
-  const FOS_FIRE_THRESHOLD = 2;                // is se zyada (ya kam, negative mein) score par hi signal fire hoga
-  const FOS_ATR_SL_MULT = 1.5;
-  const FOS_ATR_TP_MULT = 2.5;
-  const FOS_MIN_ATR_PCT = 0.0003;              // bilkul dead market mein signal na de
-  const FOS_MIN_CONFIDENCE_SCORE = 80;         // sirf 80%+ confluence confidence par hi fundamental-only signal fire hoga
-  const FOS_RELEASE_COOLDOWN_HOURS = 0.25;     // Rule 7/8: news ke pehle 15 min ka sharp spike/retracement ignore karo
-  const FOS_DXY_TREND_LOOKBACK = 8;            // DXY 1h candles jitne peeche dekh kar trend nikalna hai
-  const FOS_YIELD_TREND_LOOKBACK = 8;
-
-  const FOS_DIRECT_KEYWORDS = ['non-farm', 'nonfarm', 'employment change', 'cpi', 'pce', 'gdp',
-    'retail sales', 'ism manufacturing', 'ism services', 'ism pmi', 'consumer confidence',
-    'ppi', 'producer price', 'durable goods', 'housing starts', 'industrial production'];
-  const FOS_INVERSE_KEYWORDS = ['unemployment rate', 'unemployment claims', 'jobless claims', 'continuing claims'];
-
-  let fosCandles1h = [];
-  let fosDxyCandles1h = [];
-  let fosYieldCandles1h = [];
-  let fosTimer = null;
-  let fosSignalsCache = [];
-  // Rule 3 & 6: Fed stance aur COT positioning automate nahi ho saktay (yeh judgment/weekly-report
-  // wali cheezein hain, live price-feed se nahi milti) — is liye admin manually set karta hai,
-  // aur bot un values ko apne score mein factor karta hai. Defaults = neutral/no-bias.
-  let fosManualBias = { fedStance: 'neutral', cot: 'neutral', fedMode: 'auto', cotMode: 'auto' };
-  let fosAutoFed = { stance: 'neutral', trend: 'unknown' };
-  let fosAutoCot = { label: 'neutral', percentile: null, netNonComm: null };
-
-  function fosLogFeed(msg){
-    const feed = document.getElementById('fosFeed');
-    if (!feed) return;
-    const item = document.createElement('div');
-    item.className = 'fos-feed-item';
-    item.innerHTML = `<span class="t">${new Date().toLocaleTimeString()}</span>${msg}`;
-    feed.insertBefore(item, feed.firstChild);
-    while (feed.children.length > 30) feed.removeChild(feed.lastChild);
-  }
-  function fosSetStatus(text){ const el = document.getElementById('fosEngineStatusText'); if (el) el.textContent = text; }
-
-  // ========================= OWN DATA FETCH (independent of ICT engine's candles) =========================
-  // Rule 4 (DXY trend) aur Rule 5 (US10Y real-yield trend) ke liye auxiliary candles — dono
-  // best-effort hain: agar symbol is API plan par available na ho to sirf log hoga, poora
-  // cycle fail nahi hoga (fundamental-only bot sirf news data par hi chal sakta hai).
-  async function fosFetchAuxCandles(symbol, interval='1h', outputsize=30){
-    try {
-      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=${outputsize}&apikey=${FOS_API_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (!data.values) return [];
-      return data.values.reverse().map(v => ({
-        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
-        low: parseFloat(v.low), close: parseFloat(v.close)
-      }));
-    } catch(err){ return []; }
-  }
-  // Simple trend: last close vs N candles pehle ka close — 'up' / 'down' / 'flat'
-  function fosSimpleTrend(candles, lookback){
-    if (!candles || candles.length < lookback + 1) return 'unknown';
-    const last = candles[candles.length-1].close;
-    const prior = candles[candles.length-1-lookback].close;
-    const changePct = (last - prior) / prior;
-    if (changePct > 0.0008) return 'up';
-    if (changePct < -0.0008) return 'down';
-    return 'flat';
-  }
-
-  // ========================= AUTO Fed Stance proxy (Rule 3) =========================
-  // Koi free live API FOMC statements ko "hawkish/dovish" text-analyze nahi karta, is liye
-  // hum market-implied proxy use karte hain: US10Y real-yield ka LONGER-term trend (rising
-  // yields = market Fed ko hawkish price kar raha hai; falling yields = dovish). Yeh ek proxy
-  // hai, literal statement-reading nahi — is liye admin chahe to Manual override kar sakta hai.
-  function fosComputeAutoFedStance(yieldCandles){
-    const longTrend = fosSimpleTrend(yieldCandles, Math.min(20, Math.max(4, yieldCandles.length - 1)));
-    let stance = 'neutral';
-    if (longTrend === 'up') stance = 'hawkish';
-    else if (longTrend === 'down') stance = 'dovish';
-    return { stance, trend: longTrend };
-  }
-
-  // ========================= AUTO COT positioning (Rule 6, CFTC public API) =========================
-  // CFTC Legacy Futures-Only COT report, Gold (COMEX, contract code 088691), free/no-key
-  // Socrata endpoint. Best-effort: agar fetch fail ho ya data na aaye, COT 'neutral' treat
-  // hota hai (signal is wajah se block nahi hota, sirf COT adjustment 0 rehta hai).
-  const FOS_COT_GOLD_CODE = '088691';
-  async function fosFetchCotAuto(){
-    try {
-      const url = `https://publicreporting.cftc.gov/resource/6dca-aqww.json?$where=cftc_contract_market_code='${FOS_COT_GOLD_CODE}'&$order=report_date_as_yyyy_mm_dd DESC&$limit=156`;
-      const res = await fetch(url);
-      const rows = await res.json();
-      if (!Array.isArray(rows) || !rows.length) return;
-      const nets = rows.map(r => (parseFloat(r.noncomm_positions_long_all) || 0) - (parseFloat(r.noncomm_positions_short_all) || 0))
-        .filter(n => !isNaN(n));
-      if (nets.length < 8) return; // itni kam history mein percentile meaningful nahi
-      const latest = nets[0];
-      const sorted = [...nets].sort((a,b) => a-b);
-      const rank = sorted.filter(n => n <= latest).length;
-      const percentile = (rank / sorted.length) * 100;
-      let label = 'neutral';
-      if (percentile >= 90) label = 'extreme_long';
-      else if (percentile <= 10) label = 'extreme_short';
-      fosAutoCot = { label, percentile: Math.round(percentile), netNonComm: Math.round(latest) };
-    } catch(err){ /* best-effort — fail silently, COT stays neutral */ }
-  }
-  // Rule "exact/fresh signal": ek lightweight /price endpoint call — jab bhi entry price chahiye,
-  // is se live-most price milti hai (candle close ka wait nahi karna padta, jo 1h stale ho sakta tha).
-  async function fosFetchLatestPrice(symbol){
-    try {
-      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(symbol)}&apikey=${FOS_API_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const p = parseFloat(data.price);
-      return isNaN(p) ? null : p;
-    } catch(err){ return null; }
-  }
-  let fosLastRunAt = 0;
-  const FOS_MIN_TRIGGER_GAP_MS = 45 * 1000; // event-trigger ko bhi thora throttle taake API spam na ho
-  // News calendar refresh hote hi (har 3 min, ya jab bhi naya data aaye) turant ek cycle chala do —
-  // 5-minute fallback timer ka wait nahi karna, taake market move ho jaane ke BAAD signal na mile.
-  window.fosOnCalendarUpdate = function(){
-    if (Date.now() - fosLastRunAt < FOS_MIN_TRIGGER_GAP_MS) return;
-    if (typeof fosRunCycle === 'function') fosRunCycle();
-  };
-
-  async function fosFetchCandles(){
-    try {
-      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(FOS_SYMBOL)}&interval=1h&outputsize=60&apikey=${FOS_API_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (!data.values){ fosLogFeed('⚠️ Price data fetch fail: ' + (data.message || data.code || 'unknown')); return; }
-      fosCandles1h = data.values.reverse().map(v => ({
-        time: v.datetime, open: parseFloat(v.open), high: parseFloat(v.high),
-        low: parseFloat(v.low), close: parseFloat(v.close)
-      }));
-    } catch(err){ fosLogFeed('Price fetch error: ' + err.message); }
-  }
-  function fosAtr(c, period=14){
-    if (c.length < period+1) return 0;
-    let sum = 0;
-    for (let i = c.length-period; i < c.length; i++){
-      const tr = Math.max(c[i].high-c[i].low, Math.abs(c[i].high-c[i-1].close), Math.abs(c[i].low-c[i-1].close));
-      sum += tr;
-    }
-    return sum / period;
-  }
-  function fosParseNum(v){
-    if (v === undefined || v === null || v === '') return null;
-    const n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
-    return isNaN(n) ? null : n;
-  }
-
-  // ========================= FUNDAMENTAL BIAS (apni khud ki, independent copy) =========================
-  function fosComputeFundamentalBias(){
-    const events = window.ffEvents; // #redflagnews / #fundamentalanalysis section ka live calendar data
-    const out = { score: 0, label: 'neutral', items: [] };
-    if (!events || !events.length) return out;
-    const now = Date.now();
-    events.forEach(e => {
-      if (e.impact !== 'High' || e.country !== 'USD') return;
-      const t = new Date(e.date).getTime();
-      const ageHours = (now - t) / (60*60*1000);
-      if (ageHours < 0 || ageHours > FOS_LOOKBACK_HOURS) return;
-      const actual = fosParseNum(e.actual), forecast = fosParseNum(e.forecast);
-      if (actual === null || forecast === null || actual === forecast) return;
-      const titleLower = (e.title || '').toLowerCase();
-      const isDirect = FOS_DIRECT_KEYWORDS.some(k => titleLower.includes(k));
-      const isInverse = FOS_INVERSE_KEYWORDS.some(k => titleLower.includes(k));
-      if (!isDirect && !isInverse) return;
-      const beatForecast = actual > forecast;
-      let dir = 0;
-      if (isDirect) dir = beatForecast ? -1 : 1;
-      if (isInverse) dir = beatForecast ? 1 : -1;
-      const recencyWeight = ageHours <= FOS_RECENT_HOURS ? 2 : 1;
-      // Rule 2: sirf direction nahi, "surprise" ka SIZE bhi matter karta hai — jitna bara farq
-      // forecast se utna zyada weight (0.5x se 2x tak clamp).
-      const surpriseMag = forecast !== 0 ? Math.abs((actual - forecast) / forecast) : Math.abs(actual - forecast);
-      const magnitudeWeight = Math.min(Math.max(surpriseMag * 20, 0.5), 2);
-      const weight = recencyWeight * magnitudeWeight;
-      out.score += dir * weight;
-      out.items.push({
-        title: e.title, actual: e.actual, forecast: e.forecast, previous: e.previous,
-        ageHours: ageHours.toFixed(1), ageHoursNum: ageHours, direction: dir, weight: weight.toFixed(2)
-      });
-    });
-    if (out.score >= FOS_FIRE_THRESHOLD) out.label = 'bullish';
-    else if (out.score <= -FOS_FIRE_THRESHOLD) out.label = 'bearish';
-    else out.label = 'neutral';
-    return out;
-  }
-
-  function fosComputeConfidence(fb){
-    const strength = Math.min(Math.abs(fb.score) / 6, 1) * 50;
-    const countFactor = Math.min(fb.items.length, 5) / 5 * 30;
-    const mostRecentAge = fb.items.length ? Math.min(...fb.items.map(i => parseFloat(i.ageHours))) : 999;
-    const recencyFactor = mostRecentAge <= FOS_RECENT_HOURS ? 20 : 10;
-    const score = Math.round(strength + countFactor + recencyFactor);
-    let tier = 'Low';
-    if (score >= 80) tier = 'High'; else if (score >= 65) tier = 'Medium-High'; else if (score >= 50) tier = 'Medium';
-    return { score: Math.min(score, 100), tier };
-  }
-
-  // ========================= MAIN CYCLE =========================
-  async function fosRunCycle(){
-    fosLastRunAt = Date.now();
-    await fosFetchCandles();
-    if (fosCandles1h.length < 20){ fosSetStatus('Price history jama ho rahi hai...'); return; }
-
-    // Already-open signal ho to naya na banao, sirf monitor karo
-    const openSnap = await db.collection('fundOnlySignals').where('status','in',['open']).limit(1).get();
-    if (!openSnap.empty){
-      await fosMonitor(openSnap.docs[0]);
-      fosSetStatus('Live — ek fundamental signal already open hai, monitor ho raha hai.');
-      return;
-    }
-
-    // Rule 3, 4, 5 & 6: DXY / US10Y trend (confluence + Fed-stance proxy) aur CFTC COT — ek hi
-    // baar fetch kar ke reuse karte hain.
-    const [dxyCandles, yieldCandles] = await Promise.all([
-      fosFetchAuxCandles(FOS_DXY_SYMBOL), fosFetchAuxCandles(FOS_YIELD_SYMBOL)
-    ]);
-    fosDxyCandles1h = dxyCandles; fosYieldCandles1h = yieldCandles;
-    const dxyTrend = fosSimpleTrend(dxyCandles, FOS_DXY_TREND_LOOKBACK);
-    const yieldTrend = fosSimpleTrend(yieldCandles, FOS_YIELD_TREND_LOOKBACK);
-
-    // Rule 3 & 6: Fed stance aur COT positioning — AUTO by default (market-implied yield proxy +
-    // CFTC public COT data), admin chahe to Manual mode mein switch kar ke apni value de sakta hai.
-    const fb = fosComputeFundamentalBias();
-    fosAutoFed = fosComputeAutoFedStance(yieldCandles);
-    await fosFetchCotAuto();
-    fosRenderAutoBiasValues();
-    const effectiveFedStance = fosManualBias.fedMode === 'manual' ? fosManualBias.fedStance : fosAutoFed.stance;
-    const effectiveCot = fosManualBias.cotMode === 'manual' ? fosManualBias.cot : fosAutoCot.label;
-    const fedAdj = effectiveFedStance === 'hawkish' ? -1 : (effectiveFedStance === 'dovish' ? 1 : 0);
-    // COT: extreme-long positioning = reversal risk (gold ke liye bearish contrarian), extreme-short = bullish contrarian
-    const cotAdj = effectiveCot === 'extreme_long' ? -1 : (effectiveCot === 'extreme_short' ? 1 : 0);
-    const adjScore = fb.score + fedAdj + cotAdj;
-    const adjLabel = adjScore >= FOS_FIRE_THRESHOLD ? 'bullish' : (adjScore <= -FOS_FIRE_THRESHOLD ? 'bearish' : 'neutral');
-    if (adjLabel === 'neutral'){
-      fosSetStatus(`Live — fundamental bias NEUTRAL/MIXED hai (news score ${fb.score.toFixed(1)}, Fed[${effectiveFedStance}]/COT[${effectiveCot}] adj ${(fedAdj+cotAdj)}) — koi naya signal nahi.`);
-      return;
-    }
-
-    // Rule 7 & 8: news release ke bilkul turant baad (pehla 15 min) ka sharp spike/retracement
-    // avoid karo — us waqt tak wait karo jab tak initial spike settle na ho jaye.
-    const freshestAgeHours = fb.items.length ? Math.min(...fb.items.map(i => i.ageHoursNum)) : 999;
-    if (freshestAgeHours < FOS_RELEASE_COOLDOWN_HOURS){
-      fosLogFeed(`⏳ News abhi ${Math.round(freshestAgeHours*60)} min pehle release hui — initial spike/retracement settle hone ka wait (cooldown ${Math.round(FOS_RELEASE_COOLDOWN_HOURS*60)} min).`);
-      fosSetStatus('Live — release cooldown active, spike settle hone ka intezar.');
-      return;
-    }
-
-    const atr1h = fosAtr(fosCandles1h, 14);
-    const livePrice = await fosFetchLatestPrice(FOS_SYMBOL);
-    const price = livePrice !== null ? livePrice : fosCandles1h[fosCandles1h.length-1].close; // live quote > stale 1h candle close
-    const atrPct = price > 0 ? atr1h / price : 0;
-    if (atrPct < FOS_MIN_ATR_PCT){ fosLogFeed('Market bohot quiet hai (low ATR) — fundamental signal skip.'); return; }
-
-    // Rule 4 & 5: DXY aur US10Y real-yield trend se confluence check (gold ka inverse relationship)
-    const direction = adjLabel === 'bullish' ? 'BUY' : 'SELL';
-    // Gold BUY expects DXY/yields neeche jaana; gold SELL expects DXY/yields upar jaana
-    const dxyConfirms = dxyTrend === 'unknown' || (direction === 'BUY' ? dxyTrend !== 'up' : dxyTrend !== 'down');
-    const yieldConfirms = yieldTrend === 'unknown' || (direction === 'BUY' ? yieldTrend !== 'up' : yieldTrend !== 'down');
-    if (!dxyConfirms || !yieldConfirms){
-      fosLogFeed(`⚠️ DXY (${dxyTrend}) / US10Y (${yieldTrend}) trend fundamental bias (${direction}) se contradict kar raha hai — signal skip (safety filter).`);
-      fosSetStatus('Live — DXY/yield confluence fail, signal skip hua.');
-      return;
-    }
-
-    const entry = price;
-    const sl = direction === 'BUY' ? entry - atr1h*FOS_ATR_SL_MULT - XAUUSD_SPREAD_BUFFER : entry + atr1h*FOS_ATR_SL_MULT + XAUUSD_SPREAD_BUFFER;
-    const tp = direction === 'BUY' ? entry + atr1h*FOS_ATR_TP_MULT : entry - atr1h*FOS_ATR_TP_MULT;
-    const rr = (Math.abs(tp-entry) / Math.abs(entry-sl));
-
-    const conf = fosComputeConfidence(fb);
-    if (conf.score < FOS_MIN_CONFIDENCE_SCORE){
-      fosLogFeed(`⚠️ Fundamental bias ${adjLabel.toUpperCase()} tha lekin confidence sirf ${conf.score}% (${conf.tier}) hai — ${FOS_MIN_CONFIDENCE_SCORE}%+ chahiye, is liye signal skip.`);
-      fosSetStatus(`Live — bias ${adjLabel.toUpperCase()} tha, confidence (${conf.score}%) ${FOS_MIN_CONFIDENCE_SCORE}% se kam thi, wait kar rahe hain.`);
-      return;
-    }
-
-    // Cross-bot exposure guard
-    const exposure = await crossBotExposureCheck(direction);
-    if (!exposure.allowed){
-      fosLogFeed(`⛔ ${direction} direction mein already ${exposure.openCount} bots ke signals open hain (cap: ${CROSS_BOT_MAX_SAME_DIRECTION}) — cross-bot exposure control ki wajah se skip.`);
-      fosSetStatus('Live — cross-bot exposure cap ki wajah se signal skip hua.');
-      return;
-    }
-    const newsLines = fb.items.map(it => `• ${it.title}: Actual ${it.actual} vs Forecast ${it.forecast}${it.previous !== undefined ? ' (Previous ' + it.previous + ')' : ''} (${it.ageHours}h pehle, weight ${it.weight}) → ${it.direction>0?'Gold-bullish':'Gold-bearish'} surprise`).join('\n');
-    // Rule 9: yeh bot khud technical confluence use nahi karta, lekin ICT engine ka live technical
-    // bias (agar available ho) sirf reference/advisory ke taur par reason mein dikha dete hain.
-    const techNote = (typeof lastTechBias !== 'undefined' && lastTechBias)
-      ? `Advisory — ICT Technical Bias abhi: ${String(lastTechBias).toUpperCase()} (${lastTechBias === direction.toLowerCase() ? 'is fundamental signal ke sath aligned' : 'is fundamental signal se mismatch — manual confirmation recommended'}).`
-      : `Advisory — ICT technical structure ke sath cross-check kar ke hi entry lein (yeh signal khud koi chart/technical confluence use nahi karta).`;
-    const reason = [
-      `Basis: Fundamental Analysis rules — Actual-vs-Forecast surprise (magnitude-weighted), DXY & US10Y confluence, Fed stance/COT positioning.`,
-      `News Score: ${fb.score.toFixed(1)} | Fed Stance: ${effectiveFedStance} (${fosManualBias.fedMode}, ${fedAdj>=0?'+':''}${fedAdj}) | COT: ${effectiveCot} (${fosManualBias.cotMode}${fosAutoCot.percentile!==null && fosManualBias.cotMode==='auto' ? ', ' + fosAutoCot.percentile + 'p' : ''}, ${cotAdj>=0?'+':''}${cotAdj}) | Combined: ${adjScore.toFixed(1)} → ${adjLabel.toUpperCase()}`,
-      newsLines,
-      `DXY Trend: ${dxyTrend.toUpperCase()} (confirms) | US10Y Trend: ${yieldTrend.toUpperCase()} (confirms)`,
-      `SL/TP basis: 1H ATR (${atr1h.toFixed(2)}) — SL: ${(FOS_ATR_SL_MULT)}x ATR, TP: ${(FOS_ATR_TP_MULT)}x ATR (RR ~1:${rr.toFixed(2)}).`,
-      `Confidence Score: ${conf.score}% (${conf.tier}) — news-surprise strength/count/recency par based hai. ${FOS_MIN_CONFIDENCE_SCORE}%+ threshold pass.`,
-      techNote
-    ].join('\n');
-
-    await db.collection('fundOnlySignals').add({
-      direction, entry, sl, tp, rr, reason, confidence: conf.score, confidenceTier: conf.tier,
-      newsUsed: fb.items, dxyTrend, yieldTrend, fedStance: effectiveFedStance, cot: effectiveCot,
-      status: 'open', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    fosLogFeed(`✅ Naya ${direction} fundamental-only signal — Confidence ${conf.score}% (${conf.tier})`);
-    fosSetStatus(`Live — naya ${direction} fundamental signal fire hua.`);
-  }
-
-  async function fosMonitor(doc){
-    const livePrice = await fosFetchLatestPrice(FOS_SYMBOL);
-    const price = livePrice !== null ? livePrice : (fosCandles1h.length ? fosCandles1h[fosCandles1h.length-1].close : null); // live quote > stale 1h candle close, taake TP/SL turant pakre jayein
-    if (price === null) return;
-    const d = doc.data();
-    const hitTP = d.direction === 'BUY' ? price >= d.tp : price <= d.tp;
-    const hitSL = d.direction === 'BUY' ? price <= d.sl : price >= d.sl;
-    if (hitTP){
-      await doc.ref.update({ status:'tp_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
-      fosLogFeed('🎯 Fundamental signal TP hit!');
-    } else if (hitSL){
-      await doc.ref.update({ status:'sl_hit', closedAt: firebase.firestore.FieldValue.serverTimestamp(), closePrice: price });
-      fosLogFeed('🛑 Fundamental signal SL hit.');
-    }
-  }
-
-  // ========================= UI RENDER =========================
-  function fosRenderLive(sig){
-    const card = document.getElementById('fosLiveCard');
-    const badge = document.getElementById('fosDirBadge');
-    if (!card || !badge) return;
-    if (!sig){
-      card.className = 'fos-live-card';
-      badge.className = 'fos-dir-badge NONE'; badge.textContent = 'NO ACTIVE SIGNAL';
-      document.getElementById('fosEntry').textContent = '—';
-      document.getElementById('fosSL').textContent = '—';
-      document.getElementById('fosTP').textContent = '—';
-      document.getElementById('fosConfidence').textContent = '—';
-      document.getElementById('fosReason').textContent = 'Abhi koi active fundamental signal nahi hai. Bot recent high-impact USD news ko monitor kar raha hai.';
-      document.getElementById('fosLiveTime').textContent = '—';
-      return;
-    }
-    card.className = 'fos-live-card ' + (sig.direction === 'BUY' ? 'buy' : 'sell');
-    badge.className = 'fos-dir-badge ' + sig.direction;
-    badge.textContent = sig.direction + ' — Fundamental-Only';
-    document.getElementById('fosEntry').textContent = sig.entry.toFixed(2);
-    document.getElementById('fosSL').textContent = sig.sl.toFixed(2);
-    document.getElementById('fosTP').textContent = sig.tp.toFixed(2);
-    document.getElementById('fosConfidence').textContent = `${sig.confidence}% (${sig.confidenceTier})`;
-    document.getElementById('fosReason').textContent = sig.reason;
-    document.getElementById('fosLiveTime').textContent = sig.createdAt ? sig.createdAt.toDate().toLocaleString() : 'Abhi';
-  }
-  function fosRenderHistory(docs){
-    const container = document.getElementById('fosHistory');
-    if (!container) return;
-    container.innerHTML = '';
-    if (!docs.length){ container.innerHTML = '<p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p>'; return; }
-    docs.forEach(d => {
-      const row = document.createElement('div');
-      row.className = 'fos-history-item';
-      const time = d.createdAt ? d.createdAt.toDate().toLocaleString() : '';
-      row.innerHTML = `<span>${time} — <strong style="color:${d.direction==='BUY'?'#22c55e':'#ef4444'}">${d.direction}</strong> @ ${d.entry.toFixed(2)} <em style="color:#94a3b8;">(Conf: ${d.confidence}%)</em></span>
-        <span class="fos-badge-status ${d.status}">${(d.status||'').replace('_',' ').toUpperCase()}</span>`;
-      container.appendChild(row);
-    });
-  }
-  function fosListen(){
-    db.collection('fundOnlySignals').orderBy('createdAt','desc').limit(50).onSnapshot(snap => {
-      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      fosSignalsCache = docs;
-      const active = docs.find(d => d.status === 'open');
-      fosRenderLive(active || null);
-      fosRenderHistory(docs.slice(0, 15));
-      const tpHits = docs.filter(d => d.status === 'tp_hit').length;
-      const slHits = docs.filter(d => d.status === 'sl_hit').length;
-      const closed = tpHits + slHits;
-      const winRate = closed > 0 ? ((tpHits/closed)*100).toFixed(1) : '0';
-      document.getElementById('fosTotal').textContent = docs.length;
-      document.getElementById('fosTpCount').textContent = tpHits;
-      document.getElementById('fosSlCount').textContent = slHits;
-      document.getElementById('fosWinRate').textContent = winRate + '%';
-      window.fosAllSignals = docs;
-      if (typeof window.allSignalsRefresh === 'function') window.allSignalsRefresh();
-    });
-  }
-
-  // ========================= MANUAL BIAS (Rule 3 & 6: Fed stance / COT) =========================
-  function fosApplyManualBiasToUI(){
-    const fedModeSel = document.getElementById('fosFedModeSelect');
-    const cotModeSel = document.getElementById('fosCotModeSelect');
-    const fedSel = document.getElementById('fosFedStanceSelect');
-    const cotSel = document.getElementById('fosCotSelect');
-    if (fedModeSel) fedModeSel.value = fosManualBias.fedMode;
-    if (cotModeSel) cotModeSel.value = fosManualBias.cotMode;
-    if (fedSel) fedSel.value = fosManualBias.fedStance;
-    if (cotSel) cotSel.value = fosManualBias.cot;
-    const saveBtn = document.getElementById('fosSaveBiasBtn');
-    const isAdmin = typeof ADMIN_EMAILS !== 'undefined' && firebase.auth().currentUser &&
-      ADMIN_EMAILS.includes(firebase.auth().currentUser.email);
-    [fedModeSel, cotModeSel, fedSel, cotSel].forEach(el => { if (el) el.disabled = !isAdmin; });
-    if (saveBtn) saveBtn.style.display = isAdmin ? '' : 'none';
-    fosRenderAutoBiasValues();
-  }
-  function fosRenderAutoBiasValues(){
-    const fedEl = document.getElementById('fosAutoFedValue');
-    const cotEl = document.getElementById('fosAutoCotValue');
-    if (fedEl){
-      const shown = fosManualBias.fedMode === 'manual' ? fosManualBias.fedStance + ' (manual)' : (fosAutoFed.stance + (fosAutoFed.trend !== 'unknown' ? ' (US10Y trend: ' + fosAutoFed.trend + ')' : ''));
-      fedEl.textContent = shown;
-    }
-    if (cotEl){
-      const shown = fosManualBias.cotMode === 'manual' ? fosManualBias.cot + ' (manual)' : (fosAutoCot.label + (fosAutoCot.percentile !== null ? ' (' + fosAutoCot.percentile + 'th pct net-long)' : ''));
-      cotEl.textContent = shown;
-    }
-  }
-  function fosListenManualBias(){
-    db.collection('siteConfig').doc('fundamentalBias').onSnapshot(function(doc){
-      const d = doc.data();
-      if (d){
-        fosManualBias = {
-          fedStance: d.fedStance || 'neutral', cot: d.cot || 'neutral',
-          fedMode: d.fedMode || 'auto', cotMode: d.cotMode || 'auto'
-        };
-      }
-      fosApplyManualBiasToUI();
-    }, function(){ fosApplyManualBiasToUI(); });
-  }
-  window.fosSaveManualBias = async function(){
-    const fedMode = document.getElementById('fosFedModeSelect').value;
-    const cotMode = document.getElementById('fosCotModeSelect').value;
-    const fedStance = document.getElementById('fosFedStanceSelect').value;
-    const cot = document.getElementById('fosCotSelect').value;
-    try {
-      await db.collection('siteConfig').doc('fundamentalBias').set({
-        fedMode, cotMode, fedStance, cot, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      const note = document.getElementById('fosBiasSavedNote');
-      if (note) note.textContent = 'Saved ✓ (' + new Date().toLocaleTimeString() + ')';
-    } catch(err){
-      alert('Fed/COT bias save karte waqt error: ' + err.message);
-    }
-  };
-
-  // ========================= INIT =========================
-  let fosMonitorTimer = null;
-  const FOS_MONITOR_MS = 60 * 1000; // open signal ko har 1 min mein fresh price se check karo (TP/SL turant pakrein, 5-min cycle ka wait nahi)
-  async function fosMonitorTick(){
-    try {
-      const openSnap = await db.collection('fundOnlySignals').where('status','in',['open']).limit(1).get();
-      if (!openSnap.empty) await fosMonitor(openSnap.docs[0]);
-    } catch(err){ /* best-effort */ }
-  }
-  function fosStartEngine(){
-    fosListen();
-    fosListenManualBias();
-    fosLogFeed('Fundamental-Only bot start ho gaya — sirf Red Flag News data monitor ho raha hai (ICT se independent).');
-    fosRunCycle();
-    fosTimer = setInterval(fosRunCycle, FOS_CYCLE_MS);
-    fosMonitorTimer = setInterval(fosMonitorTick, FOS_MONITOR_MS);
-  }
-  if (typeof firebase !== 'undefined'){
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) fosStartEngine();
-      else if (fosTimer) { clearInterval(fosTimer); fosTimer = null; }
-      if (!user && fosMonitorTimer) { clearInterval(fosMonitorTimer); fosMonitorTimer = null; }
-    });
-  }
-})();
-</script>
 
 <!-- ==========================================
      FRACTAL ICT SIGNALS — Bias + Structure + Liquidity, fractal (multi-timeframe) alignment
@@ -6235,7 +5488,6 @@
       renderFFAlert(); renderFFTodayList();
       window.ffEvents = ffEvents;
       if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
-      if (typeof window.fosOnCalendarUpdate === 'function') window.fosOnCalendarUpdate();
       if (typeof window.faOnCalendarUpdate === 'function') window.faOnCalendarUpdate();
       return;
     }
@@ -6251,7 +5503,6 @@
     renderFFAlert(); renderFFTodayList();
     window.ffEvents = ffEvents; // ICT Signals engine (separate script scope) reads calendar data from here
     if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
-    if (typeof window.fosOnCalendarUpdate === 'function') window.fosOnCalendarUpdate();
     if (typeof window.faOnCalendarUpdate === 'function') window.faOnCalendarUpdate();
   }
 
@@ -6277,7 +5528,7 @@
   const FA_HISTORY_DAYS = 7;        // record kitne din tak rakha jaye
   const FA_HISTORY_KEY = 'waqarFANewsHistory';
 
-  // Same classification jo Fundamental-Only Signals bot use karta hai:
+  // Same classification jo direction (bullish/bearish for gold) nikalti hai:
   // "Direct" news mein forecast se zyada actual = achi US economy = USD strong = Gold neeche.
   // "Inverse" news (unemployment) mein zyada actual = buri economy = Gold upar.
   const FA_DIRECT_KEYWORDS = ['non-farm', 'nonfarm', 'employment change', 'cpi', 'pce', 'gdp',
