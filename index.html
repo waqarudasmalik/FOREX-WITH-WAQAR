@@ -136,6 +136,14 @@
   .hedge-side .mini-field label { display:block; font-size:11px; color:#94a3b8; margin-bottom:3px; }
   .hedge-side .mini-field input { width:100%; padding:6px 8px; border-radius:8px; border:1px solid rgba(148,163,184,0.25); background:rgba(15,23,42,0.8); color:#fff; font-size:13px; }
 
+  .hedge-pl-summary { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .hedge-pl-box { flex:1; min-width:150px; background: rgba(15,23,42,0.65); border:1px solid rgba(148,163,184,0.18); border-radius:12px; padding:12px 14px; }
+  .hedge-pl-box .hedge-pl-label { font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; }
+  .hedge-pl-box .hedge-pl-side { font-weight:800; }
+  .hedge-pl-box.buy .hedge-pl-side { color:#22c55e; }
+  .hedge-pl-box.sell .hedge-pl-side { color:#ef4444; }
+  .hedge-pl-box .hedge-pl-value { font-size:19px; font-weight:800; }
+
   .edit-panel { background: rgba(30,41,59,0.5); border-radius: 14px; padding: 18px; margin-top: 14px; border: 1px dashed rgba(148,163,184,0.3); }
   .edit-panel h5 { color:#a5b4fc; font-size:14px; margin-bottom:12px; }
   .role-choice { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
@@ -2531,6 +2539,29 @@
           : `<button class="alarm-btn ringing" onclick="muteHedgeAlarm(${h.id})">🔔 ALARM! (Band Karein)</button>`;
       }
 
+      // ===== Live Buy/Sell Profit-Loss (calculator ke andar, alarm ke sath hi dikhta hai) =====
+      let plHtml = '';
+      if (h.configured && currentPrice > 0) {
+        const ounces = (h.lot || 0) * 100;
+        const buyPL = (currentPrice - h.buyEntry) * ounces;
+        const sellPL = (h.sellEntry - currentPrice) * ounces;
+        const buyPLClass = buyPL >= 0 ? 'positive' : 'negative';
+        const sellPLClass = sellPL >= 0 ? 'positive' : 'negative';
+        const buyPLWord = buyPL >= 0 ? 'Profit' : 'Loss';
+        const sellPLWord = sellPL >= 0 ? 'Profit' : 'Loss';
+        plHtml = `
+          <div class="hedge-pl-summary">
+            <div class="hedge-pl-box buy">
+              <div class="hedge-pl-label"><span class="hedge-pl-side">BUY (${h.buyAccountName})</span><span>${buyPLWord}</span></div>
+              <div class="hedge-pl-value ${buyPLClass}">${buyPL >= 0 ? '+' : '-'}$${Math.abs(buyPL).toFixed(2)}</div>
+            </div>
+            <div class="hedge-pl-box sell">
+              <div class="hedge-pl-label"><span class="hedge-pl-side">SELL (${h.sellAccountName})</span><span>${sellPLWord}</span></div>
+              <div class="hedge-pl-value ${sellPLClass}">${sellPL >= 0 ? '+' : '-'}$${Math.abs(sellPL).toFixed(2)}</div>
+            </div>
+          </div>`;
+      }
+
       card.innerHTML = `
         <div class="hedge-header">
           <h4>${h.name}</h4>
@@ -2541,6 +2572,7 @@
             <button class="delete-btn" onclick="deleteHedge(${h.id})">Delete</button>
           </div>
         </div>
+        ${plHtml}
         ${bodyHtml}
       `;
       container.appendChild(card);
