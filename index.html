@@ -3570,8 +3570,7 @@
       Structure confirmation</b> (Break of Structure), aur <b>15M se Liquidity-sweep entry trigger</b>. Jab teeno
       align ho jayein, tabhi signal fire hota hai. Yeh section sirf signal nahi deta — neeche live "guide" panel
       bhi hai jo har pillar ko real-time samjhata hai.
-      <strong style="color:#facc15;">Teeno pillars align hone ke bawajood, signal sirf tab fire hota hai jab
-      Bias/Structure/Liquidity/RR ka combined Confidence Score 80%+ ho — kam confidence par setup skip ho jata hai.</strong>
+      <strong style="color:#facc15;">Teeno pillars (Bias + Structure + Liquidity) align aur RR theek hote hi signal fire ho jata hai — koi minimum Confidence Score gate nahi hai (Confidence Score sirf reference/transparency ke liye reason mein dikhaya jata hai).</strong>
     </p>
 
     <div class="fic-engine-status">
@@ -3653,7 +3652,6 @@
   const FIC_SWEEP_RECENCY = 8;       // sweep kitni recent candles ke andar hua ho (warna stale)
   const FIC_ATR_SL_BUFFER_MULT = 0.3;// SL, sweep wick se thora peeche (LTF ATR ka fraction)
   const FIC_CYCLE_MS = 5 * 60 * 1000;
-  const FIC_MIN_CONFIDENCE_SCORE = 80; // sirf 80%+ confluence confidence par hi Fractal ICT signal fire hoga
 
   // ========================= CONFIDENCE SCORE (Bias + Structure + Liquidity + RR quality, out of 100) =========================
   function ficComputeConfidence(bias, structure, liquidity, mtfLastClose, rr, htfAtrVal, mtfAtrVal, ltfAtrVal){
@@ -3900,16 +3898,12 @@
       return;
     }
 
-    // 80%+ confluence confidence score zaroori hai — warna signal fire nahi hoga
+    // Confidence score sirf transparency/logging ke liye compute hota hai — ab isay
+    // gate ki tarah use nahi kiya jata, teeno pillars align hote hi signal fire ho jayega.
     const htfAtr = ficAtr(htf, 14);
     const mtfAtr = ficAtr(mtf, 14);
     const mtfLastClose = mtf[mtf.length-1].close;
     const confidence = ficComputeConfidence(bias, structure, liquidity, mtfLastClose, rr, htfAtr, mtfAtr, ltfAtr);
-    if (confidence.score < FIC_MIN_CONFIDENCE_SCORE){
-      ficLogFeed(`⚠️ Teeno pillars align to hue lekin confidence sirf ${confidence.score}% (${confidence.tier}) hai — ${FIC_MIN_CONFIDENCE_SCORE}%+ chahiye, is liye signal skip.`);
-      ficSetStatus(`Live — pillars aligned the lekin confidence (${confidence.score}%) ${FIC_MIN_CONFIDENCE_SCORE}% se kam tha, wait kar rahe hain.`);
-      return;
-    }
 
     // Cross-bot exposure guard
     const exposure = await crossBotExposureCheck(direction);
@@ -3926,7 +3920,7 @@
       `3) Liquidity (15M): ${liquidity.reason}`,
       `4) Fractal Alignment: teeno pillars ${bias.bias} direction mein align — signal fire.`,
       `SL: sweep wick ke thora peeche (LTF ATR buffer). TP: agla opposite-side HTF liquidity pool. RR ~1:${rr.toFixed(2)}.`,
-      `Confidence Score: ${confidence.score}% (${confidence.tier}) — ${FIC_MIN_CONFIDENCE_SCORE}%+ threshold pass.`
+      `Confidence Score: ${confidence.score}% (${confidence.tier}).`
     ].join('\n');
 
     await db.collection('fractalIctSignals').add({
