@@ -2355,6 +2355,15 @@
 
   // ===== Hedges =====
   let hedges = JSON.parse(localStorage.getItem('waqarHedges')) || [];
+  // Migration: purane hedges mein shared "lot"/"target" hota tha — ab har side (Buy/Sell)
+  // ka apna alag lot/loss hai. Purani values ko naye fields mein convert kar dete hain
+  // taake result same rahe aur kuch na toote.
+  hedges.forEach(h => {
+    if (h.lotBuy === undefined) h.lotBuy = h.lot !== undefined ? h.lot : 0.10;
+    if (h.lotSell === undefined) h.lotSell = h.lot !== undefined ? h.lot : 0.10;
+    if (h.lossBuy === undefined) h.lossBuy = h.target !== undefined ? +(h.target * h.lotBuy * 100).toFixed(2) : 0;
+    if (h.lossSell === undefined) h.lossSell = h.target !== undefined ? +(h.target * h.lotSell * 100).toFixed(2) : 0;
+  });
   let hedgeIdCounter = parseInt(localStorage.getItem('waqarHedgeIdCounter')) || 2000;
   let openEditIds = [];
   let hedgeSortMode = 'nearest';
@@ -2377,7 +2386,7 @@
       account1: { id: acc1.id, name: acc1.name, price: acc1.price },
       account2: { id: acc2.id, name: acc2.name, price: acc2.price },
       buyAccId: null, sellAccId: null,
-      lot: 1.00, target: 1.00, buffer: 0.50,
+      lotBuy: 0.10, lossBuy: 0, lotSell: 0.10, lossSell: 0, buffer: 0.50,
       configured: false,
       buyEntry: null, sellEntry: null,
       buyTP: null, buySL: null, sellTP: null, sellSL: null
@@ -2532,8 +2541,10 @@
   function updateHedgeSettings(hedgeId) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
-    hedge.lot = parseFloat(document.getElementById('hedgeLot_' + hedgeId).value) || 0;
-    hedge.target = parseFloat(document.getElementById('hedgeTarget_' + hedgeId).value) || 0;
+    hedge.lotBuy = parseFloat(document.getElementById('hedgeLotBuy_' + hedgeId).value) || 0;
+    hedge.lossBuy = parseFloat(document.getElementById('hedgeLossBuy_' + hedgeId).value) || 0;
+    hedge.lotSell = parseFloat(document.getElementById('hedgeLotSell_' + hedgeId).value) || 0;
+    hedge.lossSell = parseFloat(document.getElementById('hedgeLossSell_' + hedgeId).value) || 0;
     hedge.buffer = parseFloat(document.getElementById('hedgeBuffer_' + hedgeId).value) || 0;
     recalcFromEntries(hedgeId);
   }
@@ -2544,15 +2555,23 @@
     if (side === 'buy') hedge.buyEntry = val; else hedge.sellEntry = val;
     recalcFromEntries(hedgeId);
   }
+  // ===== Formula "Hedge SL/TP Level Calculator (Loss Se)" wala hi hai:
+  // BUY aur SELL dono apna ALAG Lot Size + Loss dete hain, har ek apna khud ka
+  // price-movement (distance) nikal kar apna SL banata hai — TP hamesha doosri
+  // taraf ke (raw) SL ke barabar, buffer jitna pehle. =====
   function recalcFromEntries(hedgeId) {
     const hedge = hedges.find(h => h.id === hedgeId);
     if (!hedge) return;
     if (hedge.buyEntry == null || hedge.sellEntry == null) return;
     const buffer = hedge.buffer != null ? hedge.buffer : 0.50;
-    const sellSL = hedge.sellEntry + hedge.target;
-    const buyTP = sellSL - buffer;
-    const buySL = hedge.buyEntry - hedge.target;
-    const sellTP = buySL + buffer;
+    const ouncesBuy = (hedge.lotBuy || 0) * 100;
+    const ouncesSell = (hedge.lotSell || 0) * 100;
+    const distBuy = ouncesBuy !== 0 ? (hedge.lossBuy || 0) / ouncesBuy : 0;   // BUY ka apna price-movement
+    const distSell = ouncesSell !== 0 ? (hedge.lossSell || 0) / ouncesSell : 0; // SELL ka apna price-movement
+    const buySL = hedge.buyEntry - distBuy;    // BUY ka SL sirf BUY ke apne loss/lot se
+    const sellSL = hedge.sellEntry + distSell; // SELL ka SL sirf SELL ke apne loss/lot se
+    const buyTP = sellSL - buffer;             // BUY ka TP = SELL ke SL se buffer pehle
+    const sellTP = buySL + buffer;             // SELL ka TP = BUY ke SL se buffer pehle
     hedge.buyTP = buyTP; hedge.buySL = buySL; hedge.sellTP = sellTP; hedge.sellSL = sellSL;
     hedge.configured = true;
     saveHedges();
@@ -2677,12 +2696,30 @@
                 <label><input type="radio" name="role_${h.id}" ${buy2Checked} onchange="assignRole(${h.id}, ${h.account2.id})"> Isay BUY banayein</label>
               </div>
             </div>
-            <h5>Lot Size, Target &amp; Buffer</h5>
+            <h5>Buffer</h5>
             <div class="global-inputs">
-              <div class="input-group"><label>Lot Size</label><input type="number" id="hedgeLot_${h.id}" step="0.01" value="${h.lot}" onchange="updateHedgeSettings(${h.id})"></div>
-              <div class="input-group"><label>Target ($ Movement)</label><input type="number" id="hedgeTarget_${h.id}" step="0.01" value="${h.target}" onchange="updateHedgeSettings(${h.id})"></div>
               <div class="input-group"><label>Buffer ($ Safety Margin)</label><input type="number" id="hedgeBuffer_${h.id}" step="0.01" value="${bufferValue}" onchange="updateHedgeSettings(${h.id})"></div>
             </div>
+            <h5>Lot Size &amp; Loss — Har Side Apna Alag</h5>
+            <div class="buffer-calc-grid">
+              <div class="buffer-result-box" style="border-color:rgba(34,197,94,0.35); text-align:left; padding:16px 18px;">
+                <div class="label" style="margin-bottom:10px;">🟢 BUY — Apna Lot Size &amp; Loss</div>
+                <div class="global-inputs" style="margin-bottom:0;">
+                  <div class="input-group"><label>Lot Size (Buy)</label><input type="number" id="hedgeLotBuy_${h.id}" step="0.01" value="${h.lotBuy}" onchange="updateHedgeSettings(${h.id})"></div>
+                  <div class="input-group"><label>Loss ($) (Buy)</label><input type="number" id="hedgeLossBuy_${h.id}" step="0.01" value="${h.lossBuy}" onchange="updateHedgeSettings(${h.id})"></div>
+                </div>
+              </div>
+              <div class="buffer-result-box" style="border-color:rgba(239,68,68,0.35); text-align:left; padding:16px 18px;">
+                <div class="label" style="margin-bottom:10px;">🔴 SELL — Apna Lot Size &amp; Loss</div>
+                <div class="global-inputs" style="margin-bottom:0;">
+                  <div class="input-group"><label>Lot Size (Sell)</label><input type="number" id="hedgeLotSell_${h.id}" step="0.01" value="${h.lotSell}" onchange="updateHedgeSettings(${h.id})"></div>
+                  <div class="input-group"><label>Loss ($) (Sell)</label><input type="number" id="hedgeLossSell_${h.id}" step="0.01" value="${h.lossSell}" onchange="updateHedgeSettings(${h.id})"></div>
+                </div>
+              </div>
+            </div>
+            <p style="color:#64748b; font-size:11.5px; margin-top:2px;">
+              BUY ka SL sirf BUY ke apne Lot Size/Loss se calculate hota hai, SELL ka SL sirf SELL ke apne Lot Size/Loss se. BUY ka TP = SELL ke SL ke barabar (buffer se pehle), aur SELL ka TP = BUY ke SL ke barabar (buffer se pehle).
+            </p>
           </div>`;
       }
 
@@ -2703,9 +2740,10 @@
       // ===== Live Buy/Sell Profit-Loss (calculator ke andar, alarm ke sath hi dikhta hai) =====
       let plHtml = '';
       if (h.configured && currentPrice > 0) {
-        const ounces = (h.lot || 0) * 100;
-        const buyPL = (currentPrice - h.buyEntry) * ounces;
-        const sellPL = (h.sellEntry - currentPrice) * ounces;
+        const ouncesBuy = (h.lotBuy || 0) * 100;
+        const ouncesSell = (h.lotSell || 0) * 100;
+        const buyPL = (currentPrice - h.buyEntry) * ouncesBuy;
+        const sellPL = (h.sellEntry - currentPrice) * ouncesSell;
         const buyPLClass = buyPL >= 0 ? 'positive' : 'negative';
         const sellPLClass = sellPL >= 0 ? 'positive' : 'negative';
         const buyPLWord = buyPL >= 0 ? 'Profit' : 'Loss';
