@@ -703,6 +703,36 @@
   .fa-step-card p{color:#94a3b8;font-size:13.5px;}
   .fa-note{background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:14px 18px;font-size:13.5px;color:#bae6fd;margin-top:10px;}
   .fa-warn{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.35);border-radius:12px;padding:14px 18px;font-size:13.5px;color:#fecaca;margin-top:16px;}
+
+  .fa-live-card{background:rgba(17,24,39,0.78);border:1px solid rgba(148,163,184,0.16);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
+  .fa-live-card.bullish{border-left:4px solid #22c55e;}
+  .fa-live-card.bearish{border-left:4px solid #ef4444;}
+  .fa-live-card.neutral{border-left:4px solid #64748b;}
+  .fa-live-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .fa-live-top h4{color:#38bdf8;font-size:15.5px;margin:0;}
+  .fa-live-time{font-size:11.5px;color:#94a3b8;}
+  .fa-live-trade-badge{font-size:12px;font-weight:800;padding:4px 12px;border-radius:999px;letter-spacing:.5px;white-space:nowrap;}
+  .fa-live-trade-badge.BUY{background:rgba(34,197,94,0.18);color:#4ade80;border:1px solid rgba(34,197,94,0.5);}
+  .fa-live-trade-badge.SELL{background:rgba(239,68,68,0.18);color:#f87171;border:1px solid rgba(239,68,68,0.5);}
+  .fa-live-trade-badge.WAIT{background:rgba(148,163,184,0.15);color:#cbd5e1;border:1px solid rgba(148,163,184,0.4);}
+  .fa-live-figs{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:#94a3b8;margin-bottom:8px;}
+  .fa-live-figs b{color:#e2e8f0;}
+  .fa-live-desc{font-size:13.5px;color:#cbd5e1;margin-bottom:6px;}
+  .fa-live-move{font-weight:800;}
+  .fa-live-move.bullish{color:#4ade80;}
+  .fa-live-move.bearish{color:#f87171;}
+  .fa-live-empty{text-align:center;color:#64748b;padding:20px 0;font-size:13.5px;}
+  .fa-hist-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;}
+  .fa-hist-table th{text-align:left;color:#94a3b8;font-weight:700;padding:8px 10px;border-bottom:1px solid rgba(148,163,184,0.25);white-space:nowrap;}
+  .fa-hist-table td{padding:8px 10px;border-bottom:1px solid rgba(148,163,184,0.1);color:#cbd5e1;white-space:nowrap;}
+  .fa-hist-table tr:hover td{background:rgba(148,163,184,0.05);}
+  .fa-hist-wrap{overflow-x:auto;}
+  .fa-hist-dir.bullish{color:#4ade80;font-weight:700;}
+  .fa-hist-dir.bearish{color:#f87171;font-weight:700;}
+  .fa-hist-dir.neutral{color:#94a3b8;font-weight:700;}
+  .fa-section-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .fa-clear-btn{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;font-size:12px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;}
+  .fa-clear-btn:hover{background:rgba(239,68,68,0.22);}
 </style>
 <section id="fundamentalanalysis">
   <div class="glass-panel">
@@ -711,6 +741,25 @@
     <p style="color:#94a3b8; margin-bottom:22px; font-size:14px; line-height:1.6;">
       Neeche wo tamam high-impact (red folder) US news events hain jinke aane se seedha aur foran gold (XAUUSD) ki price par asar parta hai — kab aati hain, in mein kia hota hai, aur inke aane par gold kitna move kar sakta hai. Sab timings Pakistan Standard Time (PKT) mein hain — US mein daylight saving ki wajah se ±1 hour ka farq aa sakta hai, isliye hamesha ForexFactory calendar se exact time cross-check karein.
     </p>
+
+    <h3 style="margin-bottom:6px;">🔴🎯 LIVE — Abhi Jo High Alert News Aayi, Uska Gold Par Asar</h3>
+    <p style="color:#94a3b8; margin-bottom:16px; font-size:13.5px; line-height:1.6;">
+      Yeh section khud-ba-khud aapke live ForexFactory calendar data se check karta hai ke pichlay 24 ghanton mein kaunsi HIGH-impact USD news release hui (Actual figure aa chuka ho), us mein kia hua (Actual vs Forecast vs Previous), is se gold girne ki taraf jayega ya barhne ki taraf, kitne dollars tak move ho sakta hai, aur us hisaab se BUY ya SELL trade ka rujhan kya banta hai.
+    </p>
+    <div id="faLiveNewsContainer"><div class="fa-live-empty">Calendar data load ho raha hai...</div></div>
+
+    <div class="fa-section-toolbar" style="margin-top:28px;">
+      <h3 style="margin:0;">🗓️ Pichlay 7 Din Ka News Analysis Record</h3>
+      <button class="fa-clear-btn" onclick="faClearHistory()">🗑️ Record Clear Karein</button>
+    </div>
+    <p style="color:#94a3b8; margin-bottom:14px; font-size:13.5px; line-height:1.6;">
+      Har HIGH-impact news jo upar analyze hoti hai wo yahan bhi save ho jati hai — taake aap poore hafte ka pattern dekh saken (kaunsi news se gold zyada move hota hai, kaunsi direction zyada sahi nikli waghera). 7 din se purani entries khud-ba-khud hat jati hain.
+    </p>
+    <div class="fa-hist-wrap"><div id="faHistoryContainer"><div class="fa-live-empty">Abhi koi record nahi hai.</div></div></div>
+
+    <div class="fa-warn" style="margin-top:16px;">
+      ⚠️ <b>Zaroori Note:</b> Direction aur dollar-range dono hi <b>rule-based estimate</b> hain (surprise ke size aur is news-type ki typical historical volatility par based) — guarantee nahi hain. Kabhi bhi is akele par trade na lein; hamesha apna technical structure (support/resistance, ICT zones) aur risk management is ke sath cross-check karein.
+    </div>
 
     <div class="fa-news-card">
       <h4>1. Non-Farm Payrolls (NFP)</h4>
@@ -6115,6 +6164,7 @@
       window.ffEvents = ffEvents;
       if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
       if (typeof window.fosOnCalendarUpdate === 'function') window.fosOnCalendarUpdate();
+      if (typeof window.faOnCalendarUpdate === 'function') window.faOnCalendarUpdate();
       return;
     }
     try {
@@ -6130,6 +6180,7 @@
     window.ffEvents = ffEvents; // ICT Signals engine (separate script scope) reads calendar data from here
     if (typeof window.ictsigOnCalendarUpdate === 'function') window.ictsigOnCalendarUpdate();
     if (typeof window.fosOnCalendarUpdate === 'function') window.fosOnCalendarUpdate();
+    if (typeof window.faOnCalendarUpdate === 'function') window.faOnCalendarUpdate();
   }
 
   fetchFFCalendar();
@@ -6140,6 +6191,236 @@
       updateFFCountdown(new Date(parseInt(banner.dataset.nextTime)));
     }
   }, 60000);
+})();
+</script>
+
+<!-- ==========================================
+     FUNDAMENTAL ANALYSIS — LIVE news impact tracker + 7-day record
+     (apna khud ka independent copy — FOS bot se koi taluq nahi, sirf
+     wahi #redflagnews ka live calendar data [window.ffEvents] read karta hai)
+     ========================================== -->
+<script>
+(function(){
+  const FA_LOOKBACK_HOURS = 24;     // "Abhi" ke live feed mein itne ghanton ki released news dikhengi
+  const FA_HISTORY_DAYS = 7;        // record kitne din tak rakha jaye
+  const FA_HISTORY_KEY = 'waqarFANewsHistory';
+
+  // Same classification jo Fundamental-Only Signals bot use karta hai:
+  // "Direct" news mein forecast se zyada actual = achi US economy = USD strong = Gold neeche.
+  // "Inverse" news (unemployment) mein zyada actual = buri economy = Gold upar.
+  const FA_DIRECT_KEYWORDS = ['non-farm', 'nonfarm', 'employment change', 'cpi', 'pce', 'gdp',
+    'retail sales', 'ism manufacturing', 'ism services', 'ism pmi', 'consumer confidence',
+    'ppi', 'producer price', 'durable goods', 'housing starts', 'industrial production'];
+  const FA_INVERSE_KEYWORDS = ['unemployment rate', 'unemployment claims', 'jobless claims', 'continuing claims'];
+
+  // Typical historical XAUUSD dollar-move range per news type (upar wali educational guide
+  // ke figures se liya gaya hai) — surprise ke size se scale hoga.
+  const FA_RANGE_TABLE = [
+    { key: ['non-farm', 'nonfarm', 'employment change'], min: 15, max: 40, label: 'Non-Farm Payrolls' },
+    { key: ['fomc', 'interest rate', 'rate decision', 'fed funds'], min: 30, max: 80, label: 'FOMC Rate Decision' },
+    { key: ['cpi'], min: 10, max: 30, label: 'CPI' },
+    { key: ['pce'], min: 10, max: 25, label: 'PCE' },
+    { key: ['gdp'], min: 10, max: 25, label: 'GDP' },
+    { key: ['ism manufacturing', 'ism services', 'ism pmi'], min: 8, max: 20, label: 'ISM PMI' },
+    { key: ['retail sales', 'consumer confidence'], min: 8, max: 18, label: 'Retail Sales / Consumer Confidence' },
+    { key: ['unemployment claims', 'jobless claims', 'continuing claims'], min: 5, max: 15, label: 'Jobless Claims' },
+    { key: ['unemployment rate'], min: 10, max: 25, label: 'Unemployment Rate' },
+    { key: ['ppi', 'producer price'], min: 6, max: 15, label: 'PPI' },
+    { key: ['durable goods'], min: 5, max: 12, label: 'Durable Goods' },
+    { key: ['housing starts', 'industrial production'], min: 4, max: 10, label: 'Housing / Industrial Production' }
+  ];
+  const FA_DEFAULT_RANGE = { min: 5, max: 15, label: 'General High-Impact News' };
+
+  function faParseNum(v){
+    if (v === undefined || v === null || v === '') return null;
+    const cleaned = String(v).replace(/[%KMB,]/gi, '');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? null : n;
+  }
+
+  function faGetRangeForTitle(titleLower){
+    for (const row of FA_RANGE_TABLE) {
+      if (row.key.some(k => titleLower.includes(k))) return row;
+    }
+    return FA_DEFAULT_RANGE;
+  }
+
+  // Ek news event ko analyze kar ke: direction (bullish/bearish/neutral for GOLD),
+  // dollar-range estimate, aur trade recommendation (BUY/SELL/WAIT) deta hai.
+  function faAnalyzeEvent(e){
+    const titleLower = (e.title || '').toLowerCase();
+    const isDirect = FA_DIRECT_KEYWORDS.some(k => titleLower.includes(k));
+    const isInverse = FA_INVERSE_KEYWORDS.some(k => titleLower.includes(k));
+    const actual = faParseNum(e.actual), forecast = faParseNum(e.forecast);
+    const range = faGetRangeForTitle(titleLower);
+
+    let direction = 'neutral'; // gold ke liye: bullish = upar, bearish = neeche
+    let magnitudeWeight = 0.6; // default halka move agar surprise na mil sake
+    let reason = 'Actual figure abhi forecast ke barabar hai ya classify nahi ho saka — koi strong bias nahi.';
+
+    if ((isDirect || isInverse) && actual !== null && forecast !== null && actual !== forecast) {
+      const beatForecast = actual > forecast;
+      let dir = 0;
+      if (isDirect) dir = beatForecast ? -1 : 1;   // strong data = gold neeche
+      if (isInverse) dir = beatForecast ? 1 : -1;  // zyada unemployment = gold upar
+      direction = dir > 0 ? 'bullish' : 'bearish';
+      const surpriseMag = forecast !== 0 ? Math.abs((actual - forecast) / forecast) : Math.abs(actual - forecast);
+      magnitudeWeight = Math.min(Math.max(surpriseMag * 20, 0.5), 2); // 0.5x - 2x, FOS bot jaisa hi rule
+      if (isDirect) {
+        reason = beatForecast
+          ? `Actual (${e.actual}) forecast (${e.forecast}) se zyada aaya → US economy mazboot dikhi → USD ko support mila → Gold par bikwali ka dabao.`
+          : `Actual (${e.actual}) forecast (${e.forecast}) se kam aaya → US economy expectation se kamzor → USD kamzor → Gold ko support mila.`;
+      } else {
+        reason = beatForecast
+          ? `Actual (${e.actual}) forecast (${e.forecast}) se zyada aaya → job market kamzor sign → Gold ko safe-haven support mila.`
+          : `Actual (${e.actual}) forecast (${e.forecast}) se kam aaya → job market mazboot → USD ko support mila → Gold par dabao.`;
+      }
+    } else if (actual === null || forecast === null) {
+      reason = 'Actual ya Forecast figure abhi calendar par available nahi (numeric nahi) — text-based release hai, manually headline dekh kar tone judge karein.';
+    }
+
+    const lowUsd = Math.round(range.min * Math.max(magnitudeWeight * 0.7, 0.5));
+    const highUsd = Math.round(range.max * magnitudeWeight);
+
+    let recommendation = 'WAIT';
+    if (direction === 'bullish') recommendation = 'BUY';
+    else if (direction === 'bearish') recommendation = 'SELL';
+
+    return { direction, lowUsd, highUsd, recommendation, reason, rangeLabel: range.label };
+  }
+
+  function faTimeLabel(dateObj){
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Karachi', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    }).format(dateObj) + ' PKT';
+  }
+
+  function faLoadHistory(){
+    try {
+      const raw = localStorage.getItem(FA_HISTORY_KEY);
+      let list = raw ? JSON.parse(raw) : [];
+      const cutoff = Date.now() - FA_HISTORY_DAYS * 24 * 60 * 60 * 1000;
+      list = list.filter(r => r.ts >= cutoff); // 7 din se purani entries khud hat jati hain
+      return list;
+    } catch (e) { return []; }
+  }
+  function faSaveHistory(list){
+    try { localStorage.setItem(FA_HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+  window.faClearHistory = function(){
+    if (!confirm('Kya aap 7 din ka poora news-analysis record clear karna chahte hain?')) return;
+    faSaveHistory([]);
+    faRenderHistory([]);
+  };
+
+  function faRenderLive(analyzedList){
+    const container = document.getElementById('faLiveNewsContainer');
+    if (!container) return;
+    if (!analyzedList.length) {
+      container.innerHTML = '<div class="fa-live-empty">✅ Pichlay 24 ghanton mein koi HIGH-impact USD news release nahi hui.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    analyzedList.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'fa-live-card ' + item.direction;
+      const moveLabel = item.direction === 'bullish' ? 'Gold UPAR ja sakta hai'
+        : item.direction === 'bearish' ? 'Gold NEECHE ja sakta hai'
+        : 'Direction clear nahi (neutral)';
+      card.innerHTML = `
+        <div class="fa-live-top">
+          <h4>${item.title}</h4>
+          <span class="fa-live-trade-badge ${item.recommendation}">${item.recommendation === 'BUY' ? '🟢 BUY Bias' : item.recommendation === 'SELL' ? '🔴 SELL Bias' : '⚪ WAIT'}</span>
+        </div>
+        <div class="fa-live-time">${faTimeLabel(new Date(item.date))} · ${item.ageHours.toFixed(1)} ghante pehle · ${item.rangeLabel}</div>
+        <div class="fa-live-figs">
+          <span><b>Actual:</b> ${item.actual ?? '—'}</span>
+          <span><b>Forecast:</b> ${item.forecast ?? '—'}</span>
+          <span><b>Previous:</b> ${item.previous ?? '—'}</span>
+        </div>
+        <div class="fa-live-desc">${item.reason}</div>
+        <div class="fa-live-desc"><span class="fa-live-move ${item.direction}">${moveLabel}</span> — andazan <span class="fa-live-move ${item.direction}">$${item.lowUsd} – $${item.highUsd}</span> ka move ho sakta hai.</div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function faRenderHistory(list){
+    const container = document.getElementById('faHistoryContainer');
+    if (!container) return;
+    if (!list.length) {
+      container.innerHTML = '<div class="fa-live-empty">Abhi koi record nahi hai.</div>';
+      return;
+    }
+    const sorted = [...list].sort((a, b) => b.ts - a.ts);
+    let html = `<table class="fa-hist-table"><thead><tr>
+      <th>Date / Time (PKT)</th><th>News</th><th>Actual</th><th>Forecast</th><th>Previous</th>
+      <th>Gold Direction</th><th>Est. Move</th><th>Trade Bias</th>
+    </tr></thead><tbody>`;
+    sorted.forEach(r => {
+      const dirLabel = r.direction === 'bullish' ? '⬆️ Upar' : r.direction === 'bearish' ? '⬇️ Neeche' : '↔️ Neutral';
+      html += `<tr>
+        <td>${faTimeLabel(new Date(r.date))}</td>
+        <td>${r.title}</td>
+        <td>${r.actual ?? '—'}</td>
+        <td>${r.forecast ?? '—'}</td>
+        <td>${r.previous ?? '—'}</td>
+        <td class="fa-hist-dir ${r.direction}">${dirLabel}</td>
+        <td>$${r.lowUsd} – $${r.highUsd}</td>
+        <td class="fa-hist-dir ${r.recommendation === 'BUY' ? 'bullish' : r.recommendation === 'SELL' ? 'bearish' : 'neutral'}">${r.recommendation}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  // ===== MAIN: calendar update hote hi chalta hai (fetchFFCalendar ke andar se call hota hai) =====
+  window.faOnCalendarUpdate = function(){
+    const events = window.ffEvents;
+    if (!events || !events.length) return;
+    const now = Date.now();
+
+    const relevant = events.filter(e => e.impact === 'High' && e.country === 'USD').map(e => {
+      const t = new Date(e.date).getTime();
+      const ageHours = (now - t) / (60 * 60 * 1000);
+      return { e, t, ageHours };
+    }).filter(x => x.ageHours >= 0 && x.ageHours <= FA_LOOKBACK_HOURS)
+      .sort((a, b) => a.ageHours - b.ageHours); // sabse nayi (recent) pehle
+
+    const analyzedLive = relevant.map(x => {
+      const analysis = faAnalyzeEvent(x.e);
+      return {
+        title: x.e.title, date: x.e.date, actual: x.e.actual, forecast: x.e.forecast, previous: x.e.previous,
+        ageHours: x.ageHours, ...analysis
+      };
+    });
+    faRenderLive(analyzedLive);
+
+    // ===== 7-day record mein save karo (dedup by title+date, taake har 3-min refresh par duplicate na banay) =====
+    let history = faLoadHistory();
+    const existingKeys = new Set(history.map(r => r.key));
+    let changed = false;
+    analyzedLive.forEach(item => {
+      const key = item.title + '|' + item.date;
+      if (existingKeys.has(key)) return;
+      // Sirf wahi save karo jinka actual figure aa chuka ho (release ho chuki news), taake future/pending events record mein na bharen
+      if (item.actual === undefined || item.actual === null || item.actual === '') return;
+      history.push({
+        key, ts: new Date(item.date).getTime(), date: item.date, title: item.title,
+        actual: item.actual, forecast: item.forecast, previous: item.previous,
+        direction: item.direction, lowUsd: item.lowUsd, highUsd: item.highUsd, recommendation: item.recommendation
+      });
+      existingKeys.add(key);
+      changed = true;
+    });
+    if (changed) faSaveHistory(history);
+    faRenderHistory(history);
+  };
+
+  // Agar calendar data page-load ke waqt already mojood ho (edge case), turant render kar do
+  if (window.ffEvents && window.ffEvents.length) window.faOnCalendarUpdate();
+  else faRenderHistory(faLoadHistory()); // history to turant dikha do, live feed calendar ka wait karega
 })();
 </script>
  <!--
