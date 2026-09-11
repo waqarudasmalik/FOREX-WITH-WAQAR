@@ -2310,7 +2310,6 @@
   function deleteHedge(id) {
     hedges = hedges.filter(h => h.id !== id);
     openEditIds = openEditIds.filter(x => x !== id);
-    stopHedgeAlarmSound(id);
     delete hedgeAlarms[id];
     saveHedges();
     renderHedges();
@@ -2323,7 +2322,7 @@
   // ===== Proximity Alarm (TP/SL ke $5 andar aane par loud alarm) =====
   const HEDGE_ALARM_THRESHOLD = 5; // dollars
   let hedgeAudioCtx = null;
-  const hedgeAlarms = {}; // hedgeId -> { muted: bool, timerId: intervalId|null }
+  const hedgeAlarms = {}; // hedgeId -> { muted: bool }  (sirf ye track karta hai ke ye hedge announcement mein shamil ho ya nahi)
 
   function getHedgeAudioCtx() {
     if (!hedgeAudioCtx) hedgeAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2353,12 +2352,17 @@
     } catch (e) { /* audio blocked until user interacts once */ }
   }
   function getHedgeAlarmState(id) {
-    if (!hedgeAlarms[id]) hedgeAlarms[id] = { muted: false, timerId: null, speakTimerId: null, lastMessage: null };
+    if (!hedgeAlarms[id]) hedgeAlarms[id] = { muted: false };
     return hedgeAlarms[id];
   }
 
-  // ===== Voice Announcement (jab alarm bajay, account ka naam le kar bataye TP/SL hit hone wala hai) =====
-  const HEDGE_SPEAK_REPEAT_MS = 8000; // har 8 second baad wahi announcement dobara boli jayegi jab tak range mein hai
+  // ===== GLOBAL Voice Announcement System =====
+  // Chahe 1 hedge ho ya 30, sab jo alarm-range mein hain unhe EK hi cycle mein,
+  // sab se nazdeek (nearest) se sab se door (farthest) tak, sequence mein bola jata hai.
+  // Beep sirf ek hi (global) baja karta hai jab tak koi bhi hedge range mein ho.
+  const HEDGE_SPEAK_REPEAT_MS = 6000; // har itne ms baad poori list (nazdeek→door) dobara sunai jayegi
+  const hedgeGlobalAlarm = { beepTimerId: null, speakTimerId: null, lastSignature: null, currentList: [] };
+
   function speakHedgeAlert(text) {
     try {
       if (!('speechSynthesis' in window) || !text) return;
@@ -2369,37 +2373,60 @@
       window.speechSynthesis.speak(utter);
     } catch (e) { /* speech synthesis blocked/unsupported — silently ignore */ }
   }
-  function startHedgeAlarmSound(id, message) {
-    const st = getHedgeAlarmState(id);
-    if (!st.timerId) {
-      playHedgeBeep();
-      st.timerId = setInterval(playHedgeBeep, 550);
+
+  function speakHedgeAlarmList(list) {
+    try {
+      if (!('speechSynthesis' in window) || !list || !list.length) return;
+      window.speechSynthesis.cancel(); // purani/ruki hui queue saaf karo taake awazain overlap na hon
+      const ordinalWords = ['Sabse nazdeek', 'Dusra nazdeek', 'Teesra nazdeek', 'Chautha nazdeek', 'Paanchwan nazdeek'];
+      list.forEach((item, idx) => {
+        const prefix = ordinalWords[idx] || `Number ${idx + 1}`;
+        speakHedgeAlert(`${prefix}: ${item.message}`);
+      });
+    } catch (e) {}
+  }
+
+  // renderHedges() har tick par is function ko taaza (current) active-alarm list dega,
+  // jo already distance ke hisaab se sort ki hui hoti hai (nearest pehle).
+  function updateGlobalHedgeAlarm(activeAlarms) {
+    hedgeGlobalAlarm.currentList = activeAlarms;
+    if (!activeAlarms.length) {
+      stopGlobalHedgeAlarm();
+      return;
     }
-    if (message) {
-      if (!st.speakTimerId) {
-        speakHedgeAlert(message);
-        st.speakTimerId = setInterval(() => speakHedgeAlert(message), HEDGE_SPEAK_REPEAT_MS);
-      } else if (st.lastMessage !== message) {
-        speakHedgeAlert(message); // account/level badal gaya to turant naya announcement bolo
-      }
-      st.lastMessage = message;
+    if (!hedgeGlobalAlarm.beepTimerId) {
+      playHedgeBeep();
+      hedgeGlobalAlarm.beepTimerId = setInterval(playHedgeBeep, 550);
+    }
+    const signature = activeAlarms.map(a => a.id).join(','); // sirf membership/order dekh rahe hain, exact price nahi
+    if (!hedgeGlobalAlarm.speakTimerId) {
+      speakHedgeAlarmList(hedgeGlobalAlarm.currentList);
+      hedgeGlobalAlarm.lastSignature = signature;
+      hedgeGlobalAlarm.speakTimerId = setInterval(() => {
+        speakHedgeAlarmList(hedgeGlobalAlarm.currentList);
+      }, HEDGE_SPEAK_REPEAT_MS);
+    } else if (signature !== hedgeGlobalAlarm.lastSignature) {
+      // koi naya hedge range mein aaya ya order badla — turant dobara bolo
+      speakHedgeAlarmList(hedgeGlobalAlarm.currentList);
+      hedgeGlobalAlarm.lastSignature = signature;
     }
   }
-  function stopHedgeAlarmSound(id) {
-    const st = getHedgeAlarmState(id);
-    if (st.timerId) { clearInterval(st.timerId); st.timerId = null; }
-    if (st.speakTimerId) { clearInterval(st.speakTimerId); st.speakTimerId = null; }
-    st.lastMessage = null;
+
+  function stopGlobalHedgeAlarm() {
+    if (hedgeGlobalAlarm.beepTimerId) { clearInterval(hedgeGlobalAlarm.beepTimerId); hedgeGlobalAlarm.beepTimerId = null; }
+    if (hedgeGlobalAlarm.speakTimerId) { clearInterval(hedgeGlobalAlarm.speakTimerId); hedgeGlobalAlarm.speakTimerId = null; }
+    hedgeGlobalAlarm.lastSignature = null;
+    hedgeGlobalAlarm.currentList = [];
     try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {}
   }
+
   function muteHedgeAlarm(id) {
-    getHedgeAlarmState(id).muted = true;
-    stopHedgeAlarmSound(id);
+    getHedgeAlarmState(id).muted = true; // is specific hedge ko announcement list se nikaal do
     renderHedges();
   }
   function unmuteHedgeAlarm(id) {
     getHedgeAlarmState(id).muted = false;
-    renderHedges(); // agar ab bhi range mein hai to alarm khud restart ho jayega
+    renderHedges(); // agar ab bhi range mein hai to wapas list mein shamil ho jayega
   }
   function toggleEdit(id) {
     if (openEditIds.includes(id)) openEditIds = openEditIds.filter(x => x !== id);
@@ -2483,6 +2510,23 @@
       return { ...h, minDistance, nearestField, maxTP, maxSL };
     });
 
+    // ===== Global alarm collection: JITNE bhi hedges $5 range mein hain (chahe 1 ho ya 30),
+    // sab ko nearest→farthest sort kar ke EK hi announcement engine ko de do. =====
+    const activeAlarms = list
+      .filter(h => h.configured && currentPrice > 0 && h.minDistance <= HEDGE_ALARM_THRESHOLD && !getHedgeAlarmState(h.id).muted)
+      .sort((a, b) => a.minDistance - b.minDistance)
+      .map(h => {
+        const nearestAccName = (h.nearestField === 'buyTP' || h.nearestField === 'buySL') ? h.buyAccountName : h.sellAccountName;
+        const nearestLevel = (h.nearestField === 'buyTP' || h.nearestField === 'sellTP') ? 'TP' : 'SL';
+        return { id: h.id, name: h.name, distance: h.minDistance, message: `${h.name} — ${nearestAccName} ka ${nearestLevel} hit hone wala hai` };
+      });
+    // Jo hedge range se bahar nikal gaya uska mute-status reset karo taake agli baar phir alert bane.
+    list.forEach(h => {
+      const isInRange = h.configured && currentPrice > 0 && h.minDistance <= HEDGE_ALARM_THRESHOLD;
+      if (!isInRange) getHedgeAlarmState(h.id).muted = false;
+    });
+    updateGlobalHedgeAlarm(activeAlarms);
+
     if (hedgeSortMode === 'tp') list.sort((a, b) => b.maxTP - a.maxTP);
     else if (hedgeSortMode === 'sl') list.sort((a, b) => b.maxSL - a.maxSL);
     else list.sort((a, b) => a.minDistance - b.minDistance);
@@ -2495,22 +2539,17 @@
       const isNearest = i === 0 && hedgeSortMode === 'nearest' && currentPrice > 0 && h.configured;
 
       // Proximity alarm: TP/SL ke $5 (HEDGE_ALARM_THRESHOLD) andar aane par bajta hai.
+      // Actual beep/voice ab GLOBAL engine (updateGlobalHedgeAlarm) chalata hai, upar list-loop ke baad.
+      // Yahan sirf is card ke liye visual badge + priority number nikalte hain.
       const inAlarmRange = h.configured && currentPrice > 0 && h.minDistance <= HEDGE_ALARM_THRESHOLD;
       const alarmState = getHedgeAlarmState(h.id);
-      // Voice announcement ke liye: kaunsa account (Buy/Sell) aur kaunsa level (TP/SL) qareeb hai
       let alarmMessage = null;
+      let alarmRank = -1; // is hedge ka number (0 = sabse nazdeek) global announcement queue mein
       if (inAlarmRange && h.nearestField) {
         const nearestAccName = (h.nearestField === 'buyTP' || h.nearestField === 'buySL') ? h.buyAccountName : h.sellAccountName;
         const nearestLevel = (h.nearestField === 'buyTP' || h.nearestField === 'sellTP') ? 'TP' : 'SL';
         alarmMessage = `${nearestAccName} ka ${nearestLevel} hit hone wala hai`;
-      }
-      if (!inAlarmRange) {
-        stopHedgeAlarmSound(h.id);
-        alarmState.muted = false; // range se bahar jaate hi reset, taake agli baar phir alert bajay
-      } else if (!alarmState.muted) {
-        startHedgeAlarmSound(h.id, alarmMessage);
-      } else {
-        stopHedgeAlarmSound(h.id);
+        alarmRank = activeAlarms.findIndex(a => a.id === h.id);
       }
       const isRinging = inAlarmRange && !alarmState.muted;
 
@@ -2571,7 +2610,8 @@
 
       let alarmHtml = '';
       if (inAlarmRange) {
-        alarmHtml += `<span class="alert-badge">⚠️ ${alarmMessage ? alarmMessage + ' — ' : ''}sirf $${h.minDistance.toFixed(2)} door</span>`;
+        const rankLabel = alarmRank >= 0 ? `#${alarmRank + 1} ` : '';
+        alarmHtml += `<span class="alert-badge">⚠️ ${rankLabel}${alarmMessage ? alarmMessage + ' — ' : ''}sirf $${h.minDistance.toFixed(2)} door</span>`;
         alarmHtml += alarmState.muted
           ? `<button class="alarm-btn muted" onclick="unmuteHedgeAlarm(${h.id})">🔕 Alarm Band Hai (Chalu Karein)</button>`
           : `<button class="alarm-btn ringing" onclick="muteHedgeAlarm(${h.id})">🔔 ALARM! (Band Karein)</button>`;
