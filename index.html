@@ -2363,7 +2363,7 @@
     try {
       if (!('speechSynthesis' in window) || !text) return;
       const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.95;
+      utter.rate = 0.50;
       utter.pitch = 1;
       utter.volume = 1;
       window.speechSynthesis.speak(utter);
