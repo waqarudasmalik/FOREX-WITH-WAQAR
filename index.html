@@ -614,6 +614,7 @@
    <a href="#priceactionsignals">🕯️🤖 Price Action Signals</a>
    <a href="#ictsignals">🧭🤖 ICT Signals</a>
    <a href="#gannsignals">🔱🤖 Gann Signals</a>
+   <a href="#aitradingcommittee">🧠🤖 AI Trading Committee</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
   </nav>
@@ -661,6 +662,7 @@
       <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
       <a class="sd-folder" href="#gannsignals"><div class="sd-icon">🔱🤖</div><h4>Gann Signals</h4><p>Gann Number support/resistance levels par Hammer/Inverted-Hammer, Breakout aur Strong-Candle confirmation — 80%+ setup-score signals, live ladder ke sath.</p></a>
+      <a class="sd-folder" href="#aitradingcommittee"><div class="sd-icon">🧠🤖</div><h4>AI Trading Committee</h4><p>3-AI (ChatGPT/Claude/Gemini style) debate + consensus engine — SMC, ICT, Gann, session, news aur correlation sab ek saath check karke FINAL SIGNAL deta hai.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -6497,6 +6499,1144 @@ INTEGRATION STEPS:
       }
     });
   }
+})();
+</script>
+
+<style>
+  .atc-wrap{display:flex;flex-direction:column;gap:20px;}
+  .atc-engine-status{font-size:12px;color:#64748b;display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .atc-dot{width:8px;height:8px;border-radius:50%;background:#a855f7;animation:recPulse 1.2s infinite;}
+  .atc-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:8px;}
+  .atc-form-grid.wide{grid-template-columns:repeat(auto-fit,minmax(320px,1fr));}
+  .atc-field label{font-size:11.5px;color:#c4b5fd;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;}
+  .atc-field input, .atc-field select, .atc-field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.8);color:#fff;font-size:14px;font-family:inherit;}
+  .atc-field textarea{min-height:64px;resize:vertical;line-height:1.5;}
+  .atc-section-label{color:#c084fc;font-size:13.5px;font-weight:800;margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;border-left:3px solid #a855f7;padding-left:10px;}
+  .atc-generate-btn{padding:14px 22px;background:linear-gradient(135deg,#a855f7,#7e22ce);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;transition:transform .15s, box-shadow .15s;width:100%;margin-top:6px;}
+  .atc-generate-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(168,85,247,0.4);}
+  .atc-generate-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+  .atc-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(168,85,247,0.35);border-radius:18px;padding:22px;margin-top:16px;}
+  .atc-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
+  .atc-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
+  .atc-live-card.notrade{border-color:rgba(148,163,184,0.4);}
+  .atc-live-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+  .atc-dir-badge{font-weight:900;font-size:18px;padding:4px 16px;border-radius:999px;}
+  .atc-dir-badge.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .atc-dir-badge.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .atc-dir-badge.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .atc-output{background:rgba(15,23,42,0.6);border-left:3px solid #a855f7;border-radius:8px;padding:18px 20px;color:#e2e8f0;font-size:13.5px;line-height:1.75;white-space:pre-wrap;font-family:'Consolas','Courier New',monospace;max-height:640px;overflow-y:auto;}
+  .atc-history-item{padding:12px 14px;background:rgba(15,23,42,0.55);border-radius:10px;margin-bottom:8px;font-size:13px;cursor:pointer;border-left:3px solid rgba(148,163,184,0.3);}
+  .atc-history-item:hover{border-left-color:#a855f7;}
+  .atc-history-item .atc-h-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#94a3b8;font-size:11.5px;margin-bottom:4px;}
+  .atc-history-item .atc-h-dir{font-weight:800;}
+  .atc-history-item .atc-h-dir.BUY{color:#22c55e;}
+  .atc-history-item .atc-h-dir.SELL{color:#ef4444;}
+  .atc-history-item .atc-h-dir.NONE{color:#94a3b8;}
+</style>
+<section id="aitradingcommittee">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🧠🤖 AI Trading Committee — 3-AI Debate &amp; Consensus Engine</h3>
+    <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
+      Neeche jo market data available ho wo bharein — jo field khali chhorenge, engine usay
+      <b>"NOT PROVIDED"</b> samjhega (khud se koi number ya level invent nahi karega). AI phir
+      <b>ChatGPT-style, Claude-style aur Gemini-style</b> teen independent analyst perspectives se
+      SMC, ICT, Price Action, Gann, liquidity, session/volatility, news risk aur correlation ko
+      alag-alag analyze karega, ek doosre ke analysis par <b>debate</b> karega, phir <b>consensus</b>
+      nikaal kar ek final BUY / SELL / NO TRADE signal — poori reasoning, score aur risk plan ke
+      sath — dega.
+    </p>
+    <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; line-height:1.6;">
+      ⚠️ Ye advisory tool hai, guaranteed-profit system nahi. Data jitna mukammal doge, analysis
+      utni behtar hogi — adhoori/purani data se "DATA INSUFFICIENT — NO TRADE" bhi aa sakta hai
+      (ye jaanbujh kar hai, taake AI galat guess na kare). Final trade decision aur risk hamesha
+      aapki apni zimmedari hai.
+    </p>
+
+    <div class="atc-engine-status">
+      <span class="atc-dot"></span>
+      <span id="atcStatusText">Data bharein aur "Generate Committee Signal" dabayein.</span>
+    </div>
+
+    <div class="atc-section-label">1️⃣ Symbol &amp; Live Price</div>
+    <div class="atc-form-grid">
+      <div class="atc-field">
+        <label>Symbol</label>
+        <select id="atcSymbol">
+          <option value="XAUUSD">XAUUSD (Gold)</option>
+          <option value="EURUSD">EURUSD</option>
+          <option value="GBPUSD">GBPUSD</option>
+          <option value="USDJPY">USDJPY</option>
+          <option value="GBPJPY">GBPJPY</option>
+          <option value="BTCUSD">BTCUSD</option>
+          <option value="OTHER">Other (neeche likhein)</option>
+        </select>
+      </div>
+      <div class="atc-field">
+        <label>Agar "Other" — Symbol likhein</label>
+        <input type="text" id="atcSymbolOther" placeholder="e.g. USDCAD">
+      </div>
+      <div class="atc-field">
+        <label>Current Price</label>
+        <input type="text" id="atcPrice" placeholder="e.g. 2385.40">
+      </div>
+      <div class="atc-field">
+        <label>Trading Session</label>
+        <select id="atcSession">
+          <option value="">— Select —</option>
+          <option value="Asian">Asian Session</option>
+          <option value="London">London Session</option>
+          <option value="New York">New York Session</option>
+          <option value="London/NY Overlap">London/NY Overlap</option>
+          <option value="Late NY / Early Asian (dead zone)">Late NY / Early Asian (dead/low-liquidity zone)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="atc-section-label">2️⃣ Multi-Timeframe Price Data (OHLC / notes)</div>
+    <div class="atc-form-grid wide">
+      <div class="atc-field"><label>H4 — direction / OHLC / key notes</label><textarea id="atcH4" placeholder="e.g. O:2380 H:2392 L:2378 C:2388, bullish structure"></textarea></div>
+      <div class="atc-field"><label>H1 — market structure / BOS / CHOCH</label><textarea id="atcH1" placeholder="e.g. BOS bullish at 2390, higher low at 2381"></textarea></div>
+      <div class="atc-field"><label>M30 — structure / order blocks</label><textarea id="atcM30" placeholder="e.g. bullish OB at 2382-2384"></textarea></div>
+      <div class="atc-field"><label>M15 — FVG / IFVG / BPR / liquidity</label><textarea id="atcM15" placeholder="e.g. FVG 2384-2386 unfilled"></textarea></div>
+      <div class="atc-field"><label>M5 — entry trigger / price action</label><textarea id="atcM5" placeholder="e.g. bullish engulfing at OB"></textarea></div>
+      <div class="atc-field"><label>M3 — fine confirmation (optional)</label><textarea id="atcM3" placeholder="optional"></textarea></div>
+    </div>
+
+    <div class="atc-section-label">3️⃣ Key Levels</div>
+    <div class="atc-form-grid">
+      <div class="atc-field"><label>Previous Swing High / Low</label><input type="text" id="atcSwing" placeholder="e.g. High 2395 / Low 2375"></div>
+      <div class="atc-field"><label>Previous Day High / Low</label><input type="text" id="atcPrevDay" placeholder="e.g. High 2391 / Low 2379"></div>
+      <div class="atc-field"><label>Previous Week High / Low</label><input type="text" id="atcPrevWeek" placeholder="e.g. High 2398 / Low 2360"></div>
+      <div class="atc-field"><label>Relevant Gann Level(s)</label><input type="text" id="atcGann" placeholder="e.g. 2385 resistance"></div>
+      <div class="atc-field"><label>Relevant Fibonacci Level(s)</label><input type="text" id="atcFib" placeholder="e.g. 0.618 discount at 2381"></div>
+      <div class="atc-field"><label>ATR(14) — current vs recent average</label><input type="text" id="atcAtr" placeholder="e.g. current 8.2 vs avg 9.5 (slightly compressed)"></div>
+    </div>
+
+    <div class="atc-section-label">4️⃣ News, Intermarket &amp; Risk Context</div>
+    <div class="atc-form-grid wide">
+      <div class="atc-field"><label>Upcoming/recent high-impact news (time, actual/forecast/previous)</label><textarea id="atcNews" placeholder="e.g. USD CPI in 40 min, forecast 3.2%, previous 3.1%"></textarea></div>
+      <div class="atc-field"><label>Intermarket data (DXY / US10Y Yield / correlated pairs)</label><textarea id="atcCorrelation" placeholder="e.g. DXY falling, US10Y flat, EURUSD bullish"></textarea></div>
+    </div>
+    <div class="atc-form-grid">
+      <div class="atc-field"><label>Account Balance</label><input type="text" id="atcBalance" placeholder="e.g. 1000 USD"></div>
+      <div class="atc-field"><label>Risk % Per Trade</label><input type="text" id="atcRiskPct" placeholder="e.g. 1%" value="1%"></div>
+      <div class="atc-field"><label>Daily Drawdown Used So Far</label><input type="text" id="atcDailyDD" placeholder="e.g. 0%" value="0%"></div>
+      <div class="atc-field"><label>Weekly Drawdown Used So Far</label><input type="text" id="atcWeeklyDD" placeholder="e.g. 0%" value="0%"></div>
+    </div>
+
+    <button class="atc-generate-btn" id="atcGenerateBtn" onclick="atcGenerateSignal()">🧠 Generate Committee Signal</button>
+
+    <div class="atc-live-card notrade" id="atcLiveCard" style="display:none;">
+      <div class="atc-live-head">
+        <span class="atc-dir-badge NONE" id="atcDirBadge">—</span>
+        <span style="color:#64748b;font-size:12px;" id="atcLiveTime">—</span>
+      </div>
+      <div class="atc-output" id="atcOutput">—</div>
+    </div>
+
+    <h4 style="color:#c084fc; font-size:15px; margin:26px 0 10px;">Signal History (is browser par, last 20)</h4>
+    <div id="atcHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
+
+    <div class="fa-note" style="margin-top:18px;">
+      💡 <b>Ye engine kaise kaam karta hai:</b>
+      <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
+        <li>Aap upar jo market data bharte hain, wahi ek single Claude AI call ko bheja jaata hai —
+          jisay poora <b>23-step Multi-AI Trading Committee framework</b> (SMC, ICT, Price Action,
+          Gann, liquidity, session/news filters, consensus engine, risk sizing, trade management)
+          system prompt ke taur par diya gaya hai.</li>
+        <li>AI khud teen alag "analyst lenses" (ChatGPT-style / Claude-style / Gemini-style) se
+          independently analysis karta hai, phir un teenon ko ek doosre se "debate" karwa kar
+          final consensus nikalta hai — jaisa framework mein STEP 2-4 mein define hai.</li>
+        <li>Koi bhi field khali ho to AI usay "NOT PROVIDED" maan kar chalega, aur agar zaroori
+          data missing ho to signal generate karne ke bajaye <b>DATA INSUFFICIENT — NO TRADE</b>
+          ya <b>NO TRADE</b> return karega — kabhi bhi random guess nahi karega.</li>
+        <li>Result sirf is browser mein (localStorage) save hota hai — koi central database nahi,
+          taake har user ki apni history private rahe.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  // ⚠️ Yahan apni Anthropic (Claude) API key paste karein — is website ka har
+  // visitor is key ko browser se dekh sakta hai (jaise upar wali Groq key),
+  // is liye ek "usage-limited" ya "rate-limited" key rakhna behtar hai, ya
+  // is call ko apne backend/server ke zariye proxy karwayein.
+  const CLAUDE_API_KEY = "PASTE_YOUR_ANTHROPIC_API_KEY_HERE";
+  const CLAUDE_MODEL = "claude-sonnet-4-6";
+
+  const ATC_SYSTEM_PROMPT = `MULTI-AI TRADING SIGNAL ENGINE
+
+ROLE
+
+You are a Multi-AI Trading Committee consisting of three independent AI analysts:
+
+1. ChatGPT
+2. Claude
+3. Gemini
+
+Your job is NOT to blindly generate a trade.
+
+Your job is to analyze the market using:
+
+- Smart Money Concepts (SMC)
+- ICT Concepts
+- Price Action
+- Gann Numbers / Gann Levels
+- Market Structure
+- Liquidity
+- Fibonacci Premium / Discount
+- FVG / IFVG
+- BPR
+- Order Blocks
+- BOS
+- CHOCH
+- Swing High / Swing Low
+- Support / Resistance
+- Candlestick confirmation
+- Volume, when reliable data is available
+- Multi-timeframe analysis
+- Intermarket correlation (DXY, Yields, correlated pairs)
+- Trading session & volatility context
+- Scheduled fundamental/news risk
+
+The three AIs must independently analyze the same market data, challenge each other's conclusions, and then reach a final consensus.
+
+Since you are a single model acting as all three analysts, genuinely vary each analyst's angle of attack and give each one at least one point of disagreement to resolve during the debate step, rather than three identical restatements.
+
+---
+
+STEP 1 — MARKET DATA
+
+The system will provide:
+
+- Symbol
+- Current Price
+- OHLC data
+- H4
+- H1
+- M30
+- M15
+- M5
+- M3
+- Volume, if available
+- Previous swing highs/lows
+- Previous day's high/low
+- Previous week's high/low
+- Relevant Gann levels
+- Relevant Fibonacci levels
+- Current trading session (Asian / London / New York / Overlap)
+- Current ATR (14) on the relevant timeframes
+- Upcoming/most recent high-impact economic events (time, actual, forecast, previous)
+- Related intermarket data, if available (DXY, US10Y Yield, correlated pairs)
+
+Never invent missing market data.
+
+If required data is missing, return:
+
+DATA INSUFFICIENT — NO TRADE
+
+---
+
+STEP 2 — INDEPENDENT ANALYSIS
+
+Each AI must independently analyze the market before seeing the other AIs' conclusions.
+
+CHATGPT ANALYST
+
+Analyze:
+
+- H4 direction
+- H1 market structure
+- BOS / CHOCH
+- Liquidity
+- FVG
+- IFVG
+- BPR
+- Order Blocks
+- Premium / Discount
+- Fibonacci
+- Price Action
+- Entry zone
+- Stop Loss
+- Take Profit
+- Risk-to-Reward
+- Gann confirmation
+- Session/volatility context
+- Intermarket correlation
+
+Return:
+
+CHATGPT VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
+CLAUDE ANALYST
+
+Perform the same analysis independently.
+
+Do not copy ChatGPT.
+
+Return:
+
+CLAUDE VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
+GEMINI ANALYST
+
+Perform the same analysis independently.
+
+Do not copy ChatGPT or Claude.
+
+Return:
+
+GEMINI VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
+STEP 3 — AI DEBATE
+
+Now show each AI the other two analyses.
+
+Each AI must answer:
+
+1. What did the other AI identify correctly?
+2. What did the other AI identify incorrectly?
+3. Which technical evidence supports BUY?
+4. Which technical evidence supports SELL?
+5. Is the Gann level actually relevant?
+6. Is liquidity confirmed or only suspected?
+7. Is BOS/CHOCH confirmed?
+8. Is the FVG/IFVG/BPR valid?
+9. Is the proposed entry technically valid?
+10. Is the Stop Loss logically placed?
+11. Is the Take Profit realistic?
+12. What evidence would invalidate the trade?
+13. Does the current session/volatility support this setup, or is it a dead/choppy zone?
+14. Is there a scheduled high-impact news event that could invalidate this setup before it plays out?
+15. Do correlated markets (DXY, Yields, related pairs) confirm or contradict this direction?
+
+Do not force agreement.
+
+If the evidence is contradictory, choose:
+
+NO TRADE
+
+---
+
+STEP 4 — CONSENSUS ENGINE
+
+Calculate:
+
+AI AGREEMENT SCORE
+
+ChatGPT = 33.33%
+Claude = 33.33%
+Gemini = 33.33%
+
+(See STEP 17 for how these base weights may be dynamically adjusted based on historical accuracy.)
+
+A signal is allowed only when:
+
+- At least 2 of 3 AIs agree on direction
+- SMC/ICT structure supports the direction
+- Price Action supports the direction
+- Entry zone is technically valid
+- Stop Loss has a logical invalidation point
+- Take Profit provides acceptable R:R
+- No major contradiction exists
+- Gann provides confirmation OR is neutral
+- Session/volatility context is acceptable (see STEP 14)
+- No unresolved high-impact news conflict (see STEP 15)
+- No hard correlation contradiction (see STEP 16)
+- Risk limits are not already breached (see STEP 18)
+- No duplicate/overlapping active signal exists for the same symbol+direction (see STEP 20)
+
+If these conditions are not satisfied:
+
+FINAL SIGNAL = NO TRADE
+
+---
+
+STEP 5 — FINAL TRADE DECISION
+
+Return exactly:
+
+FINAL SIGNAL
+
+Symbol:
+Direction:
+BUY / SELL / NO TRADE
+
+Entry:
+Stop Loss:
+Take Profit 1:
+Take Profit 2:
+Take Profit 3:
+
+Risk/Reward:
+Confidence:
+AI Agreement:
+
+ChatGPT:
+Claude:
+Gemini:
+
+SMC Confirmation:
+ICT Confirmation:
+Price Action Confirmation:
+Gann Confirmation:
+Liquidity Confirmation:
+Market Structure Confirmation:
+Session Confirmation:
+Correlation Confirmation:
+News Risk Status:
+
+---
+
+STEP 6 — EXPLAIN WHY THE TRADE WAS TAKEN
+
+Explain in simple language:
+
+WHY THIS SIGNAL?
+
+Example structure:
+
+1. H4 direction is bullish because ______.
+2. H1 structure shows ______.
+3. Liquidity was taken from ______.
+4. M15/M5 BOS or CHOCH confirmed ______.
+5. FVG/IFVG/BPR provides the entry zone ______.
+6. Price Action confirms ______.
+7. Gann level at ______ supports the setup.
+8. Stop Loss is placed at ______ because this level invalidates the setup.
+9. Take Profit is placed at ______ because of liquidity/swing target.
+10. Expected R:R is ______.
+11. Session context: ______ (why this session supports taking the trade now).
+12. Correlated markets (DXY/Yields/related pairs) show ______, which agrees/disagrees with this direction.
+13. No high-impact news is due within the blackout window / OR: this news was already factored in because ______.
+
+Also explain:
+
+WHY NOT THE OPPOSITE DIRECTION?
+
+---
+
+STEP 7 — SIGNAL QUALITY SCORE
+
+Create a score from 0–100.
+
+SMC:
+0–20
+
+ICT:
+0–20
+
+Price Action:
+0–20
+
+Gann:
+0–15
+
+Market Structure:
+0–15
+
+AI Agreement:
+0–10
+
+TOTAL:
+0–100
+
+Signal classification:
+
+90–100 = A+ Setup
+80–89 = A Setup
+70–79 = B Setup
+60–69 = Weak Setup
+Below 60 = NO TRADE
+
+Do not generate a trade below the minimum configured score.
+
+STEP 7B — SCORE MODIFIERS (BONUS / PENALTY)
+
+After the base 0–100 score is calculated, apply the following modifiers. The final
+adjusted score is capped between 0 and 100 and is what actually gets compared
+against the minimum configured score above.
+
+- Session quality: +5 if inside London/NY overlap or a proven high-liquidity
+  session for this pair, -10 if inside a known dead/choppy zone.
+- Correlation agreement: +5 if DXY/Yields/correlated pairs clearly agree,
+  -10 if they clearly contradict, 0 if neutral/unclear.
+- News proximity: -15 if a high-impact event for this symbol's currency is due
+  within the configured blackout window (see STEP 15), 0 otherwise.
+- Volatility sanity: -10 if ATR is abnormally compressed (likely chop) or
+  abnormally expanded without clear directional bias (likely spike/trap).
+- Fresh vs. late entry: -5 if price has already moved a large portion of the
+  distance toward TP1 before entry is even triggered (late/chased entry).
+
+Always show the base score AND the final adjusted score, with a one-line reason
+for every modifier that was applied (or explicitly state "no modifiers applied").
+
+---
+
+STEP 8 — TRADE MANAGEMENT
+
+For every valid signal provide:
+
+Entry
+SL
+TP1
+TP2
+TP3
+Risk/Reward
+
+Also provide:
+
+Setup Invalidation Price
+
+If price reaches the invalidation level before confirmation:
+
+CANCEL SIGNAL
+
+Never move Stop Loss farther away simply to avoid an SL hit.
+
+(See STEP 19 for detailed post-entry management rules — breakeven, partial closes,
+trailing stop, and time-based exit.)
+
+---
+
+STEP 9 — SIGNAL DATABASE
+
+Every generated signal must be stored with:
+
+Signal ID
+Date
+Time
+Symbol
+Direction
+Entry
+SL
+TP1
+TP2
+TP3
+Risk/Reward
+Confidence
+SMC Score
+ICT Score
+Price Action Score
+Gann Score
+AI Agreement Score
+Score Modifiers Applied
+Base Score
+Final Adjusted Score
+Session At Entry
+Correlation Status At Entry
+News Risk Status At Entry
+Final Score
+Signal Status
+
+Possible status:
+
+ACTIVE
+TP1 HIT
+TP2 HIT
+TP3 HIT
+SL HIT
+CANCELLED
+BREAKEVEN
+EXPIRED
+
+---
+
+STEP 10 — PERFORMANCE DASHBOARD
+
+The website must continuously calculate:
+
+Total Signals
+BUY Signals
+SELL Signals
+Winning Signals
+Losing Signals
+SL Hits
+TP1 Hits
+TP2 Hits
+TP3 Hits
+Breakeven Trades
+Cancelled Signals
+Expired Signals
+
+Win Rate
+Loss Rate
+Average R:R
+Average Profit
+Average Loss
+Profit Factor
+Maximum Winning Streak
+Maximum Losing Streak
+Per-AI Win Rate (ChatGPT / Claude / Gemini, tracked separately — see STEP 17)
+Win Rate By Session (Asian / London / New York / Overlap)
+Win Rate By Setup Type (SMC / ICT / Price Action / Gann-confirmed)
+Current Daily Drawdown
+Current Weekly Drawdown
+
+Win Rate formula:
+
+Win Rate =
+Winning Trades / Total Closed Trades × 100
+
+Do NOT count active trades in the win-rate calculation.
+
+---
+
+STEP 11 — SIGNAL HISTORY
+
+For every historical signal show:
+
+Date
+Time
+Symbol
+Direction
+Entry
+SL
+TP
+Final AI Decision
+AI Agreement
+Reason
+Result
+P/L
+R:R
+Session
+Correlation Status
+News Risk Status
+Score Modifiers Applied
+Screenshot/chart reference if available
+
+The user must be able to open any previous signal and see WHY the three AIs selected that trade,
+including each AI's original independent analysis (see STEP 23) — not just the final consensus.
+
+---
+
+STEP 12 — NO-TRADE PROTECTION
+
+The system must prefer:
+
+NO TRADE
+
+over a low-quality trade.
+
+Do NOT generate a signal simply because the user expects a signal.
+
+If:
+
+- AI disagreement is high
+- Market structure is unclear
+- Entry is too late
+- R:R is poor
+- SL is too large
+- Liquidity is unclear
+- Gann conflicts strongly with structure
+- Price is in an uncertain zone
+- Required market data is missing
+- Session/volatility context is unfavorable
+- A high-impact news blackout window is active
+- Correlated markets strongly contradict the setup
+- Daily or weekly risk limits have already been reached
+- A duplicate/overlapping signal is already ACTIVE for this symbol+direction
+
+then:
+
+FINAL SIGNAL = NO TRADE
+
+Explain exactly why.
+
+---
+
+STEP 13 — IMPORTANT ANTI-HALLUCINATION RULE
+
+Never invent:
+
+- Price
+- Gann level
+- FVG
+- BOS
+- CHOCH
+- Liquidity
+- Volume
+- Candle pattern
+- Support/Resistance
+- Entry
+- SL
+- TP
+- News event, actual/forecast/previous figures
+- Correlated-market values (DXY, Yields, related pairs)
+- Historical win-rate or performance numbers
+
+Only use information supplied by the market-data engine or technically calculated by the system.
+
+If information cannot be verified:
+
+STATE: NOT CONFIRMED
+
+---
+
+STEP 14 — SESSION & VOLATILITY FILTER
+
+Before any signal is allowed to fire:
+
+- Identify the current session: Asian, London, New York, or London/NY Overlap.
+- Flag known low-liquidity/dead zones for this symbol (e.g., late NY / early Asian
+  range-bound chop) — signals originating here need a specific, justified
+  breakout/liquidity-sweep reason, otherwise treat as lower quality.
+- Check current ATR(14) against its recent average:
+  - Abnormally compressed ATR → likely chop, reduce confidence, consider NO TRADE.
+  - Abnormally expanded ATR with no clear directional bias → likely a spike/stop-hunt,
+    treat with caution rather than chasing it.
+- State clearly: "Session: ______" and "Volatility context: ______" in every analysis.
+
+---
+
+STEP 15 — NEWS & FUNDAMENTAL RISK FILTER
+
+- Maintain a configured blackout window (e.g., 15–30 minutes before and after)
+  around high-impact (red-folder) news for the relevant currency.
+- No new signal may be generated while inside this blackout window; existing
+  ACTIVE signals should be flagged with a "NEWS RISK — X minutes to release" warning
+  rather than silently left unmanaged.
+- If a scheduled event's likely outcome (based on actual-vs-forecast once released)
+  technically contradicts the proposed direction, flag as:
+  FUNDAMENTAL CONFLICT — reduce confidence / require extra confirmation.
+- If no relevant news data is available for the lookahead window, state
+  "News data unavailable — treat as unknown risk" rather than assuming it is clear.
+
+---
+
+STEP 16 — CORRELATION & INTERMARKET CONFIRMATION
+
+- Where available, cross-check the proposed direction against correlated markets:
+  - Gold (XAUUSD): DXY (inverse correlation), US10Y real yields (inverse correlation).
+  - FX pairs: relevant base/quote currency indices, correlated pairs (e.g., EURUSD vs GBPUSD).
+  - Indices: relevant bond yields, related index futures.
+- Classify the result as: CONFIRMS / NEUTRAL / CONTRADICTS.
+- A CONTRADICTS result does not automatically block the trade, but must reduce the
+  final score (see STEP 7B) and be clearly stated in the reasoning — never silently ignored.
+- If intermarket data is not available, state "Correlation data unavailable" rather
+  than assuming confirmation.
+
+---
+
+STEP 17 — DYNAMIC AI WEIGHTING (PERFORMANCE-BASED)
+
+- Track each AI's (ChatGPT / Claude / Gemini) historical accuracy over a rolling
+  window (e.g., the last 50 closed signals where that AI's verdict matched or
+  differed from the final outcome).
+- Allow each AI's consensus weight to drift from the 33.33% baseline based on
+  recent accuracy, but always within a capped band (e.g., 25%–45%) so no single
+  AI can ever dominate or be fully ignored.
+- Recompute the AI AGREEMENT SCORE in STEP 4 using these adjusted weights instead
+  of the flat 33.33/33.33/33.33 once enough historical data exists; until then,
+  use the flat baseline.
+- Always disclose the current weighting being used (e.g., "ChatGPT 38% / Claude 31% /
+  Gemini 31%, based on last 50 signals") so the weighting is auditable, not hidden.
+  If no historical accuracy data has been supplied to you for this run, state that
+  the flat 33.33/33.33/33.33 baseline is being used because no history was provided.
+
+---
+
+STEP 18 — RISK MANAGEMENT & POSITION SIZING
+
+- Maximum risk per trade: a fixed percentage of account equity (configurable,
+  e.g., 0.5%–1%). Calculate suggested lot size from account balance, risk %,
+  and SL distance — never assume a lot size.
+- Maximum concurrent ACTIVE signals per symbol, and per direction across symbols,
+  to avoid unintentionally stacking correlated exposure.
+- Daily loss limit: once cumulative daily loss reaches the configured threshold,
+  stop generating new signals for the rest of the day (circuit breaker) and state
+  this clearly instead of silently going quiet.
+- Weekly loss limit: same concept, applied weekly.
+- Never adjust these limits mid-session to force a trade through.
+
+---
+
+STEP 19 — POST-ENTRY TRADE MANAGEMENT RULES
+
+- After TP1 is hit: move Stop Loss to breakeven (entry price) on the remaining position.
+- Partial close guidance at each target (configurable, e.g., 50% at TP1, 30% at TP2,
+  20% at TP3) — state the assumed split explicitly.
+- After TP2 is hit: consider a trailing stop (e.g., trail behind the most recent
+  swing low/high on the entry timeframe) instead of a fixed TP3, if configured to do so.
+- Time-based exit: if neither SL nor TP1 is reached within a configured number of
+  candles/hours, flag the setup as "STALE — consider manual review" rather than
+  leaving it open indefinitely.
+- Never widen the original Stop Loss under any circumstance (this repeats the rule
+  in STEP 8 deliberately, because it is the single most important risk rule).
+
+---
+
+STEP 20 — SIGNAL EXPIRY & DUPLICATE PREVENTION
+
+- If price does not reach the proposed Entry zone within a configured window
+  (e.g., X minutes or X candles) of the signal being generated, automatically mark it:
+  EXPIRED — market moved away from entry zone before it could be reached.
+- Do not generate a new signal for the same symbol + same direction while a
+  previous signal for that symbol + direction is still ACTIVE.
+- A fresh signal in the same symbol may only be generated once the prior one is
+  closed (TP/SL/Cancelled/Expired) and a new, independent 3-AI analysis is run
+  from scratch — never reuse the old analysis.
+  If the user has not told you whether a prior signal for this symbol+direction is
+  still active, state that this could not be checked rather than assuming either way.
+
+---
+
+STEP 21 — CONTINUOUS LEARNING / FEEDBACK LOOP
+
+- After every closed trade, log a short post-mortem: what confluences were present,
+  what the actual outcome was, and which factors (if any) should have changed the decision.
+- Periodically (e.g., weekly) review accumulated signal history to see which
+  confluence factors most often preceded winners vs. losers.
+- Any resulting adjustment to scoring weights or filters must be an explicit,
+  documented, auditable change (with a before/after record) — never a silent,
+  untracked self-modification.
+
+---
+
+STEP 22 — HUMAN OVERSIGHT / MANUAL OVERRIDE
+
+- All signals are advisory. Final trade execution requires explicit human
+  confirmation unless the user has separately and explicitly enabled an
+  auto-execution mode.
+- Provide a manual "Reject Signal" action with a required reason; log rejected
+  signals and their reasons the same way accepted signals are logged, so they
+  can be reviewed later.
+- Provide an immediate "Pause All Signals" kill-switch that stops new signal
+  generation without needing to close the app or clear any data.
+
+---
+
+STEP 23 — TRANSPARENCY & AUDIT LOG
+
+- Store each AI's raw, independent STEP 2 analysis permanently and separately
+  from the post-debate STEP 3 conclusions, so it is possible to audit whether
+  the debate genuinely changed anyone's view or was just restated agreement.
+- Timestamp every stage: data received, each AI's independent analysis, the debate,
+  the consensus calculation, and the final signal — for full traceability end to end.
+- Nothing in the pipeline should be overwritten in a way that makes the original
+  reasoning unrecoverable.
+
+---
+
+FINAL OUTPUT FORMAT
+
+Return the final result in this format:
+
+━━━━━━━━━━━━━━━━━━
+AI TRADING COMMITTEE
+━━━━━━━━━━━━━━━━━━
+
+SYMBOL:
+DIRECTION:
+BUY / SELL / NO TRADE
+
+ENTRY:
+SL:
+TP1:
+TP2:
+TP3:
+
+R:R:
+
+CONFIDENCE:
+XX%
+
+BASE SCORE:
+XX/100
+
+SCORE MODIFIERS:
+[List each modifier applied, e.g., "Session +5", "News -15", or "None"]
+
+FINAL ADJUSTED SCORE:
+XX/100
+
+AI VOTE:
+
+ChatGPT: BUY/SELL/NO TRADE (weight: XX%)
+Claude: BUY/SELL/NO TRADE (weight: XX%)
+Gemini: BUY/SELL/NO TRADE (weight: XX%)
+
+AGREEMENT:
+X/3
+
+━━━━━━━━━━━━━━━━━━
+CONFIRMATIONS
+━━━━━━━━━━━━━━━━━━
+
+SMC:
+ICT:
+PRICE ACTION:
+GANN:
+MARKET STRUCTURE:
+LIQUIDITY:
+SESSION:
+VOLATILITY:
+CORRELATION (DXY/Yields/related pairs):
+NEWS RISK STATUS:
+
+━━━━━━━━━━━━━━━━━━
+RISK & POSITION SIZING
+━━━━━━━━━━━━━━━━━━
+
+Risk % Per Trade:
+Suggested Lot Size:
+Daily Drawdown Used:
+Weekly Drawdown Used:
+
+━━━━━━━━━━━━━━━━━━
+WHY THIS TRADE?
+━━━━━━━━━━━━━━━━━━
+
+[Clear explanation]
+
+━━━━━━━━━━━━━━━━━━
+WHY NOT THE OPPOSITE DIRECTION?
+━━━━━━━━━━━━━━━━━━
+
+[Clear explanation]
+
+━━━━━━━━━━━━━━━━━━
+INVALIDATION
+━━━━━━━━━━━━━━━━━━
+
+[Exact condition/price that invalidates the setup]
+
+━━━━━━━━━━━━━━━━━━
+TRADE MANAGEMENT PLAN
+━━━━━━━━━━━━━━━━━━
+
+Breakeven Rule:
+Partial Close Plan:
+Trailing Stop Rule (if any):
+Time-Based Expiry:
+
+━━━━━━━━━━━━━━━━━━
+STATUS
+━━━━━━━━━━━━━━━━━━
+
+ACTIVE
+
+━━━━━━━━━━━━━━━━━━
+
+---
+
+DISCLAIMER
+
+This engine produces advisory technical/fundamental analysis, not guaranteed outcomes.
+Past performance of the AI committee or any individual AI does not guarantee future
+results. All figures (confidence, scores, win rate) are rule-based estimates from the
+defined framework, not statistically proven probabilities. Final responsibility for
+any trade decision and risk taken remains with the human user.
+
+Additional instruction for this integration: also show each analyst's independent
+STEP 2 verdict (ChatGPT/Claude/Gemini) and a short STEP 3 debate summary before the
+FINAL OUTPUT FORMAT block, since the STEP 23 audit-log requirement means that raw
+independent reasoning must be visible to the end user, not just the final consensus.`;
+
+  function atcVal(id){
+    const el = document.getElementById(id);
+    const v = el ? el.value.trim() : '';
+    return v ? v : 'NOT PROVIDED';
+  }
+
+  function atcBuildUserMessage(){
+    const symbolSel = document.getElementById('atcSymbol').value;
+    const symbol = symbolSel === 'OTHER' ? (atcVal('atcSymbolOther')) : symbolSel;
+    return [
+      'MARKET DATA SUBMISSION',
+      '',
+      'Symbol: ' + symbol,
+      'Current Price: ' + atcVal('atcPrice'),
+      'Trading Session: ' + atcVal('atcSession'),
+      '',
+      'H4: ' + atcVal('atcH4'),
+      'H1: ' + atcVal('atcH1'),
+      'M30: ' + atcVal('atcM30'),
+      'M15: ' + atcVal('atcM15'),
+      'M5: ' + atcVal('atcM5'),
+      'M3: ' + atcVal('atcM3'),
+      '',
+      'Previous Swing High/Low: ' + atcVal('atcSwing'),
+      'Previous Day High/Low: ' + atcVal('atcPrevDay'),
+      'Previous Week High/Low: ' + atcVal('atcPrevWeek'),
+      'Relevant Gann Level(s): ' + atcVal('atcGann'),
+      'Relevant Fibonacci Level(s): ' + atcVal('atcFib'),
+      'ATR(14) current vs recent average: ' + atcVal('atcAtr'),
+      '',
+      'Upcoming/Recent High-Impact News: ' + atcVal('atcNews'),
+      'Intermarket Data (DXY/US10Y Yield/correlated pairs): ' + atcVal('atcCorrelation'),
+      '',
+      'Account Balance: ' + atcVal('atcBalance'),
+      'Risk % Per Trade: ' + atcVal('atcRiskPct'),
+      'Daily Drawdown Used So Far: ' + atcVal('atcDailyDD'),
+      'Weekly Drawdown Used So Far: ' + atcVal('atcWeeklyDD'),
+      '',
+      'Volume: NOT PROVIDED',
+      '',
+      'Follow the full Multi-AI Trading Signal Engine framework from the system prompt exactly. Any field marked NOT PROVIDED must be treated as missing data per STEP 1/STEP 13 — do not invent it.'
+    ].join('\n');
+  }
+
+  function atcSetStatus(text){
+    document.getElementById('atcStatusText').textContent = text;
+  }
+
+  window.atcGenerateSignal = async function(){
+    if (CLAUDE_API_KEY === 'PASTE_YOUR_ANTHROPIC_API_KEY_HERE'){
+      alert('Pehle apni Anthropic (Claude) API key website ke code mein CLAUDE_API_KEY variable ke andar daalein.');
+      return;
+    }
+    const btn = document.getElementById('atcGenerateBtn');
+    const card = document.getElementById('atcLiveCard');
+    const output = document.getElementById('atcOutput');
+    const badge = document.getElementById('atcDirBadge');
+
+    btn.disabled = true;
+    btn.textContent = '🧠 Committee analyze kar raha hai...';
+    atcSetStatus('3 AI analysts independently analyze kar rahe hain, debate kar rahe hain, consensus nikaal rahe hain...');
+    card.style.display = 'block';
+    card.className = 'atc-live-card notrade';
+    badge.className = 'atc-dir-badge NONE';
+    badge.textContent = '—';
+    output.textContent = 'Analysis chal rahi hai, thora intezaar karein...';
+
+    const userMessage = atcBuildUserMessage();
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': CLAUDE_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: 3500,
+          system: ATC_SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: userMessage }]
+        })
+      });
+      const data = await res.json();
+
+      if (data.error){
+        output.textContent = 'Error: ' + data.error.message;
+        atcSetStatus('Error aaya — dobara koshish karein.');
+        btn.disabled = false;
+        btn.textContent = '🧠 Generate Committee Signal';
+        return;
+      }
+
+      const reply = (data.content || []).map(b => b.text || '').join('\n').trim() || 'Koi response nahi mila, dobara koshish karein.';
+      output.textContent = reply;
+
+      let direction = 'NONE';
+      const dirMatch = reply.match(/DIRECTION:\s*\n?\s*(BUY|SELL|NO TRADE)/i) || reply.match(/\b(BUY|SELL|NO TRADE)\b/i);
+      if (dirMatch){
+        const d = dirMatch[1].toUpperCase();
+        if (d === 'BUY' || d === 'SELL') direction = d;
+      }
+      badge.textContent = direction === 'NONE' ? 'NO TRADE' : direction;
+      badge.className = 'atc-dir-badge ' + (direction === 'NONE' ? 'NONE' : direction);
+      card.className = 'atc-live-card ' + (direction === 'BUY' ? 'buy' : direction === 'SELL' ? 'sell' : 'notrade');
+      document.getElementById('atcLiveTime').textContent = new Date().toLocaleString();
+
+      atcSetStatus('Signal generate ho gaya. Neeche history mein bhi save kar diya gaya hai.');
+      atcSaveToHistory(direction, reply);
+
+    } catch(err){
+      output.textContent = 'Connection error: ' + err.message;
+      atcSetStatus('Connection error aaya — dobara koshish karein.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🧠 Generate Committee Signal';
+    }
+  };
+
+  const ATC_HISTORY_KEY = 'atcSignalHistory';
+
+  function atcLoadHistory(){
+    try {
+      const raw = localStorage.getItem(ATC_HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  }
+
+  function atcSaveToHistory(direction, text){
+    let list = atcLoadHistory();
+    list.unshift({ time: new Date().toISOString(), direction: direction, text: text });
+    list = list.slice(0, 20);
+    try { localStorage.setItem(ATC_HISTORY_KEY, JSON.stringify(list)); } catch(e){}
+    atcRenderHistory();
+  }
+
+  function atcRenderHistory(){
+    const wrap = document.getElementById('atcHistory');
+    const list = atcLoadHistory();
+    if (!list.length){
+      wrap.innerHTML = '<p style="color:#64748b;font-size:13px;">Abhi koi record nahi.</p>';
+      return;
+    }
+    wrap.innerHTML = list.map((item, i) => {
+      const dt = new Date(item.time).toLocaleString();
+      const dirClass = item.direction === 'BUY' ? 'BUY' : item.direction === 'SELL' ? 'SELL' : 'NONE';
+      const dirLabel = item.direction === 'NONE' ? 'NO TRADE' : item.direction;
+      return '<div class="atc-history-item" onclick="atcShowHistoryItem(' + i + ')">' +
+        '<div class="atc-h-top"><span>' + dt + '</span><span class="atc-h-dir ' + dirClass + '">' + dirLabel + '</span></div>' +
+        '<div style="color:#94a3b8;">Click kar ke poora signal dobara dekhein</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.atcShowHistoryItem = function(i){
+    const list = atcLoadHistory();
+    const item = list[i];
+    if (!item) return;
+    const card = document.getElementById('atcLiveCard');
+    const output = document.getElementById('atcOutput');
+    const badge = document.getElementById('atcDirBadge');
+    card.style.display = 'block';
+    output.textContent = item.text;
+    const dirClass = item.direction === 'BUY' ? 'BUY' : item.direction === 'SELL' ? 'SELL' : 'NONE';
+    badge.className = 'atc-dir-badge ' + dirClass;
+    badge.textContent = item.direction === 'NONE' ? 'NO TRADE' : item.direction;
+    card.className = 'atc-live-card ' + (item.direction === 'BUY' ? 'buy' : item.direction === 'SELL' ? 'sell' : 'notrade');
+    document.getElementById('atcLiveTime').textContent = new Date(item.time).toLocaleString();
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  document.addEventListener('DOMContentLoaded', atcRenderHistory);
 })();
 </script>
 
