@@ -6641,7 +6641,7 @@ INTEGRATION STEPS:
     <div class="fa-note" style="margin-top:18px;">
       💡 <b>Ye engine kaise kaam karta hai:</b>
       <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
-        <li>Aap upar jo market data bharte hain, wahi ek single Claude AI call ko bheja jaata hai —
+        <li>Aap upar jo market data bharte hain, wahi ek single AI call (free Groq/Llama model) ko bheja jaata hai —
           jisay poora <b>23-step Multi-AI Trading Committee framework</b> (SMC, ICT, Price Action,
           Gann, liquidity, session/news filters, consensus engine, risk sizing, trade management)
           system prompt ke taur par diya gaya hai.</li>
@@ -6660,12 +6660,12 @@ INTEGRATION STEPS:
 
 <script>
 (function(){
-  // ⚠️ Yahan apni Anthropic (Claude) API key paste karein — is website ka har
-  // visitor is key ko browser se dekh sakta hai (jaise upar wali Groq key),
-  // is liye ek "usage-limited" ya "rate-limited" key rakhna behtar hai, ya
-  // is call ko apne backend/server ke zariye proxy karwayein.
-  const CLAUDE_API_KEY = "PASTE_YOUR_ANTHROPIC_API_KEY_HERE";
-  const CLAUDE_MODEL = "claude-sonnet-4-6";
+  // Free tier: yahan wahi Groq key use ho rahi hai jo neeche AI Chat widget
+  // mein bhi use ho rahi hai (console.groq.com se free milti hai). Note: is
+  // website ka har visitor is key ko browser se dekh sakta hai — chaho to
+  // apni alag Groq key bana kar yahan daal sakte ho.
+  const ATC_API_KEY = "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";
+  const ATC_MODEL = "llama-3.3-70b-versatile";
 
   const ATC_SYSTEM_PROMPT = `MULTI-AI TRADING SIGNAL ENGINE
 
@@ -7512,10 +7512,6 @@ independent reasoning must be visible to the end user, not just the final consen
   }
 
   window.atcGenerateSignal = async function(){
-    if (CLAUDE_API_KEY === 'PASTE_YOUR_ANTHROPIC_API_KEY_HERE'){
-      alert('Pehle apni Anthropic (Claude) API key website ke code mein CLAUDE_API_KEY variable ke andar daalein.');
-      return;
-    }
     const btn = document.getElementById('atcGenerateBtn');
     const card = document.getElementById('atcLiveCard');
     const output = document.getElementById('atcOutput');
@@ -7533,19 +7529,19 @@ independent reasoning must be visible to the end user, not just the final consen
     const userMessage = atcBuildUserMessage();
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': CLAUDE_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
+          'Authorization': 'Bearer ' + ATC_API_KEY
         },
         body: JSON.stringify({
-          model: CLAUDE_MODEL,
+          model: ATC_MODEL,
           max_tokens: 3500,
-          system: ATC_SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: userMessage }]
+          messages: [
+            { role: 'system', content: ATC_SYSTEM_PROMPT },
+            { role: 'user', content: userMessage }
+          ]
         })
       });
       const data = await res.json();
@@ -7558,7 +7554,9 @@ independent reasoning must be visible to the end user, not just the final consen
         return;
       }
 
-      const reply = (data.content || []).map(b => b.text || '').join('\n').trim() || 'Koi response nahi mila, dobara koshish karein.';
+      const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
+        ? data.choices[0].message.content.trim()
+        : 'Koi response nahi mila, dobara koshish karein.';
       output.textContent = reply;
 
       let direction = 'NONE';
