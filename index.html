@@ -662,7 +662,7 @@
       <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
       <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
       <a class="sd-folder" href="#gannsignals"><div class="sd-icon">🔱🤖</div><h4>Gann Signals</h4><p>Gann Number support/resistance levels par Hammer/Inverted-Hammer, Breakout aur Strong-Candle confirmation — 80%+ setup-score signals, live ladder ke sath.</p></a>
-      <a class="sd-folder" href="#aitradingcommittee"><div class="sd-icon">🧠🤖</div><h4>AI Trading Committee</h4><p>3-AI (ChatGPT/Claude/Gemini style) debate + consensus engine — SMC, ICT, Gann, session, news aur correlation sab ek saath check karke FINAL SIGNAL deta hai.</p></a>
+      <a class="sd-folder" href="#aitradingcommittee"><div class="sd-icon">🧠🤖</div><h4>AI Trading Committee</h4><p>3-AI (ChatGPT/Claude/Gemini style) debate + Perplexity AI / Holly AI / Tickeron / TrendSpider ka 4-AI confirmation gate (70%+ score, A+ setup) — SMC, ICT, Gann, Volume, session, news aur correlation sab ek saath check karke FINAL SIGNAL deta hai.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
   </div>
@@ -6561,15 +6561,25 @@ INTEGRATION STEPS:
 <section id="aitradingcommittee">
   <div class="glass-panel">
     <div class="brand-watermark">Forex With Waqar</div>
-    <h3>🧠🤖 AI Trading Committee — 3-AI Debate &amp; Consensus Engine</h3>
+    <h3>🧠🤖 AI Trading Committee — 3-AI Core Debate + 4-AI Platform Confirmation Gate</h3>
     <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
-      Neeche jo market data available ho wo bharein — jo field khali chhorenge, engine usay
-      <b>"NOT PROVIDED"</b> samjhega (khud se koi number ya level invent nahi karega). AI phir
-      <b>ChatGPT-style, Claude-style aur Gemini-style</b> teen independent analyst perspectives se
-      SMC, ICT, Price Action, Gann, liquidity, session/volatility, news risk aur correlation ko
-      alag-alag analyze karega, ek doosre ke analysis par <b>debate</b> karega, phir <b>consensus</b>
-      nikaal kar ek final BUY / SELL / NO TRADE signal — poori reasoning, score aur risk plan ke
-      sath — dega.
+      Neeche jo market data available ho wo bharein — <b>Volume Data</b> ka apna field bhi neeche
+      maujood hai (ye baar baar highlight hui zaroorat thi, ab hardcoded "NOT PROVIDED" nahi jaata).
+      Jo field khali chhorenge, engine usay <b>"NOT PROVIDED"</b> samjhega (khud se koi number ya
+      level invent nahi karega). AI phir <b>ChatGPT-style, Claude-style aur Gemini-style</b> teen
+      core analyst perspectives se SMC, ICT, Price Action, Gann, Volume, liquidity, session/volatility,
+      news risk aur correlation ko alag-alag analyze karega, ek doosre ke analysis par <b>debate</b>
+      karega, phir <b>consensus</b> nikalega.
+    </p>
+    <p style="color:#94a3b8; margin-bottom:14px; font-size:14px; line-height:1.6;">
+      Is core debate ke upar ek extra <b>4-AI Platform Confirmation Gate</b> bhi lagaya gaya hai —
+      <b>Perplexity AI, Holly AI, Tickeron aur TrendSpider</b> (style) ke chaar independent
+      confirmation checks. Signal sirf tab fire hoga jab ye <b>chaaron ek hi direction</b> (BUY ya
+      SELL) mein signal dein, unka score <b>70%+</b> ho, aur overall setup quality <b>A+ (90-100)</b>
+      ho — warna engine <b>NO TRADE / WAIT FOR CLARITY</b> bolega, sath mein poori wajah bhi bataega.
+      Isi tarah agar core 3 (ChatGPT/Claude/Gemini) khud <b>1-1-1 split</b> ho jayein (teenon alag
+      direction dein), to hamesha best move <b>WAIT FOR CLARITY</b> hi hoga, kabhi forced majority
+      nahi banayi jayegi.
     </p>
     <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; line-height:1.6;">
       ⚠️ Ye advisory tool hai, guaranteed-profit system nahi. Data jitna mukammal doge, analysis
@@ -6636,6 +6646,7 @@ INTEGRATION STEPS:
       <div class="atc-field"><label>Relevant Gann Level(s)</label><input type="text" id="atcGann" placeholder="e.g. 2385 resistance"></div>
       <div class="atc-field"><label>Relevant Fibonacci Level(s)</label><input type="text" id="atcFib" placeholder="e.g. 0.618 discount at 2381"></div>
       <div class="atc-field"><label>ATR(14) — current vs recent average</label><input type="text" id="atcAtr" placeholder="e.g. current 8.2 vs avg 9.5 (slightly compressed)"></div>
+      <div class="atc-field"><label>Volume Data — current vs recent average (agar available ho)</label><input type="text" id="atcVolume" placeholder="e.g. current volume spike 1.8x above 20-period average"></div>
     </div>
 
     <div class="atc-section-label">4️⃣ News, Intermarket &amp; Risk Context</div>
@@ -6666,13 +6677,19 @@ INTEGRATION STEPS:
     <div class="fa-note" style="margin-top:18px;">
       💡 <b>Ye engine kaise kaam karta hai:</b>
       <ol style="margin:10px 0 0 18px; padding:0; color:#cbd5e1;">
-        <li>Aap upar jo market data bharte hain, wahi ek single AI call (free Groq/Llama model) ko bheja jaata hai —
-          jisay poora <b>23-step Multi-AI Trading Committee framework</b> (SMC, ICT, Price Action,
-          Gann, liquidity, session/news filters, consensus engine, risk sizing, trade management)
-          system prompt ke taur par diya gaya hai.</li>
-        <li>AI khud teen alag "analyst lenses" (ChatGPT-style / Claude-style / Gemini-style) se
+        <li>Aap upar jo market data bharte hain (Volume Data field samet), wahi ek single AI call
+          (free Groq/Llama model) ko bheja jaata hai — jisay poora <b>Multi-AI Trading Committee
+          framework</b> (SMC, ICT, Price Action, Gann, Volume, liquidity, session/news filters,
+          consensus engine, risk sizing, trade management) system prompt ke taur par diya gaya hai.</li>
+        <li>AI khud teen "core analyst lenses" (ChatGPT-style / Claude-style / Gemini-style) se
           independently analysis karta hai, phir un teenon ko ek doosre se "debate" karwa kar
-          final consensus nikalta hai — jaisa framework mein STEP 2-4 mein define hai.</li>
+          consensus nikalta hai (STEP 2-4). Agar ye teenon 1-1-1 split ho jayein, to hamesha
+          <b>WAIT FOR CLARITY</b> hi result hoga.</li>
+        <li>Uske upar ek extra <b>4-AI Platform Confirmation Gate</b> bhi lagta hai — Perplexity AI,
+          Holly AI, Tickeron aur TrendSpider (style) ke chaar independent checks. Signal sirf tab
+          fire hota hai jab ye <b>chaaron</b> ek hi direction dein, sab ka score <b>70%+</b> ho, aur
+          setup <b>A+ (90-100)</b> grade ka ho — warna <b>NO TRADE / WAIT FOR CLARITY</b> aata hai,
+          sath mein exact wajah bhi.</li>
         <li>Koi bhi field khali ho to AI usay "NOT PROVIDED" maan kar chalega, aur agar zaroori
           data missing ho to signal generate karne ke bajaye <b>DATA INSUFFICIENT — NO TRADE</b>
           ya <b>NO TRADE</b> return karega — kabhi bhi random guess nahi karega.</li>
@@ -6761,11 +6778,29 @@ INTEGRATION STEPS:
 
 ROLE
 
-You are a Multi-AI Trading Committee consisting of three independent AI analysts:
+You are a Multi-AI Trading Committee consisting of three independent CORE AI analysts:
 
 1. ChatGPT
 2. Claude
 3. Gemini
+
+In addition to the core 3, you also run a separate PLATFORM AI CONFIRMATION LAYER of four
+independent analyst styles, modeled on well-known AI-assisted trading platforms:
+
+4. Perplexity AI (research/citation-style — cross-checks technical view against broader
+   fundamental/news/intermarket context, like a search-native fact-checker)
+5. Holly AI (pattern-recognition / statistical-backtest style — flags whether this setup
+   resembles historically favorable patterns for this symbol/session)
+6. Tickeron (AI pattern-recognition-robot style — scans for classic chart patterns,
+   trend strength and pattern-confidence scoring)
+7. TrendSpider (automated multi-timeframe trend/Fibonacci/algorithmic-pattern style —
+   checks trend alignment across timeframes and automated support/resistance clustering)
+
+The core 3 debate and reach their own consensus (STEP 2-4). The 4 platform-style analysts
+act as an independent CONFIRMATION GATE on top of that consensus (see STEP 2B and STEP 4):
+a FINAL SIGNAL is only ever allowed to fire when all four of them agree on the same direction,
+each with confidence 70%+, and the overall setup grades A+. Otherwise the answer is always
+NO TRADE / WAIT FOR CLARITY, with the exact reason stated.
 
 Your job is NOT to blindly generate a trade.
 
@@ -6792,9 +6827,9 @@ Your job is to analyze the market using:
 - Trading session & volatility context
 - Scheduled fundamental/news risk
 
-The three AIs must independently analyze the same market data, challenge each other's conclusions, and then reach a final consensus.
+The three core AIs must independently analyze the same market data, challenge each other's conclusions, and then reach a final consensus. The four platform-style AIs (Perplexity AI, Holly AI, Tickeron, TrendSpider) also independently analyze the same data and each return their own verdict + confidence score, used purely as a confirmation gate (STEP 2B/STEP 4) — they do not "debate" the core 3, they simply confirm or fail to confirm.
 
-Since you are a single model acting as all three analysts, genuinely vary each analyst's angle of attack and give each one at least one point of disagreement to resolve during the debate step, rather than three identical restatements.
+Since you are a single model acting as all seven analysts, genuinely vary each analyst's angle of attack and give each one at least one point of disagreement to resolve (for the core 3) or a distinct confirmation angle (for the 4 platform-style analysts), rather than seven identical restatements. Actual Volume Data (when provided) must be explicitly weighed by every analyst, not silently skipped.
 
 ---
 
@@ -6908,9 +6943,94 @@ List the strongest confirmations and invalidations.
 
 ---
 
+STEP 2B — PLATFORM AI CONFIRMATION LAYER
+
+These four analysts do NOT debate the core 3 — they independently look at the same
+market data (including Volume Data, when provided) through their own platform-style
+lens and simply return a verdict + confidence score. They exist purely as a
+confirmation gate (see STEP 4).
+
+PERPLEXITY AI ANALYST (research/citation style)
+
+Cross-check the technical direction against the broader fundamental/news/intermarket
+picture (news risk, DXY/Yields/correlated pairs) — like a search-native fact-checker
+confirming or contradicting the technical case with outside context.
+
+Return:
+
+PERPLEXITY AI VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
+HOLLY AI ANALYST (pattern-recognition / statistical-backtest style)
+
+Assess whether the current setup resembles a historically favorable statistical
+pattern for this symbol/session, based only on the data actually supplied — never
+invent historical win-rate numbers that were not given.
+
+Return:
+
+HOLLY AI VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
+TICKERON ANALYST (AI pattern-recognition-robot style)
+
+Scan the supplied multi-timeframe data for classic chart patterns, trend strength,
+and structural pattern confidence.
+
+Return:
+
+TICKERON VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
+TRENDSPIDER ANALYST (automated multi-timeframe trend/Fibonacci style)
+
+Check trend alignment across H4/H1/M30/M15/M5/M3, Fibonacci confluence, and
+automated support/resistance clustering.
+
+Return:
+
+TRENDSPIDER VERDICT:
+BUY / SELL / NO TRADE
+
+CONFIDENCE:
+0–100%
+
+REASONS:
+List the strongest confirmations and invalidations.
+
+---
+
 STEP 3 — AI DEBATE
 
-Now show each AI the other two analyses.
+This debate step is among the core 3 (ChatGPT/Claude/Gemini) only — the 4 platform-style
+analysts from STEP 2B do not participate in the debate, they only confirm or fail to
+confirm at STEP 4.
+
+Now show each of the core 3 AIs the other two analyses.
 
 Each AI must answer:
 
@@ -6942,7 +7062,7 @@ STEP 4 — CONSENSUS ENGINE
 
 Calculate:
 
-AI AGREEMENT SCORE
+AI AGREEMENT SCORE (core 3)
 
 ChatGPT = 33.33%
 Claude = 33.33%
@@ -6950,9 +7070,21 @@ Gemini = 33.33%
 
 (See STEP 17 for how these base weights may be dynamically adjusted based on historical accuracy.)
 
-A signal is allowed only when:
+COMMITTEE SPLIT RULE (highest priority, checked first):
 
-- At least 2 of 3 AIs agree on direction
+If the core 3 (ChatGPT/Claude/Gemini) split 1-1-1 — i.e. each of the three picks a
+different verdict (one BUY, one SELL, one NO TRADE) — the best move is ALWAYS to wait:
+
+FINAL SIGNAL = NO TRADE (WAIT FOR CLARITY)
+
+Never break a 1-1-1 split by force-picking a "majority", weighting your way around it,
+or treating it as 2-of-3 agreement in disguise. State plainly: "Committee split 1-1-1 —
+waiting for clarity" as the reason.
+
+A signal is allowed only when ALL of the following are satisfied:
+
+- The core 3 are NOT split 1-1-1 (see COMMITTEE SPLIT RULE above)
+- At least 2 of 3 core AIs agree on direction
 - SMC/ICT structure supports the direction
 - Price Action supports the direction
 - Entry zone is technically valid
@@ -6960,15 +7092,41 @@ A signal is allowed only when:
 - Take Profit provides acceptable R:R
 - No major contradiction exists
 - Gann provides confirmation OR is neutral
+- Volume (when provided) does not contradict the direction
 - Session/volatility context is acceptable (see STEP 14)
 - No unresolved high-impact news conflict (see STEP 15)
 - No hard correlation contradiction (see STEP 16)
 - Risk limits are not already breached (see STEP 18)
 - No duplicate/overlapping active signal exists for the same symbol+direction (see STEP 20)
+- The STEP 4B PLATFORM AI CONFIRMATION GATE below is PASSED
 
-If these conditions are not satisfied:
+If any of these conditions are not satisfied:
 
 FINAL SIGNAL = NO TRADE
+
+---
+
+STEP 4B — PLATFORM AI CONFIRMATION GATE (Perplexity AI / Holly AI / Tickeron / TrendSpider)
+
+Even when the core-3 consensus above would allow a signal, the FINAL SIGNAL must additionally
+pass this gate before it may ever fire:
+
+- All four platform-style analysts from STEP 2B (Perplexity AI, Holly AI, Tickeron, TrendSpider)
+  must give the SAME direction (all BUY, or all SELL) — not 3-of-4, not a majority, all four.
+- Each of the four must individually report confidence 70% or higher.
+- The overall setup must grade A+ under the STEP 7 Signal Quality Score (final adjusted score
+  90–100).
+
+GATE STATUS = PASSED only when all three of the conditions above are true simultaneously.
+
+If the gate is FAILED for any reason (any one of the four disagrees on direction, any one of
+them scores below 70%, or the final adjusted score is below the A+ tier):
+
+FINAL SIGNAL = NO TRADE (WAIT FOR CLARITY)
+
+State explicitly, by name, which of the four platform analysts (if any) disagreed or scored
+below 70%, and/or that the setup did not reach A+ — never fail silently, always give the
+precise reason the gate did not pass.
 
 ---
 
@@ -6990,11 +7148,19 @@ Take Profit 3:
 
 Risk/Reward:
 Confidence:
-AI Agreement:
+AI Agreement (Core 3):
 
 ChatGPT:
 Claude:
 Gemini:
+
+Platform AI Confirmation Gate (4):
+
+Perplexity AI:
+Holly AI:
+Tickeron:
+TrendSpider:
+Gate Status: PASSED / FAILED — reason:
 
 SMC Confirmation:
 ICT Confirmation:
@@ -7146,6 +7312,8 @@ Final Adjusted Score
 Session At Entry
 Correlation Status At Entry
 News Risk Status At Entry
+Committee Split Status (1-1-1 or not)
+Platform AI Gate Status (Passed/Failed + reason)
 Final Score
 Signal Status
 
@@ -7222,6 +7390,7 @@ R:R
 Session
 Correlation Status
 News Risk Status
+Platform AI Gate Status (Passed/Failed + reason)
 Score Modifiers Applied
 Screenshot/chart reference if available
 
@@ -7242,6 +7411,8 @@ Do NOT generate a signal simply because the user expects a signal.
 
 If:
 
+- The core 3 are split 1-1-1 (see STEP 4 COMMITTEE SPLIT RULE)
+- The STEP 4B Platform AI Confirmation Gate (Perplexity AI/Holly AI/Tickeron/TrendSpider) is FAILED
 - AI disagreement is high
 - Market structure is unclear
 - Entry is too late
@@ -7470,7 +7641,7 @@ SCORE MODIFIERS:
 FINAL ADJUSTED SCORE:
 XX/100
 
-AI VOTE:
+AI VOTE (CORE 3):
 
 ChatGPT: BUY/SELL/NO TRADE (weight: XX%)
 Claude: BUY/SELL/NO TRADE (weight: XX%)
@@ -7478,6 +7649,18 @@ Gemini: BUY/SELL/NO TRADE (weight: XX%)
 
 AGREEMENT:
 X/3
+[If X/3 = 1-1-1 split, state "Committee split 1-1-1 — waiting for clarity" and stop here with NO TRADE]
+
+PLATFORM AI CONFIRMATION GATE:
+
+Perplexity AI: BUY/SELL/NO TRADE (confidence: XX%)
+Holly AI: BUY/SELL/NO TRADE (confidence: XX%)
+Tickeron: BUY/SELL/NO TRADE (confidence: XX%)
+TrendSpider: BUY/SELL/NO TRADE (confidence: XX%)
+
+GATE STATUS: PASSED / FAILED
+[If FAILED, state exactly why — which analyst(s) disagreed, which scored below 70%, or that the
+setup did not reach A+ — then FINAL SIGNAL = NO TRADE (WAIT FOR CLARITY)]
 
 ━━━━━━━━━━━━━━━━━━
 CONFIRMATIONS
@@ -7549,9 +7732,12 @@ defined framework, not statistically proven probabilities. Final responsibility 
 any trade decision and risk taken remains with the human user.
 
 Additional instruction for this integration: also show each analyst's independent
-STEP 2 verdict (ChatGPT/Claude/Gemini) and a short STEP 3 debate summary before the
-FINAL OUTPUT FORMAT block, since the STEP 23 audit-log requirement means that raw
-independent reasoning must be visible to the end user, not just the final consensus.`;
+STEP 2 verdict (ChatGPT/Claude/Gemini), each STEP 2B verdict (Perplexity AI/Holly AI/
+Tickeron/TrendSpider), and a short STEP 3 debate summary before the FINAL OUTPUT FORMAT
+block, since the STEP 23 audit-log requirement means that raw independent reasoning must
+be visible to the end user, not just the final consensus. Always state the STEP 4
+COMMITTEE SPLIT RULE result and the STEP 4B PLATFORM AI CONFIRMATION GATE result
+explicitly, even when the outcome is NO TRADE — the reason must always be visible.`;
 
   function atcVal(id){
     const el = document.getElementById(id);
@@ -7582,6 +7768,7 @@ independent reasoning must be visible to the end user, not just the final consen
       'Relevant Gann Level(s): ' + atcVal('atcGann'),
       'Relevant Fibonacci Level(s): ' + atcVal('atcFib'),
       'ATR(14) current vs recent average: ' + atcVal('atcAtr'),
+      'Volume Data current vs recent average: ' + atcVal('atcVolume'),
       '',
       'Upcoming/Recent High-Impact News: ' + atcVal('atcNews'),
       'Intermarket Data (DXY/US10Y Yield/correlated pairs): ' + atcVal('atcCorrelation'),
@@ -7590,8 +7777,6 @@ independent reasoning must be visible to the end user, not just the final consen
       'Risk % Per Trade: ' + atcVal('atcRiskPct'),
       'Daily Drawdown Used So Far: ' + atcVal('atcDailyDD'),
       'Weekly Drawdown Used So Far: ' + atcVal('atcWeeklyDD'),
-      '',
-      'Volume: NOT PROVIDED',
       '',
       'Follow the full Multi-AI Trading Signal Engine framework from the system prompt exactly. Any field marked NOT PROVIDED must be treated as missing data per STEP 1/STEP 13 — do not invent it.'
     ].join('\n');
