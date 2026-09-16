@@ -6532,6 +6532,31 @@ INTEGRATION STEPS:
   .atc-history-item .atc-h-dir.BUY{color:#22c55e;}
   .atc-history-item .atc-h-dir.SELL{color:#ef4444;}
   .atc-history-item .atc-h-dir.NONE{color:#94a3b8;}
+  .atc-trail-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:18px 0 10px;}
+  .atc-trail-toggle-btn{padding:12px 20px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;transition:transform .15s;}
+  .atc-trail-toggle-btn.off{background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;}
+  .atc-trail-toggle-btn.on{background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff;}
+  .atc-trail-toggle-btn:hover{transform:translateY(-2px);}
+  .atc-trail-live-dot{width:9px;height:9px;border-radius:50%;background:#64748b;display:inline-block;margin-right:6px;}
+  .atc-trail-live-dot.on{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:recPulse 1.2s infinite;}
+  .atc-trail-card{background:rgba(17,24,39,0.75);border:1px solid rgba(148,163,184,0.25);border-radius:16px;padding:18px 20px;margin-top:14px;transition:border-color .3s, box-shadow .3s;}
+  .atc-trail-card.action-HOLD{border-color:rgba(148,163,184,0.35);}
+  .atc-trail-card.action-TRAIL{border-color:rgba(56,189,248,0.5);}
+  .atc-trail-card.action-BREAKEVEN{border-color:rgba(250,204,21,0.55);}
+  .atc-trail-card.action-EXIT{border-color:rgba(239,68,68,0.55);}
+  .atc-trail-card.flash{animation:atcTrailFlash 1s ease-in-out 3;}
+  @keyframes atcTrailFlash{0%,100%{box-shadow:0 0 0 rgba(56,189,248,0);}50%{box-shadow:0 0 30px rgba(56,189,248,0.65);}}
+  .atc-trail-action-badge{font-weight:900;font-size:14px;padding:5px 14px;border-radius:999px;display:inline-block;margin-bottom:10px;}
+  .atc-trail-action-badge.HOLD{background:rgba(148,163,184,0.12);color:#cbd5e1;border:1px solid rgba(148,163,184,0.35);}
+  .atc-trail-action-badge.TRAIL{background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.5);}
+  .atc-trail-action-badge.BREAKEVEN{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.5);}
+  .atc-trail-action-badge.EXIT{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .atc-trail-sl-line{font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;}
+  .atc-trail-reason{color:#cbd5e1;font-size:13.5px;line-height:1.6;}
+  .atc-trail-meta{font-size:11.5px;color:#64748b;margin-top:10px;}
+  .atc-trail-confirm{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .atc-trail-confirm input{flex:1;min-width:220px;padding:8px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.8);color:#fff;}
+  .atc-trail-confirm button{padding:8px 14px;border:none;border-radius:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;font-weight:700;cursor:pointer;}
 </style>
 <section id="aitradingcommittee">
   <div class="glass-panel">
@@ -6655,6 +6680,71 @@ INTEGRATION STEPS:
           taake har user ki apni history private rahe.</li>
       </ol>
     </div>
+
+    <div class="atc-section-label" style="margin-top:30px;">5️⃣ 🔔 Live Trade Guide — Trailing SL Alerts</div>
+    <p style="color:#94a3b8; font-size:13.5px; line-height:1.6; margin-bottom:10px;">
+      Apna live/open trade committee ko de do (jo pehle se chal raha hai) — har chune hue interval par
+      teeno analyst (ChatGPT/Claude/Gemini-style) live price aur upar wale H4/H1/ATR data ko dobara
+      dekh kar batayenge: <b>SL hold karo, breakeven pe le jao, trail karo (nayi level ke sath), ya
+      jaldi exit ka warning</b>. Ye sirf <b>alert/suggestion</b> hai — SL/TP move karna hamesha tumhe
+      khud apne broker platform (MT4/MT5) mein karna hoga, ye engine kuch bhi khud execute nahi karta.
+    </p>
+    <p style="color:#fda4af; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:12.5px; line-height:1.6;">
+      ⚠️ Ye monitoring sirf tab tak chalti hai jab tak ye browser tab khula hai — tab band/close karte
+      hi ruk jayegi. Koi bhi system capital ko 100% safe ya profit guaranteed nahi kar sakta; final
+      decision aur risk hamesha aapki apni zimmedari hai.
+    </p>
+
+    <div class="atc-form-grid">
+      <div class="atc-field">
+        <label>Trade Direction</label>
+        <select id="atcTrailDir">
+          <option value="BUY">BUY</option>
+          <option value="SELL">SELL</option>
+        </select>
+      </div>
+      <div class="atc-field"><label>Entry Price</label><input type="text" id="atcTrailEntry" placeholder="e.g. 4295.50"></div>
+      <div class="atc-field"><label>Current Stop-Loss</label><input type="text" id="atcTrailSL" placeholder="e.g. 4275.00"></div>
+      <div class="atc-field"><label>Current Take-Profit (optional)</label><input type="text" id="atcTrailTP" placeholder="e.g. 4340.00"></div>
+      <div class="atc-field">
+        <label>Check Interval</label>
+        <select id="atcTrailInterval">
+          <option value="60000">Har 1 minute</option>
+          <option value="180000" selected>Har 3 minute</option>
+          <option value="300000">Har 5 minute</option>
+          <option value="900000">Har 15 minute</option>
+        </select>
+      </div>
+      <div class="atc-field">
+        <label>Alert Sound</label>
+        <select id="atcTrailSoundOpt">
+          <option value="on" selected>On</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="atc-trail-row">
+      <div style="font-size:13px;color:#94a3b8;">
+        <span class="atc-trail-live-dot" id="atcTrailDot"></span>
+        <span id="atcTrailStatusText">Monitoring band hai. Upar apna trade detail bhar kar "Start Monitoring" dabayein.</span>
+      </div>
+      <button class="atc-trail-toggle-btn off" id="atcTrailToggleBtn" onclick="atcTrailToggle()">▶️ Start Monitoring</button>
+    </div>
+
+    <div class="atc-trail-card" id="atcTrailCard" style="display:none;">
+      <span class="atc-trail-action-badge HOLD" id="atcTrailActionBadge">HOLD</span>
+      <div class="atc-trail-sl-line" id="atcTrailSlLine">—</div>
+      <div class="atc-trail-reason" id="atcTrailReason">—</div>
+      <div class="atc-trail-meta" id="atcTrailMeta">—</div>
+      <div class="atc-trail-confirm">
+        <input type="text" id="atcTrailConfirmInput" placeholder="Agar SL move kar di ho to yahan naya SL likh kar confirm karein">
+        <button onclick="atcTrailConfirmSL()">✅ Confirm New SL</button>
+      </div>
+    </div>
+
+    <h4 style="color:#c084fc; font-size:14px; margin:22px 0 10px;">Trailing Suggestions History (last 10)</h4>
+    <div id="atcTrailHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
   </div>
 </section>
 
@@ -7634,7 +7724,265 @@ independent reasoning must be visible to the end user, not just the final consen
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  document.addEventListener('DOMContentLoaded', atcRenderHistory);
+  // ============ LIVE TRADE GUIDE — TRAILING SL ALERTS ============
+  const ATC_TRAIL_SYSTEM_PROMPT = `You are the Forex With Waqar AI Trading Committee, now acting specifically as a LIVE TRADE MANAGEMENT desk for an ALREADY-OPEN trade (this is not a new-entry signal).
+
+Three analyst lenses (ChatGPT-style, Claude-style, Gemini-style) each glance at the data and quickly agree on ONE trailing-stop action.
+
+You will receive: symbol, direction (BUY/SELL), entry price, current stop-loss, current take-profit (may be NOT PROVIDED), current price, ATR context, and higher-timeframe structure notes.
+
+Decide exactly ONE action:
+- HOLD (no change needed yet)
+- MOVE SL TO BREAKEVEN
+- TRAIL SL (give one specific new SL price)
+- EXIT WARNING (structure/momentum has turned against the trade; consider closing early)
+
+Hard rules:
+- Never suggest a new SL that is worse for the trader than the current SL (for BUY, new SL must be greater than or equal to current SL; for SELL, new SL must be less than or equal to current SL).
+- If price hasn't moved meaningfully in the trade's favor since entry, default to HOLD.
+- If key fields are NOT PROVIDED, be conservative and prefer HOLD.
+- You are not executing anything — the trader will read this and manually move their own stop-loss on their broker platform.
+
+Respond in EXACTLY this compact format and nothing else:
+
+ACTION: <HOLD | MOVE SL TO BREAKEVEN | TRAIL SL | EXIT WARNING>
+NEW SL: <a specific price, or "no change">
+REASON: <max 40 words>`;
+
+  const ATC_TRAIL_STATE_KEY = 'atcTrailState';
+  const ATC_TRAIL_HISTORY_KEY = 'atcTrailHistoryList';
+  let atcTrailTimer = null;
+  let atcTrailLastAction = null;
+  let atcTrailLastSL = null;
+
+  function atcTrailBeep(){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.15, ctx.currentTime);
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + 0.35);
+      setTimeout(()=>{ try{ ctx.close(); }catch(e){} }, 500);
+    } catch(e){}
+  }
+
+  async function atcTrailFetchLiveGoldPrice(){
+    try{
+      const res = await fetch('https://data-asg.goldprice.org/dbXRates/USD');
+      const data = await res.json();
+      const p = data && data.items && data.items[0] && data.items[0].xauPrice;
+      return p ? parseFloat(p) : null;
+    } catch(e){ return null; }
+  }
+
+  function atcTrailBuildPrompt(livePrice){
+    const symbolSel = document.getElementById('atcSymbol').value;
+    const symbol = symbolSel === 'OTHER' ? atcVal('atcSymbolOther') : symbolSel;
+    return [
+      'LIVE TRADE — MANAGEMENT CHECK',
+      '',
+      'Symbol: ' + symbol,
+      'Direction: ' + document.getElementById('atcTrailDir').value,
+      'Entry Price: ' + atcVal('atcTrailEntry'),
+      'Current Stop-Loss: ' + atcVal('atcTrailSL'),
+      'Current Take-Profit: ' + atcVal('atcTrailTP'),
+      'Current Live Price: ' + (livePrice != null ? livePrice : atcVal('atcPrice')),
+      'ATR(14) current vs recent average: ' + atcVal('atcAtr'),
+      'H4 notes: ' + atcVal('atcH4'),
+      'H1 notes: ' + atcVal('atcH1'),
+      '',
+      'Give ONE trailing action per the system prompt format, nothing else.'
+    ].join('\n');
+  }
+
+  async function atcTrailRunCheck(){
+    const statusText = document.getElementById('atcTrailStatusText');
+    statusText.textContent = 'Committee live trade check kar rahi hai...';
+
+    let livePrice = null;
+    const symbolSel = document.getElementById('atcSymbol').value;
+    if (symbolSel === 'XAUUSD'){
+      livePrice = await atcTrailFetchLiveGoldPrice();
+      if (livePrice) document.getElementById('atcPrice').value = livePrice.toFixed(2);
+    }
+
+    const userMessage = atcTrailBuildPrompt(livePrice);
+
+    try{
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ATC_API_KEY },
+        body: JSON.stringify({
+          model: ATC_MODEL,
+          max_tokens: 250,
+          messages: [
+            { role: 'system', content: ATC_TRAIL_SYSTEM_PROMPT },
+            { role: 'user', content: userMessage }
+          ]
+        })
+      });
+      const data = await res.json();
+      if (data.error){
+        statusText.textContent = 'Error: ' + data.error.message + ' — agla check retry karega.';
+        return;
+      }
+      const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) ? data.choices[0].message.content.trim() : '';
+      atcTrailShowResult(reply, livePrice);
+    } catch(err){
+      statusText.textContent = 'Connection error — agla check retry karega.';
+    }
+  }
+
+  function atcTrailShowResult(reply, livePrice){
+    const card = document.getElementById('atcTrailCard');
+    const badge = document.getElementById('atcTrailActionBadge');
+    const slLine = document.getElementById('atcTrailSlLine');
+    const reasonEl = document.getElementById('atcTrailReason');
+    const metaEl = document.getElementById('atcTrailMeta');
+    const statusText = document.getElementById('atcTrailStatusText');
+
+    const actionMatch = reply.match(/ACTION:\s*(HOLD|MOVE SL TO BREAKEVEN|TRAIL SL|EXIT WARNING)/i);
+    const slMatch = reply.match(/NEW SL:\s*([^\n]+)/i);
+    const reasonMatch = reply.match(/REASON:\s*([\s\S]+)/i);
+
+    const action = actionMatch ? actionMatch[1].toUpperCase() : 'HOLD';
+    const newSL = slMatch ? slMatch[1].trim() : 'no change';
+    const reason = reasonMatch ? reasonMatch[1].trim() : (reply || 'No reasoning returned.');
+
+    let cssAction = 'HOLD';
+    if (action.indexOf('BREAKEVEN') !== -1) cssAction = 'BREAKEVEN';
+    else if (action.indexOf('TRAIL') !== -1) cssAction = 'TRAIL';
+    else if (action.indexOf('EXIT') !== -1) cssAction = 'EXIT';
+
+    card.style.display = 'block';
+    card.className = 'atc-trail-card action-' + cssAction;
+    badge.className = 'atc-trail-action-badge ' + cssAction;
+    badge.textContent = action;
+    slLine.textContent = (cssAction === 'HOLD') ? 'SL wahi rakho: ' + atcVal('atcTrailSL') : 'Suggested New SL: ' + newSL;
+    reasonEl.textContent = reason;
+    metaEl.textContent = 'Last check: ' + new Date().toLocaleString() + (livePrice != null ? (' | Live price: ' + livePrice) : '');
+
+    const changed = (action !== atcTrailLastAction) || (newSL !== atcTrailLastSL);
+    if (changed && cssAction !== 'HOLD'){
+      card.classList.add('flash');
+      setTimeout(()=> card.classList.remove('flash'), 3200);
+      if (document.getElementById('atcTrailSoundOpt').value === 'on') atcTrailBeep();
+      if (window.Notification && Notification.permission === 'granted'){
+        try { new Notification('Forex With Waqar — Trailing Alert', { body: action + ' → ' + newSL }); } catch(e){}
+      }
+      atcTrailSaveToHistory(action, newSL, reason);
+    }
+    atcTrailLastAction = action;
+    atcTrailLastSL = newSL;
+    statusText.textContent = 'Last check ho gaya — agla check ' + (parseInt(document.getElementById('atcTrailInterval').value)/60000) + ' minute mein.';
+  }
+
+  window.atcTrailToggle = function(){
+    const btn = document.getElementById('atcTrailToggleBtn');
+    const dot = document.getElementById('atcTrailDot');
+    const statusText = document.getElementById('atcTrailStatusText');
+
+    if (atcTrailTimer){
+      clearInterval(atcTrailTimer);
+      atcTrailTimer = null;
+      btn.textContent = '▶️ Start Monitoring';
+      btn.className = 'atc-trail-toggle-btn off';
+      dot.className = 'atc-trail-live-dot';
+      statusText.textContent = 'Monitoring band ho gayi.';
+      try { localStorage.removeItem(ATC_TRAIL_STATE_KEY); } catch(e){}
+      return;
+    }
+
+    const entry = atcVal('atcTrailEntry');
+    const sl = atcVal('atcTrailSL');
+    if (entry === 'NOT PROVIDED' || sl === 'NOT PROVIDED'){
+      alert('Pehle Entry Price aur Current Stop-Loss bharein.');
+      return;
+    }
+
+    if (window.Notification && Notification.permission === 'default'){
+      try { Notification.requestPermission(); } catch(e){}
+    }
+
+    const intervalMs = parseInt(document.getElementById('atcTrailInterval').value);
+    btn.textContent = '⏹️ Stop Monitoring';
+    btn.className = 'atc-trail-toggle-btn on';
+    dot.className = 'atc-trail-live-dot on';
+    statusText.textContent = 'Monitoring shuru — pehla check ho raha hai...';
+
+    try {
+      localStorage.setItem(ATC_TRAIL_STATE_KEY, JSON.stringify({
+        dir: document.getElementById('atcTrailDir').value,
+        entry: entry, sl: sl, tp: atcVal('atcTrailTP'), interval: intervalMs
+      }));
+    } catch(e){}
+
+    atcTrailRunCheck();
+    atcTrailTimer = setInterval(atcTrailRunCheck, intervalMs);
+  };
+
+  window.atcTrailConfirmSL = function(){
+    const val = document.getElementById('atcTrailConfirmInput').value.trim();
+    if (!val) return;
+    document.getElementById('atcTrailSL').value = val;
+    document.getElementById('atcTrailConfirmInput').value = '';
+    document.getElementById('atcTrailStatusText').textContent = 'Naya SL (' + val + ') confirm ho gaya — agla check isi se hoga.';
+    try {
+      const raw = localStorage.getItem(ATC_TRAIL_STATE_KEY);
+      if (raw){ const st = JSON.parse(raw); st.sl = val; localStorage.setItem(ATC_TRAIL_STATE_KEY, JSON.stringify(st)); }
+    } catch(e){}
+  };
+
+  function atcTrailLoadHistory(){
+    try { const raw = localStorage.getItem(ATC_TRAIL_HISTORY_KEY); return raw ? JSON.parse(raw) : []; } catch(e){ return []; }
+  }
+
+  function atcTrailSaveToHistory(action, newSL, reason){
+    let list = atcTrailLoadHistory();
+    list.unshift({ time: new Date().toISOString(), action: action, newSL: newSL, reason: reason });
+    list = list.slice(0, 10);
+    try { localStorage.setItem(ATC_TRAIL_HISTORY_KEY, JSON.stringify(list)); } catch(e){}
+    atcTrailRenderHistory();
+  }
+
+  function atcTrailRenderHistory(){
+    const wrap = document.getElementById('atcTrailHistory');
+    if (!wrap) return;
+    const list = atcTrailLoadHistory();
+    if (!list.length){
+      wrap.innerHTML = '<p style="color:#64748b;font-size:13px;">Abhi koi record nahi.</p>';
+      return;
+    }
+    wrap.innerHTML = list.map(function(item){
+      const dt = new Date(item.time).toLocaleString();
+      return '<div class="atc-history-item">' +
+        '<div class="atc-h-top"><span>' + dt + '</span><span class="atc-h-dir">' + item.action + ' \u2192 ' + item.newSL + '</span></div>' +
+        '<div style="color:#94a3b8;">' + item.reason + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function atcTrailRestoreState(){
+    try {
+      const raw = localStorage.getItem(ATC_TRAIL_STATE_KEY);
+      if (!raw) return;
+      const st = JSON.parse(raw);
+      document.getElementById('atcTrailDir').value = st.dir || 'BUY';
+      document.getElementById('atcTrailEntry').value = st.entry || '';
+      document.getElementById('atcTrailSL').value = st.sl || '';
+      document.getElementById('atcTrailTP').value = st.tp || '';
+      document.getElementById('atcTrailStatusText').textContent = 'Pichli monitoring session mili — dubara shuru karne ke liye "Start Monitoring" dabayein (tab band hone par ye khud-ba-khud ruk jaati hai).';
+    } catch(e){}
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    atcRenderHistory();
+    atcTrailRenderHistory();
+    atcTrailRestoreState();
+  });
 })();
 </script>
 
