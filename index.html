@@ -610,6 +610,10 @@
    <a href="#courseCenterSection">📚 Course Center</a>
    <a href="#interview">Live Interview</a>
     <a href="#faq">FAQs</a>
+   <a href="#fractalictsignals">🔮 Fractal ICT Signals</a>
+   <a href="#priceactionsignals">🕯️🤖 Price Action Signals</a>
+   <a href="#ictsignals">🧭🤖 ICT Signals</a>
+   <a href="#gannsignals">🔱🤖 Gann Signals</a>
    <a href="#aitradingcommittee">🧠🤖 AI Trading Committee</a>
    <a href="#kycverify">KYC Verification</a>
     <a href="https://www.forexfactory.com/calendar" target="_blank">Forex Factory</a>
@@ -654,6 +658,10 @@
       <a class="sd-folder" href="#courseCenterSection"><div class="sd-icon">📚</div><h4>Course Center</h4><p>SMC, ICT aur Price Action — diagram, practice aur quiz ke sath.</p></a>
       <a class="sd-folder" href="#interview"><div class="sd-icon">🎤</div><h4>Live Interview Practice</h4><p>150 practice questions ke sath interview prep.</p></a>
       <a class="sd-folder" href="#faq"><div class="sd-icon">❓</div><h4>FAQ Center</h4><p>Sawal aur jawab.</p></a>
+      <a class="sd-folder" href="#fractalictsignals"><div class="sd-icon">🔮</div><h4>Fractal ICT Signals</h4><p>Bias + Structure + Liquidity (multi-timeframe True ICT) — live guide ke sath.</p></a>
+      <a class="sd-folder" href="#priceactionsignals"><div class="sd-icon">🕯️🤖</div><h4>Price Action Signals</h4><p>Break & Retest, Order Block+FVG, Liquidity Sweep+MSS — 80%+ setup-score signals, live guide aur real history ke sath.</p></a>
+      <a class="sd-folder" href="#ictsignals"><div class="sd-icon">🧭🤖</div><h4>ICT Signals</h4><p>Killzone+Sweep+BOS, Order Block+FVG, Judas Swing, OTE, Power of Three, CHoCH — 6 ICT strategies, 80%+ setup-score signals.</p></a>
+      <a class="sd-folder" href="#gannsignals"><div class="sd-icon">🔱🤖</div><h4>Gann Signals</h4><p>Gann Number support/resistance levels par Hammer/Inverted-Hammer, Breakout aur Strong-Candle confirmation — 80%+ setup-score signals, live ladder ke sath.</p></a>
       <a class="sd-folder" href="#aitradingcommittee"><div class="sd-icon">🧠🤖</div><h4>AI Trading Committee</h4><p>3-AI (ChatGPT/Claude/Gemini style) debate + Perplexity AI / Holly AI / Tickeron / TrendSpider ka 4-AI confirmation gate (70%+ score, A+ setup) — SMC, ICT, Gann, Volume, session, news aur correlation sab ek saath check karke FINAL SIGNAL deta hai.</p></a>
       <a class="sd-folder" href="#kycverify"><div class="sd-icon">🪪</div><h4>KYC Verification</h4><p>Apni identity verify karein.</p></a>
     </div>
@@ -6549,6 +6557,34 @@ INTEGRATION STEPS:
   .atc-trail-confirm{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
   .atc-trail-confirm input{flex:1;min-width:220px;padding:8px 10px;border-radius:8px;border:1px solid rgba(148,163,184,0.25);background:rgba(15,23,42,0.8);color:#fff;}
   .atc-trail-confirm button{padding:8px 14px;border:none;border-radius:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;font-weight:700;cursor:pointer;}
+
+  /* ===== REAL MULTI-AI DEBATE UI ===== */
+  .atc-analysts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px;}
+  .atc-analyst-card{background:rgba(17,24,39,0.7);border:1px solid rgba(148,163,184,0.22);border-radius:16px;padding:16px 18px;transition:border-color .3s, box-shadow .3s;}
+  .atc-analyst-card.thinking{border-color:rgba(168,85,247,0.5);box-shadow:0 0 18px rgba(168,85,247,0.12);}
+  .atc-analyst-card.buy{border-color:rgba(34,197,94,0.45);}
+  .atc-analyst-card.sell{border-color:rgba(239,68,68,0.45);}
+  .atc-a-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .atc-a-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);}
+  .atc-a-name{font-weight:800;color:#e2e8f0;font-size:14px;line-height:1.2;}
+  .atc-a-model{font-size:10.5px;color:#7dd3fc;font-family:'Consolas',monospace;}
+  .atc-a-status{font-size:11.5px;color:#a855f7;margin:4px 0 8px;min-height:16px;}
+  .atc-a-dir{display:inline-block;font-weight:900;font-size:14px;padding:3px 14px;border-radius:999px;margin-bottom:8px;}
+  .atc-a-dir.BUY{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.5);}
+  .atc-a-dir.SELL{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.5);}
+  .atc-a-dir.NONE{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);}
+  .atc-a-meta{font-size:12px;color:#cbd5e1;line-height:1.7;font-family:'Consolas',monospace;}
+  .atc-a-meta b{color:#c4b5fd;}
+  .atc-a-points{font-size:12.5px;color:#94a3b8;line-height:1.6;margin-top:8px;white-space:pre-wrap;}
+  .atc-debate-log{background:rgba(15,23,42,0.55);border:1px solid rgba(148,163,184,0.2);border-radius:16px;padding:18px 20px;margin-top:16px;max-height:520px;overflow-y:auto;}
+  .atc-debate-round{margin-bottom:16px;}
+  .atc-debate-round h5{color:#c084fc;font-size:12.5px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px;border-bottom:1px solid rgba(168,85,247,0.2);padding-bottom:5px;}
+  .atc-bubble{background:rgba(30,41,59,0.7);border-left:3px solid #64748b;border-radius:8px;padding:10px 14px;margin-bottom:8px;}
+  .atc-bubble.a0{border-left-color:#22d3ee;}
+  .atc-bubble.a1{border-left-color:#a855f7;}
+  .atc-bubble.a2{border-left-color:#facc15;}
+  .atc-bubble .atc-b-name{font-weight:800;font-size:12px;color:#e2e8f0;margin-bottom:3px;}
+  .atc-bubble .atc-b-text{font-size:12.5px;color:#cbd5e1;line-height:1.6;white-space:pre-wrap;}
 </style>
 <section id="aitradingcommittee">
   <div class="glass-panel">
@@ -6655,6 +6691,10 @@ INTEGRATION STEPS:
 
     <button class="atc-generate-btn" id="atcGenerateBtn" onclick="atcGenerateSignal()">🧠 Generate Committee Signal</button>
 
+    <div class="atc-analysts-grid" id="atcAnalystsGrid" style="display:none;"></div>
+
+    <div class="atc-debate-log" id="atcDebateLog" style="display:none;"></div>
+
     <div class="atc-live-card notrade" id="atcLiveCard" style="display:none;">
       <div class="atc-live-head">
         <span class="atc-dir-badge NONE" id="atcDirBadge">—</span>
@@ -6759,12 +6799,59 @@ INTEGRATION STEPS:
 
 <script>
 (function(){
-  // Free tier: yahan wahi Groq key use ho rahi hai jo neeche AI Chat widget
-  // mein bhi use ho rahi hai (console.groq.com se free milti hai). Note: is
-  // website ka har visitor is key ko browser se dekh sakta hai — chaho to
-  // apni alag Groq key bana kar yahan daal sakte ho.
-  const ATC_API_KEY = "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";
+  // ===== SECURE BACKEND PROXY =====
+  // API key ab HTML/browser mein NAHI hai — wo sirf backend proxy server
+  // (groq-proxy/server.js) par rehti hai. Frontend sirf proxy ko call karta
+  // hai. Local test ke liye proxy chalayein:  cd groq-proxy && node server.js
+  // Production mein ATC_PROXY_URL ko apne deployed proxy ke domain par set
+  // karein (e.g. https://your-app.com/api/groq).
+  const ATC_PROXY_URL = "http://localhost:8787/api/groq";
+  const ATC_PROXY_SECRET = ""; // agar proxy par PROXY_SECRET on hai to wahi string yahan daalein
   const ATC_MODEL = "openai/gpt-oss-120b";
+
+  // Shared helper — committee, trailing-SL aur AI chat widget teeno isi ko use karte hain.
+  window.FW_GROQ_PROXY_URL = ATC_PROXY_URL;
+  window.fwGroqProxy = async function(body){
+    const headers = { 'Content-Type': 'application/json' };
+    if (ATC_PROXY_SECRET) headers['x-proxy-secret'] = ATC_PROXY_SECRET;
+    const res = await fetch(window.FW_GROQ_PROXY_URL, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  };
+
+  // ===== REAL MULTI-AI COMMITTEE: 3 genuinely different Groq models =====
+  // Har analyst ek alag model use karta hai taake opinions sach mein
+  // independent hon. Agar koi model aapke account par available na ho to
+  // yahan ID change kar lein (Groq supported models: console.groq.com/docs/models).
+  const ATC_ANALYSTS = [
+    {
+      key: 'smc',
+      name: 'Analyst 1 — SMC / ICT Specialist',
+      emoji: '🔵',
+      model: 'llama-3.3-70b-versatile',
+      lens: 'Smart Money Concepts & ICT: market structure (BOS/CHOCH), order blocks, fair value gaps (FVG/IFVG), liquidity sweeps, premium/discount zones, and multi-timeframe narrative. You are precise about WHERE institutions likely enter and where liquidity rests.'
+    },
+    {
+      key: 'pa',
+      name: 'Analyst 2 — Price Action / Gann / Volume',
+      emoji: '🟣',
+      model: 'openai/gpt-oss-120b',
+      lens: 'Classical Price Action, Gann geometry/levels, Fibonacci, candlestick patterns and VOLUME confirmation. You care about momentum quality, volume spikes/dry-ups, Gann support-resistance and whether a candle trigger actually validates the move.'
+    },
+    {
+      key: 'risk',
+      name: 'Analyst 3 — Risk / Session / News / Intermarket',
+      emoji: '🟡',
+      model: 'qwen/qwen3-32b',
+      lens: 'Session/volatility context, high-impact news risk, intermarket correlation (DXY, US10Y, correlated pairs), account risk, drawdown limits and position sizing. You are the committee risk-officer: you veto trades with bad timing, upcoming red-folder news, or broken risk parameters.'
+    }
+  ];
+  const ATC_MAX_DEBATE_ROUNDS = 4;   // jab tak muttafiqa (unanimous) na ho
+  const ATC_MIN_CONVICTION = 70;      // A+ gate: har analyst ka conviction >= 70
+  const ATC_REQUIRED_GRADE = 'A+';    // A+ gate: sab ka grade A+ hona chahiye
 
   const ATC_SYSTEM_PROMPT = `MULTI-AI TRADING SIGNAL ENGINE
 
@@ -7778,6 +7865,210 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     document.getElementById('atcStatusText').textContent = text;
   }
 
+  // ---- Real multi-AI debate engine helpers ----
+  function atcEsc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function atcCallGroq(model, messages, maxTokens){
+    const data = await window.fwGroqProxy({
+      model: model,
+      max_tokens: maxTokens || 900,
+      temperature: 0.6,
+      messages: messages
+    });
+    if (data.error) throw new Error(model + ' → ' + data.error.message);
+    const c = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (!c || !c.trim()) throw new Error(model + ' → khaali response');
+    return c.trim();
+  }
+
+  function atcAnalystSystemPrompt(a){
+    return [
+      'You are ' + a.name + ', ONE of THREE genuinely independent AI analysts on the "Forex With Waqar AI Trading Committee". Each analyst runs on a DIFFERENT underlying model, so your job is to give YOUR OWN honest view — not to please anyone.',
+      '',
+      'YOUR SPECIALTY (analyze PRIMARILY through this lens):',
+      a.lens,
+      '',
+      'HARD RULES:',
+      '- Any field marked NOT PROVIDED is genuinely missing data. NEVER invent prices, levels, volume, news or numbers. If data critical to your lens is missing, say so explicitly and lower your CONVICTION / choose NO TRADE.',
+      '- Be honest and independent. It is FINE (and expected) to disagree with the other analysts.',
+      '- CONVICTION = your confidence (0-100) that your DIRECTION is correct RIGHT NOW.',
+      '- GRADE = setup quality: A+ (90-100, textbook, every confirmation present), A, B, C, D. Give A+ ONLY when the setup is genuinely excellent by BOTH your specialty and strict risk standards. Be stingy with A+.',
+      '- If you would not put real money on it, it is not A+.',
+      '',
+      'Respond in EXACTLY this format and nothing else:',
+      'DIRECTION: BUY | SELL | NO TRADE',
+      'CONVICTION: <0-100 integer>',
+      'GRADE: <A+ | A | B | C | D>',
+      'ENTRY: <price or n/a>',
+      'SL: <price or n/a>',
+      'TP: <price or n/a>',
+      'KEY POINTS:',
+      '<2-4 short lines from your specialty>'
+    ].join('\n');
+  }
+
+  function atcDebateUserMessage(baseData, self, others, roundNo){
+    const otherTxt = others.map(function(o){
+      return '--- ' + o.name + ' ---\n' +
+        'DIRECTION: ' + o.op.dir + ' | CONVICTION: ' + o.op.conv + ' | GRADE: ' + o.op.grade + '\n' +
+        'ENTRY: ' + o.op.entry + ' | SL: ' + o.op.sl + ' | TP: ' + o.op.tp + '\n' +
+        'KEY POINTS:\n' + o.op.points +
+        (o.op.rebuttal ? '\nTHEIR LAST ARGUMENT TO YOU:\n' + o.op.rebuttal : '');
+    }).join('\n\n');
+    return [
+      baseData,
+      '',
+      '===== COMMITTEE DEBATE — ROUND ' + roundNo + ' =====',
+      'You are ' + self.name + '. The other two analysts currently hold these positions:',
+      '',
+      otherTxt,
+      '',
+      'Now DEBATE them directly and by name: address their strongest points, say exactly where they are RIGHT or WRONG, and defend or UPDATE your own view honestly. If an argument genuinely convinced you, change your DIRECTION / CONVICTION / GRADE. If not, hold your ground and explain why in one crisp line.',
+      'Stay grounded ONLY in the market data above — never invent data.',
+      '',
+      'Respond in EXACTLY this format and nothing else:',
+      'DIRECTION: BUY | SELL | NO TRADE',
+      'CONVICTION: <0-100 integer>',
+      'GRADE: <A+ | A | B | C | D>',
+      'ENTRY: <price or n/a>',
+      'SL: <price or n/a>',
+      'TP: <price or n/a>',
+      'KEY POINTS:',
+      '<your updated 2-3 line summary>',
+      'REBUTTAL:',
+      '<2-4 lines: your direct response to the other two analysts>'
+    ].join('\n');
+  }
+
+  function atcParseOpinion(text){
+    function grab(label){
+      const m = text.match(new RegExp(label + '\\s*:?\\s*([^\\n]*)', 'i'));
+      return m ? m[1].trim() : '';
+    }
+    let dir = 'NO TRADE';
+    const dm = text.match(/DIRECTION\s*:?\s*(BUY|SELL|NO\s*TRADE|WAIT)/i);
+    if (dm){
+      const d = dm[1].toUpperCase().replace(/\s+/g,' ');
+      dir = (d === 'BUY' || d === 'SELL') ? d : 'NO TRADE';
+    }
+    const convRaw = (text.match(/CONVICTION\s*:?\s*(\d{1,3})/i) || [])[1];
+    const conv = convRaw ? Math.max(0, Math.min(100, parseInt(convRaw, 10))) : 0;
+    const gm = text.match(/GRADE\s*:?\s*(A\+|A|B|C|D)/i);
+    const grade = gm ? gm[1].toUpperCase() : '—';
+    const kpPart = text.split(/KEY\s*POINTS\s*:?/i)[1] || '';
+    const points = kpPart.split(/REBUTTAL\s*:?/i)[0].trim();
+    const rbPart = text.split(/REBUTTAL\s*:?/i)[1] || '';
+    const rebuttal = rbPart.trim();
+    return {
+      dir: dir, conv: conv, grade: grade,
+      entry: grab('ENTRY'), sl: grab('SL'), tp: grab('TP'),
+      points: points, rebuttal: rebuttal, raw: text
+    };
+  }
+
+  function atcIsUnanimousAPlus(ops){
+    const dirs = ops.map(function(o){ return o.op.dir; });
+    const sameDir = dirs[0] === dirs[1] && dirs[1] === dirs[2];
+    const tradeDir = (dirs[0] === 'BUY' || dirs[0] === 'SELL');
+    const allConv = ops.every(function(o){ return o.op.conv >= ATC_MIN_CONVICTION; });
+    const allGrade = ops.every(function(o){ return o.op.grade === ATC_REQUIRED_GRADE; });
+    return sameDir && tradeDir && allConv && allGrade;
+  }
+
+  function atcInitAnalystCards(){
+    const grid = document.getElementById('atcAnalystsGrid');
+    grid.style.display = 'grid';
+    grid.innerHTML = ATC_ANALYSTS.map(function(a, i){
+      return '<div class="atc-analyst-card thinking" id="atcCard' + i + '">' +
+        '<div class="atc-a-head"><div class="atc-a-avatar">' + a.emoji + '</div>' +
+        '<div><div class="atc-a-name">' + atcEsc(a.name) + '</div>' +
+        '<div class="atc-a-model">' + atcEsc(a.model) + '</div></div></div>' +
+        '<div class="atc-a-status" id="atcAStatus' + i + '">🧠 soch raha hai...</div>' +
+        '<div id="atcABody' + i + '"></div></div>';
+    }).join('');
+    const log = document.getElementById('atcDebateLog');
+    log.style.display = 'block';
+    log.innerHTML = '<h5 style="color:#c084fc;margin:0 0 12px;text-transform:uppercase;letter-spacing:.5px;font-size:12.5px;">💬 Committee Debate Transcript</h5>';
+  }
+
+  function atcRenderAnalystCards(ops){
+    ops.forEach(function(o, i){
+      const card = document.getElementById('atcCard' + i);
+      if (!card) return;
+      card.className = 'atc-analyst-card ' + (o.op.dir === 'BUY' ? 'buy' : o.op.dir === 'SELL' ? 'sell' : '');
+      const st = document.getElementById('atcAStatus' + i);
+      if (st) st.textContent = '✔ opinion de diya';
+      const body = document.getElementById('atcABody' + i);
+      if (!body) return;
+      const dirClass = (o.op.dir === 'BUY' || o.op.dir === 'SELL') ? o.op.dir : 'NONE';
+      const dirLabel = o.op.dir === 'NO TRADE' ? 'NO TRADE' : o.op.dir;
+      body.innerHTML =
+        '<span class="atc-a-dir ' + dirClass + '">' + dirLabel + '</span>' +
+        '<div class="atc-a-meta"><b>Conviction:</b> ' + o.op.conv + '/100 &nbsp; <b>Grade:</b> ' + atcEsc(o.op.grade) + '</div>' +
+        '<div class="atc-a-meta"><b>Entry:</b> ' + atcEsc(o.op.entry || 'n/a') + ' &nbsp; <b>SL:</b> ' + atcEsc(o.op.sl || 'n/a') + ' &nbsp; <b>TP:</b> ' + atcEsc(o.op.tp || 'n/a') + '</div>' +
+        '<div class="atc-a-points">' + atcEsc(o.op.points || '') + '</div>';
+    });
+  }
+
+  function atcAppendDebateRound(label, ops, isInitial){
+    const log = document.getElementById('atcDebateLog');
+    if (!log) return;
+    let html = '<div class="atc-debate-round"><h5>' + atcEsc(label) + '</h5>';
+    ops.forEach(function(o, i){
+      let txt;
+      if (isInitial){
+        txt = '[' + o.op.dir + ' | conv ' + o.op.conv + ' | ' + o.op.grade + ']\n' + o.op.points;
+      } else {
+        txt = (o.op.rebuttal ? o.op.rebuttal + '\n\n' : '') +
+              '→ Updated: [' + o.op.dir + ' | conv ' + o.op.conv + ' | ' + o.op.grade + '] ' + o.op.points;
+      }
+      html += '<div class="atc-bubble a' + i + '"><div class="atc-b-name">' + o.analyst.emoji + ' ' + atcEsc(o.analyst.name) + '</div>' +
+              '<div class="atc-b-text">' + atcEsc(txt) + '</div></div>';
+    });
+    html += '</div>';
+    log.insertAdjacentHTML('beforeend', html);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function atcBuildFinalText(ops, finalDir, roundsHeld, gate){
+    const L = [];
+    L.push('════════════════════════════════════');
+    L.push('🧠 AI TRADING COMMITTEE — FINAL MUTTAFIQA FAISLA');
+    L.push('   (3 alag models ne independently analyze kiya, phir aapas mein debate ki)');
+    L.push('════════════════════════════════════');
+    L.push('');
+    L.push('FINAL SIGNAL: ' + finalDir);
+    L.push('');
+    L.push('COMMITTEE VOTE:');
+    ops.forEach(function(o){
+      L.push(' • ' + o.analyst.name + ' [' + o.analyst.model + ']');
+      L.push('   → ' + o.op.dir + ' | conviction ' + o.op.conv + '/100 | grade ' + o.op.grade +
+             ' | E:' + (o.op.entry || 'n/a') + ' SL:' + (o.op.sl || 'n/a') + ' TP:' + (o.op.tp || 'n/a'));
+    });
+    L.push('');
+    L.push('A+ CONSENSUS GATE:');
+    L.push(' • Unanimous direction (muttafiqa)?  ' + (gate.sameDir ? 'YES' : 'NO'));
+    L.push(' • Sab conviction ≥ ' + ATC_MIN_CONVICTION + '?          ' + (gate.allConv ? 'YES' : 'NO'));
+    L.push(' • Sab grade A+?                ' + (gate.allGrade ? 'YES' : 'NO'));
+    L.push(' • Debate rounds held:          ' + roundsHeld + ' (max ' + ATC_MAX_DEBATE_ROUNDS + ')');
+    L.push('');
+    if (finalDir === 'BUY' || finalDir === 'SELL'){
+      L.push('CONSENSUS TRADE PLAN:');
+      L.push(' Entry : ' + ops[0].op.entry);
+      L.push(' SL    : ' + ops[0].op.sl);
+      L.push(' TP    : ' + ops[0].op.tp);
+      L.push('');
+    }
+    L.push('VERDICT REASON:');
+    L.push(gate.reason);
+    L.push('');
+    L.push('⚠️ Advisory only — final trade decision aur risk aapki apni zimmedari hai.');
+    return L.join('\n');
+  }
+
   window.atcGenerateSignal = async function(){
     const btn = document.getElementById('atcGenerateBtn');
     const card = document.getElementById('atcLiveCard');
@@ -7785,60 +8076,114 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     const badge = document.getElementById('atcDirBadge');
 
     btn.disabled = true;
-    btn.textContent = '🧠 Committee analyze kar raha hai...';
-    atcSetStatus('3 AI analysts independently analyze kar rahe hain, debate kar rahe hain, consensus nikaal rahe hain...');
+    btn.textContent = '🧠 Committee debate kar rahi hai...';
     card.style.display = 'block';
     card.className = 'atc-live-card notrade';
     badge.className = 'atc-dir-badge NONE';
     badge.textContent = '—';
-    output.textContent = 'Analysis chal rahi hai, thora intezaar karein...';
+    output.textContent = 'Committee ban rahi hai...';
+    atcInitAnalystCards();
 
-    const userMessage = atcBuildUserMessage();
+    const baseData = atcBuildUserMessage();
 
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + ATC_API_KEY
-        },
-        body: JSON.stringify({
-          model: ATC_MODEL,
-          max_tokens: 3500,
-          messages: [
-            { role: 'system', content: ATC_SYSTEM_PROMPT },
-            { role: 'user', content: userMessage }
-          ]
-        })
-      });
-      const data = await res.json();
+      // ---------- ROUND 1: 3 alag models, independent opinions (parallel) ----------
+      atcSetStatus('Round 1 — teeno AI (3 alag models) independently analyze kar rahe hain...');
+      const round1 = await Promise.all(ATC_ANALYSTS.map(function(a){
+        return atcCallGroq(a.model, [
+          { role: 'system', content: atcAnalystSystemPrompt(a) },
+          { role: 'user', content: baseData }
+        ], 900).then(function(t){ return { text: t }; })
+         .catch(function(e){ return { error: e.message }; });
+      }));
 
-      if (data.error){
-        output.textContent = 'Error: ' + data.error.message;
-        atcSetStatus('Error aaya — dobara koshish karein.');
-        btn.disabled = false;
-        btn.textContent = '🧠 Generate Committee Signal';
+      const failed = round1.find(function(r){ return r.error; });
+      if (failed){
+        output.textContent = '❌ Committee start nahi ho saki:\n\n' + failed.error +
+          '\n\nYe aksar tab hota hai jab (a) Groq API key invalid/expired ho, ya (b) model ID aapke account par available na ho. console.groq.com se key check karein aur ATC_ANALYSTS ke model IDs verify karein.';
+        atcSetStatus('Error — API key ya model check karein.');
         return;
       }
 
-      const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
-        ? data.choices[0].message.content.trim()
-        : 'Koi response nahi mila, dobara koshish karein.';
-      output.textContent = reply;
+      let ops = round1.map(function(r, i){
+        return { analyst: ATC_ANALYSTS[i], op: atcParseOpinion(r.text) };
+      });
+      atcRenderAnalystCards(ops);
+      atcAppendDebateRound('Round 1 — Initial Independent Opinions', ops, true);
 
-      let direction = 'NONE';
-      const dirMatch = reply.match(/DIRECTION:\s*\n?\s*(BUY|SELL|NO TRADE)/i) || reply.match(/\b(BUY|SELL|NO TRADE)\b/i);
-      if (dirMatch){
-        const d = dirMatch[1].toUpperCase();
-        if (d === 'BUY' || d === 'SELL') direction = d;
+      // ---------- DEBATE: jab tak muttafiqa (unanimous A+) na ho, max N rounds ----------
+      let roundsHeld = 0;
+      let unanimous = atcIsUnanimousAPlus(ops);
+      while (!unanimous && roundsHeld < ATC_MAX_DEBATE_ROUNDS){
+        roundsHeld++;
+        atcSetStatus('💬 Debate Round ' + roundsHeld + ' — analysts aapas mein baat kar rahe hain...');
+        ops.forEach(function(_, i){
+          const st = document.getElementById('atcAStatus' + i);
+          const cd = document.getElementById('atcCard' + i);
+          if (st) st.textContent = '💬 round ' + roundsHeld + ' mein bol raha hai...';
+          if (cd) cd.className = 'atc-analyst-card thinking';
+        });
+
+        const results = await Promise.all(ATC_ANALYSTS.map(function(a, i){
+          const others = ops.filter(function(_, j){ return j !== i; })
+                            .map(function(o){ return { name: o.analyst.name, model: o.analyst.model, op: o.op }; });
+          return atcCallGroq(a.model, [
+            { role: 'system', content: atcAnalystSystemPrompt(a) },
+            { role: 'user', content: atcDebateUserMessage(baseData, { name: a.name }, others, roundsHeld) }
+          ], 1000).then(function(t){ return { i: i, text: t }; })
+           .catch(function(e){ return { i: i, error: e.message }; });
+        }));
+
+        results.forEach(function(r){
+          if (!r.error) ops[r.i].op = atcParseOpinion(r.text);
+        });
+        atcRenderAnalystCards(ops);
+        atcAppendDebateRound('💬 Debate Round ' + roundsHeld, ops, false);
+        unanimous = atcIsUnanimousAPlus(ops);
       }
-      badge.textContent = direction === 'NONE' ? 'NO TRADE' : direction;
-      badge.className = 'atc-dir-badge ' + (direction === 'NONE' ? 'NONE' : direction);
-      card.className = 'atc-live-card ' + (direction === 'BUY' ? 'buy' : direction === 'SELL' ? 'sell' : 'notrade');
+
+      // ---------- FINAL GATE (deterministic, JS-enforced) ----------
+      const dirs = ops.map(function(o){ return o.op.dir; });
+      const sameDir = dirs[0] === dirs[1] && dirs[1] === dirs[2];
+      const allConv = ops.every(function(o){ return o.op.conv >= ATC_MIN_CONVICTION; });
+      const allGrade = ops.every(function(o){ return o.op.grade === ATC_REQUIRED_GRADE; });
+
+      let finalDir, reason;
+      if (unanimous){
+        finalDir = dirs[0];
+        reason = 'Teeno analysts ' + finalDir + ' par MUTTAFIQ (unanimous) hain, sab ka conviction ≥ ' +
+                 ATC_MIN_CONVICTION + ' aur sab ka grade A+ hai. A+ gate PASS — ye ek high-conviction muttafiqa signal hai.';
+      } else if (sameDir && dirs[0] === 'NO TRADE'){
+        finalDir = 'NO TRADE';
+        reason = 'Teeno analysts unanimously NO TRADE kehte hain — koi valid setup nahi. WAIT karein.';
+      } else if (sameDir){
+        finalDir = 'NO TRADE / WAIT FOR CLARITY';
+        reason = 'Direction par agreement hai (' + dirs[0] + ') lekin A+ gate FAIL: ' +
+                 (!allConv ? 'conviction ' + ATC_MIN_CONVICTION + '+ nahi ' : '') +
+                 (!allConv && !allGrade ? 'aur ' : '') +
+                 (!allGrade ? 'grade sab A+ nahi' : '') +
+                 '. Jab tak setup A+ na ho, forced trade nahi — WAIT.';
+      } else {
+        finalDir = 'NO TRADE / WAIT FOR CLARITY';
+        reason = 'Committee SPLIT hai (1-1-1 ya 2-1) — ' + roundsHeld + ' debate rounds ke baad bhi teeno muttafiq nahi hue. ' +
+                 'Jab committee khud agree na kare, best move hamesha WAIT FOR CLARITY hai. Kabhi forced majority nahi banayi jayegi.';
+      }
+
+      const gate = { sameDir: sameDir, allConv: allConv, allGrade: allGrade, reason: reason };
+      const finalText = atcBuildFinalText(ops, finalDir, roundsHeld, gate);
+
+      output.textContent = finalText;
+      const isTrade = (finalDir === 'BUY' || finalDir === 'SELL');
+      badge.textContent = isTrade ? finalDir : 'NO TRADE';
+      badge.className = 'atc-dir-badge ' + (finalDir === 'BUY' ? 'BUY' : finalDir === 'SELL' ? 'SELL' : 'NONE');
+      card.className = 'atc-live-card ' + (finalDir === 'BUY' ? 'buy' : finalDir === 'SELL' ? 'sell' : 'notrade');
       document.getElementById('atcLiveTime').textContent = new Date().toLocaleString();
 
-      atcSetStatus('Signal generate ho gaya. Neeche history mein bhi save kar diya gaya hai.');
-      atcSaveToHistory(direction, reply);
+      const histDir = isTrade ? finalDir : 'NONE';
+      atcSetStatus(isTrade
+        ? '✅ Muttafiqa A+ signal: ' + finalDir + ' — history mein save ho gaya.'
+        : '⏸️ Final: NO TRADE / WAIT — committee A+ consensus par nahi pohanchi.');
+      atcSaveToHistory(histDir, finalText);
 
     } catch(err){
       output.textContent = 'Connection error: ' + err.message;
@@ -7989,19 +8334,14 @@ REASON: <max 40 words>`;
     const userMessage = atcTrailBuildPrompt(livePrice);
 
     try{
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ATC_API_KEY },
-        body: JSON.stringify({
-          model: ATC_MODEL,
-          max_tokens: 250,
-          messages: [
-            { role: 'system', content: ATC_TRAIL_SYSTEM_PROMPT },
-            { role: 'user', content: userMessage }
-          ]
-        })
+      const data = await window.fwGroqProxy({
+        model: ATC_MODEL,
+        max_tokens: 250,
+        messages: [
+          { role: 'system', content: ATC_TRAIL_SYSTEM_PROMPT },
+          { role: 'user', content: userMessage }
+        ]
       });
-      const data = await res.json();
       if (data.error){
         statusText.textContent = 'Error: ' + data.error.message + ' — agla check retry karega.';
         return;
@@ -8683,8 +9023,9 @@ window.kycAdminDeleteSubmission = async function(uid){
 </script>
 <script>
 (function(){
-  // ⚠️ Yahan apni Groq API key paste karein:
-  const GROQ_API_KEY = "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";
+  // API key ab sirf backend proxy (groq-proxy/server.js) par hai.
+  // Ye widget wahi shared proxy helper (window.fwGroqProxy) use karta hai
+  // jo upar AI Trading Committee wale script mein define hua hai.
   const GROQ_MODEL = "openai/gpt-oss-120b";
 
   let aichatHistory = [];
@@ -8742,18 +9083,11 @@ function aichatBuildSystemPrompt(){
 
     try {
 const messages = [{ role: 'system', content: aichatBuildSystemPrompt() }, ...aichatHistory];
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + GROQ_API_KEY
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          messages: messages
-        })
+      const data = await window.fwGroqProxy({
+        model: GROQ_MODEL,
+        max_tokens: 1500,
+        messages: messages
       });
-      const data = await res.json();
       typingEl.style.display = 'none';
 
       if (data.error){
