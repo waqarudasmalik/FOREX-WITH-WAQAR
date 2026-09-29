@@ -1,0 +1,10 @@
+{
+  "name": "forex-with-waqar-committee-proxy",
+  "version": "2.0.0",
+  "description": "Multi-AI Committee proxy (Groq/OpenAI/Anthropic/Gemini) with Firebase login check",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}
