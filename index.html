@@ -6808,7 +6808,10 @@ INTEGRATION STEPS:
   // hai. Local test ke liye proxy chalayein:  cd groq-proxy && node server.js
   // Production mein ATC_PROXY_URL ko apne deployed proxy ke domain par set
   // karein (e.g. https://your-app.com/api/ai).
-  const ATC_PROXY_URL = "http://localhost:8787/api/ai";
+  // Local PC par: localhost proxy. Live site par: deployed proxy ka URL (neeche apna URL daalein).
+  const ATC_LIVE_PROXY_URL = "https://YOUR-PROXY-NAME.onrender.com/api/ai";
+  const ATC_PROXY_URL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+    ? "http://localhost:8787/api/ai" : ATC_LIVE_PROXY_URL;
   const ATC_PROXY_SECRET = ""; // agar proxy par PROXY_SECRET on hai to wahi string yahan daalein
   const ATC_MODEL = "openai/gpt-oss-120b";
 
@@ -6818,6 +6821,11 @@ INTEGRATION STEPS:
   window.fwGroqProxy = async function(body){
     const headers = { 'Content-Type': 'application/json' };
     if (ATC_PROXY_SECRET) headers['x-proxy-secret'] = ATC_PROXY_SECRET;
+    // Firebase login token: proxy verify karta hai ke user logged-in + approved hai.
+    try {
+      const fu = window.firebase && firebase.auth && firebase.auth().currentUser;
+      if (fu) headers['Authorization'] = 'Bearer ' + await fu.getIdToken();
+    } catch(e){}
     const res = await fetch(window.FW_GROQ_PROXY_URL, {
       method: 'POST',
       headers: headers,
@@ -8002,6 +8010,35 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     return sameDir && tradeDir && allConv && allGrade;
   }
 
+  // ---- Consensus levels: chaaron ke Entry/SL/TP ka median + sanity checks ----
+  const ATC_MIN_RR = 1.5;
+  function atcNum(v){
+    const m = String(v == null ? '' : v).replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function atcMedian(a){
+    const b = a.slice().sort(function(x, y){ return x - y; });
+    const n = b.length;
+    return n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2;
+  }
+  function atcConsensusLevels(ops, dir){
+    const f = function(k){ return ops.map(function(o){ return atcNum(o.op[k]); }); };
+    const E = f('entry'), S = f('sl'), T = f('tp');
+    if ([E, S, T].some(function(a){ return a.some(function(x){ return !isFinite(x); }); }))
+      return { ok: false, why: 'kisi analyst ne Entry/SL/TP ka number nahi diya' };
+    const entry = atcMedian(E), sl = atcMedian(S), tp = atcMedian(T);
+    const spread = (Math.max.apply(null, E) - Math.min.apply(null, E)) / Math.abs(entry);
+    if (spread > 0.005) return { ok: false, why: 'analysts ke Entry levels aapas mein bohot alag hain' };
+    const okSide = dir === 'BUY' ? (sl < entry && entry < tp) : (sl > entry && entry > tp);
+    if (!okSide) return { ok: false, why: 'SL/Entry/TP ki tarteeb ' + dir + ' ke liye ghalat hai' };
+    const rr = Math.abs(tp - entry) / Math.abs(entry - sl);
+    if (rr < ATC_MIN_RR) return { ok: false, why: 'Risk:Reward ' + rr.toFixed(2) + ' hai (kam az kam ' + ATC_MIN_RR + ' chahiye)' };
+    const cp = atcNum(document.getElementById('atcPrice').value);
+    if (isFinite(cp) && Math.abs(entry - cp) / cp > 0.015) return { ok: false, why: 'Entry current price se 1.5% se zyada door hai' };
+    const d = entry < 50 ? 5 : 2;
+    return { ok: true, entry: entry.toFixed(d), sl: sl.toFixed(d), tp: tp.toFixed(d), rr: rr.toFixed(2) };
+  }
+
   function atcInitAnalystCards(){
     const grid = document.getElementById('atcAnalystsGrid');
     grid.style.display = 'grid';
@@ -8066,10 +8103,14 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     const L = [];
     L.push('════════════════════════════════════');
     L.push('🧠 AI TRADING COMMITTEE — FINAL MUTTAFIQA FAISLA');
-    L.push('   (3 alag models ne independently analyze kiya, phir aapas mein debate ki)');
+    L.push('   (4 seats ne independently analyze kiya, phir aapas mein debate ki)');
     L.push('════════════════════════════════════');
     L.push('');
     L.push('FINAL SIGNAL: ' + finalDir);
+    L.push('');
+    const liveN = ops.filter(function(o){ return !(o.meta && o.meta.fallback); }).length;
+    L.push('ENGINE: ' + liveN + '/' + ops.length + ' seats apne asli provider par, ' + (ops.length - liveN) + ' Groq fallback par' +
+           (liveN === 0 ? ' — NOTE: sab seats Groq ke models hain (4 alag companies ke nahi), is liye agreement kam independent hai.' : ''));
     L.push('');
     L.push('COMMITTEE VOTE:');
     ops.forEach(function(o){
@@ -8087,10 +8128,11 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     L.push(' • Debate rounds held:          ' + roundsHeld + ' (max ' + ATC_MAX_DEBATE_ROUNDS + ')');
     L.push('');
     if (finalDir === 'BUY' || finalDir === 'SELL'){
-      L.push('CONSENSUS TRADE PLAN:');
-      L.push(' Entry : ' + ops[0].op.entry);
-      L.push(' SL    : ' + ops[0].op.sl);
-      L.push(' TP    : ' + ops[0].op.tp);
+      L.push('CONSENSUS TRADE PLAN (chaaron ke levels ka median):');
+      L.push(' Entry : ' + gate.levels.entry);
+      L.push(' SL    : ' + gate.levels.sl);
+      L.push(' TP    : ' + gate.levels.tp);
+      L.push(' R:R   : ' + gate.levels.rr);
       L.push('');
     }
     L.push('VERDICT REASON:');
@@ -8107,6 +8149,9 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     try {
       h = await fetch(base + '/health').then(function(r){ return r.json(); });
     } catch(e){
+      if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)){
+        return { ok: false, msg: '❌ Committee server (proxy) se rabta nahi ho pa raha. Thori der baad dobara koshish karein ya admin ko batayein.' };
+      }
       return { ok: false, msg:
         '❌ Backend proxy server nahi chal raha.\n\n' +
         'Terminal (Command Prompt / PowerShell) kholein aur ye chalayein:\n' +
@@ -8150,6 +8195,19 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     const baseData = atcBuildUserMessage();
 
     try {
+      // ---------- DATA GATE: zaroori fields khali hon to AI ko bulaye baghair NO TRADE ----------
+      const need = [['atcPrice','Current Price'],['atcH4','H4'],['atcH1','H1'],['atcM15','M15']];
+      const miss = need.filter(function(n){ return atcVal(n[0]) === 'NOT PROVIDED'; }).map(function(n){ return n[1]; });
+      if (miss.length){
+        output.textContent = 'DATA INSUFFICIENT — NO TRADE\n\nYe zaroori fields khali hain: ' + miss.join(', ') +
+          '\n\nEngine kabhi khud se data invent nahi karta. Fields bhar kar dobara koshish karein.';
+        badge.textContent = 'NO TRADE';
+        card.className = 'atc-live-card notrade';
+        document.getElementById('atcAnalystsGrid').style.display = 'none';
+        document.getElementById('atcDebateLog').style.display = 'none';
+        atcSetStatus('⏸️ Data adhoora hai — AI ko call nahi kiya gaya.');
+        return;
+      }
       // ---------- PREFLIGHT: proxy + key check ----------
       const pre = await atcPreflight();
       if (!pre.ok){
@@ -8185,6 +8243,7 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
 
       // ---------- DEBATE: jab tak muttafiqa (unanimous A+) na ho, max N rounds ----------
       let roundsHeld = 0;
+      let lastRoundFailed = [];
       let unanimous = atcIsUnanimousAPlus(ops);
       while (!unanimous && roundsHeld < ATC_MAX_DEBATE_ROUNDS){
         roundsHeld++;
@@ -8206,12 +8265,14 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
            .catch(function(e){ return { i: i, error: e.message }; });
         }));
 
+        lastRoundFailed = [];
         results.forEach(function(r){
           if (!r.error){ ops[r.i].op = atcParseOpinion(r.text); if (r.meta) ops[r.i].meta = r.meta; }
+          else { lastRoundFailed.push(ops[r.i].analyst.name); }
         });
         atcRenderAnalystCards(ops);
         atcAppendDebateRound('💬 Debate Round ' + roundsHeld, ops, false);
-        unanimous = atcIsUnanimousAPlus(ops);
+        unanimous = atcIsUnanimousAPlus(ops) && lastRoundFailed.length === 0;
       }
 
       // ---------- FINAL GATE (deterministic, JS-enforced) ----------
@@ -8227,7 +8288,14 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
       const tallyStr = 'BUY ' + tally.BUY + ' / SELL ' + tally.SELL + ' / NO TRADE ' + tally['NO TRADE'];
 
       let finalDir, reason;
-      if (unanimous){
+      const lv = unanimous ? atcConsensusLevels(ops, dirs[0]) : null;
+      if (lastRoundFailed.length){
+        finalDir = 'NO TRADE / WAIT FOR CLARITY';
+        reason = 'Akhri debate round mein ' + lastRoundFailed.join(', ') + ' ka jawab nahi aaya (API error) — unki purani raaye par faisla nahi kiya jata. Dobara koshish karein.';
+      } else if (unanimous && lv && !lv.ok){
+        finalDir = 'NO TRADE / WAIT FOR CLARITY';
+        reason = 'Chaaron muttafiq hain lekin trade levels qabil-e-aitbar nahi: ' + lv.why + ' — forced trade nahi.';
+      } else if (unanimous){
         finalDir = dirs[0];
         reason = 'Chaaron AI (ChatGPT, Claude, Gemini, Qoder) ' + finalDir + ' par MUTTAFIQ (unanimous) hain, sab ka conviction ≥ ' +
                  ATC_MIN_CONVICTION + ' aur sab ka grade A+ hai. A+ gate PASS — ye ek high-conviction muttafiqa signal hai.';
@@ -8247,7 +8315,7 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
                  'Jab committee khud agree na kare, best move hamesha WAIT FOR CLARITY hai. Kabhi forced majority nahi banayi jayegi.';
       }
 
-      const gate = { sameDir: sameDir, allConv: allConv, allGrade: allGrade, reason: reason };
+      const gate = { sameDir: sameDir, allConv: allConv, allGrade: allGrade, reason: reason, levels: (lv && lv.ok) ? lv : null };
       const finalText = atcBuildFinalText(ops, finalDir, roundsHeld, gate);
 
       output.textContent = finalText;
@@ -8443,9 +8511,28 @@ REASON: <max 40 words>`;
     const slMatch = reply.match(/NEW SL:\s*([^\n]+)/i);
     const reasonMatch = reply.match(/REASON:\s*([\s\S]+)/i);
 
-    const action = actionMatch ? actionMatch[1].toUpperCase() : 'HOLD';
-    const newSL = slMatch ? slMatch[1].trim() : 'no change';
-    const reason = reasonMatch ? reasonMatch[1].trim() : (reply || 'No reasoning returned.');
+    let action = actionMatch ? actionMatch[1].toUpperCase() : 'HOLD';
+    let newSL = slMatch ? slMatch[1].trim() : 'no change';
+    let reason = reasonMatch ? reasonMatch[1].trim() : (reply || 'No reasoning returned.');
+
+    // ---- JS guard: AI ki suggestion ko rule ke khilaf hone par HOLD bana do ----
+    (function(){
+      if (action !== 'TRAIL SL' && action !== 'MOVE SL TO BREAKEVEN') return;
+      const dirT = document.getElementById('atcTrailDir').value;
+      const curSL = atcNum(atcVal('atcTrailSL'));
+      const entryP = atcNum(atcVal('atcTrailEntry'));
+      const px = isFinite(atcNum(livePrice)) ? atcNum(livePrice) : atcNum(atcVal('atcPrice'));
+      let n = (action === 'MOVE SL TO BREAKEVEN' && !isFinite(atcNum(newSL))) ? entryP : atcNum(newSL);
+      let why = '';
+      if (!isFinite(n) || !isFinite(curSL)) why = 'naya SL number nahi mila';
+      else if (dirT === 'BUY' && n < curSL) why = 'naya SL purane SL se peeche hai';
+      else if (dirT === 'SELL' && n > curSL) why = 'naya SL purane SL se peeche hai';
+      else if (isFinite(px) && ((dirT === 'BUY' && n >= px) || (dirT === 'SELL' && n <= px))) why = 'naya SL current price ke ghalat taraf hai';
+      if (why){
+        reason = '[Guard: AI ki suggestion (' + action + ' → ' + newSL + ') radd — ' + why + '] ' + reason;
+        action = 'HOLD'; newSL = 'no change';
+      } else if (action === 'MOVE SL TO BREAKEVEN'){ newSL = String(n); }
+    })();
 
     let cssAction = 'HOLD';
     if (action.indexOf('BREAKEVEN') !== -1) cssAction = 'BREAKEVEN';
@@ -8554,8 +8641,8 @@ REASON: <max 40 words>`;
     wrap.innerHTML = list.map(function(item){
       const dt = new Date(item.time).toLocaleString();
       return '<div class="atc-history-item">' +
-        '<div class="atc-h-top"><span>' + dt + '</span><span class="atc-h-dir">' + item.action + ' \u2192 ' + item.newSL + '</span></div>' +
-        '<div style="color:#94a3b8;">' + item.reason + '</div>' +
+        '<div class="atc-h-top"><span>' + dt + '</span><span class="atc-h-dir">' + atcEsc(item.action) + ' \u2192 ' + atcEsc(item.newSL) + '</span></div>' +
+        '<div style="color:#94a3b8;">' + atcEsc(item.reason) + '</div>' +
       '</div>';
     }).join('');
   }
