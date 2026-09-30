@@ -6809,7 +6809,7 @@ INTEGRATION STEPS:
   // Production mein ATC_PROXY_URL ko apne deployed proxy ke domain par set
   // karein (e.g. https://your-app.com/api/ai).
   // Local PC par: localhost proxy. Live site par: deployed proxy ka URL (neeche apna URL daalein).
-  const ATC_LIVE_PROXY_URL = "https://YOUR-PROXY-NAME.onrender.com/api/ai";
+ const ATC_LIVE_PROXY_URL = "https://forex-with-waqar-production.up.railway.app/api/ai";
   // location.hostname khali hota hai jab file seedha double-click se khulti hai (file:// se).
   const ATC_PROXY_URL = (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
     ? "http://localhost:8787/api/ai" : ATC_LIVE_PROXY_URL;
