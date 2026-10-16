@@ -6626,6 +6626,9 @@ INTEGRATION STEPS:
       <span id="atcStatusText">Data bharein aur "Generate Committee Signal" dabayein.</span>
     </div>
 
+    <button class="atc-generate-btn" id="atcAutoFillBtn" onclick="atcAutoFill()" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);margin-bottom:6px;">📡 Live Chart se Auto-Fill (sab levels khud bharo)</button>
+    <div id="atcAutoFillStatus" style="font-size:12.5px;color:#94a3b8;line-height:1.6;margin:6px 0 14px;white-space:pre-line;">Pehle neeche symbol chunein, phir is button par click karein — price, session, H4→M5 structure/FVG/OB/liquidity, swing, prev day/week, Fib, Gann, ATR, volume aur news khud bhar jayengi.</div>
+
     <div class="atc-section-label">1️⃣ Symbol &amp; Live Price</div>
     <div class="atc-form-grid">
       <div class="atc-field">
@@ -6799,6 +6802,406 @@ INTEGRATION STEPS:
     <div id="atcTrailHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
   </div>
 </section>
+
+<script>
+(function(){
+  // ===== AI TRADING COMMITTEE — LIVE DATA AUTO-FILL =====
+  // TradingView ka chart ek iframe hai, browser security ki wajah se uska data seedha parha nahi ja sakta.
+  // Is liye ye button wahi live candles (Twelve Data) mangta hai jo site ke baaqi bots use karte hain,
+  // aur levels (structure, FVG, OB, liquidity, swing, Fib, Gann, ATR, prev day/week) khud calculate kar ke form bhar deta hai.
+  const AF_KEY = "faa70dee4cd94663a55ff3bc640aa831";   // wahi key jo site ke dusre bots mein hai
+  const AF_CACHE_MS = 60 * 1000;
+  const AF_RATE_WAIT_MS = 15000, AF_RATE_TRIES = 6;
+  const IV_MS = { '5min':300000, '15min':900000, '30min':1800000, '1h':3600000, '4h':14400000, '1day':86400000, '1week':604800000 };
+  const afCache = {};
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const $ = id => document.getElementById(id);
+
+  function tdSymbol(sel, other){
+    let s = (sel === 'OTHER' ? other : sel) || '';
+    s = s.toUpperCase().replace(/[^A-Z0-9\/]/g, '');
+    if (s.indexOf('/') > -1) return s;
+    if (/^[A-Z]{6}$/.test(s)) return s.slice(0,3) + '/' + s.slice(3);
+    return s;
+  }
+  function dp(p){ return p >= 100 ? 2 : p >= 10 ? 3 : p >= 1 ? 5 : 6; }
+  function mk(price){ const d = dp(price); return v => (typeof v === 'number' && isFinite(v)) ? v.toFixed(d) : 'NA'; }
+  function parseTime(t){ // Twelve Data datetime (UTC) -> ms
+    return Date.parse(String(t).length <= 10 ? t + 'T00:00:00Z' : String(t).replace(' ', 'T') + 'Z');
+  }
+
+  // ---------- data fetch (rate-limit aware, cached) ----------
+  async function fetchCandles(symbol, iv, n, say){
+    const key = symbol + '|' + iv;
+    const hit = afCache[key];
+    if (hit && Date.now() - hit.t < AF_CACHE_MS && hit.n >= n) return hit.c;
+    const url = 'https://api.twelvedata.com/time_series?symbol=' + encodeURIComponent(symbol) +
+      '&interval=' + iv + '&outputsize=' + n + '&timezone=UTC&apikey=' + AF_KEY;
+    for (let attempt = 0; attempt < AF_RATE_TRIES; attempt++){
+      let data;
+      try { const res = await fetch(url); data = await res.json(); }
+      catch(e){ throw new Error('Internet / API se rabta nahi hua (' + iv + ')'); }
+      if (data && data.values && data.values.length){
+        const c = data.values.slice().reverse().map(v => ({
+          time: v.datetime, t: parseTime(v.datetime),
+          open: parseFloat(v.open), high: parseFloat(v.high), low: parseFloat(v.low), close: parseFloat(v.close),
+          volume: v.volume != null ? parseFloat(v.volume) : NaN
+        })).filter(x => isFinite(x.open) && isFinite(x.high) && isFinite(x.low) && isFinite(x.close));
+        afCache[key] = { t: Date.now(), n: n, c: c };
+        return c;
+      }
+      const msg = (data && data.message) || 'khaali jawab';
+      if (data && (data.code === 429 || /credits|rate limit|too many/i.test(msg))){
+        say('⏳ API ki per-minute limit lag gayi, ' + (AF_RATE_WAIT_MS/1000) + 's ruk kar dobara koshish (' + (attempt+1) + '/' + AF_RATE_TRIES + ')...');
+        await sleep(AF_RATE_WAIT_MS);
+        continue;
+      }
+      throw new Error(iv + ': ' + msg);
+    }
+    throw new Error(iv + ': API limit ki wajah se data nahi mil saka — 1 minute baad dobara dabayein.');
+  }
+
+  // ---------- indicators / structure ----------
+  function trSeries(c){
+    const tr = [];
+    for (let i = 1; i < c.length; i++){
+      tr.push(Math.max(c[i].high - c[i].low, Math.abs(c[i].high - c[i-1].close), Math.abs(c[i].low - c[i-1].close)));
+    }
+    return tr;
+  }
+  function atrSeries(c, p){
+    p = p || 14; const tr = trSeries(c), out = [];
+    for (let i = p - 1; i < tr.length; i++){
+      let s = 0; for (let k = i - p + 1; k <= i; k++) s += tr[k];
+      out.push(s / p);
+    }
+    return out;
+  }
+  function swings(c, k){
+    k = k || 2; const highs = [], lows = [];
+    for (let i = k; i < c.length - k; i++){
+      let h = true, l = true;
+      for (let j = 1; j <= k; j++){
+        if (c[i-j].high >= c[i].high || c[i+j].high >= c[i].high) h = false;
+        if (c[i-j].low <= c[i].low || c[i+j].low <= c[i].low) l = false;
+      }
+      if (h) highs.push({ i: i, price: c[i].high });
+      if (l) lows.push({ i: i, price: c[i].low });
+    }
+    return { highs: highs, lows: lows };
+  }
+  function trendOf(sw){
+    const h = sw.highs, l = sw.lows;
+    if (h.length < 2 || l.length < 2) return { dir: 'unclear', txt: 'Unclear (kam swings)' };
+    const hh = h[h.length-1].price > h[h.length-2].price, hl = l[l.length-1].price > l[l.length-2].price;
+    if (hh && hl) return { dir: 'bull', txt: 'Bullish (HH + HL)' };
+    if (!hh && !hl) return { dir: 'bear', txt: 'Bearish (LH + LL)' };
+    return { dir: 'range', txt: hh ? 'Mixed (HH lekin LL — expanding/range)' : 'Mixed (LH lekin HL — compression/range)' };
+  }
+  function breakInfo(c, sw, tr, f){
+    const n = c.length, last = c[n-1], parts = [];
+    const sh = sw.highs[sw.highs.length-1], sl = sw.lows[sw.lows.length-1];
+    function age(from, test){ for (let i = from + 1; i < n; i++) if (test(c[i])) return n - 1 - i; return -1; }
+    if (sh && last.close > sh.price){
+      const a = age(sh.i, x => x.close > sh.price);
+      parts.push((tr.dir === 'bull' ? 'BOS bullish' : 'CHOCH bullish (pehle trend ' + (tr.dir === 'bear' ? 'bearish' : 'unclear') + ' tha)') +
+        ' — swing high ' + f(sh.price) + ' ke upar close (' + (a <= 5 ? 'taaza, ' + a + ' candle pehle' : 'purana, ' + a + ' candle pehle') + ')');
+    }
+    if (sl && last.close < sl.price){
+      const a = age(sl.i, x => x.close < sl.price);
+      parts.push((tr.dir === 'bear' ? 'BOS bearish' : 'CHOCH bearish (pehle trend ' + (tr.dir === 'bull' ? 'bullish' : 'unclear') + ' tha)') +
+        ' — swing low ' + f(sl.price) + ' ke neeche close (' + (a <= 5 ? 'taaza, ' + a + ' candle pehle' : 'purana, ' + a + ' candle pehle') + ')');
+    }
+    if (!parts.length) parts.push('Abhi koi structure break nahi (price swing range ke andar)');
+    return parts.join('; ');
+  }
+
+  // FVG scan (last 40 candles). status: fresh / partial / filled / inverted
+  function findFVGs(c, atr, lookback){
+    const out = [], n = c.length, start = Math.max(0, n - (lookback || 40));
+    const minGap = 0.1 * (atr || 0);
+    for (let i = start; i + 2 < n; i++){
+      const c1 = c[i], c3 = c[i+2], later = c.slice(i + 3);
+      if (c1.high < c3.low && (c3.low - c1.high) >= minGap){
+        const lo = c1.high, hi = c3.low; let st = 'fresh';
+        if (later.some(x => x.close < lo)) st = 'inverted';
+        else if (later.some(x => x.low <= lo)) st = 'filled';
+        else if (later.some(x => x.low < hi)) st = 'partial';
+        out.push({ dir: 'bull', lo: lo, hi: hi, i: i + 1, st: st });
+      } else if (c1.low > c3.high && (c1.low - c3.high) >= minGap){
+        const lo = c3.high, hi = c1.low; let st = 'fresh';
+        if (later.some(x => x.close > hi)) st = 'inverted';
+        else if (later.some(x => x.high >= hi)) st = 'filled';
+        else if (later.some(x => x.high > lo)) st = 'partial';
+        out.push({ dir: 'bear', lo: lo, hi: hi, i: i + 1, st: st });
+      }
+    }
+    return out;
+  }
+  function fvgText(fv, price, f){
+    const open = fv.filter(x => x.st === 'fresh' || x.st === 'partial').slice(-3).reverse();
+    const lines = open.map(x => (x.dir === 'bull' ? 'Bullish' : 'Bearish') + ' FVG ' + f(x.lo) + '–' + f(x.hi) +
+      (x.st === 'partial' ? ' (partially filled)' : ' (unfilled)') + (price >= x.lo && price <= x.hi ? ' [price abhi andar hai]' : ''));
+    return lines.length ? lines.join('; ') : 'koi unfilled FVG nahi';
+  }
+  function ifvgBpr(fv, f){
+    const res = [];
+    const inv = fv.filter(x => x.st === 'inverted').slice(-1)[0];
+    if (inv) res.push('IFVG (' + (inv.dir === 'bull' ? 'bearish' : 'bullish') + ') ' + f(inv.lo) + '–' + f(inv.hi) + ' — ' + (inv.dir === 'bull' ? 'bullish' : 'bearish') + ' FVG ko close ne invert kiya');
+    let bpr = null;
+    for (let a = fv.length - 1; a >= 0 && !bpr; a--) for (let b = a - 1; b >= 0 && !bpr; b--){
+      if (fv[a].dir !== fv[b].dir){
+        const lo = Math.max(fv[a].lo, fv[b].lo), hi = Math.min(fv[a].hi, fv[b].hi);
+        if (hi > lo) bpr = { lo: lo, hi: hi };
+      }
+    }
+    if (bpr) res.push('BPR zone ' + f(bpr.lo) + '–' + f(bpr.hi) + ' (bullish+bearish FVG overlap)');
+    return res.length ? res.join('; ') : 'IFVG/BPR nahi mila';
+  }
+
+  // Order blocks: displacement se pehle ki aakhri opposite candle
+  function findOBs(c, atr){
+    const n = c.length, res = { bull: null, bear: null };
+    if (!atr) return res;
+    for (let i = n - 4; i >= Math.max(0, n - 80) && (!res.bull || !res.bear); i--){
+      const o = c[i], nxt = c.slice(i + 1, i + 4);
+      if (!res.bull && o.close < o.open){
+        const imp = nxt.find(x => x.close > o.high && ((x.high - x.low) >= 1.5 * atr || (x.close - x.open) >= atr));
+        if (imp && !c.slice(i + 1).some(x => x.close < o.low)){
+          res.bull = { lo: o.low, hi: o.high, tested: c.slice(i + 4).some(x => x.low <= o.high), age: n - 1 - i };
+        }
+      }
+      if (!res.bear && o.close > o.open){
+        const imp = nxt.find(x => x.close < o.low && ((x.high - x.low) >= 1.5 * atr || (x.open - x.close) >= atr));
+        if (imp && !c.slice(i + 1).some(x => x.close > o.high)){
+          res.bear = { lo: o.low, hi: o.high, tested: c.slice(i + 4).some(x => x.high >= o.low), age: n - 1 - i };
+        }
+      }
+    }
+    return res;
+  }
+  function obText(ob, f){
+    const p = [];
+    if (ob.bull) p.push('Bullish OB ' + f(ob.bull.lo) + '–' + f(ob.bull.hi) + (ob.bull.tested ? ' (tested)' : ' (untested)') + ' [' + ob.bull.age + ' candle pehle]');
+    if (ob.bear) p.push('Bearish OB ' + f(ob.bear.lo) + '–' + f(ob.bear.hi) + (ob.bear.tested ? ' (tested)' : ' (untested)') + ' [' + ob.bear.age + ' candle pehle]');
+    return p.length ? p.join('; ') : 'valid OB nahi mila';
+  }
+
+  // Liquidity: equal highs/lows + taaza sweep
+  function liquidityText(c, atr, f){
+    const n = c.length, part = c.slice(Math.max(0, n - 80)), sw = swings(part, 2), tol = 0.15 * (atr || 0), out = [];
+    function eq(arr, name){
+      for (let a = arr.length - 1; a >= 1; a--) for (let b = a - 1; b >= 0; b--){
+        if (Math.abs(arr[a].price - arr[b].price) <= tol) return name + ' ~' + f((arr[a].price + arr[b].price) / 2) + ' (2 swings barabar — liquidity pool)';
+      }
+      return null;
+    }
+    const eh = eq(sw.highs, 'EQH (equal highs)'), el = eq(sw.lows, 'EQL (equal lows)');
+    if (eh) out.push(eh); if (el) out.push(el);
+    // sweep: aakhri 8 candles mein, pichle swing se aage wick lekin close wapas andar
+    const base = c.slice(0, n - 8), sb = swings(base.slice(-60), 2);
+    const ph = sb.highs[sb.highs.length - 1], pl = sb.lows[sb.lows.length - 1];
+    for (let i = n - 1; i >= n - 8; i--){
+      if (ph && c[i].high > ph.price && c[i].close < ph.price){ out.push('Buy-side liquidity sweep: ' + f(ph.price) + ' ke upar wick (high ' + f(c[i].high) + ') aur close wapas neeche [' + (n - 1 - i) + ' candle pehle] → bearish signal'); break; }
+      if (pl && c[i].low < pl.price && c[i].close > pl.price){ out.push('Sell-side liquidity sweep: ' + f(pl.price) + ' ke neeche wick (low ' + f(c[i].low) + ') aur close wapas upar [' + (n - 1 - i) + ' candle pehle] → bullish signal'); break; }
+    }
+    return out.length ? out.join('; ') : 'koi clear EQH/EQL ya taaza sweep nahi';
+  }
+
+  // Price action (aakhri closed candles)
+  function priceAction(c, f){
+    const n = c.length; if (n < 3) return 'data kam';
+    const a = c[n-2], b = c[n-1], out = [];
+    const body = x => Math.abs(x.close - x.open), rng = x => x.high - x.low;
+    if (a.close < a.open && b.close > b.open && b.close >= a.open && b.open <= a.close) out.push('Bullish engulfing');
+    if (a.close > a.open && b.close < b.open && b.close <= a.open && b.open >= a.close) out.push('Bearish engulfing');
+    const uw = b.high - Math.max(b.open, b.close), lw = Math.min(b.open, b.close) - b.low;
+    if (rng(b) > 0 && lw >= 2 * body(b) && lw >= 0.5 * rng(b)) out.push('Bullish rejection (lamba neeche ka wick)');
+    if (rng(b) > 0 && uw >= 2 * body(b) && uw >= 0.5 * rng(b)) out.push('Bearish rejection (lamba upar ka wick)');
+    const dirs = c.slice(-3).map(x => x.close > x.open ? 'bullish' : 'bearish');
+    out.push('aakhri 3 candles: ' + dirs.join(', '));
+    return out.join('; ');
+  }
+
+  // ---------- builders for each field ----------
+  function tfBlock(name, all, forming, price, f, opts){
+    // all = saari candles; forming = aakhri candle abhi ban rahi hai?
+    const cc = forming ? all.slice(0, -1) : all, live = all[all.length - 1];
+    if (cc.length < 20) return name + ': data kam (' + cc.length + ' candles)';
+    const atrS = atrSeries(cc), atr = atrS[atrS.length - 1] || 0;
+    const sw = swings(cc, 2), tr = trendOf(sw), lc = cc[cc.length - 1];
+    const sh = sw.highs[sw.highs.length - 1], sl = sw.lows[sw.lows.length - 1];
+    const fv = findFVGs(cc, atr, 40), ob = findOBs(cc, atr);
+    const L = [];
+    L.push(name + ' — aakhri closed candle O:' + f(lc.open) + ' H:' + f(lc.high) + ' L:' + f(lc.low) + ' C:' + f(lc.close) +
+      (forming ? ' | live (ban rahi) C:' + f(live.close) : ''));
+    L.push('Trend/Structure: ' + tr.txt + ' | last swing High ' + (sh ? f(sh.price) : 'NA') + ' / Low ' + (sl ? f(sl.price) : 'NA'));
+    L.push('Break: ' + breakInfo(cc, sw, tr, f));
+    L.push('FVG: ' + fvgText(fv, price, f));
+    L.push('Order Block: ' + obText(ob, f));
+    if (opts && opts.liq){ L.push('IFVG/BPR: ' + ifvgBpr(fv, f)); L.push('Liquidity: ' + liquidityText(cc, atr, f)); }
+    if (opts && opts.pa){ L.push('Price action (entry trigger): ' + priceAction(cc, f)); }
+    return L.join('\n');
+  }
+  function isForming(c, iv, now){ const l = c[c.length - 1]; return now < l.t + IV_MS[iv]; }
+  function lastClosed(c, iv, now){ return isForming(c, iv, now) ? c[c.length - 2] : c[c.length - 1]; }
+
+  function sessionNow(){
+    const h = new Date().getUTCHours();
+    if (h >= 21 && h < 23) return 'Late NY / Early Asian (dead zone)';
+    if (h >= 23 || h < 7) return 'Asian';
+    if (h < 12) return 'London';
+    if (h < 16) return 'London/NY Overlap';
+    return 'New York';
+  }
+
+  function fibText(h1, f, price){
+    const sw = swings(h1, 3), sh = sw.highs[sw.highs.length - 1], sl = sw.lows[sw.lows.length - 1];
+    if (!sh || !sl) return null;
+    const bullLeg = sl.i < sh.i, hi = sh.price, lo = sl.price, r = hi - lo;
+    const lv = x => bullLeg ? hi - x * r : lo + x * r;
+    const eq = lv(0.5), zone = bullLeg ? (price < eq ? 'DISCOUNT' : 'PREMIUM') : (price > eq ? 'PREMIUM' : 'DISCOUNT');
+    if ((bullLeg && price < lo) || (!bullLeg && price > hi)){
+      return 'H1 ' + (bullLeg ? 'bullish leg' : 'bearish leg') + ' ' + f(bullLeg ? lo : hi) + '→' + f(bullLeg ? hi : lo) +
+        ' — lekin price is leg ke ' + (bullLeg ? 'neeche' : 'upar') + ' nikal chuka hai, is leg ke Fib levels abhi relevant nahi (retracement: 0.5=' + f(eq) + ', 0.618=' + f(lv(0.618)) + ')';
+    }
+    return 'H1 ' + (bullLeg ? 'bullish leg' : 'bearish leg') + ' ' + f(bullLeg ? lo : hi) + '→' + f(bullLeg ? hi : lo) +
+      ' retracement: 0.382=' + f(lv(0.382)) + ' | 0.5=' + f(eq) + ' | 0.618=' + f(lv(0.618)) + ' | 0.705=' + f(lv(0.705)) + ' | 0.786=' + f(lv(0.786)) +
+      ' → price abhi ' + zone + ' zone mein (0.5 ' + (price < eq ? 'se neeche' : 'se upar') + ')';
+  }
+  function gannText(h4, f, price){
+    const part = h4.slice(-60); if (part.length < 10) return null;
+    const hi = Math.max.apply(null, part.map(x => x.high)), lo = Math.min.apply(null, part.map(x => x.low)), r = hi - lo;
+    if (!(r > 0)) return null;
+    const lv = []; for (let n = 0; n <= 8; n++) lv.push({ n: n, p: lo + (n / 8) * r });
+    const below = lv.filter(x => x.p <= price).pop(), above = lv.filter(x => x.p > price)[0];
+    return 'Gann 1/8 levels (H4 range ' + f(lo) + '–' + f(hi) + '): ' +
+      (below ? 'support ' + below.n + '/8 = ' + f(below.p) : 'support NA') + ' | ' +
+      (above ? 'resistance ' + above.n + '/8 = ' + f(above.p) : 'resistance NA') + ' | 50% (4/8) = ' + f(lo + r / 2);
+  }
+  function atrText(h1, m15, f){
+    function one(name, c){
+      const s = atrSeries(c); if (s.length < 5) return null;
+      const cur = s[s.length - 1], tail = s.slice(-20), avg = tail.reduce((a, b) => a + b, 0) / tail.length;
+      const pct = (cur / avg - 1) * 100;
+      return name + ' ATR(14) current ' + f(cur) + ' vs avg(20) ' + f(avg) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(0) + '% — ' + (pct > 15 ? 'expanding' : pct < -15 ? 'compressed' : 'normal') + ')';
+    }
+    return [one('H1', h1), one('M15', m15)].filter(Boolean).join(' | ') || null;
+  }
+  function volumeText(m15, forming){
+    const cc = forming ? m15.slice(0, -1) : m15, tail = cc.slice(-21);
+    if (tail.length < 10) return null;
+    const hasVol = tail.every(x => isFinite(x.volume) && x.volume > 0);
+    const val = x => hasVol ? x.volume : (x.high - x.low);
+    const cur = val(tail[tail.length - 1]), prev = tail.slice(0, -1), avg = prev.reduce((a, x) => a + val(x), 0) / prev.length;
+    if (!(avg > 0)) return null;
+    const ratio = cur / avg;
+    return hasVol
+      ? 'M15 volume current ' + cur.toFixed(0) + ' vs 20-avg ' + avg.toFixed(0) + ' (' + ratio.toFixed(2) + 'x)'
+      : 'REAL volume is feed par available nahi — PROXY: M15 candle range current vs 20-candle avg = ' + ratio.toFixed(2) + 'x (' + (ratio > 1.5 ? 'spike' : ratio < 0.6 ? 'dry-up' : 'normal') + '); ise asli volume na samjhein';
+  }
+  function hlText(c, iv, f, now){
+    const x = lastClosed(c, iv, now); if (!x) return null;
+    return 'High ' + f(x.high) + ' / Low ' + f(x.low) + ' (' + String(x.time).slice(0, 10) + ')';
+  }
+  function newsText(sym, now){
+    const ev = window.ffEvents; if (!Array.isArray(ev) || !ev.length) return null;
+    const parts = sym.split('/'); const cur = {}; parts.forEach(p => { cur[p] = 1; });
+    if (/^(XAU|XAG|BTC|ETH)$/.test(parts[0])) cur.USD = 1;
+    const rows = ev.filter(e => e && String(e.impact).toLowerCase() === 'high' && cur[String(e.country).toUpperCase()])
+      .map(e => ({ e: e, d: new Date(e.date).getTime() }))
+      .filter(x => isFinite(x.d) && x.d >= now - 3 * 3600000 && x.d <= now + 12 * 3600000)
+      .sort((a, b) => a.d - b.d);
+    if (!rows.length) return 'Agle 12 ghante / pichle 3 ghante mein ' + Object.keys(cur).join('/') + ' ki koi high-impact news nahi (ForexFactory feed)';
+    return rows.slice(0, 5).map(x => {
+      const m = Math.round((x.d - now) / 60000), when = m >= 0 ? 'ab se ' + m + ' min baad' : Math.abs(m) + ' min pehle aayi';
+      return '[' + when + '] ' + x.e.country + ' ' + x.e.title + ' — forecast ' + (x.e.forecast || 'NA') + ', previous ' + (x.e.previous || 'NA') + (x.e.actual ? ', actual ' + x.e.actual : '');
+    }).join('\n');
+  }
+
+  function setVal(id, v){
+    const el = $(id); if (!el || v == null || v === '') return false;
+    el.value = v;
+    try { el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+    return true;
+  }
+
+  // ---------- main ----------
+  window.atcAutoFill = async function(){
+    const btn = $('atcAutoFillBtn'), st = $('atcAutoFillStatus');
+    const say = m => { if (st) st.textContent = m; };
+    if (btn.disabled) return;
+    btn.disabled = true;
+    const filled = [], missing = [];
+    try {
+      const sel = $('atcSymbol').value, other = $('atcSymbolOther') ? $('atcSymbolOther').value : '';
+      const sym = tdSymbol(sel, other);
+      if (!sym){ say('❌ Pehle symbol chunein (ya "Other" mein likhein).'); return; }
+
+      const plan = [
+        ['5min', 150], ['15min', 150], ['30min', 150], ['1h', 150], ['4h', 120], ['1day', 12], ['1week', 6]
+      ];
+      const D = {};
+      for (let i = 0; i < plan.length; i++){
+        say('📡 ' + sym + ' ka live data aa raha hai: ' + plan[i][0] + ' (' + (i + 1) + '/' + plan.length + ')');
+        try { D[plan[i][0]] = await fetchCandles(sym, plan[i][0], plan[i][1], say); }
+        catch(e){
+          if (i === 0){ say('❌ ' + e.message + ' — symbol ya API check karein.'); return; }
+          missing.push(plan[i][0] + ' (' + e.message + ')');
+        }
+        if (i < plan.length - 1) await sleep(350);
+      }
+      const now = Date.now();
+      const m5 = D['5min'];
+      if (!m5 || m5.length < 20){ say('❌ Live candles nahi mili.'); return; }
+      const price = m5[m5.length - 1].close, f = mk(price);
+
+      // data purana to? (market band / weekend)
+      const lastEnd = m5[m5.length - 1].t + IV_MS['5min'];
+      const stale = now - lastEnd > 30 * 60000;
+
+      if (setVal('atcPrice', f(price))) filled.push('Price');
+      if (setVal('atcSession', sessionNow())) filled.push('Session');
+
+      const spec = [
+        ['4h', 'H4', 'atcH4', {}], ['1h', 'H1', 'atcH1', {}], ['30min', 'M30', 'atcM30', {}],
+        ['15min', 'M15', 'atcM15', { liq: true }], ['5min', 'M5', 'atcM5', { pa: true }]
+      ];
+      spec.forEach(s => {
+        const c = D[s[0]]; if (!c) return;
+        if (setVal(s[2], tfBlock(s[1], c, isForming(c, s[0], now), price, f, s[3]))) filled.push(s[1]);
+      });
+
+      // Key levels
+      const h1 = D['1h'] && (isForming(D['1h'], '1h', now) ? D['1h'].slice(0, -1) : D['1h']);
+      const h4 = D['4h'] && (isForming(D['4h'], '4h', now) ? D['4h'].slice(0, -1) : D['4h']);
+      const m15 = D['15min'];
+      if (h1 && h1.length > 20){
+        const sw = swings(h1, 3), sh = sw.highs[sw.highs.length - 1], sl = sw.lows[sw.lows.length - 1];
+        if (sh && sl && setVal('atcSwing', 'H1: High ' + f(sh.price) + ' / Low ' + f(sl.price))) filled.push('Swing');
+        const ft = fibText(h1, f, price); if (ft && setVal('atcFib', ft)) filled.push('Fib');
+      }
+      if (D['1day'] && setVal('atcPrevDay', hlText(D['1day'], '1day', f, now))) filled.push('Prev Day');
+      if (D['1week'] && setVal('atcPrevWeek', hlText(D['1week'], '1week', f, now))) filled.push('Prev Week');
+      if (h4){ const g = gannText(h4, f, price); if (g && setVal('atcGann', g)) filled.push('Gann'); }
+      if (h1 && m15){ const a = atrText(h1, m15.slice(0, isForming(m15, '15min', now) ? -1 : undefined), f); if (a && setVal('atcAtr', a)) filled.push('ATR'); }
+      if (m15){ const v = volumeText(m15, isForming(m15, '15min', now)); if (v && setVal('atcVolume', v)) filled.push('Volume'); }
+      const nw = newsText(sym, now);
+      if (nw && setVal('atcNews', nw)) filled.push('News');
+
+      say((stale ? '⚠️ Market abhi band lagti hai (aakhri candle: ' + m5[m5.length - 1].time + ' UTC) — data purana ho sakta hai.\n' : '') +
+        '✅ ' + sym + ' — ' + filled.length + ' fields bhar diye: ' + filled.join(', ') + '.' +
+        (missing.length ? '\n⚠️ Ye data nahi mila: ' + missing.join('; ') : '') +
+        '\nIntermarket (DXY/US10Y), M3, Account/Risk aap khud bharein, phir "Generate Committee Signal" dabayein.');
+    } catch(e){
+      say('❌ Auto-fill fail: ' + (e && e.message ? e.message : e));
+    } finally {
+      btn.disabled = false;
+    }
+  };
+})();
+</script>
 
 <script>
 (function(){
