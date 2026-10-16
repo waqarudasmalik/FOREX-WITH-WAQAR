@@ -7260,6 +7260,7 @@ INTEGRATION STEPS:
 
     const firstErr = (data.error && data.error.message) || '';
     if (!ATC_RETRYABLE_ERR.test(firstErr)) return data;   // asli error (jaise login/secret) — retry fayda nahi
+    if (/Sab Groq models fail/i.test(firstErr)) return data; // proxy saare Groq models pehle hi try kar chuka — dobara bhejne se sirf limit zaya hogi
 
     // Jo models pehle fail ho chuke, unhein dobara na try karein
     const tried = [body.model, body.fallback_model].filter(Boolean);
