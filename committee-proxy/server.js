@@ -39,9 +39,13 @@ const PROJECT_ID = E.FIREBASE_PROJECT_ID || 'forex-with-waqar';
 const ADMIN_EMAILS = (E.ADMIN_EMAILS || 'ghulammurtaza3334m@gmail.com,waqarudasmalik11@gmail.com')
   .split(',').map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
 const ORIGINS = (E.ALLOWED_ORIGINS || '*').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+// Groq models ki pasandeeda tarteeb (pehla = sab se pehle try hota hai). Retire ho chuke models hata diye gaye hain.
+// NOTE: Railway Variables mein agar ALLOWED_MODELS set hai to wo ye list override kar deta hai — usay delete kar dein.
 const ALLOWED_GROQ = (E.ALLOWED_MODELS ||
-  'llama-3.3-70b-versatile,openai/gpt-oss-120b,qwen/qwen3-32b,meta-llama/llama-4-scout-17b-16e-instruct')
+  'openai/gpt-oss-120b,qwen/qwen3.6-27b,openai/gpt-oss-20b,llama-3.1-8b-instant')
   .split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+const NOT_CHAT = /whisper|tts|guard|orpheus|playai|embed|compound|safeguard/i;
+const GROQ_CONCURRENCY = parseInt(E.GROQ_CONCURRENCY, 10) || 2;   // free tier ki TPM limit se bachne ke liye
 
 const BASE = {
   groq: E.GROQ_BASE || 'https://api.groq.com/openai/v1',
@@ -175,16 +179,66 @@ function splitMessages(messages) {
   const rest = messages.filter(function (m) { return m.role !== 'system'; });
   return { sys: sys, rest: rest };
 }
+// ---------- Groq: live model list + concurrency limit + self-healing retry ----------
+const sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+let liveGroq = null, liveGroqAt = 0;          // Groq abhi jo chat models serve kar raha hai
+const deadModels = new Map();                  // model -> kab 404 mila (30 min skip)
+async function refreshLiveGroq(key) {
+  if (!key || Date.now() - liveGroqAt < 60000) return;   // 1 minute se pehle dobara nahi
+  liveGroqAt = Date.now();
+  try {
+    const r = await fetchJson(BASE.groq + '/models', { headers: { Authorization: 'Bearer ' + key } }, 10000);
+    if (r.ok && r.json && Array.isArray(r.json.data)) {
+      liveGroq = r.json.data.filter(function (m) { return m.active !== false; })
+        .map(function (m) { return m.id; }).filter(function (id) { return !NOT_CHAT.test(id); });
+      console.log('Groq live models (' + liveGroq.length + '): ' + liveGroq.join(', '));
+    }
+  } catch (e) { console.warn('Groq model list refresh fail: ' + e.message); }
+}
+function okModelId(id) { return typeof id === 'string' && /^[A-Za-z0-9._\-\/]{3,80}$/.test(id) && !NOT_CHAT.test(id); }
+function groqOrder(preferred) {
+  const out = [];
+  function add(id) {
+    if (!okModelId(id) || out.indexOf(id) !== -1) return;
+    if (liveGroq && liveGroq.indexOf(id) === -1) return;                       // Groq par ab hai hi nahi
+    const d = deadModels.get(id); if (d && Date.now() - d < 30 * 60000) return; // haal hi mein 404 mila
+    out.push(id);
+  }
+  add(preferred);
+  ALLOWED_GROQ.forEach(add);
+  (liveGroq || []).forEach(add);
+  return out.slice(0, 5);
+}
+let groqActive = 0; const groqWaiters = [];
+async function groqSlot() {
+  if (groqActive < GROQ_CONCURRENCY) { groqActive++; return; }
+  await new Promise(function (r) { groqWaiters.push(r); });
+}
+function groqRelease() { const n = groqWaiters.shift(); if (n) n(); else groqActive--; }
+
 async function callGroq(model, messages, maxTokens, temp, key) {
-  const r = await fetchJson(BASE.groq + '/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-    body: JSON.stringify({ model: model, messages: messages, max_tokens: maxTokens, temperature: temp })
-  });
-  if (!r.ok) { const e = upstreamErr('Groq', r); e.status = r.status; throw e; }
-  const t = cleanText(r.json && r.json.choices && r.json.choices[0] && r.json.choices[0].message && r.json.choices[0].message.content);
-  if (!t) throw new Error('Groq khaali response');
-  return t;
+  await groqSlot();
+  try {
+    const body = { model: model, messages: messages, temperature: temp };
+    if (/gpt-oss/i.test(model)) {            // reasoning model: thinking ke liye extra tokens, warna content khaali aa sakta hai
+      body.max_completion_tokens = maxTokens + 800;
+      body.reasoning_effort = 'low';
+    } else body.max_tokens = maxTokens;
+    const r = await fetchJson(BASE.groq + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) {
+      const e = upstreamErr('Groq', r); e.status = r.status;
+      const ra = parseFloat(r.headers && r.headers.get && r.headers.get('retry-after'));
+      if (isFinite(ra)) e.retryAfter = ra;
+      throw e;
+    }
+    const t = cleanText(r.json && r.json.choices && r.json.choices[0] && r.json.choices[0].message && r.json.choices[0].message.content);
+    if (!t) throw new Error('Groq khaali response');
+    return t;
+  } finally { groqRelease(); }
 }
 async function callOpenAI(messages, maxTokens, temp, key) {
   async function once(withTemp) {
@@ -235,13 +289,33 @@ async function callGemini(messages, maxTokens, temp, key) {
   return t;
 }
 async function groqWithRetry(preferred, messages, maxTokens, temp, key) {
-  const order = [preferred].concat(ALLOWED_GROQ.filter(function (m) { return m !== preferred; })).slice(0, 3);
-  let lastErr;
+  if (!liveGroq) await refreshLiveGroq(key);
+  const errs = [];
+  let order = groqOrder(preferred), refreshed = false;
   for (let i = 0; i < order.length; i++) {
-    try { return { text: await callGroq(order[i], messages, maxTokens, temp, key), model: order[i] }; }
-    catch (e) { lastErr = e; if (e.status && e.status < 429 && e.status !== 404 && e.status !== 400) break; }
+    const model = order[i];
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try { return { text: await callGroq(model, messages, maxTokens, temp, key), model: model }; }
+      catch (e) {
+        const msg = String(e.message || e).replace(/^Groq HTTP \d+: /, '').slice(0, 110);
+        if (e.status === 429 && attempt === 0) {              // rate limit: thora ruk kar usi model ko dobara
+          const wait = Math.min((e.retryAfter || 6) + 0.5, 25) * 1000;
+          console.warn('Groq 429 (' + model + ') — ' + Math.round(wait / 1000) + 's ruk kar retry');
+          await sleep(wait); continue;
+        }
+        errs.push(model + ': ' + (e.status ? 'HTTP ' + e.status + ' ' : '') + msg);
+        if (e.status === 404 || e.status === 400) {
+          if (e.status === 404) deadModels.set(model, Date.now());
+          if (!refreshed) { refreshed = true; liveGroqAt = 0; await refreshLiveGroq(key);
+            const more = groqOrder(preferred).filter(function (m) { return order.indexOf(m) === -1; });
+            order = order.concat(more).slice(0, 6); }
+        }
+        break;   // agla model
+      }
+    }
   }
-  throw lastErr;
+  const err = new Error('Sab Groq models fail — ' + (errs.join(' | ') || 'koi model available nahi'));
+  throw err;
 }
 
 // ---------- validation ----------
@@ -284,8 +358,8 @@ async function handleAI(req, res) {
   const maxTokens = Math.max(50, Math.min(parseInt(body.max_tokens, 10) || 900, MAX_TOKENS_CAP));
   const temp = Math.max(0, Math.min(Number(body.temperature) || 0.5, 1.2));
   const provider = ['openai', 'anthropic', 'gemini', 'groq'].indexOf(body.provider) !== -1 ? body.provider : 'groq';
-  const groqPref = ALLOWED_GROQ.indexOf(body.model) !== -1 ? body.model : null;
-  const fbPref = ALLOWED_GROQ.indexOf(body.fallback_model) !== -1 ? body.fallback_model : ALLOWED_GROQ[0];
+  const groqPref = okModelId(body.model) ? body.model : null;
+  const fbPref = okModelId(body.fallback_model) ? body.fallback_model : ALLOWED_GROQ[0];
   const meta = { provider_used: provider, model_used: '', fallback: false, fallback_reason: '' };
 
   try {
@@ -317,7 +391,7 @@ async function handleAI(req, res) {
     return send(req, res, 200, { choices: [{ message: { role: 'assistant', content: text } }], _meta: meta });
   } catch (e) {
     console.error('[' + new Date().toISOString() + '] AI error: ' + e.message);
-    return send(req, res, 502, errObj('AI provider error: ' + e.message.slice(0, 200)));
+    return send(req, res, 502, errObj('AI provider error: ' + e.message.slice(0, 700)));
   }
 }
 
@@ -328,7 +402,8 @@ const server = http.createServer(async function (req, res) {
     if (req.method === 'GET' && url === '/health') {
       const K = keys();
       return send(req, res, 200, { ok: true, auth: REQUIRE_AUTH,
-        providers: { groq: !!K.groq, openai: !!K.openai, anthropic: !!K.anthropic, gemini: !!K.gemini } });
+        providers: { groq: !!K.groq, openai: !!K.openai, anthropic: !!K.anthropic, gemini: !!K.gemini },
+        groq_live_models: liveGroq, groq_order: groqOrder(null) });
     }
     if (req.method === 'POST' && url === '/api/ai') return await handleAI(req, res);
     return send(req, res, 404, errObj('Not found'));
@@ -342,5 +417,6 @@ server.listen(PORT, HOST, function () {
   console.log('Multi-AI Committee proxy chal raha hai -> http://' + HOST + ':' + PORT);
   console.log('Keys: groq=' + !!K.groq + ' openai=' + !!K.openai + ' anthropic=' + !!K.anthropic + ' gemini=' + !!K.gemini + ' | auth=' + REQUIRE_AUTH);
   if (!K.groq) console.warn('WARNING: GROQ_API_KEY set nahi — committee chal nahi sakegi.');
+  else { refreshLiveGroq(K.groq); setInterval(function () { liveGroqAt = 0; refreshLiveGroq(keys().groq); }, 6 * 3600000).unref(); }
   if (REQUIRE_AUTH && ORIGINS.indexOf('*') !== -1) console.warn('NOTE: ALLOWED_ORIGINS=* hai; deploy par apni site ka origin daalein.');
 });
