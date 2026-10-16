@@ -6819,7 +6819,19 @@ INTEGRATION STEPS:
   // Shared helper — committee, trailing-SL aur AI chat widget sab isi ko use karte hain.
   // Body: { provider, model, fallback_model, messages, max_tokens, temperature }
   window.FW_GROQ_PROXY_URL = ATC_PROXY_URL;
-  window.fwGroqProxy = async function(body){
+  // ---- SELF-HEALING: Groq kabhi koi model band (deprecate) kar de to ye apne aap agla model try karta hai ----
+  // Is list ko sirf yahin edit karna hai (pehla = sab se pasandeeda). Groq ki taaza list:
+  // https://console.groq.com/docs/models
+  const ATC_GROQ_MODEL_CHAIN = [
+    'openai/gpt-oss-120b',
+    'qwen/qwen3.6-27b',
+    'openai/gpt-oss-20b',
+    'llama-3.1-8b-instant'
+  ];
+  // In errors ka matlab: model band / available nahi / rate-limit / server busy => agla model try karo
+  const ATC_RETRYABLE_ERR = /does not exist|do not have access|decommission|deprecat|model[_ ]not[_ ]found|no longer (supported|available)|not supported|HTTP 404|rate.?limit|HTTP 429|too many requests|overloaded|over capacity|HTTP 50\d|timed? ?out|khaali response/i;
+
+  async function atcProxyOnce(body){
     const headers = { 'Content-Type': 'application/json' };
     if (ATC_PROXY_SECRET) headers['x-proxy-secret'] = ATC_PROXY_SECRET;
     // Firebase login token: proxy verify karta hai ke user logged-in + approved hai.
@@ -6832,7 +6844,39 @@ INTEGRATION STEPS:
       headers: headers,
       body: JSON.stringify(body)
     });
-    return await res.json();
+    let data;
+    try { data = await res.json(); }
+    catch(e){ data = { error: { message: 'Proxy ka jawab samajh nahi aaya (HTTP ' + res.status + ')' } }; }
+    if (!res.ok && !data.error) data.error = { message: 'HTTP ' + res.status };
+    return data;
+  }
+
+  window.fwGroqProxy = async function(body){
+    let data = await atcProxyOnce(body);
+    if (!data || !data.error) return data;
+
+    const firstErr = (data.error && data.error.message) || '';
+    if (!ATC_RETRYABLE_ERR.test(firstErr)) return data;   // asli error (jaise login/secret) — retry fayda nahi
+
+    // Jo models pehle fail ho chuke, unhein dobara na try karein
+    const tried = [body.model, body.fallback_model].filter(Boolean);
+    for (let i = 0; i < ATC_GROQ_MODEL_CHAIN.length; i++){
+      const next = ATC_GROQ_MODEL_CHAIN[i];
+      if (tried.indexOf(next) !== -1) continue;
+      tried.push(next);
+      console.warn('[AI] "' + (body.model || 'default') + '" fail hua (' + firstErr + ') -> Groq model "' + next + '" try ho raha hai');
+      // Seedha Groq par bhejo taake purani/band model ID beech mein na aaye
+      const retryBody = Object.assign({}, body, { provider: 'groq', model: next, fallback_model: next });
+      const d2 = await atcProxyOnce(retryBody);
+      if (d2 && !d2.error){
+        d2._meta = Object.assign({}, d2._meta || {}, { fallback: true, provider_used: 'groq', model_used: next, auto_recovered: true });
+        return d2;
+      }
+      const e2 = (d2 && d2.error && d2.error.message) || '';
+      if (!ATC_RETRYABLE_ERR.test(e2)) return d2;         // koi aur masla (login wagera) — wahi dikha do
+      data = d2;
+    }
+    return data;   // saare Groq models fail — aakhri error dikhao
   };
 
   // ===== REAL 4-AI COMMITTEE: ChatGPT / Claude / Gemini / Qoder =====
@@ -6847,7 +6891,7 @@ INTEGRATION STEPS:
       emoji: '🟢',
       provider: 'openai',
       model: 'gpt-4o-mini',
-      fallbackModel: 'llama-3.3-70b-versatile',
+      fallbackModel: 'openai/gpt-oss-120b',
       lens: 'You are ChatGPT — the committee\'s Smart Money Concepts & ICT specialist. Focus on market structure (BOS/CHOCH), order blocks, fair value gaps (FVG/IFVG), liquidity sweeps, premium/discount zones and the multi-timeframe narrative. Be precise about WHERE institutions likely enter and where resting liquidity sits. You reason step-by-step and explain your logic clearly.'
     },
     {
@@ -6855,8 +6899,8 @@ INTEGRATION STEPS:
       name: 'Claude',
       emoji: '🟠',
       provider: 'anthropic',
-      model: 'claude-3-5-haiku-20241022',
-      fallbackModel: 'qwen/qwen3-32b',
+      model: 'claude-haiku-5-5',
+      fallbackModel: 'qwen/qwen3.6-27b',
       lens: 'You are Claude — the committee\'s disciplined risk officer and careful reasoner. Focus on risk-to-reward quality, position sizing, drawdown limits, session/volatility context, high-impact news risk and intermarket correlation (DXY, US10Y, correlated pairs). You are cautious, you flag weak evidence, and you veto trades with bad timing or broken risk parameters. You are honest about uncertainty and never overstate a setup.'
     },
     {
@@ -6873,8 +6917,8 @@ INTEGRATION STEPS:
       name: 'Qoder',
       emoji: '🟣',
       provider: 'groq',
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      fallbackModel: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'openai/gpt-oss-20b',
+      fallbackModel: 'openai/gpt-oss-20b',
       lens: 'You are Qoder — the committee\'s contrarian challenger. Your job is to stress-test the other three: hunt for the trap, the fake-out, the liquidity grab behind the obvious level, and the reason the crowd is wrong. If the consensus looks too clean, say why it might fail. Only agree when the evidence genuinely survives your skepticism.'
     }
   ];
@@ -8231,7 +8275,7 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
       const failed = round1.find(function(r){ return r.error; });
       if (failed){
         output.textContent = '❌ Committee start nahi ho saki:\n\n' + failed.error +
-          '\n\nYe aksar tab hota hai jab (a) proxy server na chal raha ho (cd groq-proxy && node server.js), (b) .env mein GROQ_API_KEY valid na ho, ya (c) koi model ID available na ho.';
+          '\n\nYe aksar tab hota hai jab (a) proxy server na chal raha ho (cd groq-proxy && node server.js), (b) .env mein GROQ_API_KEY valid na ho, ya (c) Groq ne koi model band kar diya ho (ab site khud agla model try karti hai — agar phir bhi error aaye to proxy ka server.js update karein).';
         atcSetStatus('Error — proxy / API key check karein.');
         return;
       }
