@@ -6698,6 +6698,8 @@ INTEGRATION STEPS:
     </div>
 
     <button class="atc-generate-btn" id="atcGenerateBtn" onclick="atcGenerateSignal()">🧠 Generate Committee Signal</button>
+    <button class="atc-generate-btn" id="atcScalpBtn" onclick="atcScalpSignal()" style="background:linear-gradient(135deg,#f59e0b,#ea580c);margin-top:10px;">⚡ Generate Scalping Signal</button>
+    <div style="font-size:11.5px;color:#94a3b8;margin:6px 0 4px;line-height:1.5;">⚡ Scalping: chhota SL/TP, M5 trigger, hold ~3–30 min. 4 mein se kam az kam 3 AI muttafiq honi chahiye (conviction ≥ 65, grade A/A+). Dead-zone session ya news ke qareeb signal nahi milta.</div>
 
     <div class="atc-analysts-grid" id="atcAnalystsGrid" style="display:none;"></div>
 
@@ -7227,9 +7229,8 @@ INTEGRATION STEPS:
   // https://console.groq.com/docs/models
   const ATC_GROQ_MODEL_CHAIN = [
     'openai/gpt-oss-120b',
-    'qwen/qwen3.6-27b',
-    'openai/gpt-oss-20b',
-    'llama-3.1-8b-instant'
+    'qwen/qwen3.8-27b',
+    'openai/gpt-oss-20b'
   ];
   // In errors ka matlab: model band / available nahi / rate-limit / server busy => agla model try karo
   const ATC_RETRYABLE_ERR = /does not exist|do not have access|decommission|deprecat|model[_ ]not[_ ]found|no longer (supported|available)|not supported|HTTP 404|rate.?limit|HTTP 429|too many requests|overloaded|over capacity|HTTP 50\d|timed? ?out|khaali response/i;
@@ -7304,7 +7305,7 @@ INTEGRATION STEPS:
       emoji: '🟠',
       provider: 'anthropic',
       model: 'claude-haiku-5-5',
-      fallbackModel: 'qwen/qwen3.6-27b',
+      fallbackModel: 'qwen/qwen3.8-27b',
       lens: 'You are Claude — the committee\'s disciplined risk officer and careful reasoner. Focus on risk-to-reward quality, position sizing, drawdown limits, session/volatility context, high-impact news risk and intermarket correlation (DXY, US10Y, correlated pairs). You are cautious, you flag weak evidence, and you veto trades with bad timing or broken risk parameters. You are honest about uncertainty and never overstate a setup.'
     },
     {
@@ -8633,6 +8634,7 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
     const badge = document.getElementById('atcDirBadge');
 
     btn.disabled = true;
+    const _sb = document.getElementById('atcScalpBtn'); if (_sb) _sb.disabled = true;
     btn.textContent = '🧠 Committee debate kar rahi hai...';
     card.style.display = 'block';
     card.className = 'atc-live-card notrade';
@@ -8785,7 +8787,262 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
       atcSetStatus('Connection error aaya — dobara koshish karein.');
     } finally {
       btn.disabled = false;
+      const _sb2 = document.getElementById('atcScalpBtn'); if (_sb2) _sb2.disabled = false;
       btn.textContent = '🧠 Generate Committee Signal';
+    }
+  };
+
+  // =====================================================================
+  // ⚡ SCALPING SIGNAL — tez, chhote SL/TP wala committee signal (hold ~3-30 min)
+  // Wohi 4 AI seats, lekin scalping rules ke sath. Gate: 4 mein se kam az kam 3 muttafiq,
+  // conviction >= 65, grade A/A+, aur levels tight + R:R >= 1.2.
+  // =====================================================================
+  const ATC_SCALP_MIN_CONV = 65;
+  const ATC_SCALP_MIN_AGREE = 3;
+  const ATC_SCALP_MIN_RR = 1.2;
+  const ATC_SCALP_MAX_DEBATE_ROUNDS = 1;
+  const ATC_SCALP_MAX_SL_PCT = 0.5;     // SL price ka 0.5% se zyada door nahi
+  const ATC_SCALP_MAX_ENTRY_GAP_PCT = 0.3;
+
+  const ATC_SCALP_RULES = [
+    '===== SCALPING MODE (yeh scalp signal hai, swing nahi) =====',
+    'Trade type: SCALP — expected holding time 3 se 30 minute.',
+    'Timeframes: H4/H1 sirf bias ke liye. Setup M15 par, ENTRY TRIGGER M5 par (M3 mile to wo bhi).',
+    'SCALP RULES:',
+    '- SL TIGHT hona chahiye: M5/M15 ATR ke andar (takreeban 0.5x se 1.5x ATR). Door ka SL = scalp nahi = NO TRADE.',
+    '- TP nazdeeki liquidity / opposing level / FVG par rakho. Minimum R:R 1.2.',
+    '- Entry current price ke bohot nazdeek honi chahiye (limit order dur nahi).',
+    '- Valid trigger chahiye: liquidity sweep + rejection, engulfing, ya FVG/OB retest ke baad M5 confirmation.',
+    '- NO TRADE agar: price range ke beech mein hai (kisi level par nahi), ATR compressed hai, high-impact news 15 minute ke andar hai, ya session dead-zone hai.',
+    '- H1/H4 bias ke KHILAF scalp tabhi lo jab M15 par saaf CHOCH ho; warna NO TRADE.',
+    '- Data mein jo NOT PROVIDED hai wo invent nahi karna.',
+    'Scalp grading: A = tradable scalp, A+ = textbook scalp (sab confirmations maujood). B ya kam = trade nahi.'
+  ].join('\n');
+
+  const ATC_SCALP_SYSTEM_ADDON = [
+    '',
+    '===== SCALPING OVERRIDE =====',
+    'Aaj tumhein SCALPING signal dena hai. Upar ke format mein koi tabdeeli nahi (DIRECTION/CONVICTION/GRADE/ENTRY/SL/TP/KEY POINTS).',
+    'KEY POINTS ki pehli line "TRIGGER: <M5 trigger kya hai>" ho, doosri "HOLD: <andaza kitne minute>".',
+    'SL tight rakho (ATR ke andar) aur TP nazdeeki level par — swing jaise bade targets mat do.',
+    'Agar scalp ka saaf trigger nahi hai to NO TRADE do. Forced scalp kabhi nahi.'
+  ].join('\n');
+
+  function atcScalpSystemPrompt(a){ return atcAnalystSystemPrompt(a) + '\n' + ATC_SCALP_SYSTEM_ADDON; }
+  function atcScalpBaseData(){ return atcBuildUserMessage() + '\n\n' + ATC_SCALP_RULES; }
+
+  // AI ko bulaye baghair rok dene wale hard checks
+  function atcScalpPreChecks(){
+    const miss = [['atcPrice','Current Price'],['atcM5','M5'],['atcM15','M15']]
+      .filter(function(n){ return atcVal(n[0]) === 'NOT PROVIDED'; }).map(function(n){ return n[1]; });
+    if (miss.length) return { ok: false, msg: 'DATA INSUFFICIENT — NO TRADE\n\nScalping ke liye ye zaroori fields khali hain: ' + miss.join(', ') +
+      '\n\n"📡 Live Chart se Auto-Fill" dabayein ya khud bharein, phir dobara koshish karein.' };
+    const sess = atcVal('atcSession');
+    if (/dead\s*zone/i.test(sess)) return { ok: false, msg: 'NO TRADE — SESSION DEAD ZONE\n\nSession: ' + sess +
+      '\n\nIs waqt liquidity bohot kam hoti hai aur spread wide — scalping ka waqt nahi. London ya New York session mein dobara koshish karein.' };
+    const news = atcVal('atcNews'); let m, soon = null;
+    const reAfter = /\[ab se (\d+) min baad\]/g, reBefore = /\[(\d+) min pehle aayi\]/g;
+    while ((m = reAfter.exec(news)) !== null){ if (parseInt(m[1], 10) <= 15) soon = 'high-impact news ' + m[1] + ' minute mein aa rahi hai'; }
+    while ((m = reBefore.exec(news)) !== null){ if (parseInt(m[1], 10) <= 10) soon = 'high-impact news ' + m[1] + ' minute pehle aayi hai (volatility abhi bhi zyada)'; }
+    if (soon) return { ok: false, msg: 'NO TRADE — NEWS RISK\n\n' + soon + '.\nScalping ke liye news ke aas paas ka waqt khatarnak hota hai (spread/slippage). News guzar jane ke baad dobara koshish karein.' };
+    return { ok: true };
+  }
+
+  function atcScalpLevels(agree, dir){
+    const f = function(k){ return agree.map(function(o){ return atcNum(o.op[k]); }); };
+    const E = f('entry'), S = f('sl'), T = f('tp');
+    if ([E, S, T].some(function(a){ return a.some(function(x){ return !isFinite(x); }); }))
+      return { ok: false, why: 'muttafiq analysts mein se kisi ne Entry/SL/TP ka number nahi diya' };
+    const entry = atcMedian(E), sl = atcMedian(S), tp = atcMedian(T);
+    if (!(entry > 0)) return { ok: false, why: 'Entry level ghalat hai' };
+    const spread = (Math.max.apply(null, E) - Math.min.apply(null, E)) / Math.abs(entry) * 100;
+    if (spread > ATC_SCALP_MAX_ENTRY_GAP_PCT) return { ok: false, why: 'analysts ke Entry levels aapas mein bohot alag hain (' + spread.toFixed(2) + '%)' };
+    const okSide = dir === 'BUY' ? (sl < entry && entry < tp) : (sl > entry && entry > tp);
+    if (!okSide) return { ok: false, why: 'SL/Entry/TP ki tarteeb ' + dir + ' ke liye ghalat hai' };
+    const risk = Math.abs(entry - sl), reward = Math.abs(tp - entry);
+    const slPct = risk / entry * 100;
+    if (slPct > ATC_SCALP_MAX_SL_PCT) return { ok: false, why: 'SL entry se ' + slPct.toFixed(2) + '% door hai — scalp ke liye bohot bada (max ' + ATC_SCALP_MAX_SL_PCT + '%)' };
+    const rr = reward / risk;
+    if (rr < ATC_SCALP_MIN_RR) return { ok: false, why: 'Risk:Reward ' + rr.toFixed(2) + ' hai (scalp ke liye kam az kam ' + ATC_SCALP_MIN_RR + ' chahiye)' };
+    const cpEl = document.getElementById('atcPrice');
+    const cp = cpEl ? atcNum(cpEl.value) : NaN;
+    if (isFinite(cp) && cp > 0 && Math.abs(entry - cp) / cp * 100 > ATC_SCALP_MAX_ENTRY_GAP_PCT)
+      return { ok: false, why: 'Entry current price se ' + (Math.abs(entry - cp) / cp * 100).toFixed(2) + '% door hai (scalp mein max ' + ATC_SCALP_MAX_ENTRY_GAP_PCT + '%)' };
+    const d = entry < 50 ? 5 : 2;
+    return { ok: true, entry: entry.toFixed(d), sl: sl.toFixed(d), tp: tp.toFixed(d), rr: rr.toFixed(2), slPct: slPct.toFixed(2) };
+  }
+
+  // Faisla (pure function — sirf ops dekh kar)
+  function atcScalpDecide(ops){
+    const N = ops.length, tally = { BUY: 0, SELL: 0, 'NO TRADE': 0 };
+    ops.forEach(function(o){ tally[o.op.dir] = (tally[o.op.dir] || 0) + 1; });
+    const tallyStr = 'BUY ' + tally.BUY + ' / SELL ' + tally.SELL + ' / NO TRADE ' + tally['NO TRADE'];
+    const dir = tally.BUY >= ATC_SCALP_MIN_AGREE ? 'BUY' : (tally.SELL >= ATC_SCALP_MIN_AGREE ? 'SELL' : null);
+    const base = { tallyStr: tallyStr, agreeCount: 0, dissent: [], levels: null };
+    if (!dir){
+      if (tally['NO TRADE'] >= ATC_SCALP_MIN_AGREE)
+        return Object.assign(base, { finalDir: 'NO TRADE', reason: 'Committee ki aksariyat (' + tally['NO TRADE'] + '/' + N + ') NO TRADE kehti hai — abhi koi saaf scalp setup nahi. Intezar karein.' });
+      return Object.assign(base, { finalDir: 'NO TRADE / WAIT FOR CLARITY', reason: 'Committee mein ' + ATC_SCALP_MIN_AGREE + '/' + N + ' ka agreement nahi hua (vote: ' + tallyStr + '). Scalp ke liye majority zaroori hai — forced trade nahi.' });
+    }
+    const agree = ops.filter(function(o){ return o.op.dir === dir; });
+    const dis = ops.filter(function(o){ return o.op.dir !== dir; });
+    const weak = agree.filter(function(o){ return o.op.conv < ATC_SCALP_MIN_CONV || !/^A\+?$/.test(o.op.grade); });
+    const info = Object.assign(base, { agreeCount: agree.length, dissent: dis });
+    if (weak.length)
+      return Object.assign(info, { finalDir: 'NO TRADE / WAIT FOR CLARITY', reason: dir + ' par ' + agree.length + '/' + N + ' muttafiq hain lekin ' + weak.map(function(o){ return o.analyst.name; }).join(', ') +
+        ' ka conviction ya grade scalp ke liye kam hai (conviction ≥ ' + ATC_SCALP_MIN_CONV + ' aur grade A/A+ chahiye). WAIT.' });
+    const lv = atcScalpLevels(agree, dir);
+    if (!lv.ok) return Object.assign(info, { finalDir: 'NO TRADE / WAIT FOR CLARITY', reason: agree.length + '/' + N + ' ' + dir + ' par muttafiq hain lekin scalp levels qabil-e-aitbar nahi: ' + lv.why + ' — forced trade nahi.' });
+    return Object.assign(info, { finalDir: dir, levels: lv,
+      reason: agree.length + '/' + N + ' AI ' + dir + ' par muttafiq hain, sab ka conviction ≥ ' + ATC_SCALP_MIN_CONV + ' aur grade A/A+, aur levels tight + R:R ≥ ' + ATC_SCALP_MIN_RR + ' hain. Scalp gate PASS.' });
+  }
+
+  function atcBuildScalpText(ops, dec, roundsHeld){
+    const L = [];
+    L.push('════════════════════════════════════');
+    L.push('⚡ AI TRADING COMMITTEE — SCALPING SIGNAL');
+    L.push('   (4 seats ne scalp rules ke sath independently analyze kiya)');
+    L.push('════════════════════════════════════');
+    L.push('');
+    L.push('SCALP SIGNAL: ' + dec.finalDir);
+    L.push('');
+    const liveN = ops.filter(function(o){ return !(o.meta && o.meta.fallback); }).length;
+    L.push('ENGINE: ' + liveN + '/' + ops.length + ' seats apne asli provider par, ' + (ops.length - liveN) + ' Groq fallback par');
+    L.push('');
+    L.push('COMMITTEE VOTE:');
+    ops.forEach(function(o){
+      const used = (o.meta && o.meta.model_used) ? o.meta.model_used : o.analyst.model;
+      L.push(' • ' + o.analyst.name + ' [' + used + ']');
+      L.push('   → ' + o.op.dir + ' | conviction ' + o.op.conv + '/100 | grade ' + o.op.grade +
+             ' | E:' + (o.op.entry || 'n/a') + ' SL:' + (o.op.sl || 'n/a') + ' TP:' + (o.op.tp || 'n/a'));
+    });
+    L.push('');
+    L.push('SCALP GATE:');
+    L.push(' • Vote: ' + dec.tallyStr + '  (kam az kam ' + ATC_SCALP_MIN_AGREE + '/' + ops.length + ' muttafiq chahiye)');
+    L.push(' • Conviction ≥ ' + ATC_SCALP_MIN_CONV + ' aur grade A/A+ (muttafiq analysts ka)');
+    L.push(' • Tight SL (≤ ' + ATC_SCALP_MAX_SL_PCT + '% price) aur R:R ≥ ' + ATC_SCALP_MIN_RR);
+    L.push(' • Debate rounds: ' + roundsHeld + ' (max ' + ATC_SCALP_MAX_DEBATE_ROUNDS + ')');
+    L.push('');
+    if (dec.levels){
+      L.push('SCALP PLAN (muttafiq analysts ke levels ka median):');
+      L.push(' Entry : ' + dec.levels.entry);
+      L.push(' SL    : ' + dec.levels.sl + '  (entry se ' + dec.levels.slPct + '%)');
+      L.push(' TP    : ' + dec.levels.tp);
+      L.push(' R:R   : ' + dec.levels.rr);
+      L.push(' Expected hold: takreeban 3–30 minute');
+      L.push(' Management (advisory): +1R par SL breakeven par le jana aam scalping rule hai; setup toot jaye to jaldi nikal jayen.');
+      L.push('');
+      if (dec.dissent && dec.dissent.length){
+        L.push('⚠️ MUKHALIF SEAT: ' + dec.dissent.map(function(o){ return o.analyst.name + ' (' + o.op.dir + ')'; }).join(', ') + ' — extra ehtiyat; risk chhota rakhein ya skip karein.');
+        L.push('');
+      }
+    }
+    L.push('VERDICT REASON:');
+    L.push(dec.reason);
+    L.push('');
+    L.push('⚠️ Advisory only. Scalping mein spread/slippage ka asar bara hota hai — final decision aur risk aapki zimmedari hai.');
+    return L.join('\n');
+  }
+
+  window.atcScalpSignal = async function(){
+    const btn = document.getElementById('atcScalpBtn');
+    const mainBtn = document.getElementById('atcGenerateBtn');
+    const card = document.getElementById('atcLiveCard');
+    const output = document.getElementById('atcOutput');
+    const badge = document.getElementById('atcDirBadge');
+    if (btn.disabled) return;
+    btn.disabled = true; if (mainBtn) mainBtn.disabled = true;
+    btn.textContent = '⚡ Scalp committee soch rahi hai...';
+    card.style.display = 'block';
+    card.className = 'atc-live-card notrade';
+    badge.className = 'atc-dir-badge NONE';
+    badge.textContent = '—';
+    output.textContent = 'Scalping committee ban rahi hai...';
+    atcInitAnalystCards();
+    try {
+      const pc = atcScalpPreChecks();
+      if (!pc.ok){
+        output.textContent = pc.msg;
+        badge.textContent = 'NO TRADE';
+        document.getElementById('atcAnalystsGrid').style.display = 'none';
+        document.getElementById('atcDebateLog').style.display = 'none';
+        atcSetStatus('⏸️ Scalp check ne rok diya — AI ko call nahi kiya gaya.');
+        return;
+      }
+      const pre = await atcPreflight();
+      if (!pre.ok){
+        output.textContent = pre.msg; badge.textContent = 'SETUP';
+        atcSetStatus('Setup zaroori hai — neeche guide dekhein.');
+        return;
+      }
+      const baseData = atcScalpBaseData();
+
+      atcSetStatus('⚡ Round 1 — 4 AI scalp setup independently dekh rahi hain...');
+      const round1 = await Promise.all(ATC_ANALYSTS.map(function(a){
+        return atcCallAI(a, [
+          { role: 'system', content: atcScalpSystemPrompt(a) },
+          { role: 'user', content: baseData }
+        ], 800).catch(function(e){ return { error: e.message }; });
+      }));
+      const failed = round1.find(function(r){ return r.error; });
+      if (failed){
+        output.textContent = '❌ Scalping committee start nahi ho saki:\n\n' + failed.error;
+        atcSetStatus('Error — proxy / API key check karein.');
+        return;
+      }
+      let ops = round1.map(function(r, i){
+        return { analyst: ATC_ANALYSTS[i], op: atcParseOpinion(r.text), meta: r.meta || {} };
+      });
+      atcRenderAnalystCards(ops);
+      atcAppendDebateRound('⚡ Round 1 — Scalp Opinions', ops, true);
+
+      // Majority nahi bani? to sirf 1 chhota debate round (scalping mein raftaar zaroori hai)
+      let roundsHeld = 0, lastFailed = [];
+      let dec = atcScalpDecide(ops);
+      const needsDebate = function(d){ return !d.levels && d.finalDir !== 'NO TRADE' && /Committee mein/.test(d.reason); };
+      while (needsDebate(dec) && roundsHeld < ATC_SCALP_MAX_DEBATE_ROUNDS){
+        roundsHeld++;
+        atcSetStatus('💬 Scalp debate round ' + roundsHeld + ' — analysts aapas mein baat kar rahe hain...');
+        const results = await Promise.all(ATC_ANALYSTS.map(function(a, i){
+          const others = ops.filter(function(_, j){ return j !== i; })
+                            .map(function(o){ return { name: o.analyst.name, model: o.analyst.model, op: o.op }; });
+          return atcCallAI(a, [
+            { role: 'system', content: atcScalpSystemPrompt(a) },
+            { role: 'user', content: atcDebateUserMessage(baseData, { name: a.name }, others, roundsHeld) }
+          ], 900).then(function(r){ return { i: i, text: r.text, meta: r.meta }; })
+           .catch(function(e){ return { i: i, error: e.message }; });
+        }));
+        lastFailed = [];
+        results.forEach(function(r){
+          if (!r.error){ ops[r.i].op = atcParseOpinion(r.text); if (r.meta) ops[r.i].meta = r.meta; }
+          else lastFailed.push(ops[r.i].analyst.name);
+        });
+        atcRenderAnalystCards(ops);
+        atcAppendDebateRound('💬 Scalp Debate Round ' + roundsHeld, ops, false);
+        dec = atcScalpDecide(ops);
+      }
+      if (lastFailed.length){
+        dec = { finalDir: 'NO TRADE / WAIT FOR CLARITY', levels: null, dissent: [], tallyStr: dec.tallyStr,
+          reason: 'Debate round mein ' + lastFailed.join(', ') + ' ka jawab nahi aaya (API error) — purani raaye par scalp nahi diya jata. Dobara koshish karein.' };
+      }
+
+      const finalText = atcBuildScalpText(ops, dec, roundsHeld);
+      output.textContent = finalText;
+      const isTrade = (dec.finalDir === 'BUY' || dec.finalDir === 'SELL');
+      badge.textContent = isTrade ? '⚡ ' + dec.finalDir : 'NO TRADE';
+      badge.className = 'atc-dir-badge ' + (dec.finalDir === 'BUY' ? 'BUY' : dec.finalDir === 'SELL' ? 'SELL' : 'NONE');
+      card.className = 'atc-live-card ' + (dec.finalDir === 'BUY' ? 'buy' : dec.finalDir === 'SELL' ? 'sell' : 'notrade');
+      document.getElementById('atcLiveTime').textContent = new Date().toLocaleString();
+      atcSetStatus(isTrade
+        ? '⚡ Scalp signal: ' + dec.finalDir + ' — history mein save ho gaya.'
+        : '⏸️ Scalp: NO TRADE / WAIT — committee ko saaf scalp setup nahi mila.');
+      atcSaveToHistory(isTrade ? dec.finalDir : 'NONE', finalText);
+    } catch(err){
+      output.textContent = 'Connection error: ' + err.message;
+      atcSetStatus('Connection error aaya — dobara koshish karein.');
+    } finally {
+      btn.disabled = false; if (mainBtn) mainBtn.disabled = false;
+      btn.textContent = '⚡ Generate Scalping Signal';
     }
   };
 
