@@ -6519,6 +6519,15 @@ INTEGRATION STEPS:
   .atc-generate-btn{padding:14px 22px;background:linear-gradient(135deg,#a855f7,#7e22ce);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;transition:transform .15s, box-shadow .15s;width:100%;margin-top:6px;}
   .atc-generate-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(168,85,247,0.4);}
   .atc-generate-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+  .atc-muse-panel{background:rgba(17,24,39,0.8);border:1px solid rgba(250,204,21,0.45);border-radius:18px;padding:20px 22px;margin-top:16px;box-shadow:0 0 24px rgba(250,204,21,0.08);}
+  .atc-muse-panel h5{margin:0 0 4px;color:#facc15;font-size:14px;letter-spacing:.4px;}
+  .atc-muse-eng{font-size:10.5px;color:#64748b;margin-bottom:10px;}
+  .atc-muse-sec{margin-top:14px;font-size:11.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#94a3b8;}
+  .atc-muse-mistake{margin-top:6px;padding:8px 12px;border-left:3px solid #f59e0b;background:rgba(245,158,11,0.07);border-radius:0 8px 8px 0;font-size:13px;line-height:1.55;color:#e2e8f0;white-space:pre-line;}
+  .atc-muse-lv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;}
+  .atc-muse-lv div{background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.2);border-radius:10px;padding:8px 12px;font-size:13px;}
+  .atc-muse-lv b{display:block;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:#94a3b8;margin-bottom:2px;}
+  .atc-muse-warn{margin-top:10px;padding:9px 12px;border-radius:10px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;font-size:12.5px;line-height:1.5;}
   .atc-live-card{background:rgba(17,24,39,0.75);border:1px solid rgba(168,85,247,0.35);border-radius:18px;padding:22px;margin-top:16px;}
   .atc-live-card.buy{border-color:rgba(34,197,94,0.5);box-shadow:0 0 24px rgba(34,197,94,0.15);}
   .atc-live-card.sell{border-color:rgba(239,68,68,0.5);box-shadow:0 0 24px rgba(239,68,68,0.15);}
@@ -6716,6 +6725,8 @@ INTEGRATION STEPS:
       </div>
       <div class="atc-output" id="atcOutput">—</div>
     </div>
+
+    <div class="atc-muse-panel" id="atcMusePanel" style="display:none;"></div>
 
     <h4 style="color:#c084fc; font-size:15px; margin:26px 0 10px;">Signal History (is browser par, last 20)</h4>
     <div id="atcHistory"><p style="color:#64748b; font-size:13px;">Abhi koi record nahi.</p></div>
@@ -8504,6 +8515,8 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
         '<div class="atc-a-status" id="atcAStatus' + i + '">🧠 soch raha hai...</div>' +
         '<div id="atcABody' + i + '"></div></div>';
     }).join('');
+    const _mp = document.getElementById('atcMusePanel');
+    if (_mp){ _mp.style.display = 'none'; _mp.innerHTML = ''; }
     const log = document.getElementById('atcDebateLog');
     log.style.display = 'block';
     log.innerHTML = '<h5 style="color:#c084fc;margin:0 0 12px;text-transform:uppercase;letter-spacing:.5px;font-size:12.5px;">💬 Committee Debate Transcript</h5>';
@@ -8629,6 +8642,171 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
         ' wo seats phir asli provider par chalne lagengi.)' };
     }
     return { ok: true, providers: p };
+  }
+
+  // =====================================================================
+  // 🟡 MUSE — REVIEWER SEAT
+  // Committee ke 4 AI ki raaye aur debate padh kar (a) un ki ghaltiyan nikalti hai,
+  // (b) apna alag signal deti hai, (c) key levels batati hai.
+  // NOTE: Ye committee ke A+ gate ka hissa NAHI hai — sirf ek alag "second opinion" hai.
+  // NOTE: muse.ai / skiv.com ek video-hosting service hai, koi trading AI nahi. Is seat ko
+  //   chalane wala model neeche `provider/model` se tay hota hai (abhi Groq, proxy ke zariye).
+  //   Jab aap ke proxy (server.js) mein Meta Muse Spark ka provider lag jaye, to sirf
+  //   provider: 'muse', model: 'muse-spark-1.1' kar dein. Panel mein hamesha asli model dikhta hai.
+  // =====================================================================
+  const ATC_MUSE = {
+    key: 'muse',
+    name: 'Muse',
+    emoji: '🟡',
+    provider: 'groq',
+    model: 'openai/gpt-oss-120b',
+    fallbackModel: 'openai/gpt-oss-120b'
+  };
+
+  function atcMuseSystemPrompt(){
+    return [
+      'You are "Muse", the REVIEWER on the "Forex With Waqar AI Trading Committee". Four other AI analysts (ChatGPT, Claude, Gemini, Qoder) have already debated. You do NOT vote with them. Your job:',
+      '1) Audit each of the four for concrete MISTAKES (ghalti). 2) Give your OWN independent signal. 3) List the KEY LEVELS the trader must watch.',
+      '',
+      'WHAT COUNTS AS A MISTAKE (be specific, cite their numbers):',
+      '- SL / Entry / TP on the wrong side for the stated direction, or Risk:Reward below 1.5.',
+      '- Entry far from current price, or SL/TP that ignore the provided ATR.',
+      '- Ignoring high-impact news, session/dead-zone, or intermarket data that was provided.',
+      '- Claiming A+ / high conviction while key data is NOT PROVIDED, or contradicting their own earlier stance without a reason.',
+      '- Using any level that does not appear in the provided data and is not clearly derived from it.',
+      'If an analyst made no real mistake, write "no clear mistake" — do NOT invent faults to look useful.',
+      '',
+      'HARD RULES:',
+      '- Fields marked NOT PROVIDED are genuinely missing. NEVER invent prices, levels, volume or news.',
+      '- KEY LEVELS must come from the provided data (swing, previous day/week, Gann, Fibonacci, OB/FVG notes) or be simple derivations from current price and ATR — say which. If there is not enough data, write "insufficient data".',
+      '- Be stingy: if you would not risk real money, answer NO TRADE. You may agree or disagree with the committee.',
+      '',
+      'Respond in EXACTLY this format and nothing else:',
+      'DIRECTION: BUY | SELL | NO TRADE',
+      'CONVICTION: <0-100 integer>',
+      'GRADE: <A+ | A | B | C | D>',
+      'ENTRY: <price or n/a>',
+      'SL: <price or n/a>',
+      'TP: <price or n/a>',
+      'MISTAKES:',
+      'CHATGPT: <one or two lines>',
+      'CLAUDE: <one or two lines>',
+      'GEMINI: <one or two lines>',
+      'QODER: <one or two lines>',
+      'KEY LEVELS:',
+      'RESISTANCE: <1-3 prices, with source e.g. prev day high>',
+      'SUPPORT: <1-3 prices, with source>',
+      'LIQUIDITY: <where stops likely rest, or n/a>',
+      'INVALIDATION: <price that cancels the idea>',
+      'SUMMARY:',
+      '<2-3 lines in simple Roman Urdu: what to do and why>'
+    ].join('\n');
+  }
+
+  function atcMuseUserMessage(baseData, ops, committeeDir, reason){
+    const txt = ops.map(function(o){
+      return '--- ' + o.analyst.name + ' (final) ---\n' +
+        'DIRECTION: ' + o.op.dir + ' | CONVICTION: ' + o.op.conv + ' | GRADE: ' + o.op.grade + '\n' +
+        'ENTRY: ' + (o.op.entry || 'n/a') + ' | SL: ' + (o.op.sl || 'n/a') + ' | TP: ' + (o.op.tp || 'n/a') + '\n' +
+        'KEY POINTS:\n' + (o.op.points || '') +
+        (o.op.rebuttal ? '\nLAST REBUTTAL:\n' + o.op.rebuttal : '');
+    }).join('\n\n');
+    return [
+      baseData,
+      '',
+      '===== COMMITTEE RESULT (for your review) =====',
+      'Committee final decision: ' + committeeDir,
+      'Reason given by the gate: ' + reason,
+      '',
+      txt,
+      '',
+      'Now review them as instructed and answer in the exact format.'
+    ].join('\n');
+  }
+
+  function atcMuseGrab(text, label){
+    const m = text.match(new RegExp('^\\s*' + label + '\\s*:\\s*(.*)$', 'im'));
+    return m ? m[1].trim() : '';
+  }
+
+  function atcMuseParse(text){
+    const op = atcParseOpinion(text);   // DIRECTION / CONVICTION / GRADE
+    const entry = atcMuseGrab(text, 'ENTRY'), sl = atcMuseGrab(text, 'SL'), tp = atcMuseGrab(text, 'TP');
+    const mist = {};
+    ['CHATGPT','CLAUDE','GEMINI','QODER'].forEach(function(k){ mist[k] = atcMuseGrab(text, k); });
+    const sumPart = text.split(/^\s*SUMMARY\s*:?\s*$/im)[1] || (text.split(/SUMMARY\s*:/i)[1] || '');
+    return {
+      dir: op.dir, conv: op.conv, grade: op.grade, entry: entry, sl: sl, tp: tp,
+      mist: mist,
+      resistance: atcMuseGrab(text, 'RESISTANCE'), support: atcMuseGrab(text, 'SUPPORT'),
+      liquidity: atcMuseGrab(text, 'LIQUIDITY'), invalidation: atcMuseGrab(text, 'INVALIDATION'),
+      summary: sumPart.trim()
+    };
+  }
+
+  // Muse ke apne levels ki JS se jaanch — AI par bharosa nahi, numbers khud check hote hain.
+  function atcMuseCheck(m){
+    if (m.dir !== 'BUY' && m.dir !== 'SELL') return { ok: true };
+    const E = atcNum(m.entry), S = atcNum(m.sl), T = atcNum(m.tp);
+    if (![E, S, T].every(isFinite)) return { ok: false, why: 'Muse ne Entry/SL/TP ka number nahi diya.' };
+    const side = m.dir === 'BUY' ? (S < E && E < T) : (S > E && E > T);
+    if (!side) return { ok: false, why: 'SL/Entry/TP ki tarteeb ' + m.dir + ' ke liye ghalat hai.' };
+    const rr = Math.abs(T - E) / Math.abs(E - S);
+    if (rr < 1.2) return { ok: false, why: 'Risk:Reward sirf ' + rr.toFixed(2) + ' hai.' };
+    const cp = atcNum(document.getElementById('atcPrice').value);
+    if (isFinite(cp) && Math.abs(E - cp) / cp > 0.015) return { ok: false, why: 'Entry current price se 1.5% se zyada door hai.' };
+    return { ok: true, rr: rr.toFixed(2) };
+  }
+
+  async function atcMuseReview(ctx){
+    const panel = document.getElementById('atcMusePanel');
+    if (!panel) return;
+    panel.style.display = 'block';
+    panel.innerHTML = '<h5>🟡 Muse — Reviewer &amp; Key Levels</h5><div class="atc-muse-eng">🧠 Muse committee ki ghaltiyan dekh rahi hai aur apna signal bana rahi hai...</div>';
+    try {
+      const r = await atcCallAI(ATC_MUSE, [
+        { role: 'system', content: atcMuseSystemPrompt() },
+        { role: 'user', content: atcMuseUserMessage(ctx.baseData, ctx.ops, ctx.committeeDir, ctx.reason) }
+      ], 1200);
+      const m = atcMuseParse(r.text);
+      const chk = atcMuseCheck(m);
+      const meta = r.meta || {};
+      const usedModel = meta.model_used || ATC_MUSE.model;
+      const eng = meta.fallback
+        ? '<span style="color:#fbbf24;">⚠ Groq fallback</span> · ' + atcEsc(usedModel)
+        : '<span style="color:#4ade80;">● live</span> · ' + atcEsc(meta.provider_used || ATC_MUSE.provider) + ' · ' + atcEsc(usedModel);
+
+      const showDir = chk.ok ? m.dir : 'NO TRADE';
+      const dirClass = (showDir === 'BUY' || showDir === 'SELL') ? showDir : 'NONE';
+      const names = { CHATGPT: 'ChatGPT', CLAUDE: 'Claude', GEMINI: 'Gemini', QODER: 'Qoder' };
+      let html = '<h5>🟡 Muse — Reviewer &amp; Key Levels</h5>' +
+        '<div class="atc-muse-eng">' + eng + '</div>' +
+        '<span class="atc-a-dir ' + dirClass + '">MUSE: ' + showDir + '</span>' +
+        '<div class="atc-a-meta"><b>Conviction:</b> ' + m.conv + '/100 &nbsp; <b>Grade:</b> ' + atcEsc(m.grade) + '</div>';
+      if (showDir === 'BUY' || showDir === 'SELL'){
+        html += '<div class="atc-a-meta"><b>Entry:</b> ' + atcEsc(m.entry) + ' &nbsp; <b>SL:</b> ' + atcEsc(m.sl) + ' &nbsp; <b>TP:</b> ' + atcEsc(m.tp) + ' &nbsp; <b>R:R:</b> ' + chk.rr + '</div>';
+      }
+      if (!chk.ok){
+        html += '<div class="atc-muse-warn">⚠️ Muse ne ' + atcEsc(m.dir) + ' kaha tha, lekin levels check mein fail: ' + atcEsc(chk.why) + ' — is liye signal NO TRADE dikhaya ja raha hai.</div>';
+      }
+      if (ctx.committeeDir !== 'BUY' && ctx.committeeDir !== 'SELL' && (showDir === 'BUY' || showDir === 'SELL')){
+        html += '<div class="atc-muse-warn">⚠️ Committee ne A+ gate pass nahi kiya (' + atcEsc(ctx.committeeDir) + '). Muse ka signal akela ek raaye hai — risk zyada, chhota size ya skip.</div>';
+      }
+      html += '<div class="atc-muse-sec">🔎 Committee ki ghaltiyan</div>';
+      Object.keys(names).forEach(function(k){
+        html += '<div class="atc-muse-mistake"><b>' + names[k] + ':</b> ' + atcEsc(m.mist[k] || 'n/a') + '</div>';
+      });
+      html += '<div class="atc-muse-sec">🎯 Key Levels</div><div class="atc-muse-lv">' +
+        '<div><b>Resistance</b>' + atcEsc(m.resistance || 'n/a') + '</div>' +
+        '<div><b>Support</b>' + atcEsc(m.support || 'n/a') + '</div>' +
+        '<div><b>Liquidity</b>' + atcEsc(m.liquidity || 'n/a') + '</div>' +
+        '<div><b>Invalidation</b>' + atcEsc(m.invalidation || 'n/a') + '</div></div>';
+      if (m.summary) html += '<div class="atc-muse-sec">📝 Khulasa</div><div class="atc-muse-mistake" style="border-left-color:#facc15;">' + atcEsc(m.summary) + '</div>';
+      html += '<div style="margin-top:12px;font-size:11.5px;color:#64748b;">⚠️ Advisory only — Muse committee ke A+ gate ka hissa nahi hai. Final decision aur risk aapki zimmedari hai.</div>';
+      panel.innerHTML = html;
+    } catch(e){
+      panel.innerHTML = '<h5>🟡 Muse — Reviewer &amp; Key Levels</h5><div class="atc-muse-warn">Muse jawab nahi de saki: ' + atcEsc(e.message) + '</div>';
+    }
   }
 
   window.atcGenerateSignal = async function(){
@@ -8785,6 +8963,7 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
         ? '✅ Muttafiqa A+ signal: ' + finalDir + ' — history mein save ho gaya.'
         : '⏸️ Final: NO TRADE / WAIT — committee A+ consensus par nahi pohanchi.');
       atcSaveToHistory(histDir, finalText);
+      atcMuseReview({ baseData: baseData, ops: ops, committeeDir: finalDir, reason: reason });   // Muse ka second opinion (await nahi — buttons foran khul jayen)
 
     } catch(err){
       output.textContent = 'Connection error: ' + err.message;
@@ -9041,6 +9220,7 @@ explicitly, even when the outcome is NO TRADE — the reason must always be visi
         ? '⚡ Scalp signal: ' + dec.finalDir + ' — history mein save ho gaya.'
         : '⏸️ Scalp: NO TRADE / WAIT — committee ko saaf scalp setup nahi mila.');
       atcSaveToHistory(isTrade ? dec.finalDir : 'NONE', finalText);
+      atcMuseReview({ baseData: baseData, ops: ops, committeeDir: dec.finalDir, reason: dec.reason });   // Muse ka second opinion
     } catch(err){
       output.textContent = 'Connection error: ' + err.message;
       atcSetStatus('Connection error aaya — dobara koshish karein.');
