@@ -601,6 +601,7 @@
     <a href="#record">Trade Record</a>
    <a href="#buffercalc">Buffer Loss Calc</a>
     <a href="#advcalc">Position Calculator</a>
+    <a href="#antipattern">🎲 Anti-Pattern SL/TP</a>
     <a href="#losstracker">Loss Tracker</a>
     <a href="#accountmanager">Accounts</a>
     <a href="#hedgeslist">Hedges</a>
@@ -649,6 +650,7 @@
       <a class="sd-folder" href="#record"><div class="sd-icon">📒</div><h4>Apna Trade Record (Auto-Update)</h4><p>Apni trades track karein, khud-badh (auto-update) hone wale record ke sath.</p></a>
       <a class="sd-folder" href="#buffercalc"><div class="sd-icon">⚖️</div><h4>Entry Difference & Buffer Loss Calculator</h4><p>Entry difference aur buffer loss nikalne ka tool.</p></a>
       <a class="sd-folder" href="#advcalc"><div class="sd-icon">🧠</div><h4>Advanced Position Calculator</h4><p>Position sizing ke liye advanced calculator.</p></a>
+      <a class="sd-folder" href="#antipattern"><div class="sd-icon">🎲</div><h4>SL/TP Anti-Pattern Generator</h4><p>Har account ke liye alag SL/TP banata hai taake pattern same na ho.</p></a>
       <a class="sd-folder" href="#losstracker"><div class="sd-icon">📉</div><h4>Account Loss Tracker</h4><p>Account-wise losses track karne ka tool.</p></a>
       <a class="sd-folder" href="#accountmanager"><div class="sd-icon">👥</div><h4>Hedging Accounts Manager</h4><p>Apne hedging accounts manage karein.</p></a>
       <a class="sd-folder" href="#hedgeslist"><div class="sd-icon">🔗</div><h4>Live Hedges</h4><p>Currently active hedges ki list.</p></a>
@@ -1392,6 +1394,141 @@
     </div>
   </div>
 </section>
+
+
+<section id="antipattern">
+  <div class="glass-panel">
+    <div class="brand-watermark">Forex With Waqar</div>
+    <h3>🎲 SL/TP Anti-Pattern Generator</h3>
+    <p style="color:#94a3b8; margin-bottom:20px; font-size:14px;">
+      Ek account ka SL/TP (misaal: SL $200, TP $206) daalein. Ye tool baqi accounts ke liye alag alag SL, TP, gap aur entry delay banata hai taake sab accounts par pattern same na lage. Pehle use hui values yaad rakhta hai aur dobara repeat nahi karta.
+    </p>
+
+    <div class="global-inputs">
+      <div class="input-group"><label>Base SL ($)</label><input type="number" id="apSL" step="0.01" value="200"></div>
+      <div class="input-group"><label>Base TP ($)</label><input type="number" id="apTP" step="0.01" value="206"></div>
+      <div class="input-group"><label>Total Accounts</label><input type="number" id="apN" min="2" max="30" value="4"></div>
+      <div class="input-group"><label>Variation (± %)</label><input type="number" id="apVar" step="1" value="8"></div>
+      <div class="input-group"><label>Rounding Step ($)</label><input type="number" id="apStep" step="0.01" value="0.5"></div>
+      <div class="input-group"><label>Minimum Farq ($)</label><input type="number" id="apMin" step="0.1" value="2"></div>
+      <div class="input-group"><label>Base Lot (optional)</label><input type="number" id="apLot" step="0.01" value="0"></div>
+      <div class="input-group"><label>Lot Variation (± %)</label><input type="number" id="apLotJ" step="1" value="0"></div>
+    </div>
+
+    <div class="input-group" style="margin-top:12px;">
+      <label>Account Names/Numbers (comma se alag, optional)</label>
+      <input type="text" id="apNames" placeholder="e.g. 2088727, 2088728, 2088729">
+    </div>
+
+    <label style="display:flex; gap:8px; align-items:center; margin:14px 0; color:#e2e8f0; font-size:13.5px; cursor:pointer;">
+      <input type="checkbox" id="apKeep" checked> Pehla account exact base SL/TP par rahe
+    </label>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+      <button onclick="apGenerate()" style="padding:11px 20px; background:linear-gradient(135deg,#38bdf8,#0ea5e9); border:none; color:#0f172a; border-radius:10px; font-weight:700; cursor:pointer;">🎲 Generate Unique Setup</button>
+      <button onclick="apCopy()" style="padding:11px 20px; background:rgba(148,163,184,0.15); border:1px solid rgba(148,163,184,0.3); color:#e2e8f0; border-radius:10px; font-weight:600; cursor:pointer;">📋 Copy Result</button>
+      <button onclick="apClearHistory()" style="padding:11px 20px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); color:#fca5a5; border-radius:10px; font-weight:600; cursor:pointer;">🗑 Clear History</button>
+    </div>
+
+    <div id="apMsg" style="display:none; margin-bottom:12px; font-size:13px; color:#facc15;"></div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13.5px; color:#e2e8f0; display:none;" id="apTable">
+        <thead>
+          <tr style="text-align:left; color:#94a3b8; border-bottom:1px solid rgba(148,163,184,0.25);">
+            <th style="padding:10px;">Account</th>
+            <th style="padding:10px;">SL ($)</th>
+            <th style="padding:10px;">TP ($)</th>
+            <th style="padding:10px;">Gap (TP-SL)</th>
+            <th style="padding:10px;">R:R</th>
+            <th style="padding:10px;">Lot</th>
+            <th style="padding:10px;">Entry Delay</th>
+          </tr>
+        </thead>
+        <tbody id="apBody"></tbody>
+      </table>
+    </div>
+    <p style="color:#64748b; font-size:12px; margin-top:14px; line-height:1.6;">
+      Note: Lot variation 0 rakhein agar aap hedge/ratio exact rakhna chahte hain. Entry delay ka matlab hai pehle account ke kitne seconds baad is account mein entry lagani hai. History sirf is browser mein save hoti hai.
+    </p>
+  </div>
+</section>
+<script>
+(function(){
+  var KEY='fwwAntiPatternHistory';
+  function $(id){return document.getElementById(id);}
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function rstep(x,s){return Math.round(x/s)*s;}
+  function f2(x){return (Math.round(x*100)/100).toString();}
+  function loadH(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return [];}}
+  function saveH(h){try{localStorage.setItem(KEY,JSON.stringify(h.slice(-40)));}catch(e){}}
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  var last=[];
+
+  window.apGenerate=function(){
+    var sl0=parseFloat($('apSL').value), tp0=parseFloat($('apTP').value);
+    var n=parseInt($('apN').value,10), v=(parseFloat($('apVar').value)||0)/100;
+    var step=parseFloat($('apStep').value)||0.5, minD=parseFloat($('apMin').value)||0;
+    var lot0=parseFloat($('apLot').value)||0, lotJ=(parseFloat($('apLotJ').value)||0)/100;
+    var keep=$('apKeep').checked, msg=$('apMsg');
+    msg.style.display='none';
+    if(!(sl0>0)||!(tp0>0)||!(n>=2)||n>30){msg.textContent='SL, TP aur accounts (2 se 30) sahi daalein.';msg.style.display='block';return;}
+    var names=$('apNames').value.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    var hist=loadH(), results=[], tries=0, f=1;
+    function ok(sl,tp,pool){
+      if(sl<=0||tp<=0||tp<=sl*0.5) return false;
+      var gap=tp-sl;
+      for(var i=0;i<pool.length;i++){
+        var r=pool[i];
+        if(Math.abs(r.sl-sl)<minD*f||Math.abs(r.tp-tp)<minD*f||Math.abs((r.tp-r.sl)-gap)<minD*f*0.5) return false;
+      }
+      return true;
+    }
+    if(keep) results.push({sl:rstep(sl0,step),tp:rstep(tp0,step)});
+    while(results.length<n && tries<4000){
+      tries++;
+      if(tries%250===0) f*=0.7;
+      var sl=rstep(sl0*(1+rnd(-v,v)),step), tp=rstep(tp0*(1+rnd(-v,v)),step);
+      if(ok(sl,tp,results.concat(hist))) results.push({sl:sl,tp:tp});
+    }
+    if(results.length<n){msg.textContent='Itni unique values nahi ban saki. Variation % barhayein ya Minimum Farq kam karein, ya History clear karein.';msg.style.display='block';}
+    var t=0, delays=[0];
+    for(var i=1;i<results.length;i++){t+=rnd(8,35);delays.push(Math.round(t));}
+    shuffle(delays);
+    var body=$('apBody'); body.innerHTML=''; last=[];
+    results.forEach(function(r,i){
+      var lot='—';
+      if(lot0>0) lot=Math.max(0.01,rstep(lot0*(1+rnd(-lotJ,lotJ)),0.01)).toFixed(2);
+      var d=(keep&&i===0)?0:delays[i];
+      var name=names[i]||('Account '+(i+1));
+      var gap=r.tp-r.sl, rr=(r.tp/r.sl).toFixed(3);
+      last.push(name+' | SL $'+f2(r.sl)+' | TP $'+f2(r.tp)+' | Lot '+lot+' | Delay '+d+'s');
+      var tr=document.createElement('tr');
+      tr.style.borderBottom='1px solid rgba(148,163,184,0.12)';
+      tr.innerHTML='<td style="padding:10px;font-weight:700;color:#38bdf8;"></td>'+
+        '<td style="padding:10px;color:#ef4444;font-weight:700;">$'+f2(r.sl)+'</td>'+
+        '<td style="padding:10px;color:#22c55e;font-weight:700;">$'+f2(r.tp)+'</td>'+
+        '<td style="padding:10px;">$'+f2(gap)+'</td>'+
+        '<td style="padding:10px;">'+rr+'</td>'+
+        '<td style="padding:10px;">'+lot+'</td>'+
+        '<td style="padding:10px;">'+d+' sec</td>';
+      tr.firstChild.textContent=name;
+      body.appendChild(tr);
+    });
+    $('apTable').style.display='table';
+    saveH(hist.concat(results));
+  };
+  window.apCopy=function(){
+    if(!last.length){return;}
+    var txt=last.join('\n');
+    if(navigator.clipboard){navigator.clipboard.writeText(txt);}
+    var m=$('apMsg'); m.textContent='Copy ho gaya ✔'; m.style.display='block';
+  };
+  window.apClearHistory=function(){
+    try{localStorage.removeItem(KEY);}catch(e){}
+    var m=$('apMsg'); m.textContent='History clear ho gayi.'; m.style.display='block';
+  };
+})();
+</script>
 
 <section id="losstracker">
   <div class="glass-panel">
